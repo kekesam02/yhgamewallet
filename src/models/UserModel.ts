@@ -8,7 +8,6 @@ import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
     name: 'bot_user'
 })
 class UserModel extends BaseEntity{
-
     @PrimaryGeneratedColumn()
     id: number;
 
