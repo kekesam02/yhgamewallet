@@ -1,6 +1,6 @@
 import {Express, Request, Response, Router} from "express";
-import logger from "../logger";
-import UserService from "../services/UserService";
+import logger from "../../logger";
+import UserService from "../../services/UserService";
 
 interface RouterConf {
   path: string;
@@ -20,6 +20,8 @@ function registerRouteGroup(app: Express, routes: RouterConf[]) {
 // type QType = ((name: string) => any) & IRouterMatcher<this>
 
 function initRoutes(app: Express) {
+  // logger.info("Router initialization");
+
   app.get("/", async (req: Request, res: Response, next) => {
     // logger.info("This is an info message")
     // logger.warn("This is a warning message")

@@ -10,7 +10,8 @@ import { RedisOptions } from "ioredis";
 interface Config {
   APP: {
     name: string;
-    port: number;
+    walletPort: number;
+    gamePort: number;
     host: string;
   };
   jwt_secret: string;

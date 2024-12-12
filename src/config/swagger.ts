@@ -13,7 +13,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: `http://${config.APP.host}:${config.APP.port}`,
+        url: `http://${config.APP.host}:${config.APP.gamePort}`,
         description: "Development server",
       },
     ],
