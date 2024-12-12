@@ -25,7 +25,7 @@ app.use(errorHandler)
 
 // 服务器配置
 const serverConfig = {
-    port: config.APP.port || 3000, // 从配置文件读取端口，默认3000
+    port: config.APP.walletPort || 3000, // 从配置文件读取端口，默认3000
     hostname: config.APP.host || "localhost", // 从配置文件读取主机名，默认localhost
 }
 

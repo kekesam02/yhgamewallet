@@ -1,7 +1,7 @@
-export type Role = 'guest' | 'user' | 'admin' | 'super';
-
-export interface AuthUser {
+/**
+ * 用户基本类型
+ */
+export interface UserType {
   id: string;
-  username: string;
-  role: Role;
+  tgId: string
 }

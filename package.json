@@ -13,7 +13,6 @@
     "nodejs",
     "web",
     "api",
-    "mongodb",
     "jwt",
     "redis"
   ],
