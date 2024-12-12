@@ -1,6 +1,6 @@
 import {Express, Request, Response, Router} from "express";
-import logger from "../logger";
-import UserService from "../services/UserService";
+import logger from "../../logger";
+import UserService from "../../services/UserService";
 
 interface RouterConf {
   path: string;

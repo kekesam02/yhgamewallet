@@ -1,10 +1,14 @@
+/**
+ * 娱乐机器人
+ */
 import express from "express";
-import { getConfig } from "./config/config";
-import errorHandler from "./middlewares/errorHandler";
-import logger from "./logger";
-import database from "./config/database";
-import initRoutes from "./controller";
-import { initMiddleware } from "./middlewares";
+import { getConfig } from "../config/config";
+import errorHandler from "../middlewares/errorHandler";
+import logger from "../logger";
+import database from "../config/database";
+import initRoutes from "../botWallet/controller";
+import { initMiddleware } from "../middlewares";
+
 
 // 读取配置文件
 const config = getConfig()
@@ -25,7 +29,7 @@ app.use(errorHandler)
 
 // 服务器配置
 const serverConfig = {
-    port: config.APP.port || 3000, // 从配置文件读取端口，默认3000
+    port: config.APP.port || 3001, // 从配置文件读取端口，默认3000
     hostname: config.APP.host || "localhost", // 从配置文件读取主机名，默认localhost
 }
 
