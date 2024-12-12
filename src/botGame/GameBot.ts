@@ -1,9 +1,14 @@
-import { Telegraf } from 'telegraf'
+import {Context, Telegraf} from 'telegraf'
 import { message } from 'telegraf/filters'
 import process from 'node:process'
+import {getConfig} from "../config/config";
+import GameMessageHandle from './GameMessageHandle'
 
-const bot = new Telegraf("7036184890:AAERV7-nzwUOSzUSbz1Jb9YXO_0DE7NsP7I")
 
+/**
+ * 娱乐机器人核心代码
+ */
+const bot = new Telegraf(getConfig().botConfig.GameBotToken)
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)
@@ -12,27 +17,14 @@ bot.command('quit', async (ctx) => {
     await ctx.leaveChat()
 })
 
-bot.on(message('text'), async (ctx) => {
-    console.log(ctx.update)
-    // 创建内联键盘按钮
-    const shareButton = {
-        reply_markup: {
-            inline_keyboard: [
-                [
-                    // 方式1: 分享机器人按钮
-                    //   { text: '分享机器人', url: https://t.me/${ctx.botInfo.username} },
-                    // 方式2: 分享当前消息按钮
-                    {
-                        text: '选择转账对象',
-                        switch_inline_query: ctx.message.text
-                    }
-                ]
-            ]
-        }
-    }
-
-    // 发送带有分享按钮的消息
-    await ctx.reply('点击进行转账:', shareButton)
+/**
+ * 监听用户发送过来的消息
+ */
+bot.on(
+    message('text'),
+async (ctx: Context) => {
+    let messageHandle = new GameMessageHandle();
+    messageHandle.handleMessage(ctx)
 })
 
 bot.on('callback_query', async (ctx) => {
