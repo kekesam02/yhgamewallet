@@ -5,6 +5,7 @@ import logger from "../logger";
 import database from "../config/database";
 import initRoutes from "./controller";
 import { initMiddleware } from "../middlewares";
+import process from "node:process";
 
 // 读取配置文件
 const config = getConfig()
@@ -30,8 +31,11 @@ const serverConfig = {
 }
 
 // 启动服务器并监听指定端口
-app.listen(serverConfig, () => {
+let server = app.listen(serverConfig, () => {
     logger.info(
         `${config.APP.name} Server is running on http://${serverConfig.hostname}:${serverConfig.port}`
     )
 })
+
+process.once('SIGINT', () => server.close())
+process.once('SIGTERM', () => server.close())

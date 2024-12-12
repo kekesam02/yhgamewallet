@@ -14,6 +14,10 @@ interface Config {
     gamePort: number;
     host: string;
   };
+  // 机器人相关的token配置
+  botConfig: {
+    GameBotToken: string
+  }
   jwt_secret: string;
   cors: CorsConfig;
   rateLimit: RateLimitConfig;

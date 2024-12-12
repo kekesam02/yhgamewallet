@@ -1,6 +1,9 @@
+import process from "node:process";
+
 /**
  * 娱乐机器人
  */
+require('./GameBot')
 import express from "express";
 import { getConfig } from "../config/config";
 import errorHandler from "../middlewares/errorHandler";
@@ -27,6 +30,7 @@ initRoutes(app)
 // 使用错误处理中间件记录错误日志
 app.use(errorHandler)
 
+
 // 服务器配置
 const serverConfig = {
     port: config.APP.gamePort || 3001, // 从配置文件读取端口，默认3000
@@ -34,8 +38,11 @@ const serverConfig = {
 }
 
 // 启动服务器并监听指定端口
-app.listen(serverConfig, () => {
+let server = app.listen(serverConfig, () => {
     logger.info(
         `${config.APP.name} Server is running on http://${serverConfig.hostname}:${serverConfig.port}`
     )
 })
+
+process.once('SIGINT', () => server.close())
+process.once('SIGTERM', () => server.close())
