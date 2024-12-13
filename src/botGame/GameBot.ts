@@ -3,6 +3,10 @@ import { message } from 'telegraf/filters'
 import process from 'node:process'
 import {getConfig} from "../config/config";
 import GameMessageHandle from './GameMessageHandle'
+import {UpdateType} from "telegraf/typings/telegram-types";
+import {Deunionize} from "telegraf/typings/core/helpers/deunionize";
+import GameCallbackHandle from "./GameCallbackHandle";
+import ScheduleHandle from "../commons/ScheduleHandle";
 
 
 /**
@@ -12,7 +16,6 @@ const bot = new Telegraf(getConfig().botConfig.GameBotToken)
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)
-
     // Using context shortcut
     await ctx.leaveChat()
 })
@@ -24,18 +27,15 @@ bot.on(
     message('text'),
 async (ctx: Context) => {
     let messageHandle = new GameMessageHandle();
-    messageHandle.handleMessage(ctx)
+    messageHandle.listenerMessage(ctx)
 })
 
 bot.on('callback_query', async (ctx) => {
-    // Explicit usage
-    await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
-
-    // Using context shortcut
-    await ctx.answerCbQuery()
+    GameCallbackHandle.listenerMessage(ctx)
 })
 
 bot.on('inline_query', async (ctx) => {
+    console.log('内连按钮回调--------------', ctx)
     try {
         const query = ctx.inlineQuery.query
 
@@ -80,8 +80,29 @@ bot.on('inline_query', async (ctx) => {
     }
 })
 
+
 bot.launch()
 
+/**
+ * 开启默认需要运行的游戏定时器
+ */
+const startJob = () => {
+    /**
+     * 运行pc28游戏定时器（放入异步中、防止配置文件没有加载完成）
+     */
+    setTimeout(() => {
+        ScheduleHandle.startPC28()
+    }, 1000)
+}
+
+startJob()
+
 // Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
+process.once('SIGINT', () => {
+    console.log('监听到关闭了1')
+    bot.stop('SIGINT')
+})
+process.once('SIGTERM', () =>{
+    console.log('监听到关闭了2')
+    bot.stop('SIGTERM');
+})

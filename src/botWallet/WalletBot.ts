@@ -91,5 +91,12 @@ bot.on('inline_query', async (ctx) => {
 bot.launch()
 
 // Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
+// Enable graceful stop
+process.once('SIGINT', () => {
+    console.log('监听到关闭了111')
+    bot.stop('SIGINT')
+})
+process.once('SIGTERM', () =>{
+    console.log('监听到关闭了222')
+    bot.stop('SIGTERM');
+})
