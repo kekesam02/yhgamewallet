@@ -1,5 +1,6 @@
 import schedule, {Job} from "node-schedule";
 import PC28Controller from "../botGame/gameController/PC28Controller";
+import {Context, Telegraf} from "telegraf";
 
 /**
  * 定时任务控制器
@@ -22,13 +23,13 @@ class ScheduleHandle {
     /**
      * 开启PC28定时任务控制器
      */
-    public static startPC28 = () => {
+    public static startPC28 = (bot: Telegraf<Context>) => {
         // pc28游戏还没有开始、打开计时器开始运行游戏
         if (!this.isStartPC28) {
             this.isStartPC28 = true
             let job = schedule.scheduleJob('0/3 * * * * *', () => {
                 let pc28Controller = new PC28Controller()
-                pc28Controller.startPCLow()
+                pc28Controller.startPCLow(bot).then((val) => {})
             })
             this.currJobList.push(job)
         }

@@ -2,6 +2,7 @@ import type {Context} from "telegraf";
 import ButtonUtils from './../commons/button/ButtonUtils'
 import GameBotHtml from './html/GameBotHtml'
 import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
+import PC28Controller from "./gameController/PC28Controller";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -16,8 +17,11 @@ class GameMessageHandle {
                 || ctx.text === '开始游戏'
                 || ctx.text === '开始':
                 // 开始游戏
-                this.startGame(ctx).then(r => console.log(r))
+                this.startGame(ctx).then()
                 break
+            case ctx.text === '历史'
+                || ctx.text ===  '1':
+                new PC28Controller().getLotteryHistory(ctx).then()
             default:
                 console.log('未能识别消息')
         }

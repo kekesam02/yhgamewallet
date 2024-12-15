@@ -1,4 +1,5 @@
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import GameTypeEnum from "../typeEnums/gameEnums/GameTypeEnum";
 
 
 @Entity({
@@ -14,7 +15,8 @@ class BotGameModel extends BaseEntity{
      *      1: 正在游戏
      */
     @Column({
-        name: 'game_state'
+        name: 'game_state',
+        default: 1
     })
     gameState: number
 
@@ -31,7 +33,9 @@ class BotGameModel extends BaseEntity{
      *      0: 未删除
      *      1: 已经删除
      */
-    @Column()
+    @Column({
+        default: 0
+    })
     del: number
 
     /**
@@ -40,7 +44,7 @@ class BotGameModel extends BaseEntity{
     @Column({
         name: 'game_type'
     })
-    gameType: number
+    gameType: GameTypeEnum
 
     /**
      * 正在进行游戏的群组id
@@ -54,7 +58,8 @@ class BotGameModel extends BaseEntity{
      * 下注期数
      */
     @Column({
-        name: 'xz_num'
+        name: 'xz_num',
+        default: 0
     })
     xzNum: number
 
@@ -62,7 +67,8 @@ class BotGameModel extends BaseEntity{
      * 类型 1公群不能切换游戏，2私聊 3私群 2和3可以更改游戏
      */
     @Column({
-        name: 's_type'
+        name: 's_type',
+        default: 0
     })
     sType: number
 }

@@ -1,7 +1,13 @@
 import BotGameModel from "../../models/BotGameModel"
-import UserModel from "../../models/UserModel"
-import {Context} from "telegraf"
+import {Context, Telegraf} from "telegraf"
 import ContextUtil from "../../commons/ContextUtil"
+import GameTypeEnum from "./../../typeEnums/gameEnums/GameTypeEnum"
+import GameEnumsClass from "../../typeEnums/gameEnums/GameEnumsClass";
+import StartGameEnum from "../../typeEnums/gameEnums/StartGameEnum";
+import ButtonUtils from "../../commons/button/ButtonUtils";
+import GameBotHtml from "../html/GameBotHtml";
+import BotRoundModel from "../../models/BotRoundModel";
+import GameBotImage from "../html/GameBotImage";
 
 const schedule = require('node-schedule')
 
@@ -18,24 +24,96 @@ class PC28Controller {
      * 添加游戏到用户群组
      *      bot_game(当前正在进行游戏的群组) 数据库
      */
-    public joinPC28Low = (ctx: Context) => {
-        // console.log('添加游戏到', ctx)
-        console.log('chatId=-====>', ctx.callbackQuery?.message?.chat.id)
-        let gropId = ContextUtil.getGroupId(ctx)
-        // BotGameModel.save()
+    public joinPC28Low = async (ctx: Context) => {
+        let groupId = ContextUtil.getGroupId(ctx)
+        let userId = ContextUtil.getUserId(ctx)
+        // 查询当前群组是否已经加入游戏
+        let result = await BotGameModel
+            .createQueryBuilder()
+            .where('group_id = :group_id', {
+                group_id: groupId
+            })
+            .getMany()
+        if (!result.length) {
+            let newBotGame = new BotGameModel()
+            newBotGame.gameState = 1
+            newBotGame.botUserId = userId
+            newBotGame.gameType = GameTypeEnum.PC28DI
+            newBotGame.groupId =  groupId
+            await BotGameModel.save(newBotGame)
+        } else {
+            if (result[0]) {
+                if (result[0].gameState == 0) {
+                    result[0].gameState = 1
+                    await BotGameModel
+                        .createQueryBuilder()
+                        .update(result[0])
+                        .where('id = :id', {
+                            id: result[0].id
+                        })
+                        .execute()
+                }
+            }
+        }
+        await this.sendJoinGameMessage(ctx)
     }
 
     /**
-     * 开始PC28游戏
+     * 发送加入游戏消息、群组添加游戏后发送消息
      */
-    public startPCLow = async () => {
+    public sendJoinGameMessage = (ctx: Context) => {
+        return ctx.replyWithHTML(
+            new GameBotHtml().getGameModelHtml(StartGameEnum.LOW),
+            new ButtonUtils().createCallbackBtn([
+                {
+                    text: '一号PC2.0公馆',
+                    url: 'https://t.me/+3EhvhC0t8ApmMGY1'
+                }
+            ])
+        )
+    }
+
+    /**
+     * 获取 pc28 开奖历史
+     */
+    public getLotteryHistory = async (ctx: Context) => {
+        let groupId = ContextUtil.getGroupId(ctx)
+        let gameModel = await BotGameModel
+            .createQueryBuilder()
+            .where('group_id = :group_id', {
+                group_id: groupId
+            })
+            .getOne()
+        let gameType = gameModel?.gameType
+        console.log('查询的游戏类型', gameType)
+        let historyList = await BotRoundModel
+            .createQueryBuilder()
+            .where('round_type = :round_type', {
+                round_type: gameType
+            })
+            .take(20)
+            .orderBy('create_time', 'DESC')
+            .getMany()
+        let botImage = await new GameBotImage().createPC28Img(historyList)
+        await ctx.replyWithPhoto(botImage)
+
+    }
+
+
+    /**
+     * 计时器开始PC28游戏
+     */
+    public startPCLow = async (bot: Telegraf<Context>) => {
         console.log('开始pc28游戏')
         let result = await BotGameModel
             .createQueryBuilder()
             .where('game_type = :game_type', {
-                game_type: 2
+                game_type: GameTypeEnum.PC28DI
             })
             .getMany()
+        // result.forEach(item => {
+        //     bot.context.replyWithHTML()
+        // })
         console.log('查询到的正在进行游戏的群组', result)
     }
 

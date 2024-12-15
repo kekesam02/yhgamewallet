@@ -1,14 +1,4 @@
-
-/**
- * 内连按钮类型   reply_markup - inline_keyboard - [[这里的类型描述]]
- */
-type ButtonInlineType = {
-    // 按钮描述文字
-    text: string,
-
-    // 点击按钮携带的文字
-    query: string
-}
+import { ButtonCallbackType, ButtonInlineType } from "./ButtonCallbackType";
 
 
 /**
@@ -26,7 +16,7 @@ class ButtonUtils {
                     [...list.map(item => {
                         return {
                             text: item.text,
-                            switch_inline_query: item.query
+                            switch_inline_query: item.query ?? ''
                         }
                     })]
                 ]
@@ -38,14 +28,15 @@ class ButtonUtils {
      * 创建 CallbackData 按钮（点击按钮回回掉到 bot.on('callback_query' 事件）
      * @param list  创建的按钮列表
      */
-    public createCallbackBtn(list: Array<ButtonInlineType>) {
+    public createCallbackBtn(list: Array<ButtonCallbackType>) {
         return {
             reply_markup: {
                 inline_keyboard: [
                     [...list.map(item => {
                         return {
                             text: item.text,
-                            callback_data: item.query
+                            callback_data: item.query ?? '',
+                            url: item.url ?? null
                         }
                     })]
                 ]

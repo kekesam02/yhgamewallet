@@ -6,22 +6,22 @@ enum GameTypeEnum {
     /**
      * 骰子
      */
-    TOUZI = '1',
+    TOUZI = 1,
 
     /**
      * pc28
      */
-    PC28DI = '2',
+    PC28DI = 2,
 
     /**
      * pc28高倍
      */
-    PC28GAO = '3',
+    PC28GAO = 3,
 
     /**
      * 骰子反水
      */
-    TOUZIFS = '4',
+    TOUZIFS = 4,
 
     /**
      * pc2.0反水
@@ -29,7 +29,7 @@ enum GameTypeEnum {
     PC28DIFS = 5,
 
     /**
-     * PC2.8高倍
+     * PC2.8高倍反水
      */
     PC28GAOFS = 6,
 
@@ -46,5 +46,9 @@ enum GameTypeEnum {
     /**
      * PC定位球反水
      */
-    PCDWQFS = 10,
+    PCDWQFS = 10
+
 }
+
+
+export default GameTypeEnum
