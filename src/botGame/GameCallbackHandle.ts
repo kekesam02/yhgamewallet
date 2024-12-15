@@ -16,6 +16,8 @@ class GameCallbackHandle {
         switch (callbackStr) {
             case StartGameEnum.LOW:
                 // 开始 pc28 低倍游戏
+                let pc28Controller = new PC28Controller()
+                pc28Controller.joinPC28Low(ctx)
                 break
             case StartGameEnum.HIGH:
                 // 开始 pc28 高倍游戏

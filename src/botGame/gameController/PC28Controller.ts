@@ -1,7 +1,9 @@
-import BotGameModel from "../../models/BotGameModel";
-import UserModel from "../../models/UserModel";
+import BotGameModel from "../../models/BotGameModel"
+import UserModel from "../../models/UserModel"
+import {Context} from "telegraf"
+import ContextUtil from "../../commons/ContextUtil"
 
-const schedule = require('node-schedule');
+const schedule = require('node-schedule')
 
 type PC28LotteryType = {
 
@@ -13,11 +15,27 @@ type PC28LotteryType = {
 class PC28Controller {
 
     /**
+     * 添加游戏到用户群组
+     *      bot_game(当前正在进行游戏的群组) 数据库
+     */
+    public joinPC28Low = (ctx: Context) => {
+        // console.log('添加游戏到', ctx)
+        console.log('chatId=-====>', ctx.callbackQuery?.message?.chat.id)
+        let gropId = ContextUtil.getGroupId(ctx)
+        // BotGameModel.save()
+    }
+
+    /**
      * 开始PC28游戏
      */
     public startPCLow = async () => {
         console.log('开始pc28游戏')
-        let result = await BotGameModel.find()
+        let result = await BotGameModel
+            .createQueryBuilder()
+            .where('game_type = :game_type', {
+                game_type: 2
+            })
+            .getMany()
         console.log('查询到的正在进行游戏的群组', result)
     }
 

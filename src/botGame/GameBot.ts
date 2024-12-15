@@ -7,6 +7,7 @@ import {UpdateType} from "telegraf/typings/telegram-types";
 import {Deunionize} from "telegraf/typings/core/helpers/deunionize";
 import GameCallbackHandle from "./GameCallbackHandle";
 import ScheduleHandle from "../commons/ScheduleHandle";
+import AESUtils from "../commons/AESUtils";
 
 
 /**
@@ -19,6 +20,8 @@ bot.command('quit', async (ctx) => {
     // Using context shortcut
     await ctx.leaveChat()
 })
+
+AESUtils.test()
 
 /**
  * 监听用户发送过来的消息
@@ -90,9 +93,9 @@ const startJob = () => {
     /**
      * 运行pc28游戏定时器（放入异步中、防止配置文件没有加载完成）
      */
-    setTimeout(() => {
-        ScheduleHandle.startPC28()
-    }, 1000)
+    // setTimeout(() => {
+    //     ScheduleHandle.startPC28()
+    // }, 1000)
 }
 
 startJob()
