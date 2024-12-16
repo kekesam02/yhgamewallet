@@ -28,6 +28,7 @@ class ScheduleHandle {
         if (!this.isStartPC28) {
             this.isStartPC28 = true
             let job = schedule.scheduleJob('0/3 * * * * *', () => {
+                console.log('进入定时器任务了s')
                 let pc28Controller = new PC28Controller()
                 pc28Controller.startPCLow(bot).then((val) => {})
             })

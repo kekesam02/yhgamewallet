@@ -91,9 +91,10 @@ const startJob = () => {
     /**
      * 运行pc28游戏定时器（放入异步中、防止配置文件没有加载完成）
      */
-    // setTimeout(() => {
-    //     ScheduleHandle.startPC28(bot)
-    // }, 1000)
+    setTimeout(() => {
+        console.log('计时器只能触发一次')
+        ScheduleHandle.startPC28(bot)
+    }, 1000)
 }
 
 startJob()
@@ -101,9 +102,11 @@ startJob()
 // Enable graceful stop
 process.once('SIGINT', () => {
     console.log('监听到关闭了1')
+    ScheduleHandle.closeJobs()
     bot.stop('SIGINT')
 })
 process.once('SIGTERM', () =>{
     console.log('监听到关闭了2')
+    ScheduleHandle.closeJobs()
     bot.stop('SIGTERM');
 })

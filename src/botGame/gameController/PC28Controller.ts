@@ -8,6 +8,8 @@ import ButtonUtils from "../../commons/button/ButtonUtils";
 import GameBotHtml from "../html/GameBotHtml";
 import BotRoundModel from "../../models/BotRoundModel";
 import GameBotImage from "../html/GameBotImage";
+import {Pc28LotteryJsonType} from "../../gameTypes/LooteryJsonType";
+import OddsController from "./OddsController";
 
 const schedule = require('node-schedule')
 
@@ -19,6 +21,24 @@ type PC28LotteryType = {
  * PC28游戏实现(类/控制器)
  */
 class PC28Controller {
+
+    /**
+     * 获取当前加入 pc28 游戏的群组
+     */
+    private getJoinGameGroup = (): Promise<Array<BotGameModel>> => {
+        return BotGameModel
+            .createQueryBuilder()
+            .where('game_type = :game_type', {
+                game_type: GameTypeEnum.PC28DI
+            })
+            .orWhere('game_type = :game_type', {
+                game_type: GameTypeEnum.PC28GAO
+            })
+            .andWhere('game_state = :game_state', {
+                game_state: 1
+            })
+            .getMany()
+    }
 
     /**
      * 添加游戏到用户群组
@@ -74,9 +94,9 @@ class PC28Controller {
     }
 
     /**
-     * 获取 pc28 开奖历史
+     * 获取 pc28 开奖记录
      */
-    public getLotteryHistory = async (ctx: Context) => {
+    public getLotteryList = async (ctx: Context) => {
         let groupId = ContextUtil.getGroupId(ctx)
         let gameModel = await BotGameModel
             .createQueryBuilder()
@@ -85,7 +105,6 @@ class PC28Controller {
             })
             .getOne()
         let gameType = gameModel?.gameType
-        console.log('查询的游戏类型', gameType)
         let historyList = await BotRoundModel
             .createQueryBuilder()
             .where('round_type = :round_type', {
@@ -96,7 +115,6 @@ class PC28Controller {
             .getMany()
         let botImage = await new GameBotImage().createPC28Img(historyList)
         await ctx.replyWithPhoto(botImage)
-
     }
 
 
@@ -105,16 +123,20 @@ class PC28Controller {
      */
     public startPCLow = async (bot: Telegraf<Context>) => {
         console.log('开始pc28游戏')
-        let result = await BotGameModel
-            .createQueryBuilder()
-            .where('game_type = :game_type', {
-                game_type: GameTypeEnum.PC28DI
-            })
-            .getMany()
-        // result.forEach(item => {
-        //     bot.context.replyWithHTML()
-        // })
-        console.log('查询到的正在进行游戏的群组', result)
+        let result = await this.getJoinGameGroup()
+        let json = await this.mockLottery()
+        // 查询游戏赔率表
+        let oddsMap = await new OddsController().getOddsMap()
+        // 遍历群组列表、并发送游戏信息到群组
+        result.forEach((item) => {
+            bot.telegram.sendMessage(
+                item.groupId,
+                new GameBotHtml().getStartGameHtml(json, item.gameType, oddsMap),
+                {
+                    parse_mode: 'HTML'
+                }
+            )
+        })
     }
 
     /**
@@ -135,7 +157,7 @@ class PC28Controller {
     /**
      * 模拟获取中奖数据
      */
-    public mockLottery = () => {
+    public mockLottery = (): Promise<Pc28LotteryJsonType> => {
         return Promise.resolve({
             "rows": 5,
             "t": "jisu28",

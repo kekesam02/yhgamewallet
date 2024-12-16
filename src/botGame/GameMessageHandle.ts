@@ -21,7 +21,8 @@ class GameMessageHandle {
                 break
             case ctx.text === '历史'
                 || ctx.text ===  '1':
-                new PC28Controller().getLotteryHistory(ctx).then()
+                new PC28Controller().getLotteryList(ctx).then()
+                break
             default:
                 console.log('未能识别消息')
         }
