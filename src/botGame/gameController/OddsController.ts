@@ -24,7 +24,7 @@ class OddsController {
             .getMany()
         oddsList.forEach(item => {
             if (map.has(item.gameType)) {
-                map.get(item.gameType).set(item.name, item)
+                map.get(item.gameType)?.set(item.name, item)
             } else {
                 map.set(item.gameType, new Map().set(item.name, item))
             }
