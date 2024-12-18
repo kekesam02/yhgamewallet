@@ -2,6 +2,8 @@ import {UpdateType} from "telegraf/typings/telegram-types";
 import {Context} from "telegraf";
 import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
 import PC28Controller from './gameController/PC28Controller'
+import GameController from "./gameController/GameController";
+import GameFindController from "./gameController/GameFindController";
 
 
 /**
@@ -25,6 +27,25 @@ class GameCallbackHandle {
             case StartGameEnum.BALL:
                 // 开始定位球游戏
                 this.startBall()
+                break
+            // ----------------  下面是查询用户点击相关事件
+            case GameController.lookBalance.query:
+                // 查询用户余额
+                new GameFindController(ctx).getUserBalance()
+                break
+            case GameController.recentBetting.query:
+                // 查询用户最近投注情况
+                new GameFindController(ctx).getUserRecentBetting()
+                break
+            case GameController.flowingWater.query:
+                // 查询用户流水
+                new GameFindController(ctx).getUserFlowingWater()
+                break
+            case GameController.profitLoss.query:
+                // 查询用户盈亏
+                new GameFindController(ctx).getUserProfitLoss()
+                break
+
         }
     }
 

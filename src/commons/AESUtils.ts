@@ -36,7 +36,7 @@ class AESUtils {
     /**
      * 用户ID加密
      */
-    public static encodeUserId = (data: string): string => {
+    public static encodeUserId = (data: string = ''): string => {
         return this.encryptPWD(data, this.userIdKey)
     }
 

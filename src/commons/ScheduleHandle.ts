@@ -27,12 +27,17 @@ class ScheduleHandle {
         // pc28游戏还没有开始、打开计时器开始运行游戏
         if (!this.isStartPC28) {
             this.isStartPC28 = true
-            let job = schedule.scheduleJob('0/3 * * * * *', () => {
-                console.log('进入定时器任务了s')
+            // let pc28Controller = new PC28Controller()
+            // pc28Controller.startPCLow(bot).then((val) => {})
+            // let job = schedule.scheduleJob('0/3 * * * * *', () => {
+            //     let pc28Controller = new PC28Controller()
+            //     pc28Controller.startPCLow(bot).then((val) => {})
+            // })
+            // this.currJobList.push(job)
+            setTimeout(() => {
                 let pc28Controller = new PC28Controller()
                 pc28Controller.startPCLow(bot).then((val) => {})
-            })
-            this.currJobList.push(job)
+            }, 2000)
         }
     }
 

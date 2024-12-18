@@ -12,7 +12,7 @@ class BotOddsModel extends BaseEntity {
      * 赔率 下注入 1 中奖金额 = 1 * 赔率
      */
     @Column()
-    odds: number
+    odds: string
 
     /**
      * 赔偿描述文字

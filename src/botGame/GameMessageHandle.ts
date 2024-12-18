@@ -34,8 +34,8 @@ class GameMessageHandle {
     public startGame = async (ctx: Context) => {
         // 发送带有分享按钮的消息
         try {
-            console.log('返回的数据', new GameBotHtml().getStartGame())
-            await ctx.replyWithHTML(new GameBotHtml().getStartGame(), new ButtonUtils().createCallbackBtn([
+            console.log('返回的数据', new GameBotHtml().getBotStartHtml())
+            await ctx.replyWithHTML(new GameBotHtml().getBotStartHtml(), new ButtonUtils().createCallbackBtn([[
                 {
                     text: '\uD83E\uDDE9Pc28',
                     query: StartGameEnum.LOW
@@ -48,7 +48,7 @@ class GameMessageHandle {
                     text: '\uD83C\uDFB2Pc定位球',
                     query: StartGameEnum.BALL
                 }
-            ]))
+            ]]))
         } catch (err) {
 
         }

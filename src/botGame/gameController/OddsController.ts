@@ -1,4 +1,5 @@
 import BotOddsModel from "../../models/BotOddsModel";
+import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
 
 
 
@@ -31,7 +32,6 @@ class OddsController {
         })
         return map
     }
-
 }
 
 

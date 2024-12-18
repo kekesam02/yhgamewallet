@@ -1,5 +1,7 @@
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import GameTypeEnum from "../typeEnums/gameEnums/GameTypeEnum";
+import {Context} from "telegraf";
+import ContextUtil from "../commons/ContextUtil";
 
 
 @Entity({
@@ -71,6 +73,19 @@ class BotGameModel extends BaseEntity{
         default: 0
     })
     sType: number
+
+    /**
+     * 创建新的游戏记录
+     */
+    public createNewGame = (ctx: Context): Promise<BotGameModel> => {
+        let groupId = ContextUtil.getGroupId(ctx)
+        let userId = ContextUtil.getUserId(ctx)
+        this.gameState = 1
+        this.botUserId = userId
+        this.gameType = GameTypeEnum.PC28DI
+        this.groupId =  groupId
+        return BotGameModel.save(this)
+    }
 }
 
 

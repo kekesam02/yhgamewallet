@@ -10,6 +10,8 @@ import BotRoundModel from "../../models/BotRoundModel";
 import GameBotImage from "../html/GameBotImage";
 import {Pc28LotteryJsonType} from "../../gameTypes/LooteryJsonType";
 import OddsController from "./OddsController";
+import ImageUtils from "../../commons/Image/ImageUtils";
+import GameController from "./GameController";
 
 const schedule = require('node-schedule')
 
@@ -28,14 +30,12 @@ class PC28Controller {
     private getJoinGameGroup = (): Promise<Array<BotGameModel>> => {
         return BotGameModel
             .createQueryBuilder()
-            .where('game_type = :game_type', {
-                game_type: GameTypeEnum.PC28DI
-            })
-            .orWhere('game_type = :game_type', {
-                game_type: GameTypeEnum.PC28GAO
-            })
-            .andWhere('game_state = :game_state', {
+            .where('game_state = :game_state', {
                 game_state: 1
+            })
+            .andWhere('(game_type = :game_type or game_type = :game_type2)', {
+                game_type: GameTypeEnum.PC28DI,
+                game_type2: GameTypeEnum.PC28GAO
             })
             .getMany()
     }
@@ -45,8 +45,6 @@ class PC28Controller {
      *      bot_game(当前正在进行游戏的群组) 数据库
      */
     public joinPC28Low = async (ctx: Context) => {
-        let groupId = ContextUtil.getGroupId(ctx)
-        let userId = ContextUtil.getUserId(ctx)
         // 查询当前群组是否已经加入游戏
         let result = await BotGameModel
             .createQueryBuilder()
@@ -55,12 +53,7 @@ class PC28Controller {
             })
             .getMany()
         if (!result.length) {
-            let newBotGame = new BotGameModel()
-            newBotGame.gameState = 1
-            newBotGame.botUserId = userId
-            newBotGame.gameType = GameTypeEnum.PC28DI
-            newBotGame.groupId =  groupId
-            await BotGameModel.save(newBotGame)
+            await new BotGameModel().createNewGame(ctx)
         } else {
             if (result[0]) {
                 if (result[0].gameState == 0) {
@@ -84,12 +77,12 @@ class PC28Controller {
     public sendJoinGameMessage = (ctx: Context) => {
         return ctx.replyWithHTML(
             new GameBotHtml().getGameModelHtml(StartGameEnum.LOW),
-            new ButtonUtils().createCallbackBtn([
+            new ButtonUtils().createCallbackBtn([[
                 {
                     text: '一号PC2.0公馆',
                     url: 'https://t.me/+3EhvhC0t8ApmMGY1'
                 }
-            ])
+            ]])
         )
     }
 
@@ -122,20 +115,33 @@ class PC28Controller {
      * 计时器开始PC28游戏
      */
     public startPCLow = async (bot: Telegraf<Context>) => {
-        console.log('开始pc28游戏')
         let result = await this.getJoinGameGroup()
         let json = await this.mockLottery()
         // 查询游戏赔率表
         let oddsMap = await new OddsController().getOddsMap()
+        let startImage = await new ImageUtils().readImageFile('./../../../static/images/start.png')
+        let replyMarkup = new GameController().createCommonBtnList().reply_markup
+        // console.log('发送的内容', new GameBotHtml().getStartGameHtml(json, item.gameType, oddsMap))
         // 遍历群组列表、并发送游戏信息到群组
         result.forEach((item) => {
-            bot.telegram.sendMessage(
+            console.log('发送的用户id--->', item.botUserId, item.id)
+            console.log('发送的群组id--->', item.groupId)
+            bot.telegram.sendPhoto(
                 item.groupId,
-                new GameBotHtml().getStartGameHtml(json, item.gameType, oddsMap),
                 {
-                    parse_mode: 'HTML'
+                    source: startImage,
+                    filename: '1.png'
+                },
+                {
+                    caption: new GameBotHtml().getStartGameHtml(json, item.gameType, oddsMap),
+                    parse_mode: 'HTML',
+                    reply_markup: replyMarkup
                 }
-            )
+            ).then(val => {
+                console.log('发送消息结果2', val)
+            }).catch(err => {
+                console.log('发送消息失败', err)
+            })
         })
     }
 
@@ -144,6 +150,7 @@ class PC28Controller {
      */
     public getLottery = async () => {
         let json = await this.mockLottery()
+
     }
 
 
