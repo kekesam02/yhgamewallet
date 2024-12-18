@@ -31,11 +31,11 @@ class GameCallbackHandle {
             // ----------------  下面是查询用户点击相关事件
             case GameController.lookBalance.query:
                 // 查询用户余额
-                new GameFindController(ctx).getUserBalance()
+                new GameFindController(ctx).getUserBalance().then()
                 break
             case GameController.recentBetting.query:
                 // 查询用户最近投注情况
-                new GameFindController(ctx).getUserRecentBetting()
+                new GameFindController(ctx).getUserRecentBetting().then()
                 break
             case GameController.flowingWater.query:
                 // 查询用户流水

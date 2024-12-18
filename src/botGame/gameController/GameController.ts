@@ -23,7 +23,7 @@ class GameController {
      */
     public static recentBetting = {
         text: '\uD83C\uDFAE最近投注',
-        query: 'lookBalance'
+        query: 'recentBetting'
     }
 
     /**

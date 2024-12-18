@@ -49,7 +49,7 @@ class PC28Controller {
         let result = await BotGameModel
             .createQueryBuilder()
             .where('group_id = :group_id', {
-                group_id: groupId
+                group_id: ContextUtil.getGroupId(ctx)
             })
             .getMany()
         if (!result.length) {
