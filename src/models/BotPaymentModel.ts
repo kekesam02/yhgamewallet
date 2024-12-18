@@ -7,7 +7,6 @@ import BotGameModel from "./BotGameModel";
 import BotExchangeModel from "./BotExchangeModel";
 import ComputeUtils from "../commons/ComputeUtils";
 import TimeUtils from "../commons/TimeUtils";
-import gameTypeEnum from "../typeEnums/gameEnums/GameTypeEnum";
 import PaymentType from "../typeEnums/PaymentType";
 
 /**
@@ -119,7 +118,107 @@ class BotPaymentModel extends BaseEntity {
     public getUserWaterClass = async (ctx: Context) => {
         // trx 当前汇率
         let TRXRate = await new BotExchangeModel().getTRXRate()
-        let {gameType, resultList} = await new BotPaymentModel().getUserWater(ctx)
+        let {gameType, resultList} = await new BotPaymentModel().getUserWater(ctx, [PaymentType.SZ])
+        return this.tidyPaymentList(
+            gameType,
+            resultList,
+            (waterData: ComputeUtils, item: BotPaymentModel) => {
+                if (item.walletType === WalletType.TRX) {
+                    return waterData.add(new ComputeUtils(item.paymentAmount).multiplied(TRXRate))
+                }
+                return waterData.add(new ComputeUtils(item.paymentAmount))
+            }
+        )
+    }
+
+    /**
+     * 获取用户盈亏数据
+     */
+    public getUserProfitLoss = async (ctx: Context) => {
+        // trx 当前汇率
+        let TRXRate = await new BotExchangeModel().getTRXRate()
+        let {gameType, resultList} = await new BotPaymentModel().getUserWater(ctx, [
+            PaymentType.SZ,
+            PaymentType.ZJ,
+            PaymentType.FS
+        ])
+        return this.tidyPaymentList(
+            gameType,
+            resultList,
+            (waterData: ComputeUtils, item: BotPaymentModel) => {
+                if (item.walletType === WalletType.TRX) {
+                    if (item.paymentType === PaymentType.SZ) {
+                        return waterData.minus(new ComputeUtils(item.paymentAmount).multiplied(TRXRate))
+                    }
+                    return waterData.add(new ComputeUtils(item.paymentAmount).multiplied(TRXRate))
+                }
+                if (item.paymentType === PaymentType.SZ) {
+                    return waterData.minus(new ComputeUtils(item.paymentAmount))
+                }
+                return waterData.add(new ComputeUtils(item.paymentAmount))
+            }
+        )
+    }
+
+    /**
+     * 获取用户流水总数据列表
+     */
+    public getUserWater = async (
+        ctx: Context,
+        paymentTypeList: Array<PaymentType>
+    ): Promise<{
+        gameType: GameTypeEnum,
+        resultList: Array<BotPaymentModel>
+    }> => {
+        let groupId = ContextUtil.getGroupId(ctx)
+        let paymentTypeParams: any = {}
+        let paymentTypeStr = paymentTypeList.length > 1? '(': ''
+        paymentTypeList.forEach((item, index) => {
+            paymentTypeParams[`paymentType${index}`] = item
+            if (index > 0) {
+                paymentTypeStr += ` or payment_type = :paymentType${index}`
+            } else {
+                paymentTypeStr += `payment_type = :paymentType${index}`
+            }
+        })
+        paymentTypeStr += paymentTypeList.length > 1? ')': ''
+        let gameModel = await BotGameModel
+            .createQueryBuilder()
+            .where('group_id = :groupId', {
+                groupId: groupId
+            })
+            .getOne()
+        let result = await BotPaymentModel
+            .createQueryBuilder()
+            .where('user_id = :tgId', {
+                tgId: ContextUtil.getUserId(ctx)
+            })
+            .andWhere('del = 0')
+            .andWhere(paymentTypeStr, paymentTypeParams)
+            .andWhere('(wallet_type = :walletType or wallet_type = :walletType2)', {
+                walletType: WalletType.USDT,
+                walletType2: WalletType.TRX,
+            })
+            .getMany()
+        return {
+            gameType: gameModel!.gameType,
+            resultList: result
+        }
+    }
+
+    /**
+     * 根据时间段整理用户流水数据列表
+     * @param gameType: 当前群组游戏类型
+     * @param resultList: 查询到的数据
+     * @param wrap: 列表数据回掉处理函数
+     *      waterData: 当前的金额对象
+     *      item: 当前循环的item
+     */
+    private tidyPaymentList = async (
+        gameType: GameTypeEnum,
+        resultList: Array<BotPaymentModel>,
+        wrap: (waterData: ComputeUtils, item: BotPaymentModel) => ComputeUtils
+    ) => {
         // 总流水
         let totalWater = new ComputeUtils(0)
         // 总支付列表
@@ -134,24 +233,25 @@ class BotPaymentModel extends BaseEntity {
         let dayList: Array<BotPaymentModel> = []
         let timeUtils = new TimeUtils()
         resultList.forEach(item => {
+            // 如果钱包类型是trx 的话需要去计算 trx 当前汇率
             if (item.walletType === WalletType.TRX) {
                 if (new ComputeUtils(item.paymentAmount).comparedTo(0) > 0) {
-                    totalWater = totalWater.add(new ComputeUtils(item.paymentAmount).multiplied(TRXRate))
+                    totalWater = wrap(totalWater, item)
                     if (timeUtils.getIsWeek(item.createTime)) {
-                        weekWater = weekWater.add(new ComputeUtils(item.paymentAmount).multiplied(TRXRate))
+                        weekWater = wrap(weekWater, item)
                     }
                     if (timeUtils.getIsDay(item.createTime)) {
-                        dayWater = dayWater.add(new ComputeUtils(item.paymentAmount).multiplied(TRXRate))
+                        dayWater = wrap(weekWater, item)
                     }
                 }
             } else {
                 if (new ComputeUtils(item.paymentAmount).comparedTo(0) > 0) {
-                    totalWater = totalWater.add(new ComputeUtils(item.paymentAmount))
+                    totalWater = wrap(totalWater, item)
                     if (timeUtils.getIsWeek(item.createTime)) {
-                        weekWater = weekWater.add(new ComputeUtils(item.paymentAmount))
+                        weekWater = wrap(weekWater, item)
                     }
                     if (timeUtils.getIsDay(item.createTime)) {
-                        dayWater = dayWater.add(new ComputeUtils(item.paymentAmount))
+                        dayWater = wrap(dayWater, item)
                     }
                 }
             }
@@ -171,45 +271,6 @@ class BotPaymentModel extends BaseEntity {
             weekList: weekList,
             dayWater: dayWater,
             dayList: dayList
-        }
-    }
-
-    /**
-     * 获取用户流水总数据列表
-     */
-    public getUserWater = async (
-        ctx: Context
-    ): Promise<{
-        gameType: GameTypeEnum,
-        resultList: Array<BotPaymentModel>
-    }> => {
-        let groupId = ContextUtil.getGroupId(ctx)
-        let gameModel = await BotGameModel
-            .createQueryBuilder()
-            .where('group_id = :groupId', {
-                groupId: groupId
-            })
-            .getOne()
-        let result = await BotPaymentModel
-            .createQueryBuilder()
-            .where('user_id = :tgId', {
-                tgId: ContextUtil.getUserId(ctx)
-            })
-            .andWhere('game_type = :gameType', {
-                gameType: gameModel?.gameType
-            })
-            .andWhere('del = 0')
-            .andWhere('payment_type = :paymentType', {
-                paymentType: PaymentType.SZ
-            })
-            .andWhere('(wallet_type = :walletType or wallet_type = :walletType2)', {
-                walletType: WalletType.USDT,
-                walletType2: WalletType.TRX,
-            })
-            .getMany()
-        return {
-            gameType: gameModel!.gameType,
-            resultList: result
         }
     }
 }

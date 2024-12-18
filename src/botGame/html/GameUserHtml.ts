@@ -26,31 +26,6 @@ class GameUserHtml {
     }
 
     /**
-     * 获取用户流水html数据
-     */
-    public getUserPaymentHtml = (ctx: Context, {
-        gameType,
-        dayWater,
-        weekWater,
-        totalWater
-    }: {
-        gameType: string,
-        dayWater: string,
-        weekWater: string,
-        totalWater : string
-    }) => {
-        let userId = ContextUtil.getUserId(ctx)
-        let firstName = ctx?.from?.first_name ?? ''
-        return `当前游戏类型：${gameType}${this.N
-            }昵称: ${firstName}${this.N
-            }ID: ${userId}${this.N
-            }总流水: ${totalWater}${this.N
-            }周流水: ${weekWater}${this.N
-            }今日流水: ${dayWater}
-        `
-    }
-
-    /**
      * 获取投注记录列表html
      */
     public getPledgeHtml = (list: Array<BotPledgeUpModel>): string => {
@@ -68,6 +43,56 @@ class GameUserHtml {
                 + `${item.winningAmount}${this.N}`
         })
         return html
+    }
+
+    /**
+     * 获取用户流水html数据
+     */
+    public getUserPaymentHtml = (ctx: Context, {
+        gameType,
+        dayWater,
+        weekWater,
+        totalWater
+    }: {
+        gameType: string,
+        dayWater: string,
+        weekWater: string,
+        totalWater : string
+    }) => {
+        let userId = ContextUtil.getUserId(ctx)
+        let firstName = ctx?.from?.first_name ?? ''
+        return `当前游戏类型：${gameType}${this.N
+        }昵称: ${firstName}${this.N
+        }ID: ${userId}${this.N
+        }总流水: ${totalWater}${this.N
+        }周流水: ${weekWater}${this.N
+        }今日流水: ${dayWater}
+        `
+    }
+
+    /**
+     * 获取用户盈亏数据
+     */
+    public getUserProfitLossHtml = (ctx: Context, {
+        gameType,
+        dayWater,
+        weekWater,
+        totalWater
+    }: {
+        gameType: string,
+        dayWater: string,
+        weekWater: string,
+        totalWater : string
+    }) => {
+        let userId = ContextUtil.getUserId(ctx)
+        let firstName = ctx?.from?.first_name ?? ''
+        return `当前游戏类型：${gameType}${this.N
+        }昵称: ${firstName}${this.N
+        }ID: ${userId}${this.N
+        }总盈亏: ${totalWater}${this.N
+        }周盈亏: ${weekWater}${this.N
+        }今日盈亏: ${dayWater}
+        `
     }
 }
 

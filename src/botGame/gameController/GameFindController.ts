@@ -57,14 +57,12 @@ class GameFindController {
      * 查询用户流水
      */
     public getUserFlowingWater = async () => {
-        console.log('发送流水信息333')
         let {
             gameType,
             dayWater,
             weekWater,
             totalWater
         } = await new BotPaymentModel().getUserWaterClass(this.ctx)
-        console.log('发送流水信息111', totalWater, totalWater.getValue())
         let html = new GameUserHtml().getUserPaymentHtml(
             this.ctx,
             {
@@ -74,16 +72,29 @@ class GameFindController {
                 totalWater: totalWater.getValue()
             }
         )
-        console.log('发送流水信息')
         await new MessageUtils(this.ctx).sendPopMessage(html)
-        // console.log('查询用户最近投注')
     }
 
     /**
      * 查询用户盈亏
      */
-    public getUserProfitLoss = () => {
-        console.log('查询用户盈亏')
+    public getUserProfitLoss = async () => {
+        let {
+            gameType,
+            dayWater,
+            weekWater,
+            totalWater
+        } = await new BotPaymentModel().getUserProfitLoss(this.ctx)
+        let html = new GameUserHtml().getUserProfitLossHtml(
+            this.ctx,
+            {
+                gameType: new GameEnumsClass().getGameTypeStr(gameType),
+                dayWater: dayWater.getValue(),
+                weekWater: weekWater.getValue(),
+                totalWater: totalWater.getValue()
+            }
+        )
+        await new MessageUtils(this.ctx).sendPopMessage(html)
     }
 }
 
