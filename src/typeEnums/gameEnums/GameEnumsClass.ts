@@ -24,7 +24,7 @@ class GameEnumsClass {
     /**
      * 获取游戏类型描述文字
      */
-    public getGameTypeStr = (type: GameTypeEnum) => {
+    public getGameTypeStr = (type: GameTypeEnum): string => {
         switch (type) {
             case GameTypeEnum.TOUZI:
                 return '骰子'

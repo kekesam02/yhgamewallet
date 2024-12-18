@@ -86,7 +86,7 @@ class UserModel extends BaseEntity{
      */
     @Column({
         name: 'vip',
-        default: 0
+        default: '0'
     })
     vip: number
 

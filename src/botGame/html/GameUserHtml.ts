@@ -4,6 +4,8 @@
 import UserModel from "../../models/UserModel";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import AESUtils from "../../commons/AESUtils";
+import {Context} from "telegraf";
+import ContextUtil from "../../commons/ContextUtil";
 
 class GameUserHtml {
 
@@ -20,6 +22,31 @@ class GameUserHtml {
             }TRX: ${user.TRX}${this.N
             }彩U: ${user.CUSDT}${this.N
             }彩T: ${user.CTRX}
+        `
+    }
+
+    /**
+     * 获取用户流水html数据
+     */
+    public getUserPaymentHtml = (ctx: Context, {
+        gameType,
+        dayWater,
+        weekWater,
+        totalWater
+    }: {
+        gameType: string,
+        dayWater: string,
+        weekWater: string,
+        totalWater : string
+    }) => {
+        let userId = ContextUtil.getUserId(ctx)
+        let firstName = ctx?.from?.first_name ?? ''
+        return `当前游戏类型：${gameType}${this.N
+            }昵称: ${firstName}${this.N
+            }ID: ${userId}${this.N
+            }总流水: ${totalWater}${this.N
+            }周流水: ${weekWater}${this.N
+            }今日流水: ${dayWater}
         `
     }
 

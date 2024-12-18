@@ -4,6 +4,12 @@ import GameUserHtml from "../html/GameUserHtml";
 import MessageUtils from "../../commons/message/MessageUtils";
 import AESUtils from "../../commons/AESUtils";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
+import BotPaymentModel from "../../models/BotPaymentModel";
+import WalletType from "../../typeEnums/WalletType";
+import BotExchangeModel from "../../models/BotExchangeModel";
+import htmlUtils from "../../commons/HtmlUtils";
+import GameController from "./GameController";
+import GameEnumsClass from "../../typeEnums/gameEnums/GameEnumsClass";
 import ContextUtil from "../../commons/ContextUtil";
 
 
@@ -22,7 +28,6 @@ class GameFindController {
      * 查询用户余额
      */
     public getUserBalance = async () => {
-        console.log('查看余额', this.ctx?.from)
         let userId = AESUtils.encodeUserId(this.ctx?.from?.id.toString())
         let user = await UserModel
             .createQueryBuilder()
@@ -34,6 +39,7 @@ class GameFindController {
             user = await new UserModel().createNewUser(this.ctx)
         }
         let html = new GameUserHtml().getUserBalanceHtml(user!)
+        console.log('返回的用户html--->', html)
         await new MessageUtils(this.ctx).sendPopMessage(html)
     }
 
@@ -50,8 +56,27 @@ class GameFindController {
     /**
      * 查询用户流水
      */
-    public getUserFlowingWater = () => {
-        console.log('查询用户最近投注')
+    public getUserFlowingWater = async () => {
+        console.log('发送流水信息333')
+        let {
+            gameType,
+            dayWater,
+            weekWater,
+            totalWater
+        } = await new BotPaymentModel().getUserWaterClass(this.ctx)
+        console.log('发送流水信息111', totalWater, totalWater.getValue())
+        let html = new GameUserHtml().getUserPaymentHtml(
+            this.ctx,
+            {
+                gameType: new GameEnumsClass().getGameTypeStr(gameType),
+                dayWater: dayWater.getValue(),
+                weekWater: weekWater.getValue(),
+                totalWater: totalWater.getValue()
+            }
+        )
+        console.log('发送流水信息')
+        await new MessageUtils(this.ctx).sendPopMessage(html)
+        // console.log('查询用户最近投注')
     }
 
     /**

@@ -15,6 +15,15 @@ class ContextUtil{
     }
 
     /**
+     * 获取用户名称
+     */
+    // public static getUserName = (ctx: Context): string => {
+    //     return {
+    //         ctx.callbackQuery?.from.id
+    //     }
+    // }
+
+    /**
      * 获取群组id
      */
     public static getGroupId = (ctx: Context) => {
