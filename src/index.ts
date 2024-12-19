@@ -1,6 +1,7 @@
 import process from "node:process";
 import ScheduleHandle from "./commons/ScheduleHandle";
 
+require('./commons/expand/ExpandSelectQueryBuilder')
 require('./botGame/GameServe')
 require('./botWallet/WalletServe')
 require('./botGame/GameServe')

@@ -11,7 +11,10 @@ class ContextUtil{
      * 获取用户id(加密后的)
      */
     public static getUserId = (ctx: Context): string => {
-        return AESUtils.encodeUserId(`${ctx.callbackQuery?.from.id}`)
+        if (ctx.callbackQuery?.from.id) {
+            return AESUtils.encodeUserId(`${ctx.callbackQuery?.from.id}`)
+        }
+        return AESUtils.encodeUserId(`${ctx?.from?.id}`)
     }
 
     /**

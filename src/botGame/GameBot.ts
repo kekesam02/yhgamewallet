@@ -44,6 +44,9 @@ bot.on(message('text'), async (ctx) => {
     await ctx.reply('点击进行转账:', shareButton)
 })
 
+/**
+ * 监听用户点击按钮回调
+ */
 bot.on('callback_query', async (ctx) => {
     // Explicit usage
     await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)

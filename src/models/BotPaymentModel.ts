@@ -118,7 +118,9 @@ class BotPaymentModel extends BaseEntity {
     public getUserWaterClass = async (ctx: Context) => {
         // trx 当前汇率
         let TRXRate = await new BotExchangeModel().getTRXRate()
-        let {gameType, resultList} = await new BotPaymentModel().getUserWater(ctx, [PaymentType.SZ])
+        let {gameType, resultList} = await new BotPaymentModel().getUserWater(ctx, [
+            PaymentType.SZ
+        ])
         return this.tidyPaymentList(
             gameType,
             resultList,
@@ -162,15 +164,35 @@ class BotPaymentModel extends BaseEntity {
 
     /**
      * 获取用户流水总数据列表
+     * @param ctx
+     * @param paymentTypeList: 支付类型
+     * @param gameTypeList: 查询的游戏类型
+     * @param pageSize: 查询的数据条数
+     *      0: 查询所有数据
+     *      1: 查询指定条数数据
      */
     public getUserWater = async (
         ctx: Context,
-        paymentTypeList: Array<PaymentType>
+        paymentTypeList: Array<PaymentType>,
+        gameTypeList: Array<GameTypeEnum> = [
+            GameTypeEnum.TOUZI ,
+            GameTypeEnum.PC28DI ,
+            GameTypeEnum.PC28GAO ,
+            GameTypeEnum.TOUZIFS ,
+            GameTypeEnum.PC28DIFS ,
+            GameTypeEnum.PC28GAOFS ,
+            GameTypeEnum.TOUZIJS ,
+            GameTypeEnum.PCDWQ ,
+            GameTypeEnum.PCDWQFS
+        ],
+        pageSize: number = 0
     ): Promise<{
         gameType: GameTypeEnum,
         resultList: Array<BotPaymentModel>
     }> => {
         let groupId = ContextUtil.getGroupId(ctx)
+
+        // 支付类型筛选
         let paymentTypeParams: any = {}
         let paymentTypeStr = paymentTypeList.length > 1? '(': ''
         paymentTypeList.forEach((item, index) => {
@@ -182,13 +204,30 @@ class BotPaymentModel extends BaseEntity {
             }
         })
         paymentTypeStr += paymentTypeList.length > 1? ')': ''
+
+        // 游戏类型筛选
+        let gameTypeParams: any = {}
+        let gameTypeStr = gameTypeList.length > 1? '(': ''
+        gameTypeList.forEach((item, index) => {
+            gameTypeParams[`gameType${index}`] = item
+            if (index > 0) {
+                gameTypeStr += ` or game_type = :gameType${index}`
+            } else {
+                gameTypeStr += `game_type = :gameType${index}`
+            }
+        })
+        gameTypeStr += gameTypeList.length > 1? ')': ''
+
+        // 查询当前群组信息
         let gameModel = await BotGameModel
             .createQueryBuilder()
             .where('group_id = :groupId', {
                 groupId: groupId
             })
             .getOne()
-        let result = await BotPaymentModel
+
+        // 查询订单表
+        let query = BotPaymentModel
             .createQueryBuilder()
             .where('user_id = :tgId', {
                 tgId: ContextUtil.getUserId(ctx)
@@ -199,7 +238,12 @@ class BotPaymentModel extends BaseEntity {
                 walletType: WalletType.USDT,
                 walletType2: WalletType.TRX,
             })
-            .getMany()
+            .andWhere(gameTypeStr, gameTypeParams)
+            .orderBy('create_time', 'DESC')
+        if (pageSize > 0) {
+            query.take(pageSize)
+        }
+        let result = await query.getMany()
         return {
             gameType: gameModel!.gameType,
             resultList: result

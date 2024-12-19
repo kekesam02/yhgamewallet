@@ -4,6 +4,7 @@ import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
 import PC28Controller from './gameController/PC28Controller'
 import GameController from "./gameController/GameController";
 import GameFindController from "./gameController/GameFindController";
+import GameCommand from "./gameController/GameCommand";
 
 
 /**
@@ -27,6 +28,7 @@ class GameCallbackHandle {
                 // 开始定位球游戏
                 this.startBall()
                 break
+
             // ----------------  下面是查询用户点击相关事件
             case GameController.lookBalance.query:
                 // 查询用户余额
@@ -44,7 +46,6 @@ class GameCallbackHandle {
                 // 查询用户盈亏
                 new GameFindController(ctx).getUserProfitLoss()
                 break
-
         }
     }
 
