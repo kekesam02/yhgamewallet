@@ -1,8 +1,12 @@
-import { Telegraf } from 'telegraf'
+import {Context, Telegraf} from 'telegraf'
 import { message } from 'telegraf/filters'
 import process from 'node:process'
+import GameBotHtml from "./html/GameBotHtml";
+import ButtonUtils from "../commons/button/ButtonUtils";
+import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
 
 const bot = new Telegraf("7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk")
+
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)
@@ -10,8 +14,14 @@ bot.command('quit', async (ctx) => {
     await ctx.leaveChat()
 })
 
+bot.command('oldschool', (ctx) => ctx.reply('Hello'))
+
+bot.action('hello', (ctx, next) => {
+    return ctx.reply('👍').then(() => next())
+})
+
 bot.on(message('text'), async (ctx) => {
-    console.log(ctx.update)
+    console.log("=============>",ctx.update)
     // 创建内联键盘按钮
     const shareButton = {
         reply_markup: {
@@ -29,6 +39,7 @@ bot.on(message('text'), async (ctx) => {
         }
     }
 
+    await ctx.telegram.sendMessage(ctx.message.chat.id, `Hello ${ctx.state.role}`)
     // 发送带有分享按钮的消息
     await ctx.reply('点击进行转账:', shareButton)
 })
@@ -36,7 +47,6 @@ bot.on(message('text'), async (ctx) => {
 bot.on('callback_query', async (ctx) => {
     // Explicit usage
     await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
-
     // Using context shortcut
     await ctx.answerCbQuery()
 })
@@ -44,9 +54,7 @@ bot.on('callback_query', async (ctx) => {
 bot.on('inline_query', async (ctx) => {
     try {
         const query = ctx.inlineQuery.query
-
         if(!query) return
-
         // 创建一个可分享的结果
         const result = [{
             type: 'article',
@@ -86,15 +94,15 @@ bot.on('inline_query', async (ctx) => {
     }
 })
 
+
+
 bot.launch()
 
 // Enable graceful stop
-// Enable graceful stop
-process.once('SIGINT', () => {
-    console.log('监听到关闭了111')
-    bot.stop('SIGINT')
-})
-process.once('SIGTERM', () =>{
-    console.log('监听到关闭了222')
-    bot.stop('SIGTERM');
-})
+process.once('SIGINT', () => bot.stop('SIGINT'))
+process.once('SIGTERM', () => bot.stop('SIGTERM'))
+
+
+
+
+export default  bot

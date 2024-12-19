@@ -1,9 +1,8 @@
 import process from "node:process";
 import ScheduleHandle from "./commons/ScheduleHandle";
 
-require('./botPay/PayWalletServe')
 require('./botGame/GameServe')
-require('./botWallet/walletServe')
+require('./botWallet/WalletServe')
 require('./botGame/GameServe')
 
 process.once('SIGINT', () => {
