@@ -12,7 +12,7 @@ bot.command('quit', async (ctx) => {
 })
 
 bot.on(message('text'), async (ctx) => {
-    console.log(ctx.update)
+    console.log("=============>",ctx.update)
     // 创建内联键盘按钮
     const shareButton = {
         reply_markup: {
@@ -37,7 +37,6 @@ bot.on(message('text'), async (ctx) => {
 bot.on('callback_query', async (ctx) => {
     // Explicit usage
     await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
-
     // Using context shortcut
     await ctx.answerCbQuery()
 })
@@ -45,9 +44,7 @@ bot.on('callback_query', async (ctx) => {
 bot.on('inline_query', async (ctx) => {
     try {
         const query = ctx.inlineQuery.query
-
         if(!query) return
-
         // 创建一个可分享的结果
         const result = [{
             type: 'article',

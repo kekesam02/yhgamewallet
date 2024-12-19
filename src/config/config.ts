@@ -11,6 +11,7 @@ interface Config {
   APP: {
     name: string;
     walletPort: number;
+    payWalletPort: number;
     gamePort: number;
     host: string;
   };

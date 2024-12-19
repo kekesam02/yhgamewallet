@@ -7,7 +7,6 @@ const bot = new Telegraf("7036184890:AAERV7-nzwUOSzUSbz1Jb9YXO_0DE7NsP7I")
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)
-
     // Using context shortcut
     await ctx.leaveChat()
 })
@@ -30,7 +29,6 @@ bot.on(message('text'), async (ctx) => {
             ]
         }
     }
-
     // 发送带有分享按钮的消息
     await ctx.reply('点击进行转账:', shareButton)
 })
@@ -38,7 +36,6 @@ bot.on(message('text'), async (ctx) => {
 bot.on('callback_query', async (ctx) => {
     // Explicit usage
     await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
-
     // Using context shortcut
     await ctx.answerCbQuery()
 })
@@ -46,9 +43,7 @@ bot.on('callback_query', async (ctx) => {
 bot.on('inline_query', async (ctx) => {
     try {
         const query = ctx.inlineQuery.query
-
         if(!query) return
-
         // 创建一个可分享的结果
         const result = [{
             type: 'article',
