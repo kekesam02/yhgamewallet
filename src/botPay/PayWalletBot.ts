@@ -1,6 +1,9 @@
-import { Telegraf } from 'telegraf'
+import {Context, Telegraf} from 'telegraf'
 import { message } from 'telegraf/filters'
 import process from 'node:process'
+import GameBotHtml from "./html/GameBotHtml";
+import ButtonUtils from "../commons/button/ButtonUtils";
+import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
 
 const bot = new Telegraf("7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk")
 
@@ -9,6 +12,12 @@ bot.command('quit', async (ctx) => {
     await ctx.telegram.leaveChat(ctx.message.chat.id)
     // Using context shortcut
     await ctx.leaveChat()
+})
+
+bot.command('oldschool', (ctx) => ctx.reply('Hello'))
+
+bot.action('hello', (ctx, next) => {
+    return ctx.reply('👍').then(() => next())
 })
 
 bot.on(message('text'), async (ctx) => {
@@ -30,6 +39,7 @@ bot.on(message('text'), async (ctx) => {
         }
     }
 
+    await ctx.telegram.sendMessage(ctx.message.chat.id, `Hello ${ctx.state.role}`)
     // 发送带有分享按钮的消息
     await ctx.reply('点击进行转账:', shareButton)
 })
@@ -84,8 +94,15 @@ bot.on('inline_query', async (ctx) => {
     }
 })
 
+
+
 bot.launch()
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
+
+
+
+
+export default  bot

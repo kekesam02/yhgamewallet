@@ -3,7 +3,6 @@ import { message } from 'telegraf/filters'
 import process from 'node:process'
 
 const bot = new Telegraf("7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk")
-
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)

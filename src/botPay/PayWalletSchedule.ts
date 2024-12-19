@@ -1,9 +1,12 @@
 import schedule from 'node-schedule'
 import logger from "../logger";
+import PayMessageHandle from "./PayMessageHandle";
+import bot from "./PayWalletBot";
 function initWallet( ) {
     const rule = '*/10 * * * * *';
     const job = schedule.scheduleJob(rule,()=>{
         logger.info('2、每次计划执行中的事件。');
+        new PayMessageHandle().sendMessage(bot)
         // 取消job。会被监听
         //job.cancel()
     });

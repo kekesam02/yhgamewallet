@@ -6,7 +6,6 @@ import database from "../config/database";
 import initRoutes from "./controller";
 import { initMiddleware } from "../middlewares";
 import initPayWallet  from "./PayWalletSchedule";
-require('./PayWalletBot')
 // 读取配置文件
 const config = getConfig()
 

@@ -8,8 +8,7 @@ interface RouterConf {
   meta?: any;
 }
 
-const routerGroup: RouterConf[] = [
-];
+const routerGroup: RouterConf[] = [];
 
 function registerRouteGroup(app: Express, routes: RouterConf[]) {
   routes.forEach((route) => {

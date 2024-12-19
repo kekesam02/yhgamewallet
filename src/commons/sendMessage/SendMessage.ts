@@ -12,15 +12,10 @@ class SendMessage {
     }
 
     /**
-     * 发送弹窗消息
+     * 发送消息
      * @param text: 弹窗文本
-     * @param showAlert: 是否弹窗显示
-     *      true: 弹窗显示
-     *      false: 顶部悬浮显示
      */
-    public sendMessage(text: string, showAlert = true) {
-        return this.ctx.send(text, {
-            show_alert: showAlert
-        })
+    public sendMessage(text: string) {
+        return this.ctx.sendMessage(text)
     }
 }
