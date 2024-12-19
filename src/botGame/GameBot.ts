@@ -1,9 +1,20 @@
-import { Telegraf } from 'telegraf'
+import {Context, Telegraf} from 'telegraf'
 import { message } from 'telegraf/filters'
 import process from 'node:process'
+import {getConfig} from "../config/config";
+import GameMessageHandle from './GameMessageHandle'
+import {UpdateType} from "telegraf/typings/telegram-types";
+import {Deunionize} from "telegraf/typings/core/helpers/deunionize";
+import GameCallbackHandle from "./GameCallbackHandle";
+import ScheduleHandle from "../commons/ScheduleHandle";
+import GameFindController from "./gameController/GameFindController";
+import TimeUtils from "../commons/TimeUtils";
 
-const bot = new Telegraf("7036184890:AAERV7-nzwUOSzUSbz1Jb9YXO_0DE7NsP7I")
 
+/**
+ * 娱乐机器人核心代码
+ */
+const bot = new Telegraf(getConfig().botConfig.GameBotToken)
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)
@@ -11,6 +22,7 @@ bot.command('quit', async (ctx) => {
     await ctx.leaveChat()
 })
 
+<<<<<<< HEAD
 bot.on(message('text'), async (ctx) => {
     console.log(ctx.update)
     // 创建内联键盘按钮
@@ -38,9 +50,25 @@ bot.on('callback_query', async (ctx) => {
     await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
     // Using context shortcut
     await ctx.answerCbQuery()
+=======
+
+/**
+ * 监听用户发送过来的消息
+ */
+bot.on(
+    message('text'),
+async (ctx: Context) => {
+    let messageHandle = new GameMessageHandle();
+    messageHandle.listenerMessage(ctx)
+})
+
+bot.on('callback_query', async (ctx) => {
+    GameCallbackHandle.listenerMessage(ctx)
+>>>>>>> 6b087c776da14bbfdfc1a3d3695c133d6aea3fb4
 })
 
 bot.on('inline_query', async (ctx) => {
+    console.log('内连按钮回调--------------', ctx)
     try {
         const query = ctx.inlineQuery.query
         if(!query) return
@@ -83,8 +111,32 @@ bot.on('inline_query', async (ctx) => {
     }
 })
 
+
 bot.launch()
 
+/**
+ * 开启默认需要运行的游戏定时器
+ */
+const startJob = () => {
+    /**
+     * 运行pc28游戏定时器（放入异步中、防止配置文件没有加载完成）
+     */
+    // setTimeout(() => {
+    //     console.log('计时器只能触发一次')
+    //     ScheduleHandle.startPC28(bot)
+    // }, 1000)
+}
+startJob()
+
+
 // Enable graceful stop
-process.once('SIGINT', () => bot.stop('SIGINT'))
-process.once('SIGTERM', () => bot.stop('SIGTERM'))
+process.once('SIGINT', () => {
+    console.log('监听到关闭了1')
+    ScheduleHandle.closeJobs()
+    bot.stop('SIGINT')
+})
+process.once('SIGTERM', () =>{
+    console.log('监听到关闭了2')
+    ScheduleHandle.closeJobs()
+    bot.stop('SIGTERM');
+})

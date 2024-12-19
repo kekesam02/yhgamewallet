@@ -1,0 +1,56 @@
+import schedule, {Job} from "node-schedule";
+import PC28Controller from "../botGame/gameController/PC28Controller";
+import {Context, Telegraf} from "telegraf";
+
+/**
+ * 定时任务控制器
+ */
+class ScheduleHandle {
+
+    /**
+     * 正在工作的定时器列表、运行结束需要关闭
+     */
+    public static currJobList: Array<Job> = []
+
+    /**
+     * 游戏是否已经开始
+     *      true: 已经开始游戏、定时器正在执行
+     *      false: 游戏还没有开始运行
+     */
+    public static isStartPC28 = false
+
+
+    /**
+     * 开启PC28定时任务控制器
+     */
+    public static startPC28 = (bot: Telegraf<Context>) => {
+        // pc28游戏还没有开始、打开计时器开始运行游戏
+        if (!this.isStartPC28) {
+            this.isStartPC28 = true
+            // let pc28Controller = new PC28Controller()
+            // pc28Controller.startPCLow(bot).then((val) => {})
+            // let job = schedule.scheduleJob('0/3 * * * * *', () => {
+            //     let pc28Controller = new PC28Controller()
+            //     pc28Controller.startPCLow(bot).then((val) => {})
+            // })
+            // this.currJobList.push(job)
+            setTimeout(() => {
+                let pc28Controller = new PC28Controller()
+                pc28Controller.startPCLow(bot).then((val) => {})
+            }, 2000)
+        }
+    }
+
+    /**
+     * 进程结束需要关闭正在工作的定时器
+     */
+    public static closeJobs = () => {
+        this.currJobList.forEach(item => {
+            item.cancel()
+        })
+    }
+}
+
+
+
+export default ScheduleHandle

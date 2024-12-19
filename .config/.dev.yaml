@@ -6,6 +6,9 @@ APP:
 
 jwt_secret: your_jwt_secret
 
+botConfig:
+  GameBotToken: '7635600144:AAFz9DYONfi_QQCy1-gtMCChiJNgQaXnZ8Y'
+
 cors:
   origin: "*"
   methods:
@@ -29,20 +32,6 @@ redis:
   port: 6379
   password: rLJ45%ki@
   db: 1
-
-#database:
-#  host : 127.0.0.1
-#  port : 3306
-#  database : spinach_robot_test
-#  user: root
-#  password : 0287dfc565570ecd
-
-#redis:
-#  host: 127.0.0.1
-#  port: 6379
-#  password: rLJ45%ki@
-#  db: 0
-
 
 rateLimit:
   windowMs: 600000 # 15 分钟
