@@ -2,6 +2,7 @@ APP:
   name: MyApp
   walletPort: 3000
   gamePort: 3001
+  payWalletPort: 3002
   host: localhost
 
 jwt_secret: your_jwt_secret

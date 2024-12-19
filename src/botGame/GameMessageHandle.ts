@@ -8,7 +8,6 @@ import PC28Controller from "./gameController/PC28Controller";
  * 娱乐机器人接收到的用户消息处理器
  */
 class GameMessageHandle {
-
     public listenerMessage = (ctx: Context) => {
         console.log('传入的用户消息', ctx)
         switch (true) {

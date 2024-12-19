@@ -33,7 +33,7 @@ app.use(errorHandler)
 
 // 服务器配置
 const serverConfig = {
-    port: config.APP.gamePort || 3001, // 从配置文件读取端口，默认3000
+    port: config.APP.gamePort || 3006, // 从配置文件读取端口，默认3000
     hostname: config.APP.host || "localhost", // 从配置文件读取主机名，默认localhost
 }
 

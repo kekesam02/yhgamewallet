@@ -10,7 +10,6 @@ import GameFindController from "./gameController/GameFindController";
  * 娱乐机器人接收到的用户按钮点击事件处理器
  */
 class GameCallbackHandle {
-
     public static listenerMessage = (ctx: Context) => {
         console.log('callback_query回调', ctx)
         let update: any = ctx?.update

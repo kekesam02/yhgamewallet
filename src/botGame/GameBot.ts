@@ -22,7 +22,6 @@ bot.command('quit', async (ctx) => {
     await ctx.leaveChat()
 })
 
-<<<<<<< HEAD
 bot.on(message('text'), async (ctx) => {
     console.log(ctx.update)
     // 创建内联键盘按钮
@@ -50,21 +49,6 @@ bot.on('callback_query', async (ctx) => {
     await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
     // Using context shortcut
     await ctx.answerCbQuery()
-=======
-
-/**
- * 监听用户发送过来的消息
- */
-bot.on(
-    message('text'),
-async (ctx: Context) => {
-    let messageHandle = new GameMessageHandle();
-    messageHandle.listenerMessage(ctx)
-})
-
-bot.on('callback_query', async (ctx) => {
-    GameCallbackHandle.listenerMessage(ctx)
->>>>>>> 6b087c776da14bbfdfc1a3d3695c133d6aea3fb4
 })
 
 bot.on('inline_query', async (ctx) => {

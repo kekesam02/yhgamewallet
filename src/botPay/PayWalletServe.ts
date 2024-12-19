@@ -6,6 +6,7 @@ import database from "../config/database";
 import initRoutes from "./controller";
 import { initMiddleware } from "../middlewares";
 import initPayWallet  from "./PayWalletSchedule";
+require('./PayWalletBot')
 // 读取配置文件
 const config = getConfig()
 
@@ -28,7 +29,7 @@ app.use(errorHandler)
 
 // 服务器配置
 const serverConfig = {
-    port: config.APP.payWalletPort || 3002, // 从配置文件读取端口，默认3002
+    port: config.APP.payWalletPort || 3002, // 从配置文件读取端口，默认4000
     hostname: config.APP.host || "localhost", // 从配置文件读取主机名，默认localhost
 }
 
