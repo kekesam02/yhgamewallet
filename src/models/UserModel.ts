@@ -270,6 +270,24 @@ class UserModel extends BaseEntity{
         this.nickName = `${ctx?.from?.first_name}${ctx?.from?.last_name}`
         return UserModel.save(this)
     }
+
+    /**
+     * 获取用户信息
+     * @param ctx
+     */
+    public getUserBalance = async (ctx: Context): Promise<UserModel> => {
+        let userId = AESUtils.encodeUserId(ctx?.from?.id.toString())
+        let user = await UserModel
+            .createQueryBuilder()
+            .where('tg_id = :tgId', {
+                tgId: userId
+            })
+            .getOne()
+        if (!user) {
+            user = await new UserModel().createNewUser(ctx)
+        }
+        return user
+    }
 }
 
 

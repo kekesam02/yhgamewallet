@@ -30,7 +30,11 @@ bot.on(
     message('text'),
 async (ctx: Context) => {
     let messageHandle = new GameMessageHandle();
-    messageHandle.listenerMessage(ctx)
+    try {
+        await messageHandle.listenerMessage(ctx)
+    } catch (err) {
+        console.log('报错了', err)
+    }
 })
 
 /**

@@ -37,13 +37,14 @@ class GameCommandHtml {
     }
 
     /**
-     * 生成注单 html
+     * 生成注单 html 带复制功能
      */
     public createNoteOrder = (pledgeUpModels: Array<BotPledgeUpModel>): string => {
-        let length1 = 11
+        let length1 = 12
         let length2 = 8
         let length3 = 8
-        let html =  `期数`.padEnd(length1, ' ')
+        let html = '<pre><code>'
+        html +=  `期数`.padEnd(length1, ' ')
         html += `下注`.padEnd(length2, ' ')
         html += `金额`.padEnd(length3, ' ')
         html += `赔付${this.N}`
@@ -53,6 +54,7 @@ class GameCommandHtml {
                 + `${item.amountMoney}`.padEnd(length3, ' ')
                 + `${item.winningAmount}${this.N}`
         })
+        html += '</code></pre>'
         return html
     }
 }

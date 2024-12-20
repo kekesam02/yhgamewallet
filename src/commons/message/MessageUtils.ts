@@ -11,15 +11,21 @@ import GameController from "../../botGame/gameController/GameController";
 class MessageUtils {
 
     /**
-     * 发送文本、带回复用户的那条消息(暂时不行需要更新版本)
+     * 发送文本、带回复用户的那条消息
      */
     public sendTextReply = (ctx:Context ,text: string) => {
         let chatId = `${ctx?.chat?.id}`
         let messageId = ctx?.message?.message_id ?? 0
         return ctx.replyWithHTML(text, {
             parse_mode: 'HTML',
+            protect_content: true,
+            reply_parameters: {
+                chat_id: chatId,
+                message_id: messageId
+            },
             reply_markup: {
-                force_reply: true
+                force_reply: true,
+                selective: true,
             }
         })
     }
