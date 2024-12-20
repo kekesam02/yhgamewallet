@@ -54,14 +54,19 @@ class GameFindController {
 
     /**
      * 查询用户流水
+     * @param isPop: 是否弹窗显示
+     *      true: 弹窗显示
+     *      false: 正常返回可copy文字
      */
-    public getUserFlowingWater = async () => {
+    public getUserFlowingWater = async (isPop: boolean = true) => {
+        console.log('开始查询')
         let {
             gameType,
             dayWater,
             weekWater,
             totalWater
         } = await new BotPaymentModel().getUserWaterClass(this.ctx)
+        console.log('查询到的数据')
         let html = new GameUserHtml().getUserPaymentHtml(
             this.ctx,
             {
@@ -69,15 +74,19 @@ class GameFindController {
                 dayWater: dayWater.getValue(),
                 weekWater: weekWater.getValue(),
                 totalWater: totalWater.getValue()
-            }
+            },
+            !isPop
         )
-        await new MessageUtils().sendPopMessage(this.ctx, html)
+        if (isPop) {
+            return await new MessageUtils().sendPopMessage(this.ctx, html)
+        }
+        return await new MessageUtils().sendTextReply(this.ctx, html)
     }
 
     /**
      * 查询用户盈亏
      */
-    public getUserProfitLoss = async () => {
+    public getUserProfitLoss = async (isPop: boolean = true) => {
         let {
             gameType,
             dayWater,
@@ -91,9 +100,13 @@ class GameFindController {
                 dayWater: dayWater.getValue(),
                 weekWater: weekWater.getValue(),
                 totalWater: totalWater.getValue()
-            }
+            },
+            !isPop
         )
-        await new MessageUtils().sendPopMessage(this.ctx, html)
+        if (isPop) {
+            return await new MessageUtils().sendPopMessage(this.ctx, html)
+        }
+        return await new MessageUtils().sendTextReply(this.ctx, html)
     }
 }
 

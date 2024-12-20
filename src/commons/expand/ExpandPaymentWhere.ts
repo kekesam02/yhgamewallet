@@ -35,9 +35,9 @@ SelectQueryBuilder.prototype.wherePaymentType = function(paymentTypeList: Array<
     paymentTypeList.forEach((item, index) => {
         paymentTypeParams[`paymentType${index}`] = item
         if (index > 0) {
-            paymentTypeStr += ` or paymentType = :gameType${index}`
+            paymentTypeStr += ` or payment_type = :gameType${index}`
         } else {
-            paymentTypeStr += `paymentType = :gameType${index}`
+            paymentTypeStr += `payment_type = :gameType${index}`
         }
     })
     paymentTypeStr += paymentTypeList.length > 1? ')': ''

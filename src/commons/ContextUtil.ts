@@ -8,9 +8,19 @@ import AESUtils from "./AESUtils";
 class ContextUtil{
 
     /**
-     * 获取用户id(加密后的)
+     * 获取用户id
+     * @param ctx
+     * @param isPwd: 是否加密
+     *     true: 加密后的数据
+     *     false: 未加密的数据
      */
-    public static getUserId = (ctx: Context): string => {
+    public static getUserId = (ctx: Context, isPwd: boolean = true): string => {
+        if (!isPwd) {
+            if (ctx.callbackQuery?.from.id) {
+                return `${ctx.callbackQuery?.from.id}`
+            }
+            return `${ctx?.from?.id}`
+        }
         if (ctx.callbackQuery?.from.id) {
             return AESUtils.encodeUserId(`${ctx.callbackQuery?.from.id}`)
         }

@@ -4,7 +4,7 @@ import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
 import PC28Controller from './gameController/PC28Controller'
 import GameController from "./gameController/GameController";
 import GameFindController from "./gameController/GameFindController";
-import GameCommand from "./gameController/GameCommand";
+import CommandController from "./gameController/CommandController";
 
 
 /**

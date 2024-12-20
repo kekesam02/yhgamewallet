@@ -15,10 +15,9 @@ class GameUserHtml {
     /**
      * 生成用户余额
      */
-    public getUserBalanceHtml = (user: UserModel) => {
+    public getUserBalanceHtml = (user: UserModel, isHtml = false) => {
         let userId = AESUtils.decodeUserId(user.tgId)
-        return `昵称：<a href="tg://user?id=${userId}">${user.userName}</a>${this.N
-            }ID: <code>${userId}</code>${this.N
+        return `${this.createName(userId, user.userName, isHtml)}${this.N
             }USDT: ${user.USDT}${this.N
             }TRX: ${user.TRX}${this.N
             }彩U: ${user.CUSDT}${this.N
@@ -59,12 +58,11 @@ class GameUserHtml {
         dayWater: string,
         weekWater: string,
         totalWater : string
-    }) => {
-        let userId = ContextUtil.getUserId(ctx)
+    }, isHtml: boolean = false) => {
+        let userId = ContextUtil.getUserId(ctx, false)
         let firstName = ctx?.from?.first_name ?? ''
         return `当前游戏类型：${gameType}${this.N
-        }昵称: ${firstName}${this.N
-        }ID: ${userId}${this.N
+        }${this.createName(userId, firstName, isHtml)}${this.N
         }总流水: ${totalWater}${this.N
         }周流水: ${weekWater}${this.N
         }今日流水: ${dayWater}
@@ -84,16 +82,31 @@ class GameUserHtml {
         dayWater: string,
         weekWater: string,
         totalWater : string
-    }) => {
-        let userId = ContextUtil.getUserId(ctx)
+    }, isHtml: boolean = false) => {
+        let userId = ContextUtil.getUserId(ctx, false)
         let firstName = ctx?.from?.first_name ?? ''
         return `当前游戏类型：${gameType}${this.N
-        }昵称: ${firstName}${this.N
-        }ID: ${userId}${this.N
+        }${this.createName(userId, firstName, isHtml)}${this.N
         }总盈亏: ${totalWater}${this.N
         }周盈亏: ${weekWater}${this.N
         }今日盈亏: ${dayWater}
         `
+    }
+
+    /**
+     * 生成用户昵称和id string
+     */
+    public createName = (
+        userId: string,
+        name: string,
+        isHtml: boolean = false
+    ) => {
+        if (isHtml) {
+            return `昵称：<a href="tg://user?id=${userId}">${name}</a>${this.N
+            }ID: <code>${userId}</code>`
+        }
+        return `昵称：${name}${this.N
+            }ID: ${userId}`
     }
 }
 
