@@ -1,10 +1,9 @@
-import {Context, Telegraf} from 'telegraf'
+import {Context, Telegraf,Markup} from 'telegraf'
 import { message } from 'telegraf/filters'
 import process from 'node:process'
 // https://blog.revincx.icu/posts/telegraf-guide/index.html
-const bot = new Telegraf("7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk")
 // 监听 /quit的命令
-import {getConfig} from "../config/config";
+import {getConfig} from "../../config/config";
 
 // 设置token
 const bot = new Telegraf(getConfig().botConfig.WalletToken)
@@ -31,8 +30,7 @@ bot.command('caption', (ctx) => {
 bot.command('start', (ctx) => {
     return ctx.replyWithHTML("<h1>哈哈</h1>",
         {
-            caption: 'Caption',
-            parse_mode: 'Markdown',
+            parse_mode: 'HTML',
             ...Markup.inlineKeyboard([
                 Markup.button.callback('Plain', 'plain'),
                 Markup.button.callback('Italic', 'italic')
@@ -99,20 +97,20 @@ bot.on(message('text'), async (ctx) => {
 
 
 bot.on('callback_query', async (ctx) => {
-    console.log("================>callback_query")
-    const message = ctx.callbackQuery.message;
-    const data = JSON.parse(ctx.callbackQuery.data);
-    const chatId = ctx.message.chat.id;
-
-    if (data.command === 'delete') {
-        const deleted = todos[chatId].splice(data.index, 1);
-        bot.answerCallbackQuery(callbackQuery.id, { text: 'Deleted "' + deleted[0] + '" from your to-do list.' });
-    }else {
+    console.log("================>callback_query",ctx.callbackQuery)
+    // const message = ctx.callbackQuery.message;
+    // const data = JSON.parse(ctx.callbackQuery.data);
+    // const chatId = ctx.callbackQuery.message.chat.id;
+    //
+    // if (data.command === 'delete') {
+    //     const deleted = 0;
+    //     bot.answerCallbackQuery(ctx.callbackQuery.id, { text: 'Deleted  from your to-do list.' });
+    // }else {
         // Explicit usage
         await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
         // Using context shortcut
         await ctx.answerCbQuery()
-    }
+    // }
 })
 
 bot.on('inline_query', async (ctx) => {

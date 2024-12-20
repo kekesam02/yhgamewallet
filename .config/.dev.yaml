@@ -9,7 +9,7 @@ jwt_secret: your_jwt_secret
 
 botConfig:
   GameBotToken: '7635600144:AAFW25-c6TSoIcDHlF9b0Js5SodglKay3hY'
-  WalletToken: '7628298549:AAHRAaSc9XJ1oSwNmbPO1C7sipJK3AeoUK8'
+  WalletToken: '7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk'
 
 cors:
   origin: "*"
