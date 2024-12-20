@@ -16,8 +16,9 @@ class GameUserHtml {
      * 生成用户余额
      */
     public getUserBalanceHtml = (user: UserModel) => {
-        return `昵称：${user.userName}${this.N
-            }ID: ${AESUtils.decodeUserId(user.tgId)}${this.N
+        let userId = AESUtils.decodeUserId(user.tgId)
+        return `昵称：<a href="tg://user?id=${userId}">${user.userName}</a>${this.N
+            }ID: <code>${userId}</code>${this.N
             }USDT: ${user.USDT}${this.N
             }TRX: ${user.TRX}${this.N
             }彩U: ${user.CUSDT}${this.N

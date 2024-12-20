@@ -192,32 +192,6 @@ class BotPaymentModel extends BaseEntity {
     }> => {
         let groupId = ContextUtil.getGroupId(ctx)
 
-        // 支付类型筛选
-        let paymentTypeParams: any = {}
-        let paymentTypeStr = paymentTypeList.length > 1? '(': ''
-        paymentTypeList.forEach((item, index) => {
-            paymentTypeParams[`paymentType${index}`] = item
-            if (index > 0) {
-                paymentTypeStr += ` or payment_type = :paymentType${index}`
-            } else {
-                paymentTypeStr += `payment_type = :paymentType${index}`
-            }
-        })
-        paymentTypeStr += paymentTypeList.length > 1? ')': ''
-
-        // 游戏类型筛选
-        let gameTypeParams: any = {}
-        let gameTypeStr = gameTypeList.length > 1? '(': ''
-        gameTypeList.forEach((item, index) => {
-            gameTypeParams[`gameType${index}`] = item
-            if (index > 0) {
-                gameTypeStr += ` or game_type = :gameType${index}`
-            } else {
-                gameTypeStr += `game_type = :gameType${index}`
-            }
-        })
-        gameTypeStr += gameTypeList.length > 1? ')': ''
-
         // 查询当前群组信息
         let gameModel = await BotGameModel
             .createQueryBuilder()
@@ -232,13 +206,13 @@ class BotPaymentModel extends BaseEntity {
             .where('user_id = :tgId', {
                 tgId: ContextUtil.getUserId(ctx)
             })
+            .whereGameType(gameTypeList)
+            .wherePaymentType(paymentTypeList)
             .andWhere('del = 0')
-            .andWhere(paymentTypeStr, paymentTypeParams)
             .andWhere('(wallet_type = :walletType or wallet_type = :walletType2)', {
                 walletType: WalletType.USDT,
                 walletType2: WalletType.TRX,
             })
-            .andWhere(gameTypeStr, gameTypeParams)
             .orderBy('create_time', 'DESC')
         if (pageSize > 0) {
             query.take(pageSize)
@@ -317,6 +291,7 @@ class BotPaymentModel extends BaseEntity {
             dayList: dayList
         }
     }
+
 }
 
 

@@ -19,9 +19,9 @@ class GameBotImage {
             }
             let total = item.numOne + item.numTwo + item.numThree
             if (total >= 0 && total <= 5) {
-                return `<div class="wrap-view peak mark">级小</div>`
+                return `<div class="wrap-view peak mark">极小</div>`
             } else if(total >= 22 && total <= 27) {
-                return `<div class="wrap-view peak mark">级大</div>`
+                return `<div class="wrap-view peak mark">极大</div>`
             }
             return `<div class="wrap-view peak">无</div>`
         }

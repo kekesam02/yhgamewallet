@@ -4,10 +4,15 @@
 import GameCommandHtml from "../html/GameCommandHtml";
 import {Context} from "telegraf";
 import BotGameModel from "../../models/BotGameModel";
-import BotPaymentModel from "../../models/BotPaymentModel";
-import PaymentType from "../../typeEnums/PaymentType";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import MessageUtils from "../../commons/message/MessageUtils";
+import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
+import PC28Controller from "./PC28Controller";
+import UserModel from "../../models/UserModel";
+import AESUtils from "../../commons/AESUtils";
+import GameUserHtml from "../html/GameUserHtml";
+import BotOddsModel from "../../models/BotOddsModel";
+import GameFindController from "./GameFindController";
 
 
 class GameCommand {
@@ -53,7 +58,7 @@ class GameCommand {
     public static profitLoss = ['盈亏', 'yk']
 
     /**
-     * 生成所有指令的html结果
+     * 发送所有指令的html结果并发送到群组
      */
     public createCommand = (ctx: Context) => {
         let html = new GameCommandHtml().createCommandHtml()
@@ -61,22 +66,83 @@ class GameCommand {
     }
 
     /**
-     * 生成注单指令
+     * 生成注单指令 html 查询结果并发送到群组
      */
     public createNoteOrder = async (ctx: Context) => {
-        try {
-            // 获取当前群组信息
-            let groupModel = await new BotGameModel().getCurrGroup(ctx)
-            if (groupModel) {
-                let result = await new BotPledgeUpModel().getHistory(ctx,10, [
-                    groupModel.gameType
-                ])
-                let html = new GameCommandHtml().createNoteOrder(result)
-                new MessageUtils().sendTextReply(ctx, html).then()
-            }
-        } catch (err) {
-            console.log('出现错误', err)
+        // 获取当前群组信息
+        let groupModel = await new BotGameModel().getCurrGroup(ctx)
+        if (groupModel) {
+            let result = await new BotPledgeUpModel().getHistory(ctx,10, [
+                groupModel.gameType
+            ])
+            let html = new GameCommandHtml().createNoteOrder(result)
+            new MessageUtils().sendTextReply(ctx, html).then()
         }
+    }
+
+    /**
+     * 生成开奖结果查询信息并发送到群组
+     * @param ctx
+     */
+    public createOpenWinner = async (ctx: Context) => {
+        // 获取当前群组信息
+        let groupModel = await new BotGameModel().getCurrGroup(ctx)
+        switch (groupModel?.gameType) {
+            case GameTypeEnum.PC28DI:
+                return new PC28Controller().getLotteryList(ctx)
+            case GameTypeEnum.PC28GAO:
+                return new PC28Controller().getLotteryList(ctx)
+        }
+    }
+
+    /**
+     * 生成用户余额查询信息并发送到群组
+     * @param ctx
+     */
+    public createUserBalance = async (ctx: Context) => {
+        let user = await new UserModel().getUserBalance(ctx)
+        let html = new GameUserHtml().getUserBalanceHtml(user!)
+        return  new MessageUtils().sendTextReply(ctx, html)
+    }
+
+    /**
+     * 给用户进行反水（暂时不对、需要确定规则）
+     * @param ctx
+     */
+    public createDefect = async (ctx: Context) => {
+        // 获取当前群组信息
+        let groupModel = await new BotGameModel().getCurrGroup(ctx)
+        if (!groupModel?.gameType) {
+            return
+        }
+        // let oddsList = await new BotOddsModel().getOddsList([
+        //     groupModel!.gameType
+        // ])
+        console.log('获取到的赔率表数据')
+    }
+
+    /**
+     * 取消上注
+     * @param ctx
+     */
+    public cancelBet = async (ctx: Context) => {
+        console.log('取消上注')
+    }
+
+    /**
+     * 查看用户流水
+     * @param ctx
+     */
+    public water = async (ctx: Context) => {
+        return new GameFindController(ctx).getUserFlowingWater()
+    }
+
+    /**
+     * 查看用户盈亏
+     * @param ctx
+     */
+    public profitLoss = async (ctx: Context) => {
+        console.log('取消上注')
     }
 
 }

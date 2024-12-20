@@ -1,6 +1,11 @@
+// @ts-nocheck
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import GameTypeEnum from "../typeEnums/gameEnums/GameTypeEnum";
 
 
+/**
+ * 赔率表
+ */
 @Entity({
     name: 'bot_odds'
 })
@@ -50,6 +55,17 @@ class BotOddsModel extends BaseEntity {
         name: 'zg'
     })
     maxMoney: number
+
+    /**
+     * 根据游戏类型获取赔率表列表数据
+     */
+    public getOddsList = (gameTypeList: Array<GameTypeEnum>) => {
+        console.log('什么东西', gameTypeList)
+        return BotOddsModel
+            .createQueryBuilder()
+            .whereGameType(gameTypeList)
+            .getMany()
+    }
 }
 
 

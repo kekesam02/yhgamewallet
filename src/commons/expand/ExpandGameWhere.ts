@@ -29,11 +29,9 @@ SelectQueryBuilder.prototype.whereGameType = function(gameTypeList: Array<GameTy
     if (!gameTypeList || gameTypeList.length < 1) {
         return this
     }
-    console.log('传入的数据', gameTypeList.length)
     let gameTypeParams: any = {}
     let gameTypeStr = gameTypeList.length > 1? '(': ''
     gameTypeList.forEach((item, index) => {
-        console.log('遍历---->', item)
         gameTypeParams[`gameType${index}`] = item
         if (index > 0) {
             gameTypeStr += ` or game_type = :gameType${index}`
@@ -42,8 +40,6 @@ SelectQueryBuilder.prototype.whereGameType = function(gameTypeList: Array<GameTy
         }
     })
     gameTypeStr += gameTypeList.length > 1? ')': ''
-    console.log('添加的查询语句', gameTypeStr)
-    console.log('查询条件', gameTypeParams)
     this.andWhere(gameTypeStr, gameTypeParams)
     return this
 }

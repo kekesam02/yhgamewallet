@@ -39,7 +39,6 @@ class GameFindController {
             user = await new UserModel().createNewUser(this.ctx)
         }
         let html = new GameUserHtml().getUserBalanceHtml(user!)
-        console.log('返回的用户html--->', html)
         await new MessageUtils().sendPopMessage(this.ctx, html)
     }
 
