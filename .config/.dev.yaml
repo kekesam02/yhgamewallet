@@ -8,7 +8,8 @@ APP:
 jwt_secret: your_jwt_secret
 
 botConfig:
-  GameBotToken: '7635600144:AAFz9DYONfi_QQCy1-gtMCChiJNgQaXnZ8Y'
+  GameBotToken: '7635600144:AAFW25-c6TSoIcDHlF9b0Js5SodglKay3hY'
+  WalletToken: '7628298549:AAHRAaSc9XJ1oSwNmbPO1C7sipJK3AeoUK8'
 
 cors:
   origin: "*"

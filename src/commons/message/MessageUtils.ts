@@ -18,6 +18,9 @@ class MessageUtils {
         let messageId = ctx?.message?.message_id ?? 0
         return ctx.replyWithHTML(text, {
             parse_mode: 'HTML',
+            reply_markup: {
+                force_reply: true
+            }
         })
     }
 

@@ -1,12 +1,10 @@
 import {Context, Telegraf} from 'telegraf'
 import { message } from 'telegraf/filters'
 import process from 'node:process'
-import GameBotHtml from "./html/GameBotHtml";
-import ButtonUtils from "../commons/button/ButtonUtils";
-import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
+import {getConfig} from "../config/config";
 
-const bot = new Telegraf("7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk")
-
+// 设置token
+const bot = new Telegraf(getConfig().botConfig.WalletToken)
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)

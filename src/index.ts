@@ -4,7 +4,6 @@ import ScheduleHandle from "./commons/ScheduleHandle";
 require('./commons/expand/ExpandSelectQueryBuilder')
 require('./botGame/GameServe')
 require('./botWallet/WalletServe')
-require('./botGame/GameServe')
 
 process.once('SIGINT', () => {
     console.log('关闭任务')
