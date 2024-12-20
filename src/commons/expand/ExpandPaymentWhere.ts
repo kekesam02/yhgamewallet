@@ -1,6 +1,6 @@
-import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import {SelectQueryBuilder} from "typeorm/query-builder/SelectQueryBuilder";
-import PaymentType from "../../typeEnums/PaymentType";
+import PaymentType from "../../type/PaymentType";
 
 /**
  * 扩展支付相关 where 条件查询

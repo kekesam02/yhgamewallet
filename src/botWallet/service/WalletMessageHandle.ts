@@ -1,7 +1,7 @@
 import type {Context} from "telegraf";
 import ButtonUtils from '../../commons/button/ButtonUtils'
-import WalletBotHtml from '../html/WalletBotHtml'
-import StartWalletEnum from "../enums/StartWalletEnum";
+import WalletBotHtml from '../../html/walletHtml/WalletBotHtml'
+import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import WalletCommand from "../const/WalletCommand";
 import ContextUtil from "../../commons/ContextUtil";
 

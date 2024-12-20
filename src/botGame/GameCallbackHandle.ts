@@ -1,6 +1,6 @@
 import {UpdateType} from "telegraf/typings/telegram-types";
 import {Context} from "telegraf";
-import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
+import StartGameEnum from "../type/gameEnums/StartGameEnum";
 import PC28Controller from './gameController/PC28Controller'
 import GameController from "./gameController/GameController";
 import GameFindController from "./gameController/GameFindController";

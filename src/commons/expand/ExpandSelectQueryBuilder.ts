@@ -1,6 +1,6 @@
 import {ObjectLiteral} from "typeorm/common/ObjectLiteral";
-import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
-import PaymentType from "../../typeEnums/PaymentType";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import PaymentType from "../../type/PaymentType";
 require('./ExpandGameWhere')
 require('./ExpandPaymentWhere')
 

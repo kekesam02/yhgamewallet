@@ -1,15 +1,15 @@
 import {Context} from "telegraf";
 import UserModel from "../../models/UserModel";
-import GameUserHtml from "../html/GameUserHtml";
+import GameUserHtml from "../../html/gameHtml/GameUserHtml";
 import MessageUtils from "../../commons/message/MessageUtils";
 import AESUtils from "../../commons/AESUtils";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import BotPaymentModel from "../../models/BotPaymentModel";
-import WalletType from "../../typeEnums/WalletType";
+import WalletType from "../../type/WalletType";
 import BotExchangeModel from "../../models/BotExchangeModel";
 import htmlUtils from "../../commons/HtmlUtils";
 import GameController from "./GameController";
-import GameEnumsClass from "../../typeEnums/gameEnums/GameEnumsClass";
+import GameEnumsIndex from "../../type/gameEnums/GameEnumsIndex";
 import ContextUtil from "../../commons/ContextUtil";
 
 
@@ -70,7 +70,7 @@ class GameFindController {
         let html = new GameUserHtml().getUserPaymentHtml(
             this.ctx,
             {
-                gameType: new GameEnumsClass().getGameTypeStr(gameType),
+                gameType: new GameEnumsIndex().getGameTypeStr(gameType),
                 dayWater: dayWater.getValue(),
                 weekWater: weekWater.getValue(),
                 totalWater: totalWater.getValue()
@@ -96,7 +96,7 @@ class GameFindController {
         let html = new GameUserHtml().getUserProfitLossHtml(
             this.ctx,
             {
-                gameType: new GameEnumsClass().getGameTypeStr(gameType),
+                gameType: new GameEnumsIndex().getGameTypeStr(gameType),
                 dayWater: dayWater.getValue(),
                 weekWater: weekWater.getValue(),
                 totalWater: totalWater.getValue()

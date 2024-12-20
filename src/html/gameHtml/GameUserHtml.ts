@@ -14,6 +14,10 @@ class GameUserHtml {
 
     /**
      * 生成用户余额
+     * @param user: 用户对象
+     * @param isHtml: 是否返回 html 字符串对象
+     *      true: 返回html 字符串对象
+     *      false: 返回 poop 弹窗字符串(里面不能包含 html 标签)
      */
     public getUserBalanceHtml = (user: UserModel, isHtml = false) => {
         let userId = AESUtils.decodeUserId(user.tgId)

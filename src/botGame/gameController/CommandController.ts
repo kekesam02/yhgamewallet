@@ -1,22 +1,19 @@
-/**
- * 游戏常用指令类
- */
-import GameCommandHtml from "../html/GameCommandHtml";
+import GameCommandHtml from "../../html/gameHtml/GameCommandHtml";
 import {Context} from "telegraf";
 import BotGameModel from "../../models/BotGameModel";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import MessageUtils from "../../commons/message/MessageUtils";
-import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import PC28Controller from "./PC28Controller";
 import UserModel from "../../models/UserModel";
 import AESUtils from "../../commons/AESUtils";
-import GameUserHtml from "../html/GameUserHtml";
+import GameUserHtml from "../../html/gameHtml/GameUserHtml";
 import BotOddsModel from "../../models/BotOddsModel";
 import GameFindController from "./GameFindController";
 
 
 /**
- * 娱乐机器人指令控制器
+ * 娱乐机器人指令控制器(游戏机器人常用指令)
  */
 class CommandController {
 

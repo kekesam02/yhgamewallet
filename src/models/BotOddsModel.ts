@@ -1,6 +1,6 @@
 // @ts-nocheck
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
-import GameTypeEnum from "../typeEnums/gameEnums/GameTypeEnum";
+import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
 
 
 /**

@@ -1,6 +1,6 @@
 import {Context, Telegraf} from "telegraf";
 import {ForceReply, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove} from "@telegraf/types/markup";
-import GameBotHtml from "../../botGame/html/GameBotHtml";
+import GameBotHtml from "../../html/gameHtml/GameBotHtml";
 import htmlUtils from "../HtmlUtils";
 import GameController from "../../botGame/gameController/GameController";
 

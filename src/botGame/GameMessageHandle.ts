@@ -1,7 +1,7 @@
 import type {Context} from "telegraf";
 import ButtonUtils from './../commons/button/ButtonUtils'
-import GameBotHtml from './html/GameBotHtml'
-import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
+import GameBotHtml from '../html/gameHtml/GameBotHtml'
+import StartGameEnum from "../type/gameEnums/StartGameEnum";
 import PC28Controller from "./gameController/PC28Controller";
 import CommandController from "./gameController/CommandController";
 import ContextUtil from "../commons/ContextUtil";
@@ -72,7 +72,7 @@ class GameMessageHandle {
                 await new CommandController().profitLoss(ctx)
                 break
 
-            // 下面上下注相关 =================
+            // 下面是下注相关 =================
 
             default:
                 console.log('未能识别消息')

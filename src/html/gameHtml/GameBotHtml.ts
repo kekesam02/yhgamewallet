@@ -1,7 +1,7 @@
-import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
-import GameEnumsClass from "../../typeEnums/gameEnums/GameEnumsClass";
-import StartGameEnum from "../../typeEnums/gameEnums/StartGameEnum";
-import { Pc28LotteryJsonType } from "../../gameTypes/LooteryJsonType";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import GameEnumsIndex from "../../type/gameEnums/GameEnumsIndex";
+import StartGameEnum from "../../type/gameEnums/StartGameEnum";
+import { Pc28LotteryJsonType } from "../../type/gameEnums/LooteryJsonType";
 import moment from 'moment'
 import BotOddsModel from "../../models/BotOddsModel";
 
@@ -25,7 +25,7 @@ class GameBotHtml {
      * 获取进入游戏模式字符串
      */
     getGameModelHtml = (gameType: StartGameEnum): string => {
-        let gameTypeStr = new GameEnumsClass().getStartGameStr(gameType)
+        let gameTypeStr = new GameEnumsIndex().getStartGameStr(gameType)
         let html = `
             进入游戏模式：${gameTypeStr}${
             this.N}----------------${

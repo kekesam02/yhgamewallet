@@ -1,6 +1,6 @@
 import {UpdateType} from "telegraf/typings/telegram-types";
 import {Context} from "telegraf";
-import StartWalletEnum from "../enums/StartWalletEnum";
+import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 
 
 /**

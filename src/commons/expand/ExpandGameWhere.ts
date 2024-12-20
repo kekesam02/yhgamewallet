@@ -1,4 +1,4 @@
-import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import {SelectQueryBuilder} from "typeorm/query-builder/SelectQueryBuilder";
 
 /**
