@@ -10,11 +10,16 @@ class BotOddsStorage {
      */
     public static oddsList = []
 
+    public static getOddsList = []
+
     /**
      * 初始化赔率表
      */
     public static init = async () => {
         let result = await new BotOddsModel().getOddsList()
-        console.log('获取到的赔率表数据', result)
+        result.forEach(item => {
+            console.log('循环赔率item------> ', item)
+        })
+        BotOddsStorage.oddsList = result
     }
 }

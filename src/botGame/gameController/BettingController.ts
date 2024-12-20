@@ -14,7 +14,7 @@ class BettingController {
     }
 
     // 小单
-    private DS = ['小单', 'xd']
+    private XD = ['小单', 'xd']
 
     // 小双
     private XS = ['小双', 'xs']

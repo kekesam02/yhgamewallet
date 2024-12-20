@@ -31,6 +31,7 @@ class GameUserHtml {
 
     /**
      * 获取投注记录列表html
+     * @param list: 用户上押列表
      */
     public getPledgeHtml = (list: Array<BotPledgeUpModel>): string => {
         let length1 = 10
@@ -51,6 +52,13 @@ class GameUserHtml {
 
     /**
      * 获取用户流水html数据
+     * @param ctx
+     * @param {
+     *     gameType: 游戏类型描述字段
+     *     dayWater: 用户当日流水金额
+     *     weekWater: 用户周流水金额
+     *     totalWater: 用户总流水金额
+     * }
      */
     public getUserPaymentHtml = (ctx: Context, {
         gameType,
@@ -75,6 +83,15 @@ class GameUserHtml {
 
     /**
      * 获取用户盈亏数据
+     * @param ctx
+     * @param {
+     *     gameType: 游戏类型描述字段
+     *     dayWater: 用户当日流水金额
+     *     weekWater: 用户周流水金额
+     *     totalWater: 用户总流水金额
+     * }
+     * @param isHtml: 返回格式是否为 html
+     *      true: 格式为 html (带标签的字符串)
      */
     public getUserProfitLossHtml = (ctx: Context, {
         gameType,
@@ -99,6 +116,9 @@ class GameUserHtml {
 
     /**
      * 生成用户昵称和id string
+     * @param userId: 用户id
+     * @param name: 用户名称
+     * @param isHtml: 是否是 html 格式
      */
     public createName = (
         userId: string,
