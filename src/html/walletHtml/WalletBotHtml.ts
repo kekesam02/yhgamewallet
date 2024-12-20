@@ -1,5 +1,5 @@
 import AESUtils from '../../commons/AESUtils'
-import {WalletUserModel} from "../model/WalletUserModel";
+import UserModel from "../../models/UserModel";
 
 /**
  * 游戏机器人返回的html字段
@@ -12,23 +12,23 @@ class WalletBotHtml {
     /**
      * 生成开始游戏的html字符串
      */
-    getBotStartHtml = (model:WalletUserModel): string => {
-        var vipHtml = "";
+    getBotStartHtml = (tgId:number,model:UserModel): string => {
+        var vipHtml = '';
         if (model.vip && model.vip < 10) {
             vipHtml = "💎尊贵的VIP" + model.vip + "💎\n";
         }
-        var add = "";
-        if (model.addr) {
-            add = "\n🧾提现地址：" + AESUtils.encodeAddr(model.addr) + "\n";
+        var add = '';
+        if (model.rechargeLink) {
+            add = "\n🧾提现地址：" + AESUtils.encodeAddr(model.rechargeLink) + "\n";
         } else {
             add = "\n👐D暂无提现地址请前往个人中心绑定👐\n";
         }
-        return vipHtml + "\n🆔 账户ID：" + model.tgId +
-            "\n👼 用户昵称：<code>" + model.nikaName + "</code>\n" +
-            "\n💰️ USDT：" + model.usdt +
-            "\n💰️ TRX：" + model.trx +
-            "\n💵 彩u：" + model.cusdt +
-            "\n💵 彩t：" + model.ctrx + "\n" +
+        return vipHtml + "\n🆔 账户ID：" + tgId +
+            "\n👼 用户昵称：<code>" + model.nickName + "</code>\n" +
+            "\n💰️ USDT：" + model.USDT +
+            "\n💰️ TRX：" + model.TRX +
+            "\n💵 彩u：" + model.CUSDT +
+            "\n💵 彩t：" + model.CTRX + "\n" +
             add +
             "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
             "\uD83C\uDFAE 游戏官方频道:@OnePalace " +

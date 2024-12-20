@@ -23,12 +23,12 @@ class BettingController {
     private DD = ['大单', 'dd']
 
     // 大双
-    private DS = ['大双', 'ds']
+    //private DS = ['大双', 'ds']
 
     private bigMap = {
         name: '大',
         alias: 'D',
-        list:
+        list: []
     }
 
     /**
