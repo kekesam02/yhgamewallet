@@ -75,7 +75,7 @@ class GameMessageHandle {
 
             // 下面是下注相关 =================
             default:
-                if (text.indexOf('/') < 0) {
+                if (text && text.length > 0 && text.indexOf('/') < 0) {
                     new BettingController(text)
                 }
                 console.log('未能识别消息')

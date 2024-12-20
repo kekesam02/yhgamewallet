@@ -57,10 +57,9 @@ class BotOddsModel extends BaseEntity {
     maxMoney: number
 
     /**
-     * 根据游戏类型获取赔率表列表数据
+     * 项目启动时从数据库加载赔率表关键字
      */
     public getOddsList = (gameTypeList: Array<GameTypeEnum>) => {
-        console.log('什么东西', gameTypeList)
         return BotOddsModel
             .createQueryBuilder()
             .whereGameType(gameTypeList)

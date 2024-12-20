@@ -10,8 +10,33 @@ class BettingController {
 
     constructor(text: string) {
         this.text = text
+        this.listenerBettingCommand()
     }
 
+    // 小单
+    private DS = ['小单', 'xd']
+
+    // 小双
+    private XS = ['小双', 'xs']
+
+    // 大单
+    private DD = ['大单', 'dd']
+
+    // 大双
+    private DS = ['大双', 'ds']
+
+    private bigMap = {
+        name: '大',
+        alias: 'D',
+        list:
+    }
+
+    /**
+     * 监听下注指令
+     */
+    private listenerBettingCommand = () => {
+
+    }
 
 }
 
