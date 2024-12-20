@@ -1,4 +1,5 @@
 import AESUtils from '../../commons/AESUtils'
+import {WalletUserModel} from "../model/WalletUserModel";
 
 /**
  * 游戏机器人返回的html字段
@@ -11,7 +12,7 @@ class WalletBotHtml {
     /**
      * 生成开始游戏的html字符串
      */
-    getBotStartHtml = (model:any): string => {
+    getBotStartHtml = (model:WalletUserModel): string => {
         var vipHtml = "";
         if (model.vip && model.vip < 10) {
             vipHtml = "💎尊贵的VIP" + model.vip + "💎\n";

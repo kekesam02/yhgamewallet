@@ -4,6 +4,7 @@ import WalletBotHtml from '../html/WalletBotHtml'
 import StartWalletEnum from "../enums/StartWalletEnum";
 import WalletCommand from "../const/WalletCommand";
 import ContextUtil from "../../commons/ContextUtil";
+import {WalletUserModel} from "../model/WalletUserModel";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -34,17 +35,18 @@ class WalletMessageHandle {
      * /start指令的提示
      */
     public startCommand = async (ctx: Context) => {
-        // 发送带有分享按钮的消息
-        var html = new WalletBotHtml().getBotStartHtml({
+        const  cmodel: WalletUserModel = {
             vip: 1,
             tgId: "545454",
             nikaName: "feige",
-            usdt: 1,
-            trx: 1,
-            cusdt: 1,
-            ctrx: 1,
+            usdt: "1",
+            trx: "1",
+            cusdt: "1",
+            ctrx: "1",
             addr: "http://www.xxx.com"
-        })
+        }
+        // 发送带有分享按钮的消息
+        var html = new WalletBotHtml().getBotStartHtml(cmodel)
         try {
             await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn([
                 [
