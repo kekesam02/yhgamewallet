@@ -12,6 +12,7 @@ import {Pc28LotteryJsonType} from "../../gameTypes/LooteryJsonType";
 import OddsController from "./OddsController";
 import ImageUtils from "../../commons/Image/ImageUtils";
 import GameController from "./GameController";
+import MessageUtils from "../../commons/message/MessageUtils";
 
 const schedule = require('node-schedule')
 
@@ -124,24 +125,8 @@ class PC28Controller {
         // console.log('发送的内容', new GameBotHtml().getStartGameHtml(json, item.gameType, oddsMap))
         // 遍历群组列表、并发送游戏信息到群组
         result.forEach((item) => {
-            console.log('发送的用户id--->', item.botUserId, item.id)
-            console.log('发送的群组id--->', item.groupId)
-            bot.telegram.sendPhoto(
-                item.groupId,
-                {
-                    source: startImage,
-                    filename: '1.png'
-                },
-                {
-                    caption: new GameBotHtml().getStartGameHtml(json, item.gameType, oddsMap),
-                    parse_mode: 'HTML',
-                    reply_markup: replyMarkup
-                }
-            ).then(val => {
-                console.log('发送消息结果2', val)
-            }).catch(err => {
-                console.log('发送消息失败', err)
-            })
+            let html = new GameBotHtml().getStartGameHtml(json, item.gameType, oddsMap)
+            new MessageUtils().sendPhotoHtmlBtn(bot, item.groupId, html, replyMarkup, startImage)
         })
     }
 

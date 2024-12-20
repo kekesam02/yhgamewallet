@@ -1,14 +1,30 @@
-import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {
+    BaseEntity, Between,
+    Column,
+    Entity,
+    JoinColumn,
+    JoinTable,
+    ManyToMany,
+    OneToMany, OneToOne,
+    PrimaryGeneratedColumn
+} from "typeorm";
 import WalletType from "../typeEnums/WalletType";
 import ContextUtil from "../commons/ContextUtil";
 import {Context} from "telegraf";
+import BotOddsModel from "./BotOddsModel";
+import BotGameModel from "./BotGameModel";
+import BotRoundModel from "./BotRoundModel";
+import moment from "moment";
+import GameTypeEnum from "../typeEnums/gameEnums/GameTypeEnum";
+import ExpandGameWhere from "../commons/expand/ExpandGameWhere";
+
 
 
 /**
  * 上押表
  */
 @Entity({
-    name: 'bot_pledge_up'
+    name: 'bot_pledge_up',
 })
 class BotPledgeUpModel extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -149,19 +165,90 @@ class BotPledgeUpModel extends BaseEntity {
     del: number
 
     /**
+     * 创建时间
+     */
+    @Column({
+        name: 'create_time'
+    })
+    createTime: string
+
+    /**
+     * 更新时间
+     */
+    @Column({
+        name: 'update_time'
+    })
+    updateTime: string
+
+    // 数据库外键有问题
+    // @OneToOne(
+    //     () => BotRoundModel,
+    //     roundModel => roundModel.id
+    // )
+    // @JoinColumn()
+    roundModel?: BotRoundModel
+
+    /**
      * 查询上注记录
      * @param: 查询条数
      */
-    public getHistory = (ctx: Context, total: number,) => {
-        return BotPledgeUpModel
+    public getHistory = (
+        ctx: Context,
+        total: number,
+        gameTypeList: Array<GameTypeEnum> = new ExpandGameWhere().getAllGameType
+    ) => {
+        let result = BotPledgeUpModel
             .createQueryBuilder()
             .where('user_id = :userId', {
                 userId: ContextUtil.getUserId(ctx)
             })
+            .whereGameType(gameTypeList)
             .take(total)
             .orderBy('create_time', 'DESC')
             .getMany()
+        return result
     }
+
+    /**
+     * 查询上注记录携带游戏期数数据
+     */
+    // public getRoundHistory = async (
+    //     ctx: Context,
+    //     groupModel: BotGameModel,
+    //     total: number
+    // ) => {
+    //     console.log('开始查询游戏数据')
+    //     try {
+    //         let query = BotPledgeUpModel
+    //             .createQueryBuilder('bot_pledge_up')
+    //             // .leftJoinAndSelect(
+    //             //     'bot_pledge_up.roundModel',
+    //             //     'roundModel'
+    //             // )
+    //             .where('user_id = :userId', {
+    //                 // userId: ContextUtil.getUserId(ctx)
+    //                 userId: 'c0Vzdi99QV9jtqfQ1cmzzw=='
+    //             })
+    //             .take(total)
+    //             .orderBy('bot_pledge_up.create_time', 'DESC')
+    //         let result = await query.getMany()
+    //         let startTime = moment(result[result.length - 1].createTime).subtract('1', 'days')
+    //         let oddsList = await new BotRoundModel().getRoundList(startTime, moment().format('YYYY-MM-DD hh:mm:ss'))
+    //         console.log('开奖数据')
+    //         result.forEach(item => {
+    //             let odds = oddsList.find(item2 => {
+    //                 return item.roundId == item2.id
+    //             })
+    //             if (odds) {
+    //                 item.roundModel = odds
+    //             }
+    //         })
+    //         return result
+    //     } catch (err) {
+    //         console.log('报错了', err)
+    //         return []
+    //     }
+    // }
 }
 
 

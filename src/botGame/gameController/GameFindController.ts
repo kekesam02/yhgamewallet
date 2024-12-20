@@ -40,7 +40,7 @@ class GameFindController {
         }
         let html = new GameUserHtml().getUserBalanceHtml(user!)
         console.log('返回的用户html--->', html)
-        await new MessageUtils(this.ctx).sendPopMessage(html)
+        await new MessageUtils().sendPopMessage(this.ctx, html)
     }
 
     /**
@@ -50,7 +50,7 @@ class GameFindController {
         let list = await new BotPledgeUpModel().getHistory(this.ctx, 5)
         let html = new GameUserHtml().getPledgeHtml(list)
         console.log(html)
-        await new MessageUtils(this.ctx).sendPopMessage(html)
+        await new MessageUtils().sendPopMessage(this.ctx, html)
     }
 
     /**
@@ -72,7 +72,7 @@ class GameFindController {
                 totalWater: totalWater.getValue()
             }
         )
-        await new MessageUtils(this.ctx).sendPopMessage(html)
+        await new MessageUtils().sendPopMessage(this.ctx, html)
     }
 
     /**
@@ -94,7 +94,7 @@ class GameFindController {
                 totalWater: totalWater.getValue()
             }
         )
-        await new MessageUtils(this.ctx).sendPopMessage(html)
+        await new MessageUtils().sendPopMessage(this.ctx, html)
     }
 }
 

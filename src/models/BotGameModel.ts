@@ -75,6 +75,19 @@ class BotGameModel extends BaseEntity{
     sType: number
 
     /**
+     * 获取当前游戏群组
+     */
+    public getCurrGroup = async (ctx: Context) => {
+        let groupId = ContextUtil.getGroupId(ctx)
+        let groupModel = await BotGameModel.createQueryBuilder()
+            .where('group_id = :groupId', {
+                groupId: groupId
+            })
+            .getOne()
+        return groupModel
+    }
+
+    /**
      * 创建新的游戏记录
      */
     public createNewGame = (ctx: Context): Promise<BotGameModel> => {

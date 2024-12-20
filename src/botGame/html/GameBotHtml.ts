@@ -1,9 +1,8 @@
 import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
 import GameEnumsClass from "../../typeEnums/gameEnums/GameEnumsClass";
 import StartGameEnum from "../../typeEnums/gameEnums/StartGameEnum";
-import {Pc28LotteryJsonType} from "../../gameTypes/LooteryJsonType";
+import { Pc28LotteryJsonType } from "../../gameTypes/LooteryJsonType";
 import moment from 'moment'
-import OddsController from "../gameController/OddsController";
 import BotOddsModel from "../../models/BotOddsModel";
 
 /**

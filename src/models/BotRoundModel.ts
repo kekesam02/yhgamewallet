@@ -1,5 +1,6 @@
-import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {BaseEntity, Between, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import GameTypeEnum from "../typeEnums/gameEnums/GameTypeEnum";
+import moment from "moment";
 
 
 @Entity({
@@ -92,6 +93,39 @@ class BotRoundModel extends BaseEntity{
         name: 'num_three'
     })
     numThree: number
+
+    /**
+     * 创建时间
+     */
+    @Column({
+        name: 'create_time'
+    })
+    createTime: string
+
+    /**
+     * 更新时间
+     */
+    @Column({
+        name: 'update_time'
+    })
+    updateTime: string
+
+    /**
+     * 获取开奖回合数据
+     */
+    public getRoundList = (
+        startTime: string,
+        endTime: string
+    ) => {
+        let start = moment(startTime)
+        let end = moment(endTime)
+        return BotRoundModel.createQueryBuilder()
+            .where(Between(
+                start.format('YYYY-MM-DD hh:mm:ss'),
+                end.format('YYYY-MM-DD hh:mm:ss')
+            ))
+            .getMany()
+    }
 }
 
 

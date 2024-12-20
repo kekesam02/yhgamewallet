@@ -26,7 +26,7 @@ class ImageUtils {
      * 读取本地图片、并返回 buffer
      * @param url: 图片地址
      */
-    public readImageFile = async (url: string) => {
+    public readImageFile = async (url: string): Promise<Buffer> => {
         const imagePath = path.join(__dirname, url)
         try {
             let result = await fs.readFileSync(imagePath)

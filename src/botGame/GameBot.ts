@@ -22,40 +22,31 @@ bot.command('quit', async (ctx) => {
     await ctx.leaveChat()
 })
 
-bot.on(message('text'), async (ctx) => {
-    console.log(ctx.update)
-    // 创建内联键盘按钮
-    const shareButton = {
-        reply_markup: {
-            inline_keyboard: [
-                [
-                    // 方式1: 分享机器人按钮
-                    //   { text: '分享机器人', url: https://t.me/${ctx.botInfo.username} },
-                    // 方式2: 分享当前消息按钮
-                    {
-                        text: '选择转账对象',
-                        switch_inline_query: ctx.message.text
-                    }
-                ]
-            ]
-        }
-    }
-    // 发送带有分享按钮的消息
-    await ctx.reply('点击进行转账:', shareButton)
+
+/**
+ * 监听用户发送过来的消息
+ */
+bot.on(
+    message('text'),
+async (ctx: Context) => {
+    let messageHandle = new GameMessageHandle();
+    messageHandle.listenerMessage(ctx)
 })
 
+/**
+ * 监听用户点击按钮回调
+ */
 bot.on('callback_query', async (ctx) => {
-    // Explicit usage
-    await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
-    // Using context shortcut
-    await ctx.answerCbQuery()
+    GameCallbackHandle.listenerMessage(ctx)
 })
 
 bot.on('inline_query', async (ctx) => {
     console.log('内连按钮回调--------------', ctx)
     try {
         const query = ctx.inlineQuery.query
+
         if(!query) return
+
         // 创建一个可分享的结果
         const result = [{
             type: 'article',
@@ -110,7 +101,6 @@ const startJob = () => {
     //     ScheduleHandle.startPC28(bot)
     // }, 1000)
 }
-
 startJob()
 
 

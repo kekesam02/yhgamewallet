@@ -1,9 +1,13 @@
-import {Context, Telegraf,Markup} from 'telegraf'
+import {Context, Telegraf} from 'telegraf'
 import { message } from 'telegraf/filters'
 import process from 'node:process'
 // https://blog.revincx.icu/posts/telegraf-guide/index.html
 const bot = new Telegraf("7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk")
 // 监听 /quit的命令
+import {getConfig} from "../config/config";
+
+// 设置token
+const bot = new Telegraf(getConfig().botConfig.WalletToken)
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)

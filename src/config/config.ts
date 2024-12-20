@@ -17,7 +17,10 @@ interface Config {
   };
   // 机器人相关的token配置
   botConfig: {
-    GameBotToken: string
+    // 娱乐机器人token
+    GameBotToken: string,
+    // 钱包token
+    WalletToken: string
   }
   jwt_secret: string;
   cors: CorsConfig;
