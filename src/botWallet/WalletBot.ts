@@ -1,12 +1,9 @@
-import {Context, Telegraf} from 'telegraf'
+import {Context, Telegraf,Markup} from 'telegraf'
 import { message } from 'telegraf/filters'
 import process from 'node:process'
-import GameBotHtml from "./html/GameBotHtml";
-import ButtonUtils from "../commons/button/ButtonUtils";
-import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
-
+// https://blog.revincx.icu/posts/telegraf-guide/index.html
 const bot = new Telegraf("7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk")
-
+// 监听 /quit的命令
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)
@@ -14,24 +11,76 @@ bot.command('quit', async (ctx) => {
     await ctx.leaveChat()
 })
 
-bot.command('oldschool', (ctx) => ctx.reply('Hello'))
-
-bot.action('hello', (ctx, next) => {
-    return ctx.reply('👍').then(() => next())
+bot.command('caption', (ctx) => {
+    return ctx.replyWithPhoto({ url: 'https://picsum.photos/200/300/?random' },
+        {
+            caption: 'Caption',
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                Markup.button.callback('Plain', 'plain'),
+                Markup.button.callback('Italic', 'italic')
+            ])
+        }
+    )
 })
 
+bot.command('start', (ctx) => {
+    return ctx.replyWithHTML("<h1>哈哈</h1>",
+        {
+            caption: 'Caption',
+            parse_mode: 'Markdown',
+            ...Markup.inlineKeyboard([
+                Markup.button.callback('Plain', 'plain'),
+                Markup.button.callback('Italic', 'italic')
+            ])
+        }
+    )
+})
+
+bot.action('plain', async (ctx) => {
+    console.log("plain=================>",ctx)
+    await ctx.answerCbQuery()
+    await ctx.editMessageCaption('Caption', Markup.inlineKeyboard([
+        Markup.button.callback('Plain', 'plain'),
+        Markup.button.callback('Italic', 'italic')
+    ]))
+})
+
+bot.action('italic', async (ctx) => {
+    console.log("italic=================>",ctx)
+    await ctx.answerCbQuery()
+    await ctx.editMessageCaption('_Caption_', {
+        parse_mode: 'Markdown',
+        ...Markup.inlineKeyboard([
+            Markup.button.callback('Plain', 'plain'),
+            Markup.button.callback('* Italic *', 'italic')
+        ])
+    })
+})
+
+// 监听 /oldschool的命令
+bot.command('oldschool', (ctx) => {
+    ctx.reply('Hello ' + ctx.message.chat.id)
+})
+
+
 bot.on(message('text'), async (ctx) => {
-    console.log("=============>",ctx.update)
+    console.log("text=============>",ctx.update)
     // 创建内联键盘按钮
     const shareButton = {
         reply_markup: {
             inline_keyboard: [
                 [
                     // 方式1: 分享机器人按钮
-                    //   { text: '分享机器人', url: https://t.me/${ctx.botInfo.username} },
+                    {
+                        text: '分享机器人',
+                        url: `https://t.me/${ctx.botInfo.username}`,
+                        callback_data: JSON.stringify({ command: 'delete'}),
+                    },
                     // 方式2: 分享当前消息按钮
                     {
                         text: '选择转账对象',
+                        callback_data: JSON.stringify({ command: 'delete'}),
                         switch_inline_query: ctx.message.text
                     }
                 ]
@@ -44,14 +93,26 @@ bot.on(message('text'), async (ctx) => {
     await ctx.reply('点击进行转账:', shareButton)
 })
 
+
 bot.on('callback_query', async (ctx) => {
-    // Explicit usage
-    await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
-    // Using context shortcut
-    await ctx.answerCbQuery()
+    console.log("================>callback_query")
+    const message = ctx.callbackQuery.message;
+    const data = JSON.parse(ctx.callbackQuery.data);
+    const chatId = ctx.message.chat.id;
+
+    if (data.command === 'delete') {
+        const deleted = todos[chatId].splice(data.index, 1);
+        bot.answerCallbackQuery(callbackQuery.id, { text: 'Deleted "' + deleted[0] + '" from your to-do list.' });
+    }else {
+        // Explicit usage
+        await ctx.telegram.answerCbQuery(ctx.callbackQuery.id)
+        // Using context shortcut
+        await ctx.answerCbQuery()
+    }
 })
 
 bot.on('inline_query', async (ctx) => {
+    console.log("================>inline_query")
     try {
         const query = ctx.inlineQuery.query
         if(!query) return
@@ -101,8 +162,5 @@ bot.launch()
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'))
 process.once('SIGTERM', () => bot.stop('SIGTERM'))
-
-
-
 
 export default  bot
