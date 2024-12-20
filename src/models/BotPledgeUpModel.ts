@@ -8,14 +8,14 @@ import {
     OneToMany, OneToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
-import WalletType from "../typeEnums/WalletType";
+import WalletType from "../type/WalletType";
 import ContextUtil from "../commons/ContextUtil";
 import {Context} from "telegraf";
 import BotOddsModel from "./BotOddsModel";
 import BotGameModel from "./BotGameModel";
 import BotRoundModel from "./BotRoundModel";
 import moment from "moment";
-import GameTypeEnum from "../typeEnums/gameEnums/GameTypeEnum";
+import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
 import ExpandGameWhere from "../commons/expand/ExpandGameWhere";
 
 

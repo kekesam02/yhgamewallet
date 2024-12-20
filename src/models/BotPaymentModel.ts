@@ -1,13 +1,13 @@
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
-import WalletType from "../typeEnums/WalletType";
-import GameTypeEnum from "../typeEnums/gameEnums/GameTypeEnum";
+import WalletType from "../type/WalletType";
+import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
 import {Context} from "telegraf";
 import ContextUtil from "../commons/ContextUtil";
 import BotGameModel from "./BotGameModel";
 import BotExchangeModel from "./BotExchangeModel";
 import ComputeUtils from "../commons/ComputeUtils";
 import TimeUtils from "../commons/TimeUtils";
-import PaymentType from "../typeEnums/PaymentType";
+import PaymentType from "../type/PaymentType";
 
 /**
  * 用户流水表

@@ -1,6 +1,4 @@
 import {Express, Request, Response, Router} from "express";
-import logger from "../../logger";
-import UserService from "../../services/UserService";
 
 interface RouterConf {
   path: string;
@@ -27,13 +25,8 @@ function initRoutes(app: Express) {
     // logger.warn("This is a warning message")
     // logger.error("This is an error message")
     try {
-      console.log('什么啊')
-      let userService = new UserService()
-      let result = await userService.getUserList()
-      console.log('这是用户id', result[0])
-      res.send(result)
+      res.send('')
     } catch (err) {
-      console.log('什么啊', err)
       next(err)
     }
   })

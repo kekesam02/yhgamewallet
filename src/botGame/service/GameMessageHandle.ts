@@ -1,10 +1,11 @@
 import type {Context} from "telegraf";
-import ButtonUtils from './../commons/button/ButtonUtils'
-import GameBotHtml from './html/GameBotHtml'
-import StartGameEnum from "../typeEnums/gameEnums/StartGameEnum";
-import PC28Controller from "./gameController/PC28Controller";
-import GameCommand from "./gameController/GameCommand";
-import ContextUtil from "../commons/ContextUtil";
+import ButtonUtils from '../../commons/button/ButtonUtils'
+import GameBotHtml from '../../html/gameHtml/GameBotHtml'
+import StartGameEnum from "../../type/gameEnums/StartGameEnum";
+import PC28Controller from "../gameController/PC28Controller";
+import CommandController from "../gameController/CommandController";
+import ContextUtil from "../../commons/ContextUtil";
+import BettingController from "../gameController/BettingController";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -31,47 +32,52 @@ class GameMessageHandle {
 
 
             // 下面是指令相关的消息------------
-            case GameCommand.command.includes(text):
+            case CommandController.command.includes(text):
                 // 查询所有指令
                 console.log('查询到的指令信息--')
-                await new GameCommand().createCommand(ctx)
+                await new CommandController().createCommand(ctx)
                 break
-            case GameCommand.noteOrder.includes(text):
+            case CommandController.noteOrder.includes(text):
                 // 查询注单信息
                 console.log('查询注单信息')
-                await new GameCommand().createNoteOrder(ctx)
+                await new CommandController().createNoteOrder(ctx)
                 break
-            case GameCommand.openWinner.includes(text):
+            case CommandController.openWinner.includes(text):
                 // 查询开奖数据
                 console.log('查询开奖信息')
-                await new GameCommand().createOpenWinner(ctx)
+                await new CommandController().createOpenWinner(ctx)
                 break
-            case GameCommand.balance.includes(text):
+            case CommandController.balance.includes(text):
                 // 查询开奖数据
                 console.log('查询开奖信息')
-                await new GameCommand().createUserBalance(ctx)
+                await new CommandController().createUserBalance(ctx)
                 break
-            case GameCommand.defect.includes(text):
+            case CommandController.defect.includes(text):
                 // 反水
                 console.log('进行反水')
-                await new GameCommand().createUserBalance(ctx)
+                await new CommandController().createUserBalance(ctx)
                 break
-            case GameCommand.cancel.includes(text):
+            case CommandController.cancel.includes(text):
                 // 取消上注
                 console.log('取消上注')
-                await new GameCommand().cancelBet(ctx)
+                await new CommandController().cancelBet(ctx)
                 break
-            case GameCommand.water.includes(text):
+            case CommandController.water.includes(text):
                 // 流水
                 console.log('查看流水')
-                await new GameCommand().water(ctx)
+                await new CommandController().water(ctx)
                 break
-            case GameCommand.profitLoss.includes(text):
+            case CommandController.profitLoss.includes(text):
                 // 盈亏
                 console.log('查看盈亏')
-                await new GameCommand().profitLoss(ctx)
+                await new CommandController().profitLoss(ctx)
                 break
+
+            // 下面是下注相关 =================
             default:
+                if (text && text.length > 0 && text.indexOf('/') < 0) {
+                    new BettingController(text)
+                }
                 console.log('未能识别消息')
         }
     }

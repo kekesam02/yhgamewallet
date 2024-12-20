@@ -1,5 +1,5 @@
 import BotOddsModel from "../../models/BotOddsModel";
-import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 
 
 

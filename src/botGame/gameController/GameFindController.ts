@@ -1,15 +1,15 @@
 import {Context} from "telegraf";
 import UserModel from "../../models/UserModel";
-import GameUserHtml from "../html/GameUserHtml";
+import GameUserHtml from "../../html/gameHtml/GameUserHtml";
 import MessageUtils from "../../commons/message/MessageUtils";
 import AESUtils from "../../commons/AESUtils";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import BotPaymentModel from "../../models/BotPaymentModel";
-import WalletType from "../../typeEnums/WalletType";
+import WalletType from "../../type/WalletType";
 import BotExchangeModel from "../../models/BotExchangeModel";
 import htmlUtils from "../../commons/HtmlUtils";
 import GameController from "./GameController";
-import GameEnumsClass from "../../typeEnums/gameEnums/GameEnumsClass";
+import GameEnumsIndex from "../../type/gameEnums/GameEnumsIndex";
 import ContextUtil from "../../commons/ContextUtil";
 
 
@@ -54,30 +54,39 @@ class GameFindController {
 
     /**
      * 查询用户流水
+     * @param isPop: 是否弹窗显示
+     *      true: 弹窗显示
+     *      false: 正常返回可copy文字
      */
-    public getUserFlowingWater = async () => {
+    public getUserFlowingWater = async (isPop: boolean = true) => {
+        console.log('开始查询')
         let {
             gameType,
             dayWater,
             weekWater,
             totalWater
         } = await new BotPaymentModel().getUserWaterClass(this.ctx)
+        console.log('查询到的数据')
         let html = new GameUserHtml().getUserPaymentHtml(
             this.ctx,
             {
-                gameType: new GameEnumsClass().getGameTypeStr(gameType),
+                gameType: new GameEnumsIndex().getGameTypeStr(gameType),
                 dayWater: dayWater.getValue(),
                 weekWater: weekWater.getValue(),
                 totalWater: totalWater.getValue()
-            }
+            },
+            !isPop
         )
-        await new MessageUtils().sendPopMessage(this.ctx, html)
+        if (isPop) {
+            return await new MessageUtils().sendPopMessage(this.ctx, html)
+        }
+        return await new MessageUtils().sendTextReply(this.ctx, html)
     }
 
     /**
      * 查询用户盈亏
      */
-    public getUserProfitLoss = async () => {
+    public getUserProfitLoss = async (isPop: boolean = true) => {
         let {
             gameType,
             dayWater,
@@ -87,13 +96,17 @@ class GameFindController {
         let html = new GameUserHtml().getUserProfitLossHtml(
             this.ctx,
             {
-                gameType: new GameEnumsClass().getGameTypeStr(gameType),
+                gameType: new GameEnumsIndex().getGameTypeStr(gameType),
                 dayWater: dayWater.getValue(),
                 weekWater: weekWater.getValue(),
                 totalWater: totalWater.getValue()
-            }
+            },
+            !isPop
         )
-        await new MessageUtils().sendPopMessage(this.ctx, html)
+        if (isPop) {
+            return await new MessageUtils().sendPopMessage(this.ctx, html)
+        }
+        return await new MessageUtils().sendTextReply(this.ctx, html)
     }
 }
 

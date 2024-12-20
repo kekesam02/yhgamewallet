@@ -5,7 +5,7 @@ import StartGameEnum from "./StartGameEnum";
 /**
  * 用来获取游戏枚举的描述文字
  */
-class GameEnumsClass {
+class GameEnumsIndex {
 
     /**
      * 获取当前开始游戏的类型
@@ -50,4 +50,4 @@ class GameEnumsClass {
 
 
 
-export default GameEnumsClass
+export default GameEnumsIndex

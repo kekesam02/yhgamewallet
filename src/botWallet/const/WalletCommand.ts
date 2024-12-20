@@ -1,9 +1,10 @@
-/**
- * 游戏常用指令类
- */
-import WalletBotHtml from "../html/WalletBotHtml";
+
+import WalletBotHtml from "../../html/walletHtml/WalletBotHtml";
 import {Context} from "telegraf";
 
+/**
+ * 钱包机器人常用指令类
+ */
 class WalletCommand {
 
     /**

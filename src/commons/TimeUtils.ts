@@ -10,8 +10,6 @@ class TimeUtils {
     public getIsDay = (time: string) => {
         let curr = moment(time)
         let { startTime, endTime } = this.getDayTime()
-        console.log('传入时间', time, '开始时间', startTime, '结束时间', endTime)
-        console.log('结果----->', curr.isAfter(startTime) && curr.isBefore(endTime))
         return curr.isAfter(startTime) && curr.isBefore(endTime);
     }
 

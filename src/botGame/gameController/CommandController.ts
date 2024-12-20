@@ -1,21 +1,21 @@
-/**
- * 游戏常用指令类
- */
-import GameCommandHtml from "../html/GameCommandHtml";
+import GameCommandHtml from "../../html/gameHtml/GameCommandHtml";
 import {Context} from "telegraf";
 import BotGameModel from "../../models/BotGameModel";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import MessageUtils from "../../commons/message/MessageUtils";
-import GameTypeEnum from "../../typeEnums/gameEnums/GameTypeEnum";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import PC28Controller from "./PC28Controller";
 import UserModel from "../../models/UserModel";
 import AESUtils from "../../commons/AESUtils";
-import GameUserHtml from "../html/GameUserHtml";
+import GameUserHtml from "../../html/gameHtml/GameUserHtml";
 import BotOddsModel from "../../models/BotOddsModel";
 import GameFindController from "./GameFindController";
 
 
-class GameCommand {
+/**
+ * 娱乐机器人指令控制器(游戏机器人常用指令)
+ */
+class CommandController {
 
     /**
      * 指令命令
@@ -101,7 +101,7 @@ class GameCommand {
      */
     public createUserBalance = async (ctx: Context) => {
         let user = await new UserModel().getUserBalance(ctx)
-        let html = new GameUserHtml().getUserBalanceHtml(user!)
+        let html = new GameUserHtml().getUserBalanceHtml(user!, true)
         return  new MessageUtils().sendTextReply(ctx, html)
     }
 
@@ -122,7 +122,7 @@ class GameCommand {
     }
 
     /**
-     * 取消上注
+     * 取消上注(暂时不实现了、等上注入完成后弄)
      * @param ctx
      */
     public cancelBet = async (ctx: Context) => {
@@ -134,7 +134,8 @@ class GameCommand {
      * @param ctx
      */
     public water = async (ctx: Context) => {
-        return new GameFindController(ctx).getUserFlowingWater()
+        console.log('查看用户流水')
+        return new GameFindController(ctx).getUserFlowingWater(false)
     }
 
     /**
@@ -142,10 +143,11 @@ class GameCommand {
      * @param ctx
      */
     public profitLoss = async (ctx: Context) => {
-        console.log('取消上注')
+        console.log('查看用户盈亏')
+        return  new GameFindController(ctx).getUserProfitLoss(false)
     }
 
 }
 
 
-export default GameCommand
+export default CommandController
