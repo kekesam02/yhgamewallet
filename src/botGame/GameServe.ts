@@ -3,7 +3,7 @@ import process from "node:process";
 /**
  * 娱乐机器人
  */
-require('./GameBot')
+require('./service/GameBot')
 import express from "express";
 import { getConfig } from "../config/config";
 import errorHandler from "../middlewares/errorHandler";

@@ -1,10 +1,11 @@
 import type {Context} from "telegraf";
-import ButtonUtils from './../commons/button/ButtonUtils'
-import GameBotHtml from '../html/gameHtml/GameBotHtml'
-import StartGameEnum from "../type/gameEnums/StartGameEnum";
-import PC28Controller from "./gameController/PC28Controller";
-import CommandController from "./gameController/CommandController";
-import ContextUtil from "../commons/ContextUtil";
+import ButtonUtils from '../../commons/button/ButtonUtils'
+import GameBotHtml from '../../html/gameHtml/GameBotHtml'
+import StartGameEnum from "../../type/gameEnums/StartGameEnum";
+import PC28Controller from "../gameController/PC28Controller";
+import CommandController from "../gameController/CommandController";
+import ContextUtil from "../../commons/ContextUtil";
+import BettingController from "../gameController/BettingController";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -73,8 +74,10 @@ class GameMessageHandle {
                 break
 
             // 下面是下注相关 =================
-
             default:
+                if (text.indexOf('/') < 0) {
+                    new BettingController(text)
+                }
                 console.log('未能识别消息')
         }
     }
