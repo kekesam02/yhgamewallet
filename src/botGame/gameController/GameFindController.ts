@@ -1,6 +1,6 @@
 import {Context} from "telegraf";
 import UserModel from "../../models/UserModel";
-import GameUserHtml from "../../html/gameHtml/GameUserHtml";
+import GameUserHtml from "../../html/userHtml/GameUserHtml";
 import MessageUtils from "../../commons/message/MessageUtils";
 import AESUtils from "../../commons/AESUtils";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
