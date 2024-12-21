@@ -59,7 +59,7 @@ class WalletMessageHandle {
         let userId = AESUtils.encodeUserId(tgId?.toString())
         // 根据tgId查询用户是否存在。
         let user = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
-        // 如果不存在就添加
+        // 1：如果不存在就添加
         if (!user) {
             // 如果用户不存在就添加用户
             var insertResultPromise = await UserModel.createQueryBuilder().insert().into(UserModel).values({
@@ -73,16 +73,19 @@ class WalletMessageHandle {
             // 查询覆盖原来的值
             user = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
         }
-        // 实时同步更新用户的昵称
+
+        // 2：实时同步更新用户的昵称
         if (firstName && user && user.nickName != firstName) {
             // 如果用户不存在就添加用户
             await UserModel.createQueryBuilder().update(UserModel).set({
                 nickName: firstName
             }).where('id = :id', {id: user.id}).execute();
         }
-        // 发送带有分享按钮的消息
+
+        // 3：发送带有分享按钮的消息
         var html = new WalletBotHtml().getBotStartHtml(tgId, user!)
         try {
+            // 4: 机器人回复，显示信息和按钮相关
             await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn([
                 [
                     {
