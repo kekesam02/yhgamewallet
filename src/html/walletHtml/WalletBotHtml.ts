@@ -1,5 +1,6 @@
 import AESUtils from '../../commons/AESUtils'
 import UserModel from "../../models/UserModel";
+import WalletUserModel from "../../models/WalletUserModel";
 
 /**
  * 游戏机器人返回的html字段

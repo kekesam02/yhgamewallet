@@ -76,9 +76,8 @@ class GameMessageHandle {
             // 下面是下注相关 =================
             default:
                 if (text && text.length > 0 && text.indexOf('/') < 0) {
-                    new BettingController(text)
+                    await new BettingController(ctx, text).listenerBettingCommand()
                 }
-                console.log('未能识别消息')
         }
     }
 

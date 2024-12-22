@@ -2,29 +2,10 @@ import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import {SelectQueryBuilder} from "typeorm/query-builder/SelectQueryBuilder";
 import PaymentType from "../../type/PaymentType";
 
-/**
- * 扩展支付相关 where 条件查询
- */
-class ExpandPaymentWhere {
 
-    /**
-     * 获取所有的游戏类型
-     */
-    public getAllGameType = [
-        GameTypeEnum.TOUZI ,
-        GameTypeEnum.PC28DI ,
-        GameTypeEnum.PC28GAO ,
-        GameTypeEnum.TOUZIFS ,
-        GameTypeEnum.PC28DIFS ,
-        GameTypeEnum.PC28GAOFS ,
-        GameTypeEnum.TOUZIJS ,
-        GameTypeEnum.PCDWQ ,
-        GameTypeEnum.PCDWQFS
-    ]
-}
 
 /**
- * 扩展游戏类型查询sql
+ * 扩展支付类型查询sql
  */
 SelectQueryBuilder.prototype.wherePaymentType = function(paymentTypeList: Array<PaymentType>) {
     if (!paymentTypeList || paymentTypeList.length < 1) {
@@ -44,7 +25,3 @@ SelectQueryBuilder.prototype.wherePaymentType = function(paymentTypeList: Array<
     this.andWhere(paymentTypeStr, paymentTypeParams)
     return this
 }
-
-
-
-export default ExpandPaymentWhere

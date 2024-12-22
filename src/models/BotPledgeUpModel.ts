@@ -1,22 +1,15 @@
 import {
-    BaseEntity, Between,
+    BaseEntity,
     Column,
     Entity,
-    JoinColumn,
-    JoinTable,
-    ManyToMany,
-    OneToMany, OneToOne,
     PrimaryGeneratedColumn
 } from "typeorm";
 import WalletType from "../type/WalletType";
 import ContextUtil from "../commons/ContextUtil";
 import {Context} from "telegraf";
-import BotOddsModel from "./BotOddsModel";
-import BotGameModel from "./BotGameModel";
 import BotRoundModel from "./BotRoundModel";
-import moment from "moment";
 import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
-import ExpandGameWhere from "../commons/expand/ExpandGameWhere";
+import GameEnumsIndex from "../type/gameEnums/GameEnumsIndex";
 
 
 
@@ -195,7 +188,7 @@ class BotPledgeUpModel extends BaseEntity {
     public getHistory = (
         ctx: Context,
         total: number,
-        gameTypeList: Array<GameTypeEnum> = new ExpandGameWhere().getAllGameType
+        gameTypeList: Array<GameTypeEnum> = new GameEnumsIndex().getGameTypeAll()
     ) => {
         let result = BotPledgeUpModel
             .createQueryBuilder()

@@ -8,6 +8,23 @@ import StartGameEnum from "./StartGameEnum";
 class GameEnumsIndex {
 
     /**
+     * 获取所有的游戏类型
+     */
+    public getGameTypeAll = () => {
+        return [
+            GameTypeEnum.TOUZI ,
+            GameTypeEnum.PC28DI ,
+            GameTypeEnum.PC28GAO ,
+            GameTypeEnum.TOUZIFS ,
+            GameTypeEnum.PC28DIFS ,
+            GameTypeEnum.PC28GAOFS ,
+            GameTypeEnum.TOUZIJS ,
+            GameTypeEnum.PCDWQ ,
+            GameTypeEnum.PCDWQFS
+        ]
+    }
+
+    /**
      * 获取当前开始游戏的类型
      */
     public getStartGameStr = (type: StartGameEnum) => {
