@@ -100,7 +100,7 @@ class CommandController {
      * @param ctx
      */
     public createUserBalance = async (ctx: Context) => {
-        let user = await new UserModel().getUserBalance(ctx)
+        let user = await new UserModel().getUserModel(ctx)
         let html = new GameUserHtml().getUserBalanceHtml(user!, true)
         return  new MessageUtils().sendTextReply(ctx, html)
     }

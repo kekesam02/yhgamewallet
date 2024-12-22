@@ -1,16 +1,19 @@
-import {
-    BaseEntity,
-    Column,
-    Entity,
-    PrimaryGeneratedColumn
-} from "typeorm";
+import {BaseEntity, Column, createConnection, Entity, getConnection, PrimaryGeneratedColumn} from "typeorm";
 import WalletType from "../type/WalletType";
 import ContextUtil from "../commons/ContextUtil";
 import {Context} from "telegraf";
 import BotRoundModel from "./BotRoundModel";
 import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
 import GameEnumsIndex from "../type/gameEnums/GameEnumsIndex";
-
+import UserModel from "./UserModel";
+import MessageUtils from "../commons/message/MessageUtils";
+import GameBotHtml from "../html/gameHtml/GameBotHtml";
+import GameController from "../botGame/gameController/GameController";
+import BotOddsModel from "./BotOddsModel";
+import AESUtils from "../commons/AESUtils";
+import OrderUtils from "../commons/OrderUtils";
+import BotGameModel from "./BotGameModel";
+import ComputeUtils from "../commons/ComputeUtils";
 
 
 /**
@@ -37,7 +40,7 @@ class BotPledgeUpModel extends BaseEntity {
     @Column({
         name: 'round_id'
     })
-    roundId: string
+    roundId: number
 
     /**
      * 用户上押金额
@@ -140,8 +143,8 @@ class BotPledgeUpModel extends BaseEntity {
 
     /**
      * 是否取消上注（好像和是否删除一样）
-     *      1： 取消上注
-     *      2： 正常上注
+     *      -1： 取消上注
+     *      0： 正常上注
      */
     @Column({
         name: 'state'
@@ -203,45 +206,114 @@ class BotPledgeUpModel extends BaseEntity {
     }
 
     /**
-     * 查询上注记录携带游戏期数数据
+     * 用户上注
+     * @param ctx
+     * @param roundId: 游戏期数
+     * @param money: 下注金额
+     * @param group: 群组信息
+     * @param content: 下注内容
+     * @param gameData: 针对于数字下注 / 下注内容
+     * @param odds: 赔率表
      */
-    // public getRoundHistory = async (
-    //     ctx: Context,
-    //     groupModel: BotGameModel,
-    //     total: number
-    // ) => {
-    //     console.log('开始查询游戏数据')
-    //     try {
-    //         let query = BotPledgeUpModel
-    //             .createQueryBuilder('bot_pledge_up')
-    //             // .leftJoinAndSelect(
-    //             //     'bot_pledge_up.roundModel',
-    //             //     'roundModel'
-    //             // )
-    //             .where('user_id = :userId', {
-    //                 // userId: ContextUtil.getUserId(ctx)
-    //                 userId: 'c0Vzdi99QV9jtqfQ1cmzzw=='
-    //             })
-    //             .take(total)
-    //             .orderBy('bot_pledge_up.create_time', 'DESC')
-    //         let result = await query.getMany()
-    //         let startTime = moment(result[result.length - 1].createTime).subtract('1', 'days')
-    //         let oddsList = await new BotRoundModel().getRoundList(startTime, moment().format('YYYY-MM-DD hh:mm:ss'))
-    //         console.log('开奖数据')
-    //         result.forEach(item => {
-    //             let odds = oddsList.find(item2 => {
-    //                 return item.roundId == item2.id
-    //             })
-    //             if (odds) {
-    //                 item.roundModel = odds
-    //             }
-    //         })
-    //         return result
-    //     } catch (err) {
-    //         console.log('报错了', err)
-    //         return []
-    //     }
-    // }
+    public createNewPledgeUp = async (
+        ctx: Context,
+        roundId: number,
+        money: string,
+        group: BotGameModel,
+        content: string,
+        gameData: string,
+        odds: BotOddsModel
+    ) => {
+        return createConnection().then(async connection => {
+            // 用户对象
+            let userModel = await new UserModel().getUserModel(ctx)
+            if (!await this.userBalanceJudge(ctx, userModel, money, roundId, content)) {
+                // 用户余额不足
+                return
+            }
+            if (money == '梭哈') {
+                if (new ComputeUtils(userModel.CUSDT).comparedTo(1) >= 0) {
+                    money = userModel.CUSDT
+                } else if (new ComputeUtils(userModel.USDT).comparedTo(1) >= 0) {
+                    money = userModel.USDT
+                } else {
+                    // 如果彩U和U都小于1、提示用户余额不足
+                    if (!await this.userBalanceJudge(ctx, userModel, money, roundId, content)) {
+                        // 用户余额不足
+                        return
+                    }
+                }
+            }
+            let wallType = userModel.CUSDT >= money? WalletType.CUSDT: WalletType.USDT
+
+            let upId = new OrderUtils().createPledgeUpModelId()
+            this.tgId = AESUtils.decodeUserId(userModel.tgId)
+            this.roundId = roundId
+            this.amountMoney = money
+            this.gameType = group.gameType
+            this.bettingType = odds.id
+            this.upId = upId
+            this.walletType = wallType
+            this.gameData = content
+            this.content = content
+            this.groupId = group.groupId
+            this.isWinning = 0
+            this.winningAmount = '0'
+            this.userName = userModel.userName
+            this.isSm = 2
+            this.state = 0
+            this.del = 0
+            if (wallType == WalletType.USDT) {
+                userModel.USDT = new ComputeUtils(userModel.USDT).minus(money).toString()
+            } else {
+                userModel.CUSDT = new ComputeUtils(userModel.CUSDT).minus(money).toString()
+            }
+            await userModel.updateUser()
+            await BotPledgeUpModel.save(this)
+            throw new Error('出错了')
+        })
+    }
+
+    /**
+     * 用户余额判断
+     */
+    private userBalanceJudge = async (
+        ctx: Context,
+        userModel: UserModel,
+        money: string,
+        roundId: number,
+        content: string
+    ) => {
+        if (
+            new ComputeUtils(userModel.USDT).comparedTo(1) >= 0 &&
+            new ComputeUtils(userModel.CUSDT).comparedTo(1) >= 0
+        ) {
+            // 判断用户余额小于1提示用户余额不足
+            await new MessageUtils().sendTextReply(
+                ctx,
+                new GameBotHtml().getBalanceNot(userModel, roundId, content),
+                new GameController().createTopUpBtn().reply_markup.inline_keyboard
+            )
+            return false
+        }
+        if (money == '梭哈') {
+            // 梭哈处理
+            return true
+        }
+        if (
+            new ComputeUtils(userModel.USDT).comparedTo(money) >= 0 &&
+            new ComputeUtils(userModel.CUSDT).comparedTo(money) >= 0
+        ) {
+            // 判断用户余额小于1提示用户余额不足
+            await new MessageUtils().sendTextReply(
+                ctx,
+                new GameBotHtml().getBalanceNot(userModel, roundId, content),
+                new GameController().createTopUpBtn().reply_markup.inline_keyboard
+            )
+            return false
+        }
+        return true
+    }
 }
 
 

@@ -4,6 +4,7 @@
 enum WalletType {
 
     USDT = 1,
+
     TRX = 2,
 
     /**

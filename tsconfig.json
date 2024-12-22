@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020", // 指定 ECMAScript 目标版本为 ES2020，以支持现代 JavaScript 特性
+    "target": "ES2021", // 指定 ECMAScript 目标版本为 ES2020，以支持现代 JavaScript 特性
     "module": "commonjs", // 将模块解析设置为 CommonJS，以便与 Node.js 兼容
     "strict": true, // 启用所有严格类型检查选项，以增强代码的类型安全性
     "esModuleInterop": true, // 启用对 ES 模块的互操作性，以便使用 `import` 语句导入 CommonJS 模块

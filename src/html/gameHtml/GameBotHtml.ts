@@ -4,6 +4,10 @@ import StartGameEnum from "../../type/gameEnums/StartGameEnum";
 import { Pc28LotteryJsonType } from "../../type/gameEnums/LooteryJsonType";
 import moment from 'moment'
 import BotOddsModel from "../../models/BotOddsModel";
+import UserModel from "../../models/UserModel";
+import WalletType from "../../type/WalletType";
+import CommonEnumsIndex from "../../type/CommonEnumsIndex";
+import AESUtils from "../../commons/AESUtils";
 
 /**
  * 游戏机器人返回的html字段
@@ -16,15 +20,67 @@ class GameBotHtml {
     /**
      * 生成开始游戏的html字符串
      */
-    getBotStartHtml = (): string => {
+    public getBotStartHtml = (): string => {
         return `欢迎使用一号公馆娱乐机器人\uD83C\uDFAA\n`
         + "\n<tg-emoji emoji-id=\"5368324170671202286\">\uD83D\uDC47</tg-emoji><b>请选择你要娱乐的游戏\uD83C\uDFAE</b><tg-emoji emoji-id=\"5368324170671202286\">\uD83D\uDC4D</tg-emoji>"
     }
 
     /**
+     * 生成余额不够字符串
+     * @param user: 用户
+     * @param roundId: 期数
+     * @param content: 下注内容
+     */
+    public getBalanceNot = (
+        user: UserModel,
+        roundId: number,
+        content: string
+    ): string => {
+        let userId = AESUtils.decodeUserId(user.tgId)
+        return `
+            昵称: <a href="tg://user?id=${userId}">${user.userName}</a>${this.N
+            }ID: <code>${userId}</code>${this.N
+            }期号: <code>${roundId}</code>${this.N
+            }${content}${this.N
+            }余额不足${this.N
+            }------------------------------------${this.N
+            }USDT: ${user.USDT}${this.N
+            }TRX: ${user.TRX}${this.N
+            }彩U: ${user.CUSDT}${this.N
+            }彩t: ${user.CTRX}
+        `
+    }
+
+    /**
+     * 生成下注后返回的字符串内容
+     * @param user: 用户
+     * @param roundId: 期号
+     * @param content: 下注成功内容
+     * @param wallType: 钱包类型
+     */
+    public getBettingHtml = (
+        user: UserModel,
+        roundId: string,
+        content: string,
+        wallType: WalletType
+    ): string => {
+        let userId = AESUtils.decodeUserId(user.tgId)
+        let wallTypeStr = new CommonEnumsIndex().getWalletTypeStr(wallType)
+        let vipHtml = '1'
+        return `
+            ${vipHtml} ${user.userName} 【${userId}】${this.N
+            }当前期号：<code>${roundId}</code>${this.N
+            }下注成功内容${this.N
+            }${content}${wallTypeStr}${this.N
+            }---------------${this.N
+            }余额: ${wallTypeStr}${user.getBalance(wallType)}
+        `
+    }
+
+    /**
      * 获取进入游戏模式字符串
      */
-    getGameModelHtml = (gameType: StartGameEnum): string => {
+    public getGameModelHtml = (gameType: StartGameEnum): string => {
         let gameTypeStr = new GameEnumsIndex().getStartGameStr(gameType)
         let html = `
             进入游戏模式：${gameTypeStr}${
@@ -44,7 +100,7 @@ class GameBotHtml {
      * @param gameType: 游戏类型
      * @param oddsMap: 赔率列表
      */
-    getStartGameHtml = (
+    public getStartGameHtml = (
         json: Pc28LotteryJsonType,
         gameType: GameTypeEnum,
         oddsMap: Map<number, Map<string, BotOddsModel>>

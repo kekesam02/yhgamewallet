@@ -98,7 +98,10 @@ class ComputeUtils {
     }
 
     /**
-     * 比较大小 1: 大于 -1: 小于 0: 等于
+     * 比较大小
+     *      1: 大于
+     *      -1: 小于
+     *      0: 等于
      * @param num2
      */
     public comparedTo(num2: number | string): number {

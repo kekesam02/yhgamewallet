@@ -59,14 +59,12 @@ class GameFindController {
      *      false: 正常返回可copy文字
      */
     public getUserFlowingWater = async (isPop: boolean = true) => {
-        console.log('开始查询')
         let {
             gameType,
             dayWater,
             weekWater,
             totalWater
         } = await new BotPaymentModel().getUserWaterClass(this.ctx)
-        console.log('查询到的数据')
         let html = new GameUserHtml().getUserPaymentHtml(
             this.ctx,
             {

@@ -1,4 +1,6 @@
 import GameTypeEnum from "./gameEnums/GameTypeEnum";
+import WalletType from "./WalletType";
+
 
 /**
  * 获取公共的类型描述文字之类的
@@ -20,6 +22,24 @@ class CommonEnumsIndex {
             GameTypeEnum.PCDWQ ,
             GameTypeEnum.PCDWQFS
         ]
+    }
+
+    /**
+     * 获取钱包类型描述文字
+     */
+    public getWalletTypeStr = (walletType: WalletType): string =>{
+        switch (walletType) {
+            case WalletType.USDT:
+                return 'usdt'
+            case WalletType.CUSDT:
+                return '彩U'
+            case WalletType.TRX:
+                return 'TRX'
+            case WalletType.CTRX:
+                return '彩T'
+            case WalletType.JIFEN:
+                return '积分'
+        }
     }
 }
 

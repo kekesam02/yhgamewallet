@@ -28,7 +28,15 @@ class ButtonUtils {
      * 创建 CallbackData 按钮（点击按钮回回掉到 bot.on('callback_query' 事件）
      * @param list  创建的按钮列表
      */
-    public createCallbackBtn(list: Array<Array<ButtonCallbackType>>) {
+    public createCallbackBtn(list: Array<Array<ButtonCallbackType>>): {
+        reply_markup: {
+            inline_keyboard: Array<Array<{
+                text: string,
+                callback_data: string,
+                url: string
+            }>>
+        }
+    } {
         return {
             reply_markup: {
                 inline_keyboard: [

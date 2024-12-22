@@ -99,6 +99,19 @@ class GameController {
         ])
     }
 
+
+
+    /**
+     * 生成充值按钮
+     */
+    public createTopUpBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                GameController.recharge
+            ]
+        ])
+    }
+
 }
 
 

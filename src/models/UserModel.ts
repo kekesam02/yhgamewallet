@@ -1,6 +1,7 @@
-import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
+import {BaseEntity, Column, createConnection, Entity, PrimaryGeneratedColumn, UpdateResult} from "typeorm";
 import {Context} from "telegraf";
 import AESUtils from "../commons/AESUtils";
+import WalletType from "../type/WalletType";
 
 
 /**
@@ -264,18 +265,30 @@ class UserModel extends BaseEntity{
      * 新建用户
      */
     public createNewUser = async (ctx: Context): Promise<UserModel> => {
-        this.promotionLink = ''
-        this.tgId = AESUtils.encodeUserId(ctx?.from?.id.toString())
-        this.userName = ctx?.from?.username ?? ''
-        this.nickName = `${ctx?.from?.first_name}${ctx?.from?.last_name}`
-        return UserModel.save(this)
+        return createConnection().then(async connection => {
+            this.promotionLink = ''
+            this.tgId = AESUtils.encodeUserId(ctx?.from?.id.toString())
+            this.userName = ctx?.from?.username ?? ''
+            this.nickName = `${ctx?.from?.first_name}${ctx?.from?.last_name}`
+            return UserModel.save(this)
+        })
+    }
+
+    /**
+     * 更新用户金额信息
+     * @param user
+     */
+    public updateUser = async (): Promise<UserModel> => {
+        return createConnection().then(async connection => {
+            return  UserModel.save(this)
+        })
     }
 
     /**
      * 获取用户信息
      * @param ctx
      */
-    public getUserBalance = async (ctx: Context): Promise<UserModel> => {
+    public getUserModel = async (ctx: Context): Promise<UserModel> => {
         let userId = AESUtils.encodeUserId(ctx?.from?.id.toString())
         let user = await UserModel
             .createQueryBuilder()
@@ -287,6 +300,25 @@ class UserModel extends BaseEntity{
             user = await new UserModel().createNewUser(ctx)
         }
         return user
+    }
+
+    /**
+     * 获取用户余额、指定金额类型
+     */
+    public getBalance = (wallType: WalletType): string => {
+        switch (wallType) {
+            case WalletType.USDT:
+                return this.USDT
+            case WalletType.CUSDT:
+                return this.CUSDT
+            case WalletType.TRX:
+                return this.TRX
+            case WalletType.CTRX:
+                return this.CTRX
+            case WalletType.JIFEN:
+                // 暂时没有积分功能
+                return this.KK
+        }
     }
 }
 

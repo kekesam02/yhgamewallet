@@ -1,8 +1,17 @@
 import {Context, Telegraf} from "telegraf";
-import {ForceReply, InlineKeyboardMarkup, ReplyKeyboardMarkup, ReplyKeyboardRemove} from "@telegraf/types/markup";
+import {
+    ForceReply,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove
+} from "@telegraf/types/markup";
 import GameBotHtml from "../../html/gameHtml/GameBotHtml";
 import htmlUtils from "../HtmlUtils";
 import GameController from "../../botGame/gameController/GameController";
+import ButtonUtils from "../button/ButtonUtils";
+import {ButtonCallbackType} from "../button/ButtonCallbackType";
+import buttonUtils from "../button/ButtonUtils";
 
 
 /**
@@ -12,8 +21,11 @@ class MessageUtils {
 
     /**
      * 发送文本、带回复用户的那条消息
+     * @param ctx
+     * @param text
+     * @param list: 按钮列表
      */
-    public sendTextReply = (ctx:Context ,text: string) => {
+    public sendTextReply = (ctx:Context ,text: string, list: InlineKeyboardButton[][] = []) => {
         let chatId = `${ctx?.chat?.id}`
         let messageId = ctx?.message?.message_id ?? 0
         return ctx.replyWithHTML(text, {
@@ -26,6 +38,7 @@ class MessageUtils {
             reply_markup: {
                 force_reply: true,
                 selective: true,
+                inline_keyboard: list
             }
         })
     }
