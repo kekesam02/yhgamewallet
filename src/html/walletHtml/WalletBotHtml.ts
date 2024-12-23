@@ -31,7 +31,7 @@ class WalletBotHtml {
             "\n💵 彩u：" + model.CUSDT +
             "\n💵 彩t：" + model.CTRX + "\n" +
             add +
-            "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
+            "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
             "\uD83C\uDFAE 游戏官方频道:@OnePalace " +
             "\uD83C\uDFAA\uD83C\uDFB2\uD83C\uDFB0";
     }

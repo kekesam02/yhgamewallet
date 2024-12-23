@@ -3,13 +3,8 @@ import { message } from 'telegraf/filters'
 import process from 'node:process'
 import {getConfig} from "../../config/config";
 import GameMessageHandle from './GameMessageHandle'
-import {UpdateType} from "telegraf/typings/telegram-types";
-import {Deunionize} from "telegraf/typings/core/helpers/deunionize";
 import GameCallbackHandle from "./GameCallbackHandle";
 import ScheduleHandle from "../../commons/ScheduleHandle";
-import GameFindController from "../gameController/GameFindController";
-import TimeUtils from "../../commons/TimeUtils";
-import AESUtils from "../../commons/AESUtils";
 
 
 /**

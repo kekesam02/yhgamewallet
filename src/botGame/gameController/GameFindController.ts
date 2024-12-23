@@ -5,12 +5,7 @@ import MessageUtils from "../../commons/message/MessageUtils";
 import AESUtils from "../../commons/AESUtils";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import BotPaymentModel from "../../models/BotPaymentModel";
-import WalletType from "../../type/WalletType";
-import BotExchangeModel from "../../models/BotExchangeModel";
-import htmlUtils from "../../commons/HtmlUtils";
-import GameController from "./GameController";
 import GameEnumsIndex from "../../type/gameEnums/GameEnumsIndex";
-import ContextUtil from "../../commons/ContextUtil";
 
 
 /**

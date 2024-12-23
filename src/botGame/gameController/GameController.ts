@@ -1,7 +1,4 @@
 import ButtonUtils from "../../commons/button/ButtonUtils";
-import {Context} from "telegraf";
-
-
 
 /**
  * 公共的游戏控制器

@@ -4,6 +4,10 @@
 enum StartWalletEnum {
 
     /**
+     * 返回首页
+     */
+    CZFH = 'czfh',
+    /**
      * 充值
      */
     CHONGZHI = 'chongzhi_btn',

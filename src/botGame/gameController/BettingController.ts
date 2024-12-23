@@ -6,11 +6,6 @@ import {Context} from "telegraf";
 import BotGameModel from "../../models/BotGameModel";
 import BettingCommand28 from "../const/BettingCommand28";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
-import UserModel from "../../models/UserModel";
-import MessageUtils from "../../commons/message/MessageUtils";
-import GameBotHtml from "../../html/gameHtml/GameBotHtml";
-import GameController from "./GameController";
-
 
 class BettingController {
 

@@ -1,11 +1,10 @@
-import {Context, Markup, Telegraf} from 'telegraf'
+import {Context, Telegraf} from 'telegraf'
 import {message} from 'telegraf/filters'
 import process from 'node:process'
 import {getConfig} from "../../config/config";
 import WalletMessageHandle from '../service/WalletMessageHandle'
-import {UpdateType} from "telegraf/typings/telegram-types";
-import {Deunionize} from "telegraf/typings/core/helpers/deunionize";
 import WalletButtonCallbackHandle from "../service/WalletButtonCallbackHandle";
+import WalletHandleMethod from "../handle/WalletHandleMethod";
 
 /**
  * 娱乐机器人核心代码
@@ -22,8 +21,7 @@ bot.command('quit', async (ctx) => {
  * 监听/start命令
  */
 bot.command('start', (ctx) => {
-    let messageHandle = new WalletMessageHandle();
-    messageHandle.startCommand(ctx)
+    WalletHandleMethod.startCommandCallback(ctx)
 })
 
 
@@ -89,7 +87,7 @@ bot.on('inline_query', async (ctx) => {
 })
 
 
-bot.launch()
+bot.launch().then((ctx) => console.log('Bot已经成功启动',ctx))
 
 /**
  * 开启默认需要运行的游戏定时器

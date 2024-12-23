@@ -28,12 +28,52 @@ class BotPaymentModel extends BaseEntity {
     tgId: string
 
     /**
+     * 用户名称
+     */
+    @Column({
+        name: 'username'
+    })
+    username: string
+
+    /**
+     * 用户昵称
+     */
+    @Column({
+        name: 'nickname'
+    })
+    nickname: string
+
+    /**
      * 赔率 下注入 1 中奖金额 = 1 * 赔率
      */
     @Column({
         name: 'payment_type'
     })
     paymentType: PaymentType
+
+    /**
+     * 支付类型的名称
+     */
+    @Column({
+        name: 'payment_type_name'
+    })
+    paymentTypeName: string
+
+    /**
+     * 充值之前
+     */
+    @Column({
+        name: 'balance_bfter'
+    })
+    balanceBfter: string
+
+    /**
+     * 充值之后
+     */
+    @Column({
+        name: 'balance_after'
+    })
+    balanceAfter: string
 
     /**
      * 备注，提现的订单号
@@ -43,6 +83,7 @@ class BotPaymentModel extends BaseEntity {
     })
     paymentMethod: number
 
+
     /**
      * 支付类型对应的号充值对应充值单号/上押对应上押号
      */
@@ -50,6 +91,7 @@ class BotPaymentModel extends BaseEntity {
         name: 'payment_type_number'
     })
     paymentTypeNumber: string
+
 
     /**
      * 支付金额

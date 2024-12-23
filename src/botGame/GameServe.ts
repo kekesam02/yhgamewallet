@@ -9,7 +9,7 @@ import { getConfig } from "../config/config";
 import errorHandler from "../middlewares/errorHandler";
 import logger from "../logger";
 import database from "../config/database";
-import initRoutes from "../botWallet/router";
+import initRoutes from "./router";
 import { initMiddleware } from "../middlewares";
 
 

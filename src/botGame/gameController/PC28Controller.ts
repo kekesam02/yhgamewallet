@@ -2,7 +2,6 @@ import BotGameModel from "../../models/BotGameModel"
 import {Context, Telegraf} from "telegraf"
 import ContextUtil from "../../commons/ContextUtil"
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum"
-import GameEnumsIndex from "../../type/gameEnums/GameEnumsIndex";
 import StartGameEnum from "../../type/gameEnums/StartGameEnum";
 import ButtonUtils from "../../commons/button/ButtonUtils";
 import GameBotHtml from "../../html/gameHtml/GameBotHtml";

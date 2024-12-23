@@ -1,11 +1,12 @@
-
-import WalletBotHtml from "../../html/walletHtml/WalletBotHtml";
-import {Context} from "telegraf";
-
 /**
  * 钱包机器人常用指令类
  */
 class WalletCommand {
+
+    /**
+     * 返回命令
+     */
+    public static czfh = ['返回','czfh']
 
     /**
      * 指令命令
