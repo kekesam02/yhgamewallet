@@ -87,7 +87,7 @@ bot.on('inline_query', async (ctx) => {
 })
 
 
-bot.launch().then((ctx) => console.log('Bot已经成功启动',ctx))
+bot.launch().then(() => console.log('钱包walletBot已经成功启动'))
 
 /**
  * 开启默认需要运行的游戏定时器
