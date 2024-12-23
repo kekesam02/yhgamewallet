@@ -142,7 +142,7 @@ class PC28Controller {
         let roundId = lotteryJson.data[0].expect
         // 当前开奖号码
         let number = lotteryJson.data[0].open_code
-        let html = new GameBotHtml().getLotteryTextHtml()
+        let html = new GameBotHtml().getLotteryTextHtml([])
     }
 
     /**

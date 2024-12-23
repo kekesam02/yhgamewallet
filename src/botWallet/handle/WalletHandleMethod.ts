@@ -5,9 +5,11 @@ import BotTronAddrModel from "../../models/BotTronAddrModel";
 import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import AESUtils from "../../commons/AESUtils";
 import UserModel from "../../models/UserModel";
-import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 import MCoinRechargeAddrPoolModel from "../../models/MCoinRechargeAddrPoolModel";
-
+import WalletController from "../../botWallet/controller/WalletController";
+import messageUtils from "../../commons/message/MessageUtils";
+const QRCode = require('qrcode');
+const moment = require('moment');
 /**
  * 公共方法处理
  * 钱包机器人收到的用户消息处理器
@@ -40,7 +42,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.message?.from?.id || 0
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
-        this.startCommand(ctx, tgId,username, firstName)
+        this.startCommand(ctx, tgId, username, firstName)
     }
 
     /**
@@ -147,13 +149,11 @@ class WalletHandleMethod {
         // 根据tgId查询用户是否存在。
         let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
         var link: string | undefined = '';
-        console.log("1===========botUser=========>",botUser)
         //获取专属充值连接，先查询是否有充值连接，没有的话就拿充值链接并且赋值
         if (!botUser) {
             let botTronAddrModel = await BotTronAddrModel.createQueryBuilder()
                 .where("uses = :uses", {uses: 0}).limit(0).offset(1).getOne()
             link = botTronAddrModel?.addr;
-            console.log("2===========botTronAddrModel=========>",botTronAddrModel)
             // 如果用户不存在就添加用户，把交易地址赋值给他
             await UserModel.createQueryBuilder().insert().into(UserModel).values({
                 tgId: userId,
@@ -164,26 +164,24 @@ class WalletHandleMethod {
                 rechargeLink: link
             }).execute()
             // 回查用户的信息
-            botUser =  await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
+            botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
             // 标识交易地址为使用
             await BotTronAddrModel.createQueryBuilder().update().set({uses: 1}).where("id=:id", {'id': botTronAddrModel?.id}).execute()
             // 加入到监听池中
             await MCoinRechargeAddrPoolModel.createQueryBuilder()
                 .insert().into(MCoinRechargeAddrPoolModel)
                 .values({
-                    username:username,
-                    nickname:firstName,
-                    userId:botUser?.id,
-                    tgId:userId,
-                    address:link,
-                    privateKey:"",
-                    currency:"USDT"
+                    username: username,
+                    nickname: firstName,
+                    userId: botUser?.id,
+                    tgId: userId,
+                    address: link,
+                    privateKey: "",
+                    currency: "USDT"
                 }).execute()
-
         } else {
-            console.log("3===========botUser=========>",botUser)
             // 如果用户存在，交易地址不存在，就分配一个交易地址给用户
-            if (!botUser.rechargeLink){
+            if (!botUser.rechargeLink) {
                 let botTronAddrModel = await BotTronAddrModel.createQueryBuilder()
                     .where("uses = :uses", {uses: 0}).getOne()
                 link = botTronAddrModel?.addr;
@@ -201,26 +199,39 @@ class WalletHandleMethod {
                 await MCoinRechargeAddrPoolModel.createQueryBuilder()
                     .insert().into(MCoinRechargeAddrPoolModel)
                     .values({
-                        username:username,
-                        nickname:firstName,
-                        userId:botUser.id,
-                        tgId:userId,
-                        address:link,
-                        privateKey:"",
-                        currency:"USDT"
+                        username: username,
+                        nickname: firstName,
+                        userId: botUser.id,
+                        tgId: userId,
+                        address: link,
+                        privateKey: "",
+                        currency: "USDT"
                     }).execute()
-            }else{
+            } else {
                 link = botUser.rechargeLink
             }
         }
+
         if (link != null) {
-            var messageId:number = ctx.callbackQuery?.message?.message_id || 0
+            var messageId: number = ctx.callbackQuery?.message?.message_id || 0
             if (messageId > 0) {
                 ctx.deleteMessage(messageId)
             }
-            // 开始发送图片二维码给用户
-            //var s = AESUtils.decodeAddr(link);
-            ctx.reply(AESUtils.decodeAddr(link) + "______" + link)
+
+            var s = AESUtils.decodeAddr(link);
+            const qrCodeImage = await QRCode.toBuffer(s,{ errorCorrectionLevel: 'H', width: 400,
+                height: 400, margin: 1 },);
+            // 获取当前日期和时间
+            const now = new Date();
+            const formattedDate = moment(now).format('YYYY-MM-DD HH:mm:ss');
+            var html = '\n<strong>当前中国时间：'+formattedDate+'</strong>\n\n' +
+                '\uD83D\uDCB0 充值专属钱包地址: 点击可复制（目前只收TRC20 USDT，转错概不负责。）\n\n' +
+                '<code>'+s+'</code>\n\n' +
+                '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
+                '请仔细比对地址，如果和图片中地址不一致，请停止充值，立即重新安装飞机软件。';
+
+            let replyMarkup = new WalletController().createEmptyBtn().reply_markup
+            new messageUtils().sendPhotoHtmlCtxBtn(ctx,html,replyMarkup,Buffer.from(qrCodeImage))
         }
     }
 }

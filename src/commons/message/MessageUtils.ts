@@ -6,13 +6,6 @@ import {
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove
 } from "@telegraf/types/markup";
-import GameBotHtml from "../../html/gameHtml/GameBotHtml";
-import htmlUtils from "../HtmlUtils";
-import GameController from "../../botGame/gameController/GameController";
-import ButtonUtils from "../button/ButtonUtils";
-import {ButtonCallbackType} from "../button/ButtonCallbackType";
-import buttonUtils from "../button/ButtonUtils";
-
 
 /**
  * 消息发送类、整理发送消息方法
@@ -95,6 +88,34 @@ class MessageUtils {
     ) {
         return bot.telegram.sendPhoto(
             groupId,
+            {
+                source: image,
+                filename: '1.png'
+            },
+            {
+                caption: html,
+                parse_mode: 'HTML',
+                reply_markup: replyMarkup
+            }
+        )
+    }
+
+    /**
+     * 发送消息到群组
+     *      格式为: 顶部图片 + 文本 + 底部按钮消息
+     * @param bot: 机器人对象
+     * @param groupId 群组id
+     * @param html  发送的html
+     * @param replyMarkup 按钮对象
+     * @param image 图片
+     */
+    public sendPhotoHtmlCtxBtn(
+        ctx: Context,
+        html: string,
+        replyMarkup: InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply,
+        image: Buffer
+    ) {
+        return ctx.sendPhoto(
             {
                 source: image,
                 filename: '1.png'

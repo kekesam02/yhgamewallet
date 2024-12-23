@@ -96,8 +96,6 @@ class GameController {
         ])
     }
 
-
-
     /**
      * 生成充值按钮
      */
@@ -105,6 +103,16 @@ class GameController {
         return new ButtonUtils().createCallbackBtn([
             [
                 GameController.recharge
+            ]
+        ])
+    }
+
+    /**
+     * 创建空按钮组
+     */
+    public createEmptyBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
             ]
         ])
     }
