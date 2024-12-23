@@ -68,12 +68,13 @@ class ScheduleHandle {
                 // 服务器第一次运行数据处理
                 if (!ScheduleHandle.pc28Config.stopUpTime && !ScheduleHandle.pc28Config.openTime) {
                     try {
-                        console.log('服务器第一次运行', ScheduleHandle.pc28Config.stopUpTime)
+                        console.log('服务器第一次运行-----', ScheduleHandle.pc28Config.stopUpTime)
                         let json = await new PC28Controller().getLotteryJson()
                         let currJson = json.data[0]
                         // 下次开奖时间、加上封盘时间 + 5秒、用来判断用户是否还可以继续下
                         let nextTime = moment(json.data[0].next_time).subtract(new BotGameConfig().FPTime + 4, 'seconds')
                         if (moment(nextTime).isAfter(moment())) {
+                            console.log('发送下注信息到群组----')
                             // 可以继续下注、发送开始下注信息到群组
                             await new PC28Controller().startPCLow(bot, json)
                         }
@@ -98,7 +99,7 @@ class ScheduleHandle {
                     !ScheduleHandle.pc28Config.isCloseTips
                 ) {
                     try {
-                        console.log('判断是否发送停止上注提示到群组')
+                        console.log('判断是否发送停止上注提示到群组----')
                         ScheduleHandle.pc28Config.isCloseTips = true
                         let closeTipsTime = moment(ScheduleHandle.pc28Config.closeTipsTime)
                         let stopUpTime = moment(ScheduleHandle.pc28Config.stopUpTime)
@@ -121,11 +122,11 @@ class ScheduleHandle {
                 if (
                     ScheduleHandle.pc28Config.stopUpTime &&
                     ScheduleHandle.pc28Config.openTime &&
-                    moment().isBefore(moment(ScheduleHandle.pc28Config.stopUpTime)) &&
+                    moment().isAfter(moment(ScheduleHandle.pc28Config.stopUpTime)) &&
                     !ScheduleHandle.pc28Config.isClose
                 ) {
                     try {
-                        console.log('是否已经发送停止上注信息到群组')
+                        console.log('是否已经发送停止上注信息到群组----')
                         ScheduleHandle.pc28Config.isClose = true
                         // 如果已经超出停止上注时间、并且没有停止上注发送停止上注消息到群组中
                         await new PC28Controller().sendStopTop(bot, {
@@ -138,6 +139,7 @@ class ScheduleHandle {
                     return
                 }
 
+                // 获取最新的开奖结果
                 if(
                     ScheduleHandle.pc28Config.stopUpTime &&
                     ScheduleHandle.pc28Config.openTime &&
@@ -145,11 +147,17 @@ class ScheduleHandle {
                     && !ScheduleHandle.pc28Config.isOpenLottery
                 ) {
                     try {
-                        console.log('获取开奖数据')
+                        console.log('获取开奖数据------')
                         ScheduleHandle.pc28Config.isOpenLottery = true
                         let pc28Controller = new PC28Controller()
                         let openJson = await pc28Controller.getLotteryJson()
-                        await pc28Controller.getLotteryTextBot(bot, openJson)
+                        // 保存开奖结果到数据库
+                        await pc28Controller.saveLotteryJson(openJson)
+                        console.log('这里吗????')
+                        let pledgeUpMap = await pc28Controller.getWinningUser(openJson)
+                        console.log('这里吗111????')
+                        await pc28Controller.getLotteryTextBot(bot, openJson, pledgeUpMap)
+                        console.log('这里吗?222???')
                         await pc28Controller.getLotteryListBot(bot)
                         await pc28Controller.startPCLow(bot, openJson)
                         ScheduleHandle.checkNextPC28()

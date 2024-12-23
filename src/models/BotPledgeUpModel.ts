@@ -16,6 +16,8 @@ import OrderUtils from "../commons/OrderUtils";
 import BotGameModel from "./BotGameModel";
 import ComputeUtils from "../commons/ComputeUtils";
 import database from "../config/database";
+import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
+import WinningTypeConfirm from "../botGame/const/WinningTypeConfirm";
 
 
 /**
@@ -201,8 +203,27 @@ class BotPledgeUpModel extends BaseEntity {
                 userId: ContextUtil.getUserId(ctx)
             })
             .whereGameType(gameTypeList)
+            .andWhere('state = 0')
+            .andWhere('del = 0')
             .take(total)
             .orderBy('create_time', 'DESC')
+            .getMany()
+        return result
+    }
+
+    /**
+     * 根据当前期数所有下注的用户
+     * @param json: 获取到的中奖数据
+     */
+    public getUserList = async (json: Pc28LotteryJsonType) => {
+        let roundId = json.data[0].open_code
+        let result = BotPledgeUpModel
+            .createQueryBuilder()
+            .where('round_id = :roundId', {
+                roundId: roundId
+            })
+            .andWhere('state = 0')
+            .andWhere('del = 0')
             .getMany()
         return result
     }
@@ -282,6 +303,13 @@ class BotPledgeUpModel extends BaseEntity {
         } finally {
             await queryRunner.release()
         }
+    }
+
+    /**
+     * 用户用户下注信息(只能更新上注金额、中奖金额、上注状态之类的)
+     */
+    public updatePledgeUpList = (list: Array<BotPledgeUpModel>) => {
+        return BotPledgeUpModel.save(list)
     }
 
     /**

@@ -9,6 +9,8 @@ import WalletType from "../../type/WalletType";
 import CommonEnumsIndex from "../../type/CommonEnumsIndex";
 import AESUtils from "../../commons/AESUtils";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
+import WinningTypeConfirm from "../../botGame/const/WinningTypeConfirm";
+import ComputeUtils from "../../commons/ComputeUtils";
 
 /**
  * 游戏机器人返回的html字段
@@ -193,9 +195,34 @@ class GameBotHtml {
 
     /**
      * 生成开奖结果文字描述html
+     * @param json: 中奖json
+     * @param roundId: 当前期数
+     * @param code: 当前开奖号码
+     * @param gameType: 游戏类型
+     * @param pledgeUpList: 下注列表 (过滤后已经中奖的数据)
      */
-    public getLotteryTextHtml = (pledgeUpList: Array<BotPledgeUpModel>) => {
-
+    public getLotteryTextHtml = (
+        json: Pc28LotteryJsonType,
+        roundId: string,
+        code: string,
+        gameType: GameTypeEnum,
+        pledgeUpList: Array<BotPledgeUpModel>
+    ) => {
+        let arrCode = code.split(',')
+        let sum = arrCode.reduce((prev, curr) => prev + curr)
+        let winnerType = new WinningTypeConfirm().getLotteryDesc(code, gameType)
+        let html = `${roundId}期开奖${this.N
+        }${arrCode[0]}+${arrCode[1]}+${arrCode[2]}=${sum}(${winnerType.code.key})${this.N
+        }特殊奖: ${winnerType.form.key}${this.N
+        }=======本期中奖结果=======${this.N}`
+        pledgeUpList.forEach(item => {
+            // 上注的内容纯文字
+            let contentText = item.content.replaceAll(item.amountMoney, '')
+            // 倍率
+            let rate = new ComputeUtils(item.winningAmount).dividedBy(item.amountMoney, 2).toString()
+            html += `${item.userName}${contentText} 中${item.winningAmount}(${rate})倍率`
+        })
+        return html
     }
 
 

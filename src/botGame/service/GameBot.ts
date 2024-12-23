@@ -1,10 +1,12 @@
 import {Context, Telegraf} from 'telegraf'
-import { message } from 'telegraf/filters'
+import {message} from 'telegraf/filters'
 import process from 'node:process'
 import {getConfig} from "../../config/config";
 import GameMessageHandle from './GameMessageHandle'
 import GameCallbackHandle from "./GameCallbackHandle";
 import ScheduleHandle from "../../commons/ScheduleHandle";
+import WinningTypeConfirm from "../const/WinningTypeConfirm";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 
 
 /**
@@ -100,11 +102,11 @@ const startJob = () => {
     /**
      * 运行pc28游戏定时器（放入异步中、防止配置文件没有加载完成）
      */
-    setTimeout(() => {
-        ScheduleHandle.startPC28(bot)
-    }, 5000)
+    // setTimeout(() => {
+    //     ScheduleHandle.startPC28(bot)
+    // }, 5000)
 }
-// startJob()
+startJob()
 
 
 // Enable graceful stop

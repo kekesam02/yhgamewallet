@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import WalletType from "../type/WalletType";
 import GameTypeEnum from "../type/gameEnums/GameTypeEnum";

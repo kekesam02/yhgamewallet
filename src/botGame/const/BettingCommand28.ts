@@ -91,7 +91,12 @@ class BettingCommand28 {
         /**
          * 梭哈
          */
-        ['梭哈', 'sh']
+        ['梭哈', 'sh'],
+
+        /**
+         * 点杀
+         */
+        ['点杀', '.']
     ]
 
     constructor(
@@ -113,10 +118,28 @@ class BettingCommand28 {
         let commandStr = text
         // 是否是梭哈
         let allIn = false
+        // 梭哈
         if (text.indexOf('梭哈') == 0 || text.indexOf('sh') == 0 ) {
             commandStr = text.substring(2, text.length)
             allIn = true
         }
+
+        // 当前是点杀数字
+        if (text.indexOf('杀') > -1 || text.indexOf('.') > -1) {
+            let arr = text.indexOf('杀') > -1? text.split('杀'): text.split('.')
+            let money = Number(arr[2])
+            // 当前点杀数字
+            let code = Number(arr[0])
+            if (isNaN(money) || isNaN(code)) {
+                // 金额解析错误
+                return
+            }
+            if (code > -1 || code < 27) {
+                // 点杀数字符合规则
+                this.startBetting(text, `${money}`, this.commandList[this.commandList.length - 1])
+            }
+        }
+
         let curr = this.commandList.find(item => {
             if (item[0] == commandStr.substring(0, item[0].length)
                 || item[1] == commandStr.substring(0, item[1].length)

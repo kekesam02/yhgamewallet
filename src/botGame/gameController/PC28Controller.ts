@@ -14,6 +14,8 @@ import GameController from "./GameController";
 import MessageUtils from "../../commons/message/MessageUtils";
 import request from "../../commons/request/request";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
+import WinningTypeConfirm from "../const/WinningTypeConfirm";
+import BotOddsStorage from "../../storage/BotOddsStorage";
 
 const schedule = require('node-schedule')
 
@@ -26,11 +28,16 @@ type PC28LotteryType = {
  */
 class PC28Controller {
 
+    private groupList: Array<BotGameModel> = []
+
     /**
      * 获取当前加入 pc28 游戏的群组
      */
-    private getJoinGameGroup = (): Promise<Array<BotGameModel>> => {
-        return BotGameModel
+    private getJoinGameGroup = async (): Promise<Array<BotGameModel>> => {
+        if (this.groupList.length > 0) {
+            return Promise.resolve(this.groupList)
+        }
+        let result = await BotGameModel
             .createQueryBuilder()
             .where('game_state = :game_state', {
                 game_state: 1
@@ -40,6 +47,12 @@ class PC28Controller {
                 game_type2: GameTypeEnum.PC28GAO
             })
             .getMany()
+        result = result.filter(item => {
+            if (item.gameState == 1 && item.del == 0) {
+                return true
+            }
+        })
+        return result
     }
 
     /**
@@ -136,13 +149,32 @@ class PC28Controller {
     /**
      * 发送开奖结果字符串到群组
      * @param bot
+     * @param lotteryJson: 开奖结果
+     * @param pledgeUpMap: 上押表map整理后的数据
      */
-    public getLotteryTextBot = async (bot: Telegraf<Context>, lotteryJson: Pc28LotteryJsonType) => {
+    public getLotteryTextBot = async (
+        bot: Telegraf<Context>,
+        lotteryJson: Pc28LotteryJsonType,
+        pledgeUpMap: Map<GameTypeEnum, Array<BotPledgeUpModel>>
+    ) => {
         // 当前开奖期数
         let roundId = lotteryJson.data[0].expect
         // 当前开奖号码
         let number = lotteryJson.data[0].open_code
-        let html = new GameBotHtml().getLotteryTextHtml([])
+
+        let groupList = await this.getJoinGameGroup()
+        for (let i = 0; i < groupList.length; i++) {
+            let item = groupList[0]
+            let winningList = await this.getUserIsWinning(pledgeUpMap, lotteryJson, item.gameType)
+            let html = new GameBotHtml().getLotteryTextHtml(
+                lotteryJson,
+                roundId,
+                number,
+                item.gameType,
+                winningList
+            )
+            await new MessageUtils().botSendText(bot, item.groupId, html)
+        }
     }
 
     /**
@@ -160,7 +192,6 @@ class PC28Controller {
         let startImage = await new ImageUtils().readImageFile('./../../../static/images/start.png')
         let replyMarkup = new GameController().createCommonBtnList().reply_markup
         // 遍历群组列表、并发送游戏信息到群组
-        console.log('开始遍历--------------')
         result.forEach((item) => {
             let html = new GameBotHtml().getStartGameHtml(json, item.gameType, oddsMap)
             new MessageUtils().sendPhotoHtmlBtn(bot, item.groupId, html, replyMarkup, startImage)
@@ -230,16 +261,42 @@ class PC28Controller {
     }
 
 
+    /**
+     * 保存开奖结果到数据库
+     */
+    public saveLotteryJson = async (json: Pc28LotteryJsonType) => {
+        await new BotRoundModel().saveRound(json, GameTypeEnum.PC28DI, 1)
+        await new BotRoundModel().saveRound(json, GameTypeEnum.PC28DI, 1)
+        return json
+    }
 
-
-
-
-
+    /**
+     * 获取所有下注的用户列表、根据游戏类型进行分类
+     */
+    public getWinningUser = async (json: Pc28LotteryJsonType): Promise<Map<
+        // 游戏类型
+        GameTypeEnum,
+        // 所有下注列表
+        Array<BotPledgeUpModel>
+    >> => {
+        // 当前所有下注的用户
+        let pledgeUpList = await new BotPledgeUpModel()
+            .getUserList(json)
+        let result: Map<GameTypeEnum, Array<BotPledgeUpModel>> = new Map()
+        pledgeUpList.forEach(item => {
+            if (result.has(item.gameType)) {
+                result.set(item.gameType, [...result.get(item.gameType)!, item])
+            } else {
+                result.set(item.gameType, [item])
+            }
+        })
+        return result
+    }
 
 
 
     /**
-     * 模拟获取中奖数据
+     * 获取pc28开奖结果
      */
     public getLotteryJson = async (): Promise<Pc28LotteryJsonType> => {
         let json = await request({
@@ -259,37 +316,50 @@ class PC28Controller {
         //             "open_time": "2024-12-13 22:13:00",
         //             "next_expect": "73674887",
         //             "next_time": "2024-12-13 22:14:15"
-        //         },
-        //         {
-        //             "expect": "73674885",
-        //             "open_code": "1,5,7",
-        //             "open_time": "2024-12-13 22:11:45",
-        //             "next_expect": "73674886",
-        //             "next_time": "2024-12-13 22:13:00"
-        //         },
-        //         {
-        //             "expect": "73674884",
-        //             "open_code": "6,2,3",
-        //             "open_time": "2024-12-13 22:10:30",
-        //             "next_expect": "73674885",
-        //             "next_time": "2024-12-13 22:11:45"
-        //         },
-        //         {
-        //             "expect": "73674883",
-        //             "open_code": "1,2,3",
-        //             "open_time": "2024-12-13 22:09:15",
-        //             "next_expect": "73674884",
-        //             "next_time": "2024-12-13 22:10:30"
-        //         },
-        //         {
-        //             "expect": "73674882",
-        //             "open_code": "2,7,1",
-        //             "open_time": "2024-12-13 22:08:00",
-        //             "next_expect": "73674883",
-        //             "next_time": "2024-12-13 22:09:15"
         //         }
         //     ]
         // })
+    }
+
+    /**
+     * 根据游戏类型获取所有中奖用户
+     * @param pledgeUpMap 根据游戏类型划分后的用户列表、具体查看 getWinningUser
+     * @param lotteryJson 开奖结果
+     * @param gameType
+     */
+    public getUserIsWinning = async (
+        pledgeUpMap: Map<GameTypeEnum, Array<BotPledgeUpModel>>,
+        lotteryJson: Pc28LotteryJsonType,
+        gameType: GameTypeEnum
+    ): Promise<Array<BotPledgeUpModel>> => {
+        let currList = pledgeUpMap.get(gameType) ?? []
+        if (currList.length < 0) {
+            return []
+        }
+        // 当前中奖结果
+        let openCode = lotteryJson.data[0].open_code
+        // 获取判定后的开奖结果
+        let winningType = new WinningTypeConfirm().getLotteryDesc(openCode, gameType)
+        // 更新后的数据
+        let needChangeList: Array<BotPledgeUpModel> = []
+        for (let i = 0; i < currList.length; i++) {
+            let item = currList[i]
+            if (item.content.indexOf(winningType.code.key) > -1) {
+                item.isWinning = 1
+                item.winningAmount = await BotOddsStorage.getOddsMoney(item.bettingType, item.amountMoney)
+                needChangeList.push(item)
+                break
+            }
+            if (item.content.indexOf(winningType.form.key) > -1) {
+                item.isWinning = 1
+                item.winningAmount = await BotOddsStorage.getOddsMoney(item.bettingType, item.amountMoney)
+                needChangeList.push(item)
+                break
+            }
+        }
+        let update = await new BotPledgeUpModel().updatePledgeUpList(needChangeList)
+        console.log('更新后的数据', update)
+        return needChangeList
     }
 }
 

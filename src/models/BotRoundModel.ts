@@ -1,6 +1,9 @@
 import {BaseEntity, Between, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
 import moment from "moment";
+import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
+import WinningTypeConfirm from "../botGame/const/WinningTypeConfirm";
+import BotGameConfig from "../botGame/BotGameConfig";
 
 
 @Entity({
@@ -125,6 +128,38 @@ class BotRoundModel extends BaseEntity{
                 end.format('YYYY-MM-DD HH:mm:ss')
             ))
             .getMany()
+    }
+
+    /**
+     * 保存开奖数据到数据库
+     */
+    public saveRound = (
+        json: Pc28LotteryJsonType,
+        gameType: GameTypeEnum,
+        entertained: number
+    ) => {
+        let curr = json.data[0]
+        let arr = json.data[0].open_code.split(',')
+        let winnerType = new WinningTypeConfirm().getLotteryDescPC28DI(curr.open_code)
+        this.roundId = Number(curr.expect)
+        this.result = curr.open_code
+        this.specialCode = winnerType.code.key
+        this.form = winnerType.form.key
+        this.roundType = gameType
+        this.fpTime = moment(curr.open_time).subtract(new BotGameConfig().FPTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
+        this.kjTime = curr.open_time
+        this.entertained = entertained
+        this.numOne = Number(arr[0])
+        this.numTwo = Number(arr[1])
+        this.numThree = Number(arr[2])
+        return BotRoundModel.save(this)
+    }
+
+    /**
+     * 获取上次开奖结果
+     */
+    public getPrevResult = () => {
+
     }
 }
 
