@@ -1,4 +1,5 @@
-import {BaseEntity, Column, createConnection, Entity, getConnection, getManager, PrimaryGeneratedColumn} from "typeorm";
+// @ts-nocheck
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import WalletType from "../type/WalletType";
 import ContextUtil from "../commons/ContextUtil";
 import {Context} from "telegraf";
@@ -14,7 +15,6 @@ import AESUtils from "../commons/AESUtils";
 import OrderUtils from "../commons/OrderUtils";
 import BotGameModel from "./BotGameModel";
 import ComputeUtils from "../commons/ComputeUtils";
-import dataSource from "../config/database";
 import database from "../config/database";
 
 
@@ -283,6 +283,18 @@ class BotPledgeUpModel extends BaseEntity {
             await queryRunner.release()
         }
     }
+
+    /**
+     * 取消上注(取消用户本期所有的下注内容)
+     */
+    public cancelPledgeUp = async (ctx: Context) => {
+        console.log('取消上注')
+        // 当前群组
+        let userModel = await new UserModel().getUserModel(ctx)
+    }
+
+
+    // -------------- 下面是一些基础的方法
 
     /**
      * 用户余额判断
