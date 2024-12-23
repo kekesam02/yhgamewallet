@@ -120,11 +120,11 @@ class CommandController {
     }
 
     /**
-     * 取消上注(暂时不实现了、等上注入完成后弄)
+     * 取消上注
      * @param ctx
      */
     public cancelBet = async (ctx: Context) => {
-        console.log('取消上注')
+        return new BotPledgeUpModel().cancelPledgeUp(ctx)
     }
 
     /**

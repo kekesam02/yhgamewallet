@@ -100,12 +100,11 @@ const startJob = () => {
     /**
      * 运行pc28游戏定时器（放入异步中、防止配置文件没有加载完成）
      */
-    // setTimeout(() => {
-    //     console.log('计时器只能触发一次')
-    //     ScheduleHandle.startPC28(bot)
-    // }, 1000)
+    setTimeout(() => {
+        ScheduleHandle.startPC28(bot)
+    }, 5000)
 }
-startJob()
+// startJob()
 
 
 // Enable graceful stop

@@ -8,6 +8,7 @@ import UserModel from "../../models/UserModel";
 import WalletType from "../../type/WalletType";
 import CommonEnumsIndex from "../../type/CommonEnumsIndex";
 import AESUtils from "../../commons/AESUtils";
+import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 
 /**
  * 游戏机器人返回的html字段
@@ -149,6 +150,59 @@ class GameBotHtml {
     }
 
     /**
+     * 生成封盘提醒html
+     */
+    public getCloseTips = (roundId: string): string => {
+        return `
+        ❗️❗️提醒❗️❗️❗️${this.N
+        }${roundId}"期封盘剩下30秒！${this.N
+        }以下下注一切以机器人收录为准${this.N
+        }如机器人未收录则无效！无争议！${this.N
+        }领取活动需按活动流水下分，未领取则不计算${this.N
+        }本群自由反水，输入反水即可反当前流水！
+        `
+    }
+
+    /**
+     * 生成停止上注 html
+     * @param roundId: 游戏期号
+     * @param startTime: 开奖时间
+     * @param pledgeUpList: 当前下注用户
+     */
+    public getStopTopHtml = (
+        roundId: string,
+        startTime: string,
+        pledgeUpList: Array<BotPledgeUpModel>
+    ): string => {
+        let headerHtml = `
+            <tg-emoji emoji-id='5368324170671202286'>\uD83D\uDC47</tg-emoji>期号：<code> ${roundId}</code> 停止下注${this.N
+            }<tg-emoji emoji-id='5368324170671202286'>\uD83D\uDC47</tg-emoji>开奖时间：${startTime}${this.N
+            }-----------------------
+        `
+        headerHtml += `
+            本期人数: ${pledgeUpList.length}${this.N
+            }-----本期下注玩家-----${this.N}
+        `
+        pledgeUpList.forEach(item => {
+            headerHtml += `
+                ${item.userName} ()
+            `
+        })
+        return headerHtml
+    }
+
+    /**
+     * 生成开奖结果文字描述html
+     */
+    public getLotteryTextHtml = (pledgeUpList: Array<BotPledgeUpModel>) => {
+
+    }
+
+
+
+
+
+    /**
      * 生成 pc28 开始下注html
      * @param json:  获取到的 json 数据
      * @param oddsMap: 赔率map表
@@ -168,8 +222,7 @@ class GameBotHtml {
         let currData = json.data[0]
         let nextTime = moment(currData.next_time)
         // 封盘时间
-        let fbTime = nextTime.subtract(1, 'seconds').format('YYYY-MM-DD hh:mm:ss')
-        console.log('封盘时间', fbTime)
+        let fbTime = nextTime.subtract(1, 'seconds').format('YYYY-MM-DD HH:mm:ss')
         return `
             <tg-emoji emoji-id=\"5368324170671202286\">\uD83C\uDFAA</tg-emoji>期号：<code>${currData.next_expect}</code>开始下注${this.N
 

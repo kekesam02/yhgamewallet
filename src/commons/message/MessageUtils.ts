@@ -20,6 +20,26 @@ import buttonUtils from "../button/ButtonUtils";
 class MessageUtils {
 
     /**
+     * 发送文本消息到群组
+     */
+    public botSendText = (
+        bot: Telegraf<Context>,
+        groupId: string,
+        text: string,
+        reply_markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply = {
+            inline_keyboard: []
+        }
+    ) => {
+        return bot.telegram.sendMessage(groupId,
+            text,
+            {
+                parse_mode: 'HTML',
+                reply_markup: reply_markup
+            }
+        )
+    }
+
+    /**
      * 发送文本、带回复用户的那条消息
      * @param ctx
      * @param text

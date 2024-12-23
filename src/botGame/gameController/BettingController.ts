@@ -1,12 +1,12 @@
-/**
- * 娱乐机器人下注控制器
- */
 import BotOddsStorage from "../../storage/BotOddsStorage";
 import {Context} from "telegraf";
 import BotGameModel from "../../models/BotGameModel";
 import BettingCommand28 from "../const/BettingCommand28";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 
+/**
+ * 娱乐机器人下注控制器
+ */
 class BettingController {
 
     // 当前传入的下注相关指令

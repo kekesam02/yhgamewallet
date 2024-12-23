@@ -121,8 +121,8 @@ class BotRoundModel extends BaseEntity{
         let end = moment(endTime)
         return BotRoundModel.createQueryBuilder()
             .where(Between(
-                start.format('YYYY-MM-DD hh:mm:ss'),
-                end.format('YYYY-MM-DD hh:mm:ss')
+                start.format('YYYY-MM-DD HH:mm:ss'),
+                end.format('YYYY-MM-DD HH:mm:ss')
             ))
             .getMany()
     }
