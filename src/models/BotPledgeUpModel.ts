@@ -1,4 +1,4 @@
-import {BaseEntity, Column, createConnection, Entity, getConnection, PrimaryGeneratedColumn} from "typeorm";
+import {BaseEntity, Column, createConnection, Entity, getConnection, getManager, PrimaryGeneratedColumn} from "typeorm";
 import WalletType from "../type/WalletType";
 import ContextUtil from "../commons/ContextUtil";
 import {Context} from "telegraf";
@@ -14,6 +14,8 @@ import AESUtils from "../commons/AESUtils";
 import OrderUtils from "../commons/OrderUtils";
 import BotGameModel from "./BotGameModel";
 import ComputeUtils from "../commons/ComputeUtils";
+import dataSource from "../config/database";
+import database from "../config/database";
 
 
 /**
@@ -224,10 +226,11 @@ class BotPledgeUpModel extends BaseEntity {
         gameData: string,
         odds: BotOddsModel
     ) => {
-        return createConnection().then(async connection => {
+        let queryRunner = database.createQueryRunner()
+        await queryRunner.startTransaction()
+        try {
             // 用户对象
             let userModel = await new UserModel().getUserModel(ctx)
-            console.log('开始执行', userModel.USDT)
             if (!await this.userBalanceJudge(ctx, userModel, money, roundId, content)) {
                 // 用户余额不足
                 return
@@ -245,7 +248,8 @@ class BotPledgeUpModel extends BaseEntity {
                     }
                 }
             }
-            let wallType = userModel.CUSDT >= money? WalletType.CUSDT: WalletType.USDT
+            // 当前下注钱包类型
+            let wallType = new ComputeUtils(userModel.CUSDT).comparedTo(money) >= 0? WalletType.CUSDT: WalletType.USDT
 
             let upId = new OrderUtils().createPledgeUpModelId()
             this.tgId = AESUtils.decodeUserId(userModel.tgId)
@@ -269,12 +273,15 @@ class BotPledgeUpModel extends BaseEntity {
             } else {
                 userModel.CUSDT = new ComputeUtils(userModel.CUSDT).minus(money).toString()
             }
-            await userModel.updateUser()
-            await BotPledgeUpModel.save(this)
+            await queryRunner.manager.save(userModel)
+            await queryRunner.manager.save(this as BotPledgeUpModel)
             let html = new GameBotHtml().getBettingHtml(userModel, roundId, content, wallType)
             await new MessageUtils().sendTextReply(ctx, html)
-            throw new Error('出错了')
-        })
+        } catch (err) {
+            await queryRunner.rollbackTransaction()
+        } finally {
+            await queryRunner.release()
+        }
     }
 
     /**

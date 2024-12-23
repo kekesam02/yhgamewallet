@@ -1,7 +1,7 @@
 import { getConfig } from "./config"
 import {DataSource} from "typeorm";
 
-const seq = new DataSource({
+const dataSource = new DataSource({
   type: 'mysql',
   host: getConfig().database.host,
   port: getConfig().database.port,
@@ -18,4 +18,11 @@ const seq = new DataSource({
   // subscribers: ['src/subscriber/**/*{.ts,.js}'],
 })
 
-export default seq
+/**
+ * 添加事务处理
+ */
+export let startTransaction = () => {
+
+}
+
+export default dataSource

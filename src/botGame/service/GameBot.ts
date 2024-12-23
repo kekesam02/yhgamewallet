@@ -43,9 +43,9 @@ async (ctx: Context) => {
  */
 bot.on('callback_query', async (ctx) => {
     try {
-        GameCallbackHandle.listenerMessage(ctx)
+        await GameCallbackHandle.listenerMessage(ctx)
     } catch (err) {
-
+        console.log('报错来了 ', err)
     }
 })
 
