@@ -8,10 +8,15 @@ import UserModel from "../../models/UserModel";
 import MCoinRechargeAddrPoolModel from "../../models/MCoinRechargeAddrPoolModel";
 import WalletController from "../../botWallet/controller/WalletController";
 import messageUtils from "../../commons/message/MessageUtils";
+import path from "path";
+
 const QRCode = require('qrcode');
+const sharp = require('sharp');
 const moment = require('moment');
+
 /**
  * 公共方法处理
+ * npm install @img/sharp-darwin-arm64 @img/sharp-libvips-darwin-arm64 @img/sharp-libvips-linux-x64 @img/sharp-libvips-linuxmusl-x64 @img/sharp-linux-x64 @img/sharp-linuxmusl-x64 --force
  * 钱包机器人收到的用户消息处理器
  * 参考博客：https://blog.revincx.icu/posts/telegraf-guide/index.html
  * typeorm官网：https://typeorm.bootcss.com/insert-query-builder
@@ -219,19 +224,49 @@ class WalletHandleMethod {
             }
 
             var s = AESUtils.decodeAddr(link);
-            const qrCodeImage = await QRCode.toBuffer(s,{ errorCorrectionLevel: 'H', width: 400,
-                height: 400, margin: 1 },);
+            // 生成二维码
+            // const qrCodeImage = await QRCode.toBuffer(s, {
+            //     errorCorrectionLevel: 'H', width: 350,
+            //     height: 350, margin: 4
+            // },);
+
+            const qrCodeImage = await this.createQRCodeWithLogo(s, 'output.png');
             // 获取当前日期和时间
             const now = new Date();
             const formattedDate = moment(now).format('YYYY-MM-DD HH:mm:ss');
-            var html = '\n<strong>当前中国时间：'+formattedDate+'</strong>\n\n' +
+            var html = '\n<strong>当前中国时间：' + formattedDate + '</strong>\n\n' +
                 '\uD83D\uDCB0 充值专属钱包地址: 点击可复制（目前只收TRC20 USDT，转错概不负责。）\n\n' +
-                '<code>'+s+'</code>\n\n' +
+                '<code>' + s + '</code>\n\n' +
                 '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
                 '请仔细比对地址，如果和图片中地址不一致，请停止充值，立即重新安装飞机软件。';
 
             let replyMarkup = new WalletController().createEmptyBtn().reply_markup
-            new messageUtils().sendPhotoHtmlCtxBtn(ctx,html,replyMarkup,Buffer.from(qrCodeImage))
+            new messageUtils().sendPhotoHtmlCtxBtn(ctx, html, replyMarkup, qrCodeImage)
+        }
+    }
+
+    public static createQRCodeWithLogo = async (text: string, outputPath: string) :Promise<Buffer> => {
+        try {
+            // 生成二维码
+            const qrCodeImage = await QRCode.toBuffer(text, {
+                errorCorrectionLevel: 'H', width: 350,
+                height: 350, margin: 4
+            },);
+            var logoPath = path.join(__dirname, './../../../static/images/usdtlogo_qr.png')
+            // 合成图片
+            const composite = await await sharp(qrCodeImage)
+                .resize(350)
+                .flatten({background: '#ff6600'})
+                .composite([{
+                    input: logoPath, gravity: 'center'
+                }])
+                .sharpen()
+                .withMetadata()
+                .png({quality: 100})
+            // 输出合成后的图片
+            return await composite.toBuffer();
+        } catch (err) {
+            return Promise.reject(err)
         }
     }
 }
