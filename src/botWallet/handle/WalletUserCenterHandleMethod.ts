@@ -54,6 +54,12 @@ class WalletUserCenterHandleMethod {
             }).where('id = :id', {id: user.id}).execute();
         }
 
+        // 删除上一次消息
+        var messageId:number = ctx.callbackQuery?.message?.message_id || 0
+        if (messageId > 0) {
+            ctx.deleteMessage(messageId)
+        }
+
         // 3：发送带有分享按钮的消息
         var html = new WalletBotHtml().getBotStartHtml(tgId, user!)
         try {

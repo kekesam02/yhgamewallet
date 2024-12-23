@@ -6,6 +6,7 @@ import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import AESUtils from "../../commons/AESUtils";
 import UserModel from "../../models/UserModel";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
+import MCoinRechargeAddrPoolModel from "../../models/MCoinRechargeAddrPoolModel";
 
 /**
  * 公共方法处理
@@ -27,7 +28,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         var firstName: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
-        this.startCommand(ctx, tgId, firstName, username)
+        this.startCommand(ctx, tgId, username, firstName)
     }
 
     /**
@@ -39,7 +40,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.message?.from?.id || 0
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
-        this.startCommand(ctx, tgId, firstName, username)
+        this.startCommand(ctx, tgId,username, firstName)
     }
 
     /**
@@ -146,11 +147,13 @@ class WalletHandleMethod {
         // 根据tgId查询用户是否存在。
         let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
         var link: string | undefined = '';
+        console.log("1===========botUser=========>",botUser)
         //获取专属充值连接，先查询是否有充值连接，没有的话就拿充值链接并且赋值
         if (!botUser) {
             let botTronAddrModel = await BotTronAddrModel.createQueryBuilder()
                 .where("uses = :uses", {uses: 0}).limit(0).offset(1).getOne()
             link = botTronAddrModel?.addr;
+            console.log("2===========botTronAddrModel=========>",botTronAddrModel)
             // 如果用户不存在就添加用户，把交易地址赋值给他
             await UserModel.createQueryBuilder().insert().into(UserModel).values({
                 tgId: userId,
@@ -159,54 +162,66 @@ class WalletHandleMethod {
                 vip: 0,
                 promotionLink: '',
                 rechargeLink: link
-            }).execute();
-            // 并且标识交易地址为使用
+            }).execute()
+            // 回查用户的信息
+            botUser =  await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
+            // 标识交易地址为使用
             await BotTronAddrModel.createQueryBuilder().update().set({uses: 1}).where("id=:id", {'id': botTronAddrModel?.id}).execute()
-            //加入到监听
-            // MCoinRechargeAddrPool mCoinRechargeAddrPool = new MCoinRechargeAddrPool();
-            // mCoinRechargeAddrPool.setAddress(link);
-            // mCoinRechargeAddrPool.setPrivateKey("");
-            // mCoinRechargeAddrPool.setCurrency("USDT");
-            // mCoinRechargeAddrPoolService.save(mCoinRechargeAddrPool);
+            // 加入到监听池中
+            await MCoinRechargeAddrPoolModel.createQueryBuilder()
+                .insert().into(MCoinRechargeAddrPoolModel)
+                .values({
+                    username:username,
+                    nickname:firstName,
+                    userId:botUser?.id,
+                    tgId:userId,
+                    address:link,
+                    privateKey:"",
+                    currency:"USDT"
+                }).execute()
+
         } else {
-            // //没有支付链接
-            // if (Objects.isNull(userById.getRechargeLink())){
-            //     BotTronAddr botTronAddr = botTronAddrService.lambdaQuery()
-            //         .eq(BotTronAddr::getUses, CommonEnums.ZERO)
-            //         .list().get(0);
-            //     link=botTronAddr.getAddr();
-            //     botUserService.updateUserLink(tgId,link);
-            //     botTronAddrService.lambdaUpdate().eq(BotTronAddr::getId,botTronAddr.getId())
-            //         .set(BotTronAddr::getUses,CommonEnums.ONE).update();
-            //     //加入到监听
-            //     MCoinRechargeAddrPool mCoinRechargeAddrPool = new MCoinRechargeAddrPool();
-            //     mCoinRechargeAddrPool.setAddress(link);
-            //     mCoinRechargeAddrPool.setPrivateKey("");
-            //     mCoinRechargeAddrPool.setCurrency("USDT");
-            //     mCoinRechargeAddrPoolService.save(mCoinRechargeAddrPool);
-            // }else {
-            //     link= userById.getRechargeLink();
-            // }
+            console.log("3===========botUser=========>",botUser)
+            // 如果用户存在，交易地址不存在，就分配一个交易地址给用户
+            if (!botUser.rechargeLink){
+                let botTronAddrModel = await BotTronAddrModel.createQueryBuilder()
+                    .where("uses = :uses", {uses: 0}).getOne()
+                link = botTronAddrModel?.addr;
+
+                // 修改用户交易地址
+                await UserModel.createQueryBuilder().update(UserModel).set({
+                    nickName: firstName,
+                    rechargeLink: link
+                }).where('id = :id', {id: botUser.id}).execute()
+
+                // 标识交易地址为使用
+                await BotTronAddrModel.createQueryBuilder().update().set({uses: 1}).where("id=:id", {'id': botTronAddrModel?.id}).execute()
+
+                // 加入到监听池中
+                await MCoinRechargeAddrPoolModel.createQueryBuilder()
+                    .insert().into(MCoinRechargeAddrPoolModel)
+                    .values({
+                        username:username,
+                        nickname:firstName,
+                        userId:botUser.id,
+                        tgId:userId,
+                        address:link,
+                        privateKey:"",
+                        currency:"USDT"
+                    }).execute()
+            }else{
+                link = botUser.rechargeLink
+            }
         }
-
-        //封装数据
-//            String botParameter = BotEncapsulateTextWallet.sendMsgZflj();
-//            //发送支付信息
-//            botEncapsulation.sendMenu(tgId,botParameter,bot);
-        //封装数据
-        //取消上一次消息
-        // if (Objects.nonNull(callbackQueryId)){
-        //     botEncapsulation.delSend(callbackQueryId,bot);
-        //     // 删除上一个消息
-        //     botEncapsulation. deleteMessage(chatId, messageId,bot);
-        // }
-        // String s = AESUtil.jieAESAddr(link);
-        // BotParameter entertained = BotEncapsulateTextWallet.entertained(s);
-        // //获取图片
-        // InputStream inputStream = QRCodeGenerator.zfTp(s);
-        // //发送支付链接
-        // botEncapsulation.sendMenuImage(tgId,inputStream,entertained.getHtml(),entertained.getKeyboardMarkup(),bot);
-
+        if (link != null) {
+            var messageId:number = ctx.callbackQuery?.message?.message_id || 0
+            if (messageId > 0) {
+                ctx.deleteMessage(messageId)
+            }
+            // 开始发送图片二维码给用户
+            //var s = AESUtils.decodeAddr(link);
+            ctx.reply(AESUtils.decodeAddr(link) + "______" + link)
+        }
     }
 }
 

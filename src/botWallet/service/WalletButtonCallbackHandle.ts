@@ -17,31 +17,39 @@ class WalletButtonCallbackHandle {
             // 我的账单
             case WalletUserCenterEnum.BACCOUNT:
                 WalletHandleMethod.startButtonBack(ctx)
+                break
             // 提币历史
             case WalletUserCenterEnum.TBLS:
                 WalletHandleMethod.startButtonBack(ctx)
+                break
             // 彩金转化
             case WalletUserCenterEnum.CTRXZH:
                 WalletHandleMethod.startButtonBack(ctx)
+                break
             // 领取邀请返利
             case WalletUserCenterEnum.YQFL:
                 WalletHandleMethod.startButtonBack(ctx)
+                break
             // 首充返利
             case WalletUserCenterEnum.SCFL:
                 WalletHandleMethod.startButtonBack(ctx)
+                break
             // 小额免密
             case WalletUserCenterEnum.XEMM:
                 WalletHandleMethod.startButtonBack(ctx)
+                break
             // 邀请好友
             case WalletUserCenterEnum.YQHY:
                 WalletHandleMethod.startButtonBack(ctx)
+                break
             // 设置提现地址
             case WalletUserCenterEnum.SZTXDZ:
                 WalletHandleMethod.startButtonBack(ctx)
+                break
             // 主菜单
             case WalletUserCenterEnum.HOME:
                 WalletHandleMethod.startButtonBack(ctx)
-
+                break
             // ===============================按钮组2：用户充值、提现===========================
             // 充值
             case StartWalletEnum.CHONGZHI:
