@@ -1,4 +1,4 @@
-import {BaseEntity, Column, createConnection, Entity, PrimaryGeneratedColumn, UpdateResult} from "typeorm";
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn, UpdateResult} from "typeorm";
 import {Context} from "telegraf";
 import AESUtils from "../commons/AESUtils";
 import WalletType from "../type/WalletType";
@@ -265,13 +265,11 @@ class UserModel extends BaseEntity{
      * 新建用户
      */
     public createNewUser = async (ctx: Context): Promise<UserModel> => {
-        return createConnection().then(async connection => {
-            this.promotionLink = ''
-            this.tgId = AESUtils.encodeUserId(ctx?.from?.id.toString())
-            this.userName = ctx?.from?.username ?? ''
-            this.nickName = `${ctx?.from?.first_name}${ctx?.from?.last_name}`
-            return UserModel.save(this)
-        })
+        this.promotionLink = ''
+        this.tgId = AESUtils.encodeUserId(ctx?.from?.id.toString())
+        this.userName = ctx?.from?.username ?? ''
+        this.nickName = `${ctx?.from?.first_name}${ctx?.from?.last_name}`
+        return UserModel.save(this)
     }
 
     /**
@@ -279,9 +277,7 @@ class UserModel extends BaseEntity{
      * @param user
      */
     public updateUser = async (): Promise<UserModel> => {
-        return createConnection().then(async connection => {
-            return  UserModel.save(this)
-        })
+        return UserModel.save(this)
     }
 
     /**

@@ -60,7 +60,7 @@ class GameBotHtml {
      */
     public getBettingHtml = (
         user: UserModel,
-        roundId: string,
+        roundId: number,
         content: string,
         wallType: WalletType
     ): string => {

@@ -227,6 +227,7 @@ class BotPledgeUpModel extends BaseEntity {
         return createConnection().then(async connection => {
             // 用户对象
             let userModel = await new UserModel().getUserModel(ctx)
+            console.log('开始执行', userModel.USDT)
             if (!await this.userBalanceJudge(ctx, userModel, money, roundId, content)) {
                 // 用户余额不足
                 return
@@ -270,6 +271,8 @@ class BotPledgeUpModel extends BaseEntity {
             }
             await userModel.updateUser()
             await BotPledgeUpModel.save(this)
+            let html = new GameBotHtml().getBettingHtml(userModel, roundId, content, wallType)
+            await new MessageUtils().sendTextReply(ctx, html)
             throw new Error('出错了')
         })
     }
@@ -285,8 +288,8 @@ class BotPledgeUpModel extends BaseEntity {
         content: string
     ) => {
         if (
-            new ComputeUtils(userModel.USDT).comparedTo(1) >= 0 &&
-            new ComputeUtils(userModel.CUSDT).comparedTo(1) >= 0
+            new ComputeUtils(userModel.USDT).comparedTo(1) < 0 &&
+            new ComputeUtils(userModel.CUSDT).comparedTo(1) < 0
         ) {
             // 判断用户余额小于1提示用户余额不足
             await new MessageUtils().sendTextReply(
@@ -301,8 +304,8 @@ class BotPledgeUpModel extends BaseEntity {
             return true
         }
         if (
-            new ComputeUtils(userModel.USDT).comparedTo(money) >= 0 &&
-            new ComputeUtils(userModel.CUSDT).comparedTo(money) >= 0
+            new ComputeUtils(userModel.USDT).comparedTo(money) < 0 &&
+            new ComputeUtils(userModel.CUSDT).comparedTo(money) < 0
         ) {
             // 判断用户余额小于1提示用户余额不足
             await new MessageUtils().sendTextReply(

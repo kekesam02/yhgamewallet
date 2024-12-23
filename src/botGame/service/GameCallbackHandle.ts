@@ -11,7 +11,7 @@ import CommandController from "../gameController/CommandController";
  * 娱乐机器人接收到的用户按钮点击事件处理器
  */
 class GameCallbackHandle {
-    public static listenerMessage = (ctx: Context) => {
+    public static listenerMessage = async (ctx: Context) => {
         console.log('callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
@@ -19,7 +19,7 @@ class GameCallbackHandle {
             case StartGameEnum.LOW:
                 // 开始 pc28 低倍游戏
                 let pc28Controller = new PC28Controller()
-                pc28Controller.joinPC28Low(ctx)
+                await pc28Controller.joinPC28Low(ctx)
                 break
             case StartGameEnum.HIGH:
                 // 开始 pc28 高倍游戏
@@ -32,19 +32,19 @@ class GameCallbackHandle {
             // ----------------  下面是查询用户点击相关事件
             case GameController.lookBalance.query:
                 // 查询用户余额
-                new GameFindController(ctx).getUserBalance().then()
+                await new GameFindController(ctx).getUserBalance()
                 break
             case GameController.recentBetting.query:
                 // 查询用户最近投注情况
-                new GameFindController(ctx).getUserRecentBetting().then()
+                await new GameFindController(ctx).getUserRecentBetting()
                 break
             case GameController.flowingWater.query:
                 // 查询用户流水
-                new GameFindController(ctx).getUserFlowingWater()
+                await new GameFindController(ctx).getUserFlowingWater()
                 break
             case GameController.profitLoss.query:
                 // 查询用户盈亏
-                new GameFindController(ctx).getUserProfitLoss()
+                await new GameFindController(ctx).getUserProfitLoss()
                 break
         }
     }

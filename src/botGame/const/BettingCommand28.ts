@@ -132,10 +132,10 @@ class BettingCommand28 {
             // 梭哈处理
             return this.startBetting(text, '梭哈', curr)
         }
-        let money = curr[0] === text
+        let money = curr[0] == text.substring(0, curr[0].length)
             ? text.replaceAll(curr[0]!, '')
             : text.replaceAll(curr[1]!, '')
-        if (!isNaN(Number(money))) {
+        if (isNaN(Number(money))) {
             // 没有传入金额chilled
             return
         }

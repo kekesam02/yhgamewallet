@@ -42,7 +42,11 @@ async (ctx: Context) => {
  * 监听用户点击按钮回调
  */
 bot.on('callback_query', async (ctx) => {
-    GameCallbackHandle.listenerMessage(ctx)
+    try {
+        GameCallbackHandle.listenerMessage(ctx)
+    } catch (err) {
+
+    }
 })
 
 bot.on('inline_query', async (ctx) => {
