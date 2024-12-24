@@ -104,7 +104,7 @@ const startJob = () => {
      */
     // setTimeout(() => {
     //     ScheduleHandle.startPC28(bot)
-    // }, 5000)
+    // }, 10000)
 }
 startJob()
 

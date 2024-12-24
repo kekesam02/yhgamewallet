@@ -8,9 +8,10 @@ import UserModel from "../../models/UserModel";
 import WalletType from "../../type/WalletType";
 import CommonEnumsIndex from "../../type/CommonEnumsIndex";
 import AESUtils from "../../commons/AESUtils";
-import BotPledgeUpModel from "../../models/BotPledgeUpModel";
+import BotPledgeUpModel, {PledgeUpInfoType} from "../../models/BotPledgeUpModel";
 import WinningTypeConfirm from "../../botGame/const/WinningTypeConfirm";
 import ComputeUtils from "../../commons/ComputeUtils";
+import BotGameConfig from "../../botGame/BotGameConfig";
 
 /**
  * 游戏机器人返回的html字段
@@ -37,9 +38,13 @@ class GameBotHtml {
     public getBalanceNot = (
         user: UserModel,
         roundId: number,
-        content: string
+        pledgeUpInfo: PledgeUpInfoType
     ): string => {
         let userId = AESUtils.decodeUserId(user.tgId)
+        let content = ''
+        pledgeUpInfo.list.forEach(item => {
+            content = `${item.content}${this.N}`
+        })
         return `
             昵称: <a href="tg://user?id=${userId}">${user.userName}</a>${this.N
             }ID: <code>${userId}</code>${this.N
@@ -63,18 +68,24 @@ class GameBotHtml {
      */
     public getBettingHtml = (
         user: UserModel,
-        roundId: number,
-        content: string,
+        pledgeUpInfo: PledgeUpInfoType,
         wallType: WalletType
     ): string => {
-        let userId = AESUtils.decodeUserId(user.tgId)
+        let content = ''
         let wallTypeStr = new CommonEnumsIndex().getWalletTypeStr(wallType)
-        let vipHtml = '1'
+        pledgeUpInfo.list.forEach(item => {
+            content = `${content}${item.content}${wallTypeStr}${this.N}`
+        })
+        if (pledgeUpInfo.list[0].command == '梭哈') {
+            content = `${pledgeUpInfo.list[0].content}${pledgeUpInfo.totalMoney}${wallTypeStr}${this.N}`
+        }
+        let userId = AESUtils.decodeUserId(user.tgId)
+        // let vipHtml = '1'
         return `
-            ${vipHtml} ${user.userName} 【${userId}】${this.N
-            }当前期号：<code>${roundId}</code>${this.N
+            ${user.userName} 【${userId}】${this.N
+            }当前期号：<code>${pledgeUpInfo.roundId}</code>${this.N
             }下注成功内容${this.N
-            }${content}${wallTypeStr}${this.N
+            }${content}${this.N
             }---------------${this.N
             }余额: ${wallTypeStr}${user.getBalance(wallType)}
         `
@@ -157,7 +168,7 @@ class GameBotHtml {
     public getCloseTips = (roundId: string): string => {
         return `
         ❗️❗️提醒❗️❗️❗️${this.N
-        }${roundId}"期封盘剩下30秒！${this.N
+        }${roundId}期封盘剩下30秒！${this.N
         }以下下注一切以机器人收录为准${this.N
         }如机器人未收录则无效！无争议！${this.N
         }领取活动需按活动流水下分，未领取则不计算${this.N
@@ -179,16 +190,12 @@ class GameBotHtml {
         let headerHtml = `
             <tg-emoji emoji-id='5368324170671202286'>\uD83D\uDC47</tg-emoji>期号：<code> ${roundId}</code> 停止下注${this.N
             }<tg-emoji emoji-id='5368324170671202286'>\uD83D\uDC47</tg-emoji>开奖时间：${startTime}${this.N
-            }-----------------------
-        `
-        headerHtml += `
-            本期人数: ${pledgeUpList.length}${this.N
+            }-----------------------${this.N
+            }本期人数: ${pledgeUpList.length}${this.N
             }-----本期下注玩家-----${this.N}
         `
         pledgeUpList.forEach(item => {
-            headerHtml += `
-                ${item.userName} ()
-            `
+            headerHtml += `${item.userName} ${item.content}${new CommonEnumsIndex().getWalletTypeStr(item.walletType)}`
         })
         return headerHtml
     }
@@ -209,7 +216,9 @@ class GameBotHtml {
         pledgeUpList: Array<BotPledgeUpModel>
     ) => {
         let arrCode = code.split(',')
-        let sum = arrCode.reduce((prev, curr) => prev + curr)
+        let sum = arrCode.reduce((prev, curr) => {
+            return prev.add(curr)
+        }, new ComputeUtils(0)).toString()
         let winnerType = new WinningTypeConfirm().getLotteryDesc(code, gameType)
         let html = `${roundId}期开奖${this.N
         }${arrCode[0]}+${arrCode[1]}+${arrCode[2]}=${sum}(${winnerType.code.key})${this.N
@@ -249,7 +258,7 @@ class GameBotHtml {
         let currData = json.data[0]
         let nextTime = moment(currData.next_time)
         // 封盘时间
-        let fbTime = nextTime.subtract(1, 'seconds').format('YYYY-MM-DD HH:mm:ss')
+        let fbTime = nextTime.subtract(new BotGameConfig().FPTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
         return `
             <tg-emoji emoji-id=\"5368324170671202286\">\uD83C\uDFAA</tg-emoji>期号：<code>${currData.next_expect}</code>开始下注${this.N
 

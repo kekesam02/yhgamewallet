@@ -1,7 +1,9 @@
 import BotGameModel from "../../models/BotGameModel";
 import {Context} from "telegraf";
 import BotOddsModel from "../../models/BotOddsModel";
-import BotPledgeUpModel from "../../models/BotPledgeUpModel";
+import BotPledgeUpModel, {PledgeUpInfoType} from "../../models/BotPledgeUpModel";
+import StringUtils from "../../commons/StringUtils";
+import ComputeUtils from "../../commons/ComputeUtils";
 
 
 /**
@@ -22,25 +24,6 @@ class BettingCommand28 {
     public oddsList: Array<BotOddsModel>
 
     public commandList = [
-        /**
-         * 大
-         */
-        ['大', 'D'],
-
-        /**
-         * 小
-         */
-        ['小', 'x'],
-
-        /**
-         * 单
-         */
-        ['单', 'd'],
-
-        /**
-         * 双
-         */
-        ['双', 's'],
 
         /**
          * 大单
@@ -96,7 +79,27 @@ class BettingCommand28 {
         /**
          * 点杀
          */
-        ['点杀', '.']
+        ['杀', '.'],
+
+        /**
+         * 大
+         */
+        ['大', 'D'],
+
+        /**
+         * 小
+         */
+        ['小', 'x'],
+
+        /**
+         * 单
+         */
+        ['单', 'd'],
+
+        /**
+         * 双
+         */
+        ['双', 's']
     ]
 
     constructor(
@@ -112,87 +115,120 @@ class BettingCommand28 {
     /**
      * 监听用户 pc28 下注指令
      */
-    public listenerCommand = (
+    public listenerCommand = async (
     ) => {
         let text = this.ctx.text!
-        let commandStr = text
-        // 是否是梭哈
-        let allIn = false
-        // 梭哈
-        if (text.indexOf('梭哈') == 0 || text.indexOf('sh') == 0 ) {
-            commandStr = text.substring(2, text.length)
-            allIn = true
-        }
-
-        // 当前是点杀数字
-        if (text.indexOf('杀') > -1 || text.indexOf('.') > -1) {
-            let arr = text.indexOf('杀') > -1? text.split('杀'): text.split('.')
-            let money = Number(arr[2])
-            // 当前点杀数字
-            let code = Number(arr[0])
-            if (isNaN(money) || isNaN(code)) {
-                // 金额解析错误
-                return
-            }
-            if (code > -1 || code < 27) {
-                // 点杀数字符合规则
-                this.startBetting(text, `${money}`, this.commandList[this.commandList.length - 1])
-            }
-        }
-
-        let curr = this.commandList.find(item => {
-            if (item[0] == commandStr.substring(0, item[0].length)
-                || item[1] == commandStr.substring(0, item[1].length)
-            ) {
-                return item
-            }
-        })
-        if (!curr) return;
-        if (allIn) {
-            // 梭哈处理
-            return this.startBetting(text, '梭哈', curr)
-        }
-        let money = curr[0] == text.substring(0, curr[0].length)
-            ? text.replaceAll(curr[0]!, '')
-            : text.replaceAll(curr[1]!, '')
-        if (isNaN(Number(money))) {
-            // 没有传入金额chilled
-            return
-        }
-        this.startBetting(text, money, curr)
+        let  parseList =  this.parseCommand(text)
+        await new BotPledgeUpModel().createNewPledgeUp(
+            this.ctx,
+            this.group,
+            parseList
+        )
     }
 
     /**
-     * 开始下注
-     * @param: 下注内容
-     * @param: 下注金额
-     * @param: 当前下注的指令(大双、大单之类的)
+     * 解析下注指令
      */
-    public startBetting = (
-        content: string,
-        money: string,
-        currCommand: Array<string>
-    ) => {
-        let currOdds = this.oddsList.find(item => {
-            if (currCommand.includes(item.name) || currCommand.includes(item.alias)) {
-                return item
-            }
-        })
-        if (!currOdds) {
-            return
+    public parseCommand = (text: string): PledgeUpInfoType => {
+        let arr = text.split(' ')
+        let resultList: PledgeUpInfoType = {
+            roundId: 123,
+            totalMoney: '0',
+            list: []
         }
-        console.log('当前下注内容', content)
-        console.log('当前的赔率信息', currOdds)
-        // 保存上注信息
-        return new BotPledgeUpModel().createNewPledgeUp(
-            this.ctx,
-            123,
-            money,
-            this.group,
-            content,
-            content,
-            currOdds
-        )
+        for (let i = 0; i < arr.length; i++) {
+            let itemText = arr[i]
+            // 当前下注金额
+            let money = '0'
+            // 当前是几杀
+            let sha = ''
+            // 获取当前指令
+            let currCommand: Array<string> | undefined = this.commandList.find(item2 => {
+                // 点杀处理
+                if (item2[0] == '杀' && new StringUtils().isStartWithNum(itemText)) {
+                    // 判断传入的是杀还是.   true 杀
+                    let isStr = itemText.indexOf('杀') > -1
+                    let first = isStr ? itemText.split('杀')[0]: itemText.split('.')[0]
+                    sha = first + '杀'
+                    money = isStr
+                        ? itemText.replaceAll(first + '杀', '')
+                        : itemText.replaceAll(first + '.', '')
+                    if (!isStr) {
+                        itemText = itemText.replaceAll(first + '.', first + '杀')
+                    }
+                    return item2
+                }
+                // 其他指令处理
+                if (
+                    itemText.substring(0, item2[0].length) == item2[0]
+                    || itemText.substring(0, item2[1].length) == item2[1]
+                ) {
+                    money =  itemText.substring(0, item2[0].length) == item2[0]
+                        ? itemText.replaceAll(item2[0], '')
+                        : itemText.replaceAll(item2[1], '')
+                    return item2
+                }
+            })
+            if (!currCommand) {
+                console.log('指令不存在')
+                break
+            }
+            console.log('金币', money)
+
+            // 如果是梭哈的话判定一下后面的指令能否对上、如果对不上直接break
+            if (currCommand[0] == '梭哈') {
+                if (money == '梭哈') {
+                    break
+                }
+                let exit = this.commandList.find(item2 => item2.indexOf(money) > -1)
+                if (!exit) {
+                    break
+                }
+            }
+
+            // 如果不是梭哈的话判定后面文字是否为数字、不是数字直接break
+            if (currCommand[0] != '梭哈' && isNaN(Number(money))) {
+                console.log('解析不到金额指令')
+                break
+            }
+
+            // 获取赔率数据
+            let odds: BotOddsModel | undefined = this.oddsList.find(item => {
+                if (currCommand?.[0] == '杀') {
+                    // 点杀处理
+                    if (sha == item.name || sha == item.alias) {
+                        return item
+                    }
+                } else if (currCommand?.[0] == '梭哈') {
+                    // 梭哈处理
+                    if (money.indexOf(item.name) > -1 || money.indexOf(item.alias) > -1) {
+                        return item
+                    }
+                } else {
+                    if (currCommand!.includes(item.name) || currCommand!.includes(item.alias)) {
+                        return item
+                    }
+                }
+
+            })
+            if (!odds) {
+                break
+            }
+
+            // 获取投注总金额、在后面用来判定余额是否足够
+            if (currCommand[0] != '梭哈') {
+                // 设置下注的总金额
+                resultList.totalMoney = new ComputeUtils(0).add(money).toString()
+            }
+            resultList.list.push({
+                money: money,
+                content: itemText,
+                command: currCommand[0],
+                odds: odds
+            })
+        }
+        console.log('整理后的数据', resultList)
+        return resultList
     }
 }
 
