@@ -13,7 +13,7 @@ enum StartWalletEnum {
     CHONGZHI = 'chongzhi_btn',
 
     /**
-     * 体现
+     * 提现
      */
     TIXIAN = 'tixian_btn',
 
@@ -33,7 +33,7 @@ enum StartWalletEnum {
     HONGBAO = 'hongbao_btn',
 
     /**
-     * 充值
+     * 闪兑
      */
     SHANGDUI = 'shandui_btn',
 

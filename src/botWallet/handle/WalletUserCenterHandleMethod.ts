@@ -119,6 +119,78 @@ class WalletUserCenterHandleMethod {
 
         }
     }
+
+    /**
+     * 我的账单
+     * 代号：baccount_btn
+     * @param ctx
+     */
+    public static startBAccount = async (ctx: Context) => {
+
+    }
+
+    /**
+     * 提币历史
+     * 代号：tbls_btn
+     * @param ctx
+     */
+    public static startTbls = async (ctx: Context) => {
+
+    }
+
+    /**
+     * 彩金转化
+     * 代号：ctrxzh_btn
+     * @param ctx
+     */
+    public static startCtrxzh = async (ctx: Context) => {
+
+    }
+
+    /**
+     * 领取邀请返利
+     * 代号：yqfl_btn
+     * @param ctx
+     */
+    public static startYqfl = async (ctx: Context) => {
+
+    }
+
+    /**
+     * 首充返利
+     * 代号：scfl_btn
+     * @param ctx
+     */
+    public static startScfl = async (ctx: Context) => {
+
+    }
+
+    /**
+     * 小额免密
+     * 代号：xemm_btn
+     * @param ctx
+     */
+    public static startXemm = async (ctx: Context) => {
+
+    }
+
+    /**
+     * 邀请好友
+     * 代号：yqhy_btn
+     * @param ctx
+     */
+    public static startYqhy = async (ctx: Context) => {
+
+    }
+
+    /**
+     * 设置提现地址
+     * 代号：sztxdz_btn
+     * @param ctx
+     */
+    public static startTxdz = async (ctx: Context) => {
+
+    }
 }
 
 
