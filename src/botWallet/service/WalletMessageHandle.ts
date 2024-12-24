@@ -1,6 +1,6 @@
 import type {Context} from "telegraf";
 import WalletCommand from "../const/WalletCommand";
-import WalletHandleMethod from "../handle/WalletHandleMethod";
+import WalletHandleMethod from "./handle/WalletHandleMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器

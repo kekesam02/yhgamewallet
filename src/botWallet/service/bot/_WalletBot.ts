@@ -3,7 +3,7 @@ import { message } from 'telegraf/filters'
 import process from 'node:process'
 // https://blog.revincx.icu/posts/telegraf-guide/index.html
 // 监听 /quit的命令
-import {getConfig} from "../../config/config";
+import {getConfig} from "../../../config/config";
 
 // 设置token
 const bot = new Telegraf(getConfig().botConfig.WalletToken)

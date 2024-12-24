@@ -1,7 +1,7 @@
 import {Context} from "telegraf";
 import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
-import WalletHandleMethod from "../handle/WalletHandleMethod";
-import WalletUserCenterHandleMethod from "../handle/WalletUserCenterHandleMethod";
+import WalletHandleMethod from "./handle/WalletHandleMethod";
+import WalletUserCenterHandleMethod from "./handle/WalletUserCenterHandleMethod";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 
 

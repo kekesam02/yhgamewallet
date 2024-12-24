@@ -1,11 +1,11 @@
 import type {Context} from "telegraf";
-import ButtonUtils from '../../commons/button/ButtonUtils'
-import WalletBotHtml from '../../html/walletHtml/WalletBotHtml'
-import BotTronAddrModel from "../../models/BotTronAddrModel";
-import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
-import AESUtils from "../../commons/AESUtils";
-import UserModel from "../../models/UserModel";
-import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
+import ButtonUtils from '../../../commons/button/ButtonUtils'
+import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
+import BotTronAddrModel from "../../../models/BotTronAddrModel";
+import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
+import AESUtils from "../../../commons/AESUtils";
+import UserModel from "../../../models/UserModel";
+import WalletUserCenterEnum from "../../../type/walletEnums/WalletUserCenterEnum";
 
 /**
  * 公共方法处理
