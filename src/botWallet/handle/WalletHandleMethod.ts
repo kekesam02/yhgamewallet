@@ -274,6 +274,7 @@ class WalletHandleMethod {
             var cacheValue = this.localCache.get(chatId + "") || ""
             var currentVal = callbackStr.replaceAll('num_', '')
             var cvalue = cacheValue + currentVal
+            if(cvalue.length > 4 )return
             this.localCache.set(chatId + "", cvalue)
             await this.sendPasswordSetupMessage(ctx, cvalue, false,false)
         }else if(callbackStr == 'clear'){
@@ -300,13 +301,13 @@ class WalletHandleMethod {
             var arr = ["🔑 "]
             let length = callbackStr.length
             for (let i = 0; i < length; i++) {
-                arr.push("* ")
+                arr.push(callbackStr[i])
             }
             for (let i = length; i < 4; i++) {
                 arr.push("_ ")
             }
             surebtn = length >= 4
-            const html = "\uD83C\uDFE6欢迎使用一号公馆钱包\n为了您的资金安全\n✏️请设置 4 位支付密码\n\n" + arr.join("") + "你的密码是："+callbackStr+"\n";
+            const html = "\uD83C\uDFE6欢迎使用一号公馆钱包\n为了您的资金安全\n✏️请设置 4 位支付密码\n\n" + arr.join("") ;
             const keybordsArr: Array<Array<ButtonCallbackType>> = []
             for (let i = 1; i <= 9; i += 3) {
                 var rowInline: Array<ButtonCallbackType> = []
@@ -372,7 +373,7 @@ class WalletHandleMethod {
             if (cacheValue.length >= 4 ) {
                 console.log("最终修改密码是：cacheValue----->", cacheValue)
                 // 开始执行密码修改
-                const html = "✅ 密码设置成功\n\n⚠️ 请牢记密码，你的所有资金都是和密码绑定，避免遗忘。"
+                const html = "✅ 密码设置成功！当前密码是：("+cacheValue+")\n\n⚠️ 请牢记密码，你的所有资金都是和密码绑定，避免遗忘。"
                 // 清空缓存
                 this.removeMessage(ctx)
                 ctx.replyWithHTML(html)
