@@ -373,9 +373,13 @@ class WalletHandleMethod {
             if (cacheValue.length >= 4 ) {
                 console.log("最终修改密码是：cacheValue----->", cacheValue)
                 // 开始执行密码修改
+
                 const html = "✅ 密码设置成功！当前密码是：("+cacheValue+")\n\n⚠️ 请牢记密码，你的所有资金都是和密码绑定，避免遗忘。"
-                // 清空缓存
+                // 清除计算器消息
                 this.removeMessage(ctx)
+                // 清空缓存
+                this.clearCacheRelation(ctx)
+                // 发送消息
                 ctx.replyWithHTML(html)
             }else{
                 ctx.replyWithHTML("⚠️ 密码长度不够，必须是4位!")
