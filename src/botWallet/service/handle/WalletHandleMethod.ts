@@ -2,7 +2,6 @@ import type {Context} from "telegraf";
 import ButtonUtils from '../../../commons/button/ButtonUtils'
 import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
 import BotTronAddrModel from "../../../models/BotTronAddrModel";
-import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
 import AESUtils from "../../../commons/AESUtils";
 import UserModel from "../../../models/UserModel";
 import MCoinRechargeAddrPoolModel from "../../../models/MCoinRechargeAddrPoolModel";
@@ -120,43 +119,7 @@ class WalletHandleMethod {
         var html = new WalletBotHtml().getBotStartHtml(tgId, user!)
         try {
             // 4: 机器人回复，显示信息和按钮相关
-            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn([
-                [
-                    {
-                        text: '💰️ 充值',
-                        query: StartWalletEnum.CHONGZHI
-                    },
-                    {
-                        text: '💸 提现',
-                        query: StartWalletEnum.TIXIAN
-                    }
-                ],
-                [
-                    {
-                        text: '↪️ 转账',
-                        query: StartWalletEnum.ZHUANZHANG
-                    },
-                    {
-                        text: '↩️ 收款',
-                        query: StartWalletEnum.SHOUKUANG
-                    }
-                ],
-                [
-                    {
-                        text: '🧧 红包',
-                        query: StartWalletEnum.HONGBAO
-                    },
-                    {
-                        text: '🥯 闪兑',
-                        query: StartWalletEnum.SHANGDUI
-                    }
-                ],
-                [
-                    {
-                        text: '🏘️ 个人中心',
-                        query: StartWalletEnum.USERCENTER,
-                    }
-                ]]))
+            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(WalletController.HomeBtns))
         } catch (err) {
             ctx.reply("提示：尊敬的用户，网络繁忙中请稍后再试！如遇到问题可联系客服：@Yhclub01")
         }
@@ -319,25 +282,10 @@ class WalletHandleMethod {
                 }
                 keybordsArr.push(rowInline)
             }
-            keybordsArr.push([{
-                text: "清空",
-                query: "clear"
-            }, {
-                text: "0",
-                query: "num_0"
-            }, {
-                text: "删除",
-                query: "delete"
-            }])
-
+            // 计算器清空，删除，zero按钮
+            keybordsArr.push(WalletController.ComputeClearDel)
             if (surebtn) {
-                keybordsArr.push([{
-                    text: '↩️ 返回',
-                    query: 'backhome'
-                },{
-                    text: "✏️ 保存密码",
-                    query: "update_pwd_btn"
-                }])
+                keybordsArr.push([WalletController.BackHome,WalletController.SaveUserPwd])
             }else{
                 var len = keybordsArr.length
                 var index = keybordsArr[len - 1].findIndex(c=>c.query == 'surebtn')
@@ -345,7 +293,6 @@ class WalletHandleMethod {
                     keybordsArr[len - 1].splice(index, 1)
                 }
             }
-
             if (firstFlag) {
                 // 4: 机器人回复，显示信息和按钮相关
                 await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(keybordsArr))

@@ -1,11 +1,9 @@
 import type {Context} from "telegraf";
 import ButtonUtils from '../../../commons/button/ButtonUtils'
 import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
-import BotTronAddrModel from "../../../models/BotTronAddrModel";
-import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
 import AESUtils from "../../../commons/AESUtils";
 import UserModel from "../../../models/UserModel";
-import WalletUserCenterEnum from "../../../type/walletEnums/WalletUserCenterEnum";
+import walletController from "../../controller/WalletController";
 
 /**
  * 公共方法处理
@@ -63,57 +61,7 @@ class WalletUserCenterHandleMethod {
         var html = new WalletBotHtml().getBotStartHtml(tgId, user!)
         try {
             // 4: 机器人回复，显示信息和按钮相关
-            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn([
-                [
-                    {
-                        text: '💰️ 我的账单',
-                        query: WalletUserCenterEnum.BACCOUNT
-                    },
-                    {
-                        text: '💸 提币历史',
-                        query: WalletUserCenterEnum.TBLS
-                    }
-                ],
-                [
-                    {
-                        text: '🥯 彩金转化',
-                        query: WalletUserCenterEnum.CTRXZH
-                    },
-                    {
-                        text: '🥯 领取邀请返利',
-                        query: WalletUserCenterEnum.YQFL
-                    },
-                    {
-                        text: '🥯 首充返利',
-                        query: WalletUserCenterEnum.SCFL
-                    }
-                ],
-                [
-                    {
-                        text: '💰️ 小额免密',
-                        query: WalletUserCenterEnum.XEMM
-                    },
-                    {
-                        text: '🍻 邀请好友',
-                        query: WalletUserCenterEnum.YQHY
-                    }
-                ],
-                [
-                    {
-                        text: '🛄 设置提现地址',
-                        query: WalletUserCenterEnum.SZTXDZ,
-                    }
-                ], [
-                    {
-                        text: '🏘️ 主菜单',
-                        query: WalletUserCenterEnum.HOME,
-                    }
-                ],[
-                    {
-                        text: '🏘️ 测试',
-                        url: 'https://t.me/VertexPaybot?start=withdraw'
-                    }
-                ]]))
+            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(walletController.UserHomeBtns))
         } catch (err) {
 
         }
