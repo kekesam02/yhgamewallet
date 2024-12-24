@@ -6,7 +6,7 @@ enum StartWalletEnum {
     /**
      * 返回首页
      */
-    CZFH = 'czfh',
+    BACKHOME = 'backhome',
     /**
      * 充值
      */

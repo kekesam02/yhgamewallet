@@ -109,21 +109,12 @@ class MCoinRechargeModel extends BaseEntity{
     nickname: string
 
     /**
-     * 用户TGID
-     */
-    @Column({
-        name: 'tg_id'
-    })
-    tgId: string
-
-    /**
      * 充值用户
      */
     @Column({
-        name: 'user_id',
-        default: 0
+        name: 'user_id'
     })
-    userId: number
+    userId: string
 
     /**
      * 充值时间

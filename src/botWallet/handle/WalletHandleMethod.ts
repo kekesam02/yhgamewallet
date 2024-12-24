@@ -8,11 +8,9 @@ import UserModel from "../../models/UserModel";
 import MCoinRechargeAddrPoolModel from "../../models/MCoinRechargeAddrPoolModel";
 import WalletController from "../../botWallet/controller/WalletController";
 import messageUtils from "../../commons/message/MessageUtils";
-import path from "path";
+import QRCodeUtils from "../../commons/qrcode/QRCodeUtils";
+import DateFormatUtils from "../../commons/date/DateFormatUtils";
 
-const QRCode = require('qrcode');
-const sharp = require('sharp');
-const moment = require('moment');
 
 /**
  * 公共方法处理
@@ -224,51 +222,20 @@ class WalletHandleMethod {
             }
 
             var s = AESUtils.decodeAddr(link);
-            // 生成二维码
-            // const qrCodeImage = await QRCode.toBuffer(s, {
-            //     errorCorrectionLevel: 'H', width: 350,
-            //     height: 350, margin: 4
-            // },);
-
-            const qrCodeImage = await this.createQRCodeWithLogo(s, 'output.png');
+            const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s);
             // 获取当前日期和时间
-            const now = new Date();
-            const formattedDate = moment(now).format('YYYY-MM-DD HH:mm:ss');
+            const formattedDate = DateFormatUtils.DateFormat(new Date());
             var html = '\n<strong>当前中国时间：' + formattedDate + '</strong>\n\n' +
-                '\uD83D\uDCB0 充值专属钱包地址: 点击可复制（目前只收TRC20 USDT，转错概不负责。）\n\n' +
-                '<code>' + s + '</code>\n\n' +
+                '\uD83D\uDCB0 充值专属钱包地址: 点击可复制（目前只收TRC20 USDT，转错概不负责。）\n' +
+                '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
+                '<code>' + s + '</code>\n' +
                 '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
                 '请仔细比对地址，如果和图片中地址不一致，请停止充值，立即重新安装飞机软件。';
-
-            let replyMarkup = new WalletController().createEmptyBtn().reply_markup
+            let replyMarkup = new WalletController().createBackBtn().reply_markup
             new messageUtils().sendPhotoHtmlCtxBtn(ctx, html, replyMarkup, qrCodeImage)
         }
     }
 
-    public static createQRCodeWithLogo = async (text: string, outputPath: string) :Promise<Buffer> => {
-        try {
-            // 生成二维码
-            const qrCodeImage = await QRCode.toBuffer(text, {
-                errorCorrectionLevel: 'H', width: 350,
-                height: 350, margin: 4
-            },);
-            var logoPath = path.join(__dirname, './../../../static/images/usdtlogo_qr.png')
-            // 合成图片
-            const composite = await await sharp(qrCodeImage)
-                .resize(350)
-                .flatten({background: '#ff6600'})
-                .composite([{
-                    input: logoPath, gravity: 'center'
-                }])
-                .sharpen()
-                .withMetadata()
-                .png({quality: 100})
-            // 输出合成后的图片
-            return await composite.toBuffer();
-        } catch (err) {
-            return Promise.reject(err)
-        }
-    }
 }
 
 

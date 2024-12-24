@@ -53,3 +53,7 @@ BaseProject/express
     README.md               # 项目说明文件
     tsconfig.json           # TypeScript 配置文件
 ```
+sharp兼容问题解决
+```
+npm install --platform=win32 --arch=x64 sharp
+```

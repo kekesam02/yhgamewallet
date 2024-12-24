@@ -7,5 +7,5 @@ import swaggerSpec from '../config/swagger';
  * @param app
  */
 export const swaggerMiddleware = (app: Express) => {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 };

@@ -79,6 +79,11 @@ class WalletButtonCallbackHandle {
             case StartWalletEnum.USERCENTER:
                 WalletUserCenterHandleMethod.startUserCenterCallback(ctx).then()
                 break
+            // ===============================按钮组3：功能业务中的一些按钮===========================
+            // 返回按钮
+            case StartWalletEnum.BACKHOME:
+                WalletHandleMethod.startButtonBack(ctx)
+                break
         }
     }
 
