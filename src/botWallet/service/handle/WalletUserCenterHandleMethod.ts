@@ -1,11 +1,9 @@
 import type {Context} from "telegraf";
-import ButtonUtils from '../../commons/button/ButtonUtils'
-import WalletBotHtml from '../../html/walletHtml/WalletBotHtml'
-import BotTronAddrModel from "../../models/BotTronAddrModel";
-import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
-import AESUtils from "../../commons/AESUtils";
-import UserModel from "../../models/UserModel";
-import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
+import ButtonUtils from '../../../commons/button/ButtonUtils'
+import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
+import AESUtils from "../../../commons/AESUtils";
+import UserModel from "../../../models/UserModel";
+import walletController from "../../controller/WalletController";
 
 /**
  * 公共方法处理
@@ -59,62 +57,11 @@ class WalletUserCenterHandleMethod {
         if (messageId > 0) {
             ctx.deleteMessage(messageId)
         }
-
         // 3：发送带有分享按钮的消息
         var html = new WalletBotHtml().getBotStartHtml(tgId, user!)
         try {
             // 4: 机器人回复，显示信息和按钮相关
-            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn([
-                [
-                    {
-                        text: '💰️ 我的账单',
-                        query: WalletUserCenterEnum.BACCOUNT
-                    },
-                    {
-                        text: '💸 提币历史',
-                        query: WalletUserCenterEnum.TBLS
-                    }
-                ],
-                [
-                    {
-                        text: '🥯 彩金转化',
-                        query: WalletUserCenterEnum.CTRXZH
-                    },
-                    {
-                        text: '🥯 领取邀请返利',
-                        query: WalletUserCenterEnum.YQFL
-                    },
-                    {
-                        text: '🥯 首充返利',
-                        query: WalletUserCenterEnum.SCFL
-                    }
-                ],
-                [
-                    {
-                        text: '💰️ 小额免密',
-                        query: WalletUserCenterEnum.XEMM
-                    },
-                    {
-                        text: '🍻 邀请好友',
-                        query: WalletUserCenterEnum.YQHY
-                    }
-                ],
-                [
-                    {
-                        text: '🛄 设置提现地址',
-                        query: WalletUserCenterEnum.SZTXDZ,
-                    }
-                ], [
-                    {
-                        text: '🏘️ 主菜单',
-                        query: WalletUserCenterEnum.HOME,
-                    }
-                ],[
-                    {
-                        text: '🏘️ 测试',
-                        url: 'https://t.me/VertexPaybot?start=withdraw'
-                    }
-                ]]))
+            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(walletController.UserHomeBtns))
         } catch (err) {
 
         }
@@ -126,7 +73,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startBAccount = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -135,7 +82,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startTbls = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -144,7 +91,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startCtrxzh = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -153,7 +100,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startYqfl = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -162,7 +109,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startScfl = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -171,7 +118,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startXemm = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -180,7 +127,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startYqhy = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -189,7 +136,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startTxdz = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 }
 

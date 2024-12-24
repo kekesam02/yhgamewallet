@@ -1,9 +1,9 @@
 import {Context, Telegraf} from 'telegraf'
 import {message} from 'telegraf/filters'
 import process from 'node:process'
-import {getConfig} from "../../config/config";
-import WalletMessageHandle from '../service/WalletMessageHandle'
-import WalletButtonCallbackHandle from "../service/WalletButtonCallbackHandle";
+import {getConfig} from "../../../config/config";
+import WalletMessageHandle from '../WalletMessageHandle'
+import WalletButtonCallbackHandle from "../WalletButtonCallbackHandle";
 import WalletHandleMethod from "../handle/WalletHandleMethod";
 
 /**

@@ -1,6 +1,6 @@
-const { EventEmitter } = require("node:events");
+const {EventEmitter} = require("node:events");
 const clone = require("clone");
-import { Yallist } from 'yallist'
+import {Yallist} from 'yallist'
 
 class LocalCache extends EventEmitter {
     private options: {
@@ -13,7 +13,8 @@ class LocalCache extends EventEmitter {
     private _lruList: any;
     private _length: number;
     private _cache: Map<string, any>;
-    constructor(options={}) {
+
+    constructor(options = {}) {
         super();
         this.options = Object.assign(
             {
@@ -37,11 +38,11 @@ class LocalCache extends EventEmitter {
 
     get data() {
         return Array.from(this._cache).reduce((obj, [key, node]) => {
-            return { ...obj, [key]: node.value.v };
+            return {...obj, [key]: node.value.v};
         }, {});
     }
 
-    get = (key:string) => {
+    get = (key: string) => {
         const node = this._cache.get(key);
         if (node && this._check(node)) {
             this._lruList.unshiftNode(node); // 移动到队首
@@ -51,8 +52,8 @@ class LocalCache extends EventEmitter {
         }
     };
 
-    set = (key:string, value:any, ttl:number=0) => {
-        const { lengthCalculator, maxLength } = this.options;
+    set = (key: string, value: any, ttl: number = 0) => {
+        const {lengthCalculator, maxLength} = this.options;
         const len = lengthCalculator(value, key);
         // 元素本身超过最大长度，设置失败
         if (len > maxLength) {
@@ -80,7 +81,7 @@ class LocalCache extends EventEmitter {
         return true;
     };
 
-    del = (key:string) => {
+    del = (key: string) => {
         if (!this._cache.has(key)) {
             return false;
         }
@@ -88,7 +89,7 @@ class LocalCache extends EventEmitter {
         this._del(node);
     };
 
-    _del = (node:any) => {
+    _del = (node: any) => {
         const item = node.value;
         this._length -= item.l;
         this._cache.delete(item.k);
@@ -98,7 +99,7 @@ class LocalCache extends EventEmitter {
     };
 
     // 检查是否过期，过期则删除
-    _check = (node:any) => {
+    _check = (node: any) => {
         const item = node.value;
         if (item.t !== 0 && item.t < Date.now()) {
             this.emit("expired", item.k, item.v);
@@ -127,11 +128,11 @@ class LocalCache extends EventEmitter {
         }
     };
 
-    _unwrap = (item:any) => {
+    _unwrap = (item: any) => {
         return this.options.useClones ? clone(item.v) : item.v;
     };
 
-    _wrap = (key:string, value:any, ttl:number, length:number) => {
+    _wrap = (key: string, value: any, ttl: number, length: number) => {
         ttl = ttl ?? this.options.stdTTL;
         return {
             k: key,
@@ -142,7 +143,7 @@ class LocalCache extends EventEmitter {
     };
 
     _trim = () => {
-        const { maxLength } = this.options;
+        const {maxLength} = this.options;
 
         let walker = this._lruList.tail;
         while (this._length > maxLength && walker !== null) {
@@ -154,4 +155,4 @@ class LocalCache extends EventEmitter {
     };
 }
 
-export  default LocalCache
+export default LocalCache

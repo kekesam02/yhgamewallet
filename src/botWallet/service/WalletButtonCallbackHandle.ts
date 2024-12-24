@@ -1,7 +1,7 @@
 import {Context} from "telegraf";
 import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
-import WalletHandleMethod from "../handle/WalletHandleMethod";
-import WalletUserCenterHandleMethod from "../handle/WalletUserCenterHandleMethod";
+import WalletHandleMethod from "./handle/WalletHandleMethod";
+import WalletUserCenterHandleMethod from "./handle/WalletUserCenterHandleMethod";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 
 
@@ -13,9 +13,10 @@ class WalletButtonCallbackHandle {
         console.log('callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
+        console.log("========>callbackStr",callbackStr)
         // 计算器callback
         if (callbackStr.startsWith('num_') || callbackStr === 'delete' || callbackStr === 'clear') {
-
+            WalletHandleMethod.startInputPassword(ctx)
         } else {
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
@@ -89,6 +90,10 @@ class WalletButtonCallbackHandle {
                 case StartWalletEnum.BACKHOME:
                     WalletHandleMethod.removeMessage(ctx)
                     WalletHandleMethod.startButtonBack(ctx)
+                    break
+                // 修改密码按钮
+                case StartWalletEnum.UPDATEPWDBTN:
+                    WalletHandleMethod.startUpdatePwdCallback(ctx)
                     break
             }
         }

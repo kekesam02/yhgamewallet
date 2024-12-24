@@ -1,16 +1,16 @@
 import type {Context} from "telegraf";
-import ButtonUtils from '../../commons/button/ButtonUtils'
-import WalletBotHtml from '../../html/walletHtml/WalletBotHtml'
-import BotTronAddrModel from "../../models/BotTronAddrModel";
-import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
-import AESUtils from "../../commons/AESUtils";
-import UserModel from "../../models/UserModel";
-import MCoinRechargeAddrPoolModel from "../../models/MCoinRechargeAddrPoolModel";
-import WalletController from "../../botWallet/controller/WalletController";
-import messageUtils from "../../commons/message/MessageUtils";
-import QRCodeUtils from "../../commons/qrcode/QRCodeUtils";
-import DateFormatUtils from "../../commons/date/DateFormatUtils";
-import {ButtonCallbackType} from "../../commons/button/ButtonCallbackType";
+import ButtonUtils from '../../../commons/button/ButtonUtils'
+import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
+import BotTronAddrModel from "../../../models/BotTronAddrModel";
+import AESUtils from "../../../commons/AESUtils";
+import UserModel from "../../../models/UserModel";
+import MCoinRechargeAddrPoolModel from "../../../models/MCoinRechargeAddrPoolModel";
+import WalletController from "../../controller/WalletController";
+import messageUtils from "../../../commons/message/MessageUtils";
+import QRCodeUtils from "../../../commons/qrcode/QRCodeUtils";
+import DateFormatUtils from "../../../commons/date/DateFormatUtils";
+import {ButtonCallbackType} from "../../../commons/button/ButtonCallbackType";
+import LocalCache from "../../../commons/cache/LocalCache";
 
 
 /**
@@ -24,6 +24,8 @@ import {ButtonCallbackType} from "../../commons/button/ButtonCallbackType";
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
 class WalletHandleMethod {
+
+    private static localCache: LocalCache = new LocalCache();
     /**
      * 删除上一次消息
      * @param ctx
@@ -36,6 +38,15 @@ class WalletHandleMethod {
     }
 
     /**
+     * 清除缓存相关
+     * @param ctx
+     */
+    public static clearCacheRelation = (ctx:Context)=>{
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        this.localCache.del(chatId + "")
+    }
+
+    /**
      * 个人中心主菜单返回
      * 代号：home_btn
      * @param ctx
@@ -45,6 +56,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         var firstName: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
+        this.clearCacheRelation(ctx)
         this.startCommand(ctx, tgId, username, firstName)
     }
 
@@ -57,6 +69,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.message?.from?.id || 0
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
+        this.clearCacheRelation(ctx)
         this.startCommand(ctx, tgId, username, firstName)
     }
 
@@ -106,43 +119,7 @@ class WalletHandleMethod {
         var html = new WalletBotHtml().getBotStartHtml(tgId, user!)
         try {
             // 4: 机器人回复，显示信息和按钮相关
-            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn([
-                [
-                    {
-                        text: '💰️ 充值',
-                        query: StartWalletEnum.CHONGZHI
-                    },
-                    {
-                        text: '💸 提现',
-                        query: StartWalletEnum.TIXIAN
-                    }
-                ],
-                [
-                    {
-                        text: '↪️ 转账',
-                        query: StartWalletEnum.ZHUANZHANG
-                    },
-                    {
-                        text: '↩️ 收款',
-                        query: StartWalletEnum.SHOUKUANG
-                    }
-                ],
-                [
-                    {
-                        text: '🧧 红包',
-                        query: StartWalletEnum.HONGBAO
-                    },
-                    {
-                        text: '🥯 闪兑',
-                        query: StartWalletEnum.SHANGDUI
-                    }
-                ],
-                [
-                    {
-                        text: '🏘️ 个人中心',
-                        query: StartWalletEnum.USERCENTER,
-                    }
-                ]]))
+            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(WalletController.HomeBtns))
         } catch (err) {
             ctx.reply("提示：尊敬的用户，网络繁忙中请稍后再试！如遇到问题可联系客服：@Yhclub01")
         }
@@ -236,7 +213,7 @@ class WalletHandleMethod {
             var s = AESUtils.decodeAddr(link);
             const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s);
             // 获取当前日期和时间
-            const formattedDate =  DateFormatUtils.DateFormat(new Date());
+            const formattedDate = DateFormatUtils.DateFormat(new Date());
             var html = '\n<strong>当前中国时间：' + formattedDate + '</strong>\n\n' +
                 '\uD83D\uDCB0 充值专属钱包地址: （目前只收TRC20 USDT，转错概不负责。）\n' +
                 '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
@@ -249,48 +226,124 @@ class WalletHandleMethod {
     }
 
     /**
+     * 计算器输入
+     * @param ctx
+     */
+    public static startInputPassword = async(ctx:Context) => {
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        let update: any = ctx?.update
+        let callbackStr: string = update.callback_query?.data || ""
+        if(callbackStr.startsWith("num_")) {
+            var cacheValue = this.localCache.get(chatId + "") || ""
+            var currentVal = callbackStr.replaceAll('num_', '')
+            var cvalue = cacheValue + currentVal
+            if(cvalue.length > 4 )return
+            this.localCache.set(chatId + "", cvalue)
+            await this.sendPasswordSetupMessage(ctx, cvalue, false,false)
+        }else if(callbackStr == 'clear'){
+            this.localCache.del(chatId + "")
+            await this.sendPasswordSetupMessage(ctx, "", false,false)
+        }else if(callbackStr == 'delete'){
+            var cacheKey = this.localCache.get(chatId + "")
+            if (cacheKey) {
+                var arr = cacheKey.split("")
+                arr.pop()
+                var join = arr.join('');
+                this.localCache.set(chatId + "", join)
+                await this.sendPasswordSetupMessage(ctx, join, false,true)
+            }
+        }
+    }
+
+    /**
      * 转账、红包、提现、收款、闪兑提示输入密码
      * @param ctx
      */
-    public static sendPasswordSetupMessage = async (ctx:Context) => {
+    public static sendPasswordSetupMessage = async (ctx: Context,callbackStr:string="",firstFlag:boolean=true,surebtn:boolean = false) => {
         try {
-            const html = "\uD83C\uDFE6欢迎使用一号公馆钱包\n为了您的资金安全\n✏️请设置 4 位支付密码\n";
-            const keybordsArr:Array<Array<ButtonCallbackType>> = []
+            var arr = ["🔑 "]
+            let length = callbackStr.length
+            for (let i = 0; i < length; i++) {
+                arr.push(callbackStr[i])
+            }
+            for (let i = length; i < 4; i++) {
+                arr.push("_ ")
+            }
+            surebtn = length >= 4
+            const html = "\uD83C\uDFE6欢迎使用一号公馆钱包\n为了您的资金安全\n✏️请设置 4 位支付密码\n\n" + arr.join("") ;
+            const keybordsArr: Array<Array<ButtonCallbackType>> = []
             for (let i = 1; i <= 9; i += 3) {
-                var rowInline : Array<ButtonCallbackType> = []
+                var rowInline: Array<ButtonCallbackType> = []
                 for (let j = i; j < i + 3; j++) {
                     rowInline.push({
-                        text: j+"",
-                        query: "num_"+j
+                        text: j + "",
+                        query: "num_" + j
                     })
                 }
                 keybordsArr.push(rowInline)
             }
-            keybordsArr.push([{
-                text: "清空",
-                query: "clear"
-            },{
-                text: "0",
-                query: "num_0"
-            },{
-                text: "删除",
-                query: "delete"
-            }])
-            // 4: 机器人回复，显示信息和按钮相关
-            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(keybordsArr))
+            // 计算器清空，删除，zero按钮
+            keybordsArr.push(WalletController.ComputeClearDel)
+            if (surebtn) {
+                keybordsArr.push([WalletController.BackHome,WalletController.SaveUserPwd])
+            }else{
+                var len = keybordsArr.length
+                var index = keybordsArr[len - 1].findIndex(c=>c.query == 'surebtn')
+                if (index != -1) {
+                    keybordsArr[len - 1].splice(index, 1)
+                }
+            }
+            if (firstFlag) {
+                // 4: 机器人回复，显示信息和按钮相关
+                await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(keybordsArr))
+            }else{
+                // 4: 机器人回复，显示信息和按钮相关
+                await ctx.editMessageText(html, new ButtonUtils().createCallbackBtn(keybordsArr))
+            }
         } catch (err) {
+            console.log("err",err)
             ctx.reply("提示：尊敬的用户，网络繁忙中请稍后再试！如遇到问题可联系客服：@Yhclub01")
         }
     }
 
+    /**
+     * 修改密码
+     * 代号：update_pwd_btn
+     * @param ctx
+     */
+    public static  startUpdatePwdCallback = async (ctx: Context) => {
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        let update: any = ctx?.update
+        let callbackStr: string = update.callback_query?.data || ""
+        var cacheValue = this.localCache.get(chatId + "") || ""
+        if (cacheValue) {
+            if (cacheValue.length >= 4 ) {
+                console.log("最终修改密码是：cacheValue----->", cacheValue)
+                // 开始执行密码修改
+
+                const html = "✅ 密码设置成功！当前密码是：("+cacheValue+")\n\n⚠️ 请牢记密码，你的所有资金都是和密码绑定，避免遗忘。"
+                // 清除计算器消息
+                this.removeMessage(ctx)
+                // 清空缓存
+                this.clearCacheRelation(ctx)
+                // 发送消息
+                ctx.replyWithHTML(html)
+            }else{
+                ctx.replyWithHTML("⚠️ 密码长度不够，必须是4位!")
+            }
+        }else{
+            ctx.replyWithHTML("⚠️ 请输入密码")
+        }
+    }
 
     /**
      * 提现
      * 代号：tixian_btn
      * @param ctx
      */
-    public static startTiXian = async (ctx: Context) => {
-
+    public static  startTiXian = async (ctx: Context) => {
+        await this.sendPasswordSetupMessage(ctx)
+        return Promise.resolve()
     }
 
     /**
@@ -298,8 +351,9 @@ class WalletHandleMethod {
      * 代号：zhuanzhang_btn
      * @param ctx
      */
-    public static startZhuanZhang= async (ctx: Context) => {
-
+    public static startZhuanZhang = async (ctx: Context) => {
+        await this.sendPasswordSetupMessage(ctx)
+        return Promise.resolve()
     }
 
     /**
@@ -307,8 +361,9 @@ class WalletHandleMethod {
      * 代号：shoukuan_btn
      * @param ctx
      */
-    public static startShouKuan= async (ctx: Context) => {
-
+    public static  startShouKuan = async (ctx: Context) => {
+        await this.sendPasswordSetupMessage(ctx)
+        return Promise.resolve()
     }
 
     /**
@@ -316,8 +371,9 @@ class WalletHandleMethod {
      * 代号：hongbao_btn
      * @param ctx
      */
-    public static startHongBao= async (ctx: Context) => {
-
+    public static startHongBao = async (ctx: Context) => {
+        await this.sendPasswordSetupMessage(ctx)
+        return Promise.resolve()
     }
 
     /**
@@ -325,8 +381,9 @@ class WalletHandleMethod {
      * 代号：shandui_btn
      * @param ctx
      */
-    public static startShanDui= async (ctx: Context) => {
-
+    public static  startShanDui = async (ctx: Context) => {
+        await this.sendPasswordSetupMessage(ctx)
+        return Promise.resolve()
     }
 }
 

@@ -1,4 +1,4 @@
-require('./bot/WalletBot')
+require('./service/bot/WalletBot')
 import express from "express";
 import { getConfig } from "../config/config";
 import errorHandler from "../middlewares/errorHandler";

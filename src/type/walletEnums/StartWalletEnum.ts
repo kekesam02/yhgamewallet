@@ -40,7 +40,14 @@ enum StartWalletEnum {
     /**
      * 个人中心
      */
-    USERCENTER = 'center_btn'
+    USERCENTER = 'center_btn',
+
+    /**
+     * 修改密码
+     */
+    UPDATEPWDBTN = 'update_pwd_btn',
+
+
 }
 
 
