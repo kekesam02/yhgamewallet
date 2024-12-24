@@ -59,7 +59,6 @@ class WalletUserCenterHandleMethod {
         if (messageId > 0) {
             ctx.deleteMessage(messageId)
         }
-
         // 3：发送带有分享按钮的消息
         var html = new WalletBotHtml().getBotStartHtml(tgId, user!)
         try {
@@ -126,7 +125,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startBAccount = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -135,7 +134,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startTbls = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -144,7 +143,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startCtrxzh = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -153,7 +152,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startYqfl = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -162,7 +161,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startScfl = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -171,7 +170,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startXemm = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -180,7 +179,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startYqhy = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 
     /**
@@ -189,7 +188,7 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startTxdz = async (ctx: Context) => {
-
+        return Promise.resolve()
     }
 }
 
