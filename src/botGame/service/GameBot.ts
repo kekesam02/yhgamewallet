@@ -7,6 +7,7 @@ import GameCallbackHandle from "./GameCallbackHandle";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import WinningTypeConfirm from "../const/WinningTypeConfirm";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import PC28Controller from "../gameController/PC28Controller";
 
 
 /**
@@ -105,6 +106,7 @@ const startJob = () => {
     // setTimeout(() => {
     //     ScheduleHandle.startPC28(bot)
     // }, 10000)
+
 }
 startJob()
 

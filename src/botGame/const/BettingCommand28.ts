@@ -4,6 +4,7 @@ import BotOddsModel from "../../models/BotOddsModel";
 import BotPledgeUpModel, {PledgeUpInfoType} from "../../models/BotPledgeUpModel";
 import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/ComputeUtils";
+import ScheduleHandle from "../../commons/ScheduleHandle";
 
 
 /**
@@ -132,7 +133,7 @@ class BettingCommand28 {
     public parseCommand = (text: string): PledgeUpInfoType => {
         let arr = text.split(' ')
         let resultList: PledgeUpInfoType = {
-            roundId: 123,
+            roundId: Number(ScheduleHandle.pc28Config.roundId),
             totalMoney: '0',
             list: []
         }

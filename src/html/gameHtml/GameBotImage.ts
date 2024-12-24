@@ -11,7 +11,10 @@ class GameBotImage {
     /**
      * 生成 PC28 开奖记录图片
      */
-    public createPC28Img = (historyList: Array<BotRoundModel>): Promise<InputFile>  => {
+    public createPC28Img = (historyList: Array<BotRoundModel>): Promise<{
+        source: Buffer
+        filename?: string
+    }>  => {
         // 获取极值描述文字
         let getLevelValue = (item: BotRoundModel) => {
             if (!item.result) {

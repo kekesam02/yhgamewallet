@@ -215,7 +215,7 @@ class BotPledgeUpModel extends BaseEntity {
      * @param json: 获取到的中奖数据
      */
     public getUserList = async (json: Pc28LotteryJsonType) => {
-        let roundId = json.data[0].open_code
+        let roundId = json.data[0].expect
         let result = BotPledgeUpModel
             .createQueryBuilder()
             .where('round_id = :roundId', {
@@ -257,9 +257,9 @@ class BotPledgeUpModel extends BaseEntity {
             console.log('保存用户信息结束')
             let wallType = updatePledgeUpList[0].walletType
             await queryRunner.manager.save(updatePledgeUpList)
-            console.log('发送通知消息')
             let html = new GameBotHtml().getBettingHtml(userModel, pledgeUpInfo, wallType)
             await new MessageUtils().sendTextReply(ctx, html)
+            await queryRunner.commitTransaction()
         } catch (err) {
             console.log('出现错误了进行回滚', err)
             await queryRunner.rollbackTransaction()
@@ -360,11 +360,11 @@ class BotPledgeUpModel extends BaseEntity {
             pledgeUp.roundId = pledgeUpInfo.roundId
             pledgeUp.amountMoney = item.money
             pledgeUp.gameType = group.gameType
-            pledgeUp.bettingType = pledgeUpInfo.list[0].odds.id
+            pledgeUp.bettingType = item.odds.id
             pledgeUp.upId = new OrderUtils().createPledgeUpModelId()
             pledgeUp.walletType = wallType
-            pledgeUp.gameData = pledgeUpInfo.list[0].content
-            pledgeUp.content = pledgeUpInfo.list[0].content
+            pledgeUp.gameData = item.content
+            pledgeUp.content = item.content
             pledgeUp.groupId = group.groupId
             pledgeUp.isWinning = 0
             pledgeUp.winningAmount = '0'
