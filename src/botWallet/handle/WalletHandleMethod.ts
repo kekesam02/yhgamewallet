@@ -10,6 +10,7 @@ import WalletController from "../../botWallet/controller/WalletController";
 import messageUtils from "../../commons/message/MessageUtils";
 import QRCodeUtils from "../../commons/qrcode/QRCodeUtils";
 import DateFormatUtils from "../../commons/date/DateFormatUtils";
+import {ButtonCallbackType} from "../../commons/button/ButtonCallbackType";
 
 
 /**
@@ -23,9 +24,20 @@ import DateFormatUtils from "../../commons/date/DateFormatUtils";
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
 class WalletHandleMethod {
+    /**
+     * 删除上一次消息
+     * @param ctx
+     */
+    public static removeMessage = async (ctx: Context) => {
+        var messageId: number = ctx.callbackQuery?.message?.message_id || 0
+        if (messageId > 0) {
+            ctx.deleteMessage(messageId)
+        }
+    }
 
     /**
      * 个人中心主菜单返回
+     * 代号：home_btn
      * @param ctx
      */
     public static startButtonBack = async (ctx: Context) => {
@@ -132,7 +144,7 @@ class WalletHandleMethod {
                     }
                 ]]))
         } catch (err) {
-
+            ctx.reply("提示：尊敬的用户，网络繁忙中请稍后再试！如遇到问题可联系客服：@Yhclub01")
         }
     }
 
@@ -224,11 +236,11 @@ class WalletHandleMethod {
             var s = AESUtils.decodeAddr(link);
             const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s);
             // 获取当前日期和时间
-            const formattedDate = DateFormatUtils.DateFormat(new Date());
+            const formattedDate =  DateFormatUtils.DateFormat(new Date());
             var html = '\n<strong>当前中国时间：' + formattedDate + '</strong>\n\n' +
-                '\uD83D\uDCB0 充值专属钱包地址: 点击可复制（目前只收TRC20 USDT，转错概不负责。）\n' +
+                '\uD83D\uDCB0 充值专属钱包地址: （目前只收TRC20 USDT，转错概不负责。）\n' +
                 '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
-                '<code>' + s + '</code>\n' +
+                '<code>' + s + '</code>（点击可复制）\n' +
                 '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
                 '请仔细比对地址，如果和图片中地址不一致，请停止充值，立即重新安装飞机软件。';
             let replyMarkup = new WalletController().createBackBtn().reply_markup
@@ -236,6 +248,86 @@ class WalletHandleMethod {
         }
     }
 
+    /**
+     * 转账、红包、提现、收款、闪兑提示输入密码
+     * @param ctx
+     */
+    public static sendPasswordSetupMessage = async (ctx:Context) => {
+        try {
+            const html = "\uD83C\uDFE6欢迎使用一号公馆钱包\n为了您的资金安全\n✏️请设置 4 位支付密码\n";
+            const keybordsArr:Array<Array<ButtonCallbackType>> = []
+            for (let i = 1; i <= 9; i += 3) {
+                var rowInline : Array<ButtonCallbackType> = []
+                for (let j = i; j < i + 3; j++) {
+                    rowInline.push({
+                        text: j+"",
+                        query: "num_"+j
+                    })
+                }
+                keybordsArr.push(rowInline)
+            }
+            keybordsArr.push([{
+                text: "清空",
+                query: "clear"
+            },{
+                text: "0",
+                query: "num_0"
+            },{
+                text: "删除",
+                query: "delete"
+            }])
+            // 4: 机器人回复，显示信息和按钮相关
+            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(keybordsArr))
+        } catch (err) {
+            ctx.reply("提示：尊敬的用户，网络繁忙中请稍后再试！如遇到问题可联系客服：@Yhclub01")
+        }
+    }
+
+
+    /**
+     * 提现
+     * 代号：tixian_btn
+     * @param ctx
+     */
+    public static startTiXian = async (ctx: Context) => {
+
+    }
+
+    /**
+     * 转账
+     * 代号：zhuanzhang_btn
+     * @param ctx
+     */
+    public static startZhuanZhang= async (ctx: Context) => {
+
+    }
+
+    /**
+     * 收款
+     * 代号：shoukuan_btn
+     * @param ctx
+     */
+    public static startShouKuan= async (ctx: Context) => {
+
+    }
+
+    /**
+     * 红包
+     * 代号：hongbao_btn
+     * @param ctx
+     */
+    public static startHongBao= async (ctx: Context) => {
+
+    }
+
+    /**
+     * 闪兑
+     * 代号：shandui_btn
+     * @param ctx
+     */
+    public static startShanDui= async (ctx: Context) => {
+
+    }
 }
 
 

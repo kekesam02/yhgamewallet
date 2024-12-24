@@ -7,7 +7,7 @@ class DateFormatUtils {
      * @param date
      * @param format
      */
-    public static DateFormat = async (date: Date, format: string = "YYYY-MM-DD HH:mm:ss")  => {
+    public static DateFormat =  (date: Date, format: string = "YYYY-MM-DD HH:mm:ss")  => {
         return moment(date).format(format)
     }
 
@@ -16,7 +16,7 @@ class DateFormatUtils {
      * @param date
      * @param outputPath
      */
-    public static DateFormatString = async (date: string, format: string = "YYYY-MM-DD HH:mm:ss")  => {
+    public static DateFormatString =  (date: string, format: string = "YYYY-MM-DD HH:mm:ss")  => {
         return moment(new Date(date)).format(format)
     }
 }

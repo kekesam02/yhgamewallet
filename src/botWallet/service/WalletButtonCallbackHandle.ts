@@ -4,6 +4,7 @@ import WalletHandleMethod from "../handle/WalletHandleMethod";
 import WalletUserCenterHandleMethod from "../handle/WalletUserCenterHandleMethod";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 
+
 /**
  * 钱包回调
  */
@@ -12,82 +13,86 @@ class WalletButtonCallbackHandle {
         console.log('callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
-        switch (callbackStr) {
-            // ===========================按钮组1：用户中心===========================
-            // 我的账单
-            case WalletUserCenterEnum.BACCOUNT:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
-            // 提币历史
-            case WalletUserCenterEnum.TBLS:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
-            // 彩金转化
-            case WalletUserCenterEnum.CTRXZH:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
-            // 领取邀请返利
-            case WalletUserCenterEnum.YQFL:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
-            // 首充返利
-            case WalletUserCenterEnum.SCFL:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
-            // 小额免密
-            case WalletUserCenterEnum.XEMM:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
-            // 邀请好友
-            case WalletUserCenterEnum.YQHY:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
-            // 设置提现地址
-            case WalletUserCenterEnum.SZTXDZ:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
-            // 主菜单
-            case WalletUserCenterEnum.HOME:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
-            // ===============================按钮组2：用户充值、提现===========================
-            // 充值
-            case StartWalletEnum.CHONGZHI:
-                WalletHandleMethod.startChongZhi(ctx)
-                break
-            // 提现
-            case StartWalletEnum.TIXIAN:
-                console.log("TIXIAN")
-                break
-            // 转账
-            case StartWalletEnum.ZHUANZHANG:
-                console.log("ZHUANZHANG")
-                break
-            // 收款
-            case StartWalletEnum.SHOUKUANG:
-                console.log("SHOUKUANG")
-                break
-            // 红包
-            case StartWalletEnum.HONGBAO:
-                console.log("HONGBAO")
-                break
-            // 闪兑
-            case StartWalletEnum.SHANGDUI:
-                console.log("SHANGDUI")
-                break
-            // 个人中心
-            case StartWalletEnum.USERCENTER:
-                WalletUserCenterHandleMethod.startUserCenterCallback(ctx).then()
-                break
-            // ===============================按钮组3：功能业务中的一些按钮===========================
-            // 返回按钮
-            case StartWalletEnum.BACKHOME:
-                WalletHandleMethod.startButtonBack(ctx)
-                break
+        // 计算器callback
+        if (callbackStr.startsWith('num_') || callbackStr === 'delete' || callbackStr === 'clear') {
+
+        } else {
+            switch (callbackStr) {
+                // ===========================按钮组1：用户中心===========================
+                // 我的账单
+                case WalletUserCenterEnum.BACCOUNT:
+                    WalletUserCenterHandleMethod.startBAccount(ctx)
+                    break
+                // 提币历史
+                case WalletUserCenterEnum.TBLS:
+                    WalletUserCenterHandleMethod.startTbls(ctx)
+                    break
+                // 彩金转化
+                case WalletUserCenterEnum.CTRXZH:
+                    WalletUserCenterHandleMethod.startCtrxzh(ctx)
+                    break
+                // 领取邀请返利
+                case WalletUserCenterEnum.YQFL:
+                    WalletUserCenterHandleMethod.startYqfl(ctx)
+                    break
+                // 首充返利
+                case WalletUserCenterEnum.SCFL:
+                    WalletUserCenterHandleMethod.startScfl(ctx)
+                    break
+                // 小额免密
+                case WalletUserCenterEnum.XEMM:
+                    WalletUserCenterHandleMethod.startXemm(ctx)
+                    break
+                // 邀请好友
+                case WalletUserCenterEnum.YQHY:
+                    WalletUserCenterHandleMethod.startYqhy(ctx)
+                    break
+                // 设置提现地址
+                case WalletUserCenterEnum.SZTXDZ:
+                    WalletUserCenterHandleMethod.startTxdz(ctx)
+                    break
+                // 主菜单
+                case WalletUserCenterEnum.HOME:
+                    WalletHandleMethod.startButtonBack(ctx)
+                    break
+                // ===============================按钮组2：用户充值、提现===========================
+                // 充值
+                case StartWalletEnum.CHONGZHI:
+                    WalletHandleMethod.startChongZhi(ctx)
+                    break
+                // 提现
+                case StartWalletEnum.TIXIAN:
+                    WalletHandleMethod.startTiXian(ctx)
+                    break
+                // 转账
+                case StartWalletEnum.ZHUANZHANG:
+                    WalletHandleMethod.startZhuanZhang(ctx)
+                    break
+                // 收款
+                case StartWalletEnum.SHOUKUANG:
+                    WalletHandleMethod.startShouKuan(ctx)
+                    break
+                // 红包
+                case StartWalletEnum.HONGBAO:
+                    WalletHandleMethod.startHongBao(ctx)
+                    break
+                // 闪兑
+                case StartWalletEnum.SHANGDUI:
+                    WalletHandleMethod.startShanDui(ctx)
+                    break
+                // 个人中心
+                case StartWalletEnum.USERCENTER:
+                    WalletUserCenterHandleMethod.startUserCenterCallback(ctx).then()
+                    break
+                // ===============================按钮组3：功能业务中的一些按钮===========================
+                // 返回按钮
+                case StartWalletEnum.BACKHOME:
+                    WalletHandleMethod.removeMessage(ctx)
+                    WalletHandleMethod.startButtonBack(ctx)
+                    break
+            }
         }
     }
-
-
 
 
     /**
@@ -97,8 +102,6 @@ class WalletButtonCallbackHandle {
         console.log('开始定位球游戏')
     }
 }
-
-
 
 
 export default WalletButtonCallbackHandle
