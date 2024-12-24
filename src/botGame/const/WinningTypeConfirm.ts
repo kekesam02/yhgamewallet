@@ -339,6 +339,10 @@ class WinningTypeConfirm {
             return item.value(num1, num2, num3, sum, GameTypeEnum.PC28DI)
         })
 
+        if (!formResult) {
+            formResult = this.formDefault
+        }
+
         return {
             code: codeResult!,
             form: formResult!

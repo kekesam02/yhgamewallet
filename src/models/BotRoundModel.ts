@@ -4,6 +4,7 @@ import moment from "moment";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
 import WinningTypeConfirm from "../botGame/const/WinningTypeConfirm";
 import BotGameConfig from "../botGame/BotGameConfig";
+import ComputeUtils from "../commons/ComputeUtils";
 
 
 @Entity({
@@ -141,9 +142,19 @@ class BotRoundModel extends BaseEntity{
         let curr = json.data[0]
         let arr = json.data[0].open_code.split(',')
         let winnerType = new WinningTypeConfirm().getLotteryDescPC28DI(curr.open_code)
+        console.log('获取到的开奖结果', winnerType.code)
+        console.log('获取到的开奖结果', winnerType.form)
+        let result = curr.open_code.split(',')
+        let resultStr = ''
+        let sum = new ComputeUtils(0)
+        result.map(item => {
+            resultStr = `${resultStr}+item`
+            sum.add(item)
+        })
+        resultStr = `${resultStr}=${sum}`
         this.roundId = Number(curr.expect)
-        this.result = curr.open_code
-        this.specialCode = winnerType.code.key
+        this.result = resultStr
+        this.specialCode = winnerType.code.key.replaceAll(',', '')
         this.form = winnerType.form.key
         this.roundType = gameType
         this.fpTime = moment(curr.open_time).subtract(new BotGameConfig().FPTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
@@ -152,6 +163,7 @@ class BotRoundModel extends BaseEntity{
         this.numOne = Number(arr[0])
         this.numTwo = Number(arr[1])
         this.numThree = Number(arr[2])
+        console.log('保存开奖信息到数据库')
         return BotRoundModel.save(this)
     }
 

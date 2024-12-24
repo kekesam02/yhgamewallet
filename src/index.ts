@@ -5,6 +5,7 @@ import LocalCache from "./commons/cache/LocalCache";
 require('./commons/expand/ExpandSelectQueryBuilder')
 require('./botGame/GameServe')
 require('./botWallet/WalletServe')
+
 process.once('SIGINT', () => {
     console.log('关闭任务')
     ScheduleHandle.closeJobs()
