@@ -5,6 +5,9 @@ import moment from "moment";
 import BotGameConfig from "../botGame/BotGameConfig";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
 import {string} from "yaml/dist/schema/common/string";
+import TimeUtils from "./date/TimeUtils";
+import MessageUtils from "./message/MessageUtils";
+import GameCommandHtml from "../html/gameHtml/GameCommandHtml";
 
 /**
  * 定时任务控制器
@@ -27,11 +30,14 @@ class ScheduleHandle {
         // 游戏是否是第一次运行
         isFirstStart: false,
 
+        // 是否已发送停盘维护信息
+        isSendProtect: false,
+
         // 当前的开奖时间（每次开奖成功后刷新数据）
         openTime: '',
 
         // 当前开奖期数
-        roundId: '',
+        roundId: '3229194',
 
         // 本次是否已经开奖
         isOpenLottery: false,
@@ -86,6 +92,20 @@ class ScheduleHandle {
                 console.log('停止上注提示时间', ScheduleHandle.pc28Config.closeTipsTime)
                 console.log('停止上注提示时间是否成功', moment().isAfter(moment(ScheduleHandle.pc28Config.closeTipsTime)))
                 console.log('是否已经提示', ScheduleHandle.pc28Config.isCloseTips)
+
+                if (new TimeUtils().isTimeBetween('20:30', '23:04')) {
+                    console.log('当前应该维护了')
+                    if (!ScheduleHandle.pc28Config.isSendProtect) {
+                        ScheduleHandle.pc28Config.isSendProtect = true
+                        await new PC28Controller().sendRepairHtml(bot)
+                    }
+                    return
+                }
+                if (ScheduleHandle.pc28Config.isSendProtect) {
+                    ScheduleHandle.pc28Config.isSendProtect = false
+                }
+
+
                 // 服务器第一次运行数据处理
                 if (!ScheduleHandle.pc28Config.isFirstStart && !ScheduleHandle.pc28Config.stopUpTime && !ScheduleHandle.pc28Config.openTime) {
                     ScheduleHandle.pc28Config.isFirstStart = true

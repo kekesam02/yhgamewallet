@@ -5,6 +5,8 @@ import StartGameEnum from "../../type/gameEnums/StartGameEnum";
 import PC28Controller from "../gameController/PC28Controller";
 import CommandController from "../gameController/CommandController";
 import BettingController from "../gameController/BettingController";
+import moment from "moment";
+import ScheduleHandle from "../../commons/ScheduleHandle";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -75,7 +77,9 @@ class GameMessageHandle {
             // 下面是下注相关 =================
             default:
                 if (text && text.length > 0 && text.indexOf('/') < 0) {
-                    await new BettingController(ctx, text).listenerBettingCommand()
+                    if (moment().isBefore(ScheduleHandle.pc28Config.stopUpTime)) {
+                        await new BettingController(ctx, text).listenerBettingCommand()
+                    }
                 }
         }
     }

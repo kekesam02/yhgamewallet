@@ -18,6 +18,7 @@ import WinningTypeConfirm from "../const/WinningTypeConfirm";
 import BotOddsStorage from "../../storage/BotOddsStorage";
 import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/ComputeUtils";
+import GameCommandHtml from "../../html/gameHtml/GameCommandHtml";
 
 const schedule = require('node-schedule')
 
@@ -166,7 +167,7 @@ class PC28Controller {
 
         let groupList = await this.getJoinGameGroup()
         for (let i = 0; i < groupList.length; i++) {
-            let item = groupList[0]
+            let item = groupList[i]
             let winningList = await this.getUserIsWinning(pledgeUpMap, lotteryJson, item.gameType)
             console.log('获取中奖列表结束', winningList)
             let html = new GameBotHtml().getLotteryTextHtml(
@@ -252,6 +253,8 @@ class PC28Controller {
             .where('round_id = :roundId', {
                 roundId: roundId
             })
+            .andWhere('state = 0')
+            .andWhere('del = 0')
             .getMany()
         // 遍历群组列表、并发送游戏信息到群组
         result.forEach((item) => {
@@ -285,7 +288,7 @@ class PC28Controller {
     >> => {
         // 当前所有下注的用户
         let pledgeUpList = await new BotPledgeUpModel()
-            .getUserList(json)
+            .getUserList(json.data[0].expect)
         let result: Map<GameTypeEnum, Array<BotPledgeUpModel>> = new Map()
         pledgeUpList.forEach(item => {
             if (result.has(item.gameType)) {
@@ -295,6 +298,17 @@ class PC28Controller {
             }
         })
         return result
+    }
+
+    /**
+     * 发送官网维护消息到群组
+     */
+    public sendRepairHtml = async (bot: Telegraf<Context>) => {
+        let groupList = await this.getJoinGameGroup()
+        let html = new GameCommandHtml().repairHtml()
+        groupList.forEach(item => {
+            new MessageUtils().botSendText(bot, item.groupId, html)
+        })
     }
 
 

@@ -19,6 +19,7 @@ import database from "../config/database";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
 import BotPaymentModel from "./BotPaymentModel";
 import PaymentType from "../type/PaymentType";
+import ScheduleHandle from "../commons/ScheduleHandle";
 
 
 /**
@@ -214,10 +215,10 @@ class BotPledgeUpModel extends BaseEntity {
 
     /**
      * 根据当前期数所有下注的用户
-     * @param json: 获取到的中奖数据
+     * @param expect: 获取到的中奖数据
      */
-    public getUserList = async (json: Pc28LotteryJsonType) => {
-        let roundId = json.data[0].expect
+    public getUserList = async (expect: string) => {
+        let roundId = expect
         let result = BotPledgeUpModel
             .createQueryBuilder()
             .where('round_id = :roundId', {
@@ -244,8 +245,10 @@ class BotPledgeUpModel extends BaseEntity {
         let queryRunner = database.createQueryRunner()
         await queryRunner.startTransaction()
         try {
+            console.log('开始查询用户')
             // 用户对象
             let userModel = await new UserModel().getUserModel(ctx)
+            console.log('查询到到用户数')
             if (!await this.userBalanceJudge(ctx, userModel, pledgeUpInfo.totalMoney, pledgeUpInfo.roundId, pledgeUpInfo)) {
                 // 用户余额不足
                 return
@@ -284,10 +287,40 @@ class BotPledgeUpModel extends BaseEntity {
     /**
      * 取消上注(取消用户本期所有的下注内容)
      */
-    public cancelPledgeUp = async (ctx: Context) => {
+    public cancelPledgeUp = async (ctx: Context, groupModel: BotGameModel, roundId: string) => {
         console.log('取消上注')
         // 当前群组
         let userModel = await new UserModel().getUserModel(ctx)
+        let pledgeModelList = await this.getUserList(`${ScheduleHandle.pc28Config.roundId}`)
+        pledgeModelList.forEach(item => {
+            item.state = -1
+            item.del = 1
+            userModel.updateUserMoney(item.walletType, item.amountMoney)
+        })
+        let paymentList = await new BotPaymentModel().getPaymentModelList({
+            roundId
+        })
+        paymentList.forEach(item => {
+            item.del = 1
+        })
+        let queryRunner = database.createQueryRunner()
+        await queryRunner.startTransaction()
+        try{
+            console.log('开始更新数据')
+            await queryRunner.manager.save(pledgeModelList)
+            await queryRunner.manager.save(userModel)
+            await queryRunner.manager.save(paymentList)
+            await queryRunner.commitTransaction()
+        } catch (err) {
+            console.log('出现错误了进行回滚', err)
+            await queryRunner.rollbackTransaction()
+        } finally {
+            await queryRunner.release()
+        }
+        return {
+            userModel,
+            pledgeModelList
+        }
     }
 
 

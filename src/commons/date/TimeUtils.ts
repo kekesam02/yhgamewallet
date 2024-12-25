@@ -72,6 +72,20 @@ class TimeUtils {
         }
     }
 
+    /**
+     * 判断是否在当前的时间段
+     * @param start 开始时间 格式为 20:00
+     * @param end 结束时间  格式为 20:35
+     */
+    public isTimeBetween = (start: string, end: string) => {
+        const now = moment();
+        let startArr = start.split(':')
+        let endArr = end.split(':')
+        const startTime = moment(now).startOf('day').add(startArr[0], 'hours').add(startArr[1], 'minute')
+        const endTime = moment(now).startOf('day').add(endArr[0], 'hours').add(endArr[1], 'minute')
+        return now.isBetween(startTime, endTime);
+    }
+
 }
 
 export default TimeUtils

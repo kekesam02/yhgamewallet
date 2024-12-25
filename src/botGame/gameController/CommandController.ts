@@ -10,6 +10,8 @@ import GameUserHtml from "../../html/userHtml/GameUserHtml";
 import GameFindController from "./GameFindController";
 import BotPaymentModel from "../../models/BotPaymentModel";
 import userModel from "../../models/UserModel";
+import ScheduleHandle from "../../commons/ScheduleHandle";
+import GamePledgeUpHtml from "../../html/gameHtml/GamePledgeUpHtml";
 
 
 /**
@@ -124,7 +126,14 @@ class CommandController {
      * @param ctx
      */
     public cancelBet = async (ctx: Context) => {
-        return new BotPledgeUpModel().cancelPledgeUp(ctx)
+        // 获取当前群组信息
+        let groupModel = await new BotGameModel().getCurrGroup(ctx)
+        if (!groupModel?.gameType) {
+            return
+        }
+        let {pledgeModelList, userModel} = await new BotPledgeUpModel().cancelPledgeUp(ctx, groupModel, ScheduleHandle.pc28Config.roundId)
+        let html = new GamePledgeUpHtml().cancelUp(userModel, pledgeModelList, ScheduleHandle.pc28Config.roundId)
+        await new MessageUtils().sendTextReply(ctx, html)
     }
 
     /**

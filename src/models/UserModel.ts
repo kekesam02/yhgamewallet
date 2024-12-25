@@ -2,6 +2,7 @@ import {BaseEntity, Column, Entity, PrimaryGeneratedColumn, UpdateResult} from "
 import {Context} from "telegraf";
 import AESUtils from "../commons/AESUtils";
 import WalletType from "../type/WalletType";
+import ComputeUtils from "../commons/ComputeUtils";
 
 
 /**
@@ -281,24 +282,6 @@ class UserModel extends BaseEntity{
     }
 
     /**
-     * 获取用户当前金额
-     */
-    public getUserMoney = (wallType: WalletType) => {
-        switch (wallType) {
-            case WalletType.USDT:
-                return this.USDT
-            case WalletType.TRX:
-                return this.TRX
-            case WalletType.CUSDT:
-                return this.CUSDT
-            case WalletType.CTRX:
-                return this.CTRX
-            default:
-                return this.USDT
-        }
-    }
-
-    /**
      * 获取用户信息
      * @param ctx
      */
@@ -314,6 +297,49 @@ class UserModel extends BaseEntity{
             user = await new UserModel().createNewUser(ctx)
         }
         return user
+    }
+
+    /**
+     * 更新用户金额信息、指定金额类型
+     * @param wallType 钱包类型
+     * @param money 金额数量
+     * @param isAdd
+     *      true 增加金额
+     *      false减少金额
+     */
+    public updateUserMoney = (
+        wallType: WalletType,
+        money: string,
+        isAdd: boolean = true
+    ): string => {
+        switch (wallType) {
+            case WalletType.USDT:
+                this.USDT = isAdd
+                    ? new ComputeUtils(this.USDT).add(money).toString()
+                    : new ComputeUtils(this.USDT).minus(money).toString()
+                return this.USDT
+            case WalletType.CUSDT:
+                this.CUSDT = isAdd
+                    ? new ComputeUtils(this.CUSDT).add(money).toString()
+                    : new ComputeUtils(this.CUSDT).minus(money).toString()
+                return this.CUSDT
+            case WalletType.TRX:
+                this.TRX = isAdd
+                    ? new ComputeUtils(this.TRX).add(money).toString()
+                    : new ComputeUtils(this.TRX).minus(money).toString()
+                return this.TRX
+            case WalletType.CTRX:
+                this.CTRX = isAdd
+                    ? new ComputeUtils(this.CTRX).add(money).toString()
+                    : new ComputeUtils(this.CTRX).minus(money).toString()
+                return this.CTRX
+            case WalletType.JIFEN:
+                this.KK = isAdd
+                    ? new ComputeUtils(this.KK).add(money).toString()
+                    : new ComputeUtils(this.KK).minus(money).toString()
+                // 暂时没有积分功能
+                return this.KK
+        }
     }
 
     /**

@@ -116,12 +116,12 @@ class BettingCommand28 {
         /**
          * 极大
          */
-        ['极大', 'jd'],
+        ['极大', 'jd', '级大'],
 
         /**
          * 极小
          */
-        ['极小', 'jx']
+        ['极小', 'jx', '级小']
     ]
 
     constructor(
@@ -141,6 +141,10 @@ class BettingCommand28 {
     ) => {
         let text = this.ctx.text!
         let  parseList =  this.parseCommand(text)
+        if (parseList.list.length <= 0) {
+            console.log('指令不存在直接退出')
+            return
+        }
         await new BotPledgeUpModel().createNewPledgeUp(
             this.ctx,
             this.group,
@@ -197,7 +201,6 @@ class BettingCommand28 {
                 console.log('指令不存在')
                 break
             }
-            console.log('金币', money)
 
             // 如果是梭哈的话判定一下后面的指令能否对上、如果对不上直接break
             if (currCommand[0] == '梭哈') {
