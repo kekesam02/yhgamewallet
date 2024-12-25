@@ -29,11 +29,11 @@ class BettingController {
         switch (group.gameType) {
             case GameTypeEnum.PC28DI:
                 // 进行pc28游戏指令处理
-                new BettingCommand28(this.ctx, group, oddsList).listenerCommand()
+                await new BettingCommand28(this.ctx, group, oddsList).listenerCommand()
                 break
             case GameTypeEnum.PC28GAO:
                 // 进行pc28游戏指令处理
-                new BettingCommand28(this.ctx, group, oddsList).listenerCommand()
+                await new BettingCommand28(this.ctx, group, oddsList).listenerCommand()
                 break
         }
     }

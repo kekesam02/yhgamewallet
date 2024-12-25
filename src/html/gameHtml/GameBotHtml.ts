@@ -43,7 +43,7 @@ class GameBotHtml {
         let userId = AESUtils.decodeUserId(user.tgId)
         let content = ''
         pledgeUpInfo.list.forEach(item => {
-            content = `${item.content}${this.N}`
+            content = `${content}${item.content}${this.N}`
         })
         return `
             昵称: <a href="tg://user?id=${userId}">${user.userName}</a>${this.N

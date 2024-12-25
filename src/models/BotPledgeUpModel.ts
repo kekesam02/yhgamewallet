@@ -395,7 +395,6 @@ class BotPledgeUpModel extends BaseEntity {
             new ComputeUtils(userModel.USDT).comparedTo(1) < 0 &&
             new ComputeUtils(userModel.CUSDT).comparedTo(1) < 0
         ) {
-            console.log('余额111判断')
             // 判断用户余额小于1提示用户余额不足
             await new MessageUtils().sendTextReply(
                 ctx,
@@ -405,7 +404,6 @@ class BotPledgeUpModel extends BaseEntity {
             return false
         }
         if (money == '梭哈') {
-            console.log('余额333判断')
             // 梭哈处理
             return true
         }
@@ -413,7 +411,6 @@ class BotPledgeUpModel extends BaseEntity {
             new ComputeUtils(userModel.USDT).comparedTo(money) < 0 &&
             new ComputeUtils(userModel.CUSDT).comparedTo(money) < 0
         ) {
-            console.log('余额222判断')
             // 判断用户余额小于1提示用户余额不足
             await new MessageUtils().sendTextReply(
                 ctx,
