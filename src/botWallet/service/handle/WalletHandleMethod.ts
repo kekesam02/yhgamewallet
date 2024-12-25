@@ -217,14 +217,9 @@ class WalletHandleMethod {
         }
 
         if (link != null) {
-            var messageId: number = ctx.callbackQuery?.message?.message_id || 0
-            if (messageId > 0) {
-                ctx.deleteMessage(messageId)
-            }
-
             var s = AESUtils.decodeAddr(link);
             const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s);
-            let replyMarkup = WalletController.createBackBtn().reply_markup
+            let replyMarkup = WalletController.createEmptyBtn().reply_markup
             new messageUtils().sendPhotoHtmlCtxBtn(ctx, WalletBotHtml.getBotUserHtml(s), replyMarkup, qrCodeImage)
         }
     }
@@ -238,7 +233,6 @@ class WalletHandleMethod {
         const flag = await this.isLogin(ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
-            this.removeMessage(ctx)
             var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
             return
@@ -256,7 +250,6 @@ class WalletHandleMethod {
         const flag = await this.isLogin(ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
-            this.removeMessage(ctx)
             var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
             return
@@ -275,7 +268,6 @@ class WalletHandleMethod {
         const flag = await this.isLogin(ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
-            this.removeMessage(ctx)
             var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
             return
@@ -294,7 +286,6 @@ class WalletHandleMethod {
         const flag = await this.isLogin(ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
-            this.removeMessage(ctx)
             var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
             return
@@ -313,7 +304,6 @@ class WalletHandleMethod {
         const flag = await this.isLogin(ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
-            this.removeMessage(ctx)
             var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
             return
@@ -353,16 +343,6 @@ class WalletHandleMethod {
         }
     }
 
-    /**
-     * 关闭计算器
-     * @param ctx
-     */
-    public static closeComputer = async (ctx: Context) => {
-        // 清除缓存
-        this.clearCacheRelation(ctx)
-        // 删除缓存
-        this.removeMessage(ctx)
-    }
 
     /**
      * 转账、红包、提现、收款、闪兑提示输入密码

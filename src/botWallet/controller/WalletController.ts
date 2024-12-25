@@ -162,6 +162,15 @@ class WalletController {
             ]
         ])
     }
+    /**
+     * 创建空按钮
+     */
+    public static createEmptyBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+            ]
+        ])
+    }
 
 }
 

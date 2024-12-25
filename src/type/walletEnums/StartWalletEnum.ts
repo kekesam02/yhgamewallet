@@ -46,11 +46,6 @@ enum StartWalletEnum {
      * 修改密码
      */
     UPDATEPWDBTN = 'update_pwd_btn',
-
-    /**
-     * 关闭计算器
-     */
-    CLOSECOMPUTER = 'close_computer',
 }
 
 
