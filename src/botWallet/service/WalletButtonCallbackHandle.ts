@@ -59,6 +59,7 @@ class WalletButtonCallbackHandle {
                 // ===============================按钮组2：用户充值、提现===========================
                 // 充值
                 case StartWalletEnum.CHONGZHI:
+                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleMethod.startChongZhi(ctx)
                     break
                 // 提现
@@ -83,6 +84,7 @@ class WalletButtonCallbackHandle {
                     break
                 // 个人中心
                 case StartWalletEnum.USERCENTER:
+                    WalletUserCenterHandleMethod.removeMessage(ctx)
                     WalletUserCenterHandleMethod.startUserCenterCallback(ctx).then()
                     break
                 // ===============================按钮组3：功能业务中的一些按钮===========================
@@ -107,6 +109,5 @@ class WalletButtonCallbackHandle {
         console.log('开始定位球游戏')
     }
 }
-
 
 export default WalletButtonCallbackHandle

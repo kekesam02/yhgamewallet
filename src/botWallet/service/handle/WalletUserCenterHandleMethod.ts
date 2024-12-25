@@ -15,6 +15,18 @@ import WalletController from "../../controller/WalletController";
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
 class WalletUserCenterHandleMethod {
+
+    /**
+     * 删除上一次消息
+     * @param ctx
+     */
+    public static removeMessage = async (ctx: Context) => {
+        var messageId: number = ctx.callbackQuery?.message?.message_id || 0
+        if (messageId > 0) {
+            ctx.deleteMessage(messageId)
+        }
+    }
+
     /**
      * 个人中心按钮--执行方法
      * 代号：user_center

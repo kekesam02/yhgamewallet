@@ -50,7 +50,7 @@ class LocalCache extends EventEmitter {
         } else {
             return void 0;
         }
-    };
+    }
 
     set = (key: string, value: any, ttl: number = 0) => {
         const {lengthCalculator, maxLength} = this.options;
@@ -79,7 +79,7 @@ class LocalCache extends EventEmitter {
         this._trim();
         this.emit("set", key, value);
         return true;
-    };
+    }
 
     del = (key: string) => {
         if (!this._cache.has(key)) {
@@ -87,7 +87,14 @@ class LocalCache extends EventEmitter {
         }
         const node = this._cache.get(key);
         this._del(node);
-    };
+    }
+
+    clear = () => {
+        for(var key in this._cache) {
+            const node = this._cache.get(key);
+            this._del(node);
+        }
+    }
 
     _del = (node: any) => {
         const item = node.value;

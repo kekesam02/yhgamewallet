@@ -7,15 +7,26 @@ import UserModel from "../../models/UserModel";
  */
 class WalletBotHtml {
 
+    static getTixianHtml = ()=> {
+       var  html = "\uD83D\uDD39 提现指南 \uD83D\uDD39\n" +
+            "  \uD83D\uDD3A提现格式：提现+金额 （例如：提现100）\n" +
+            "  \uD83D\uDD3A最低提现金额：10 USDT \uD83D\uDCB5\n" +
+            "  \uD83D\uDD3A手续费：1 USDT，将从余额中扣除 \uD83D\uDCB8\n" +
+            "\n" +
+            "⚠️ 提现操作不可撤销，请仔细核对信息！\n" +
+            "⚠️ 提现 USDT 将收取 1 USDT 手续费";
+        return html
+    }
+
 
     static getBotUserHtml = (s: string) => {
         // 获取当前日期和时间
         const formattedDate = DateFormatUtils .DateFormat(new Date());
         var html = '\n<strong>当前中国时间：' + formattedDate + '</strong>\n\n' +
-            '\uD83D\uDCB0 充值专属钱包地址: （目前只收TRC20 USDT，转错概不负责。）\n' +
-            '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
-            '<code>' + s + '</code>（点击可复制）\n' +
-            '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
+            '\uD83D\uDCB0 充值专属钱包地址:  （目前只收TRC20 USDT，转错概不负责。）点击可复制\n' +
+            '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
+            '<code>' + s + '</code>\n' +
+            '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
             '请仔细比对地址，如果和图片中地址不一致，请停止充值，立即重新安装飞机软件。';
         return html
     }

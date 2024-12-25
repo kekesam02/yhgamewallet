@@ -11,6 +11,7 @@ import QRCodeUtils from "../../../commons/qrcode/QRCodeUtils";
 import {ButtonCallbackType} from "../../../commons/button/ButtonCallbackType";
 import LocalCache from "../../../commons/cache/LocalCache";
 import WalletMessage from "../../const/WalletMessage";
+import {InlineQueryResultArticle} from "@telegraf/types/inline";
 
 
 /**
@@ -25,7 +26,7 @@ import WalletMessage from "../../const/WalletMessage";
  */
 class WalletHandleMethod {
 
-    private static localCache: LocalCache = new LocalCache();
+    public static localCache: LocalCache = new LocalCache();
     /**
      * 删除上一次消息
      * @param ctx
@@ -67,6 +68,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         var firstName: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
+        this.removeMessage(ctx)
         this.clearCacheRelation(ctx)
         this.clearCacheLogin(ctx)
         this.startCommand(ctx, tgId, username, firstName)
@@ -219,7 +221,7 @@ class WalletHandleMethod {
         if (link != null) {
             var s = AESUtils.decodeAddr(link);
             const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s);
-            let replyMarkup = WalletController.createEmptyBtn().reply_markup
+            let replyMarkup = WalletController.createBackBtn().reply_markup
             new messageUtils().sendPhotoHtmlCtxBtn(ctx, WalletBotHtml.getBotUserHtml(s), replyMarkup, qrCodeImage)
         }
     }
@@ -231,13 +233,17 @@ class WalletHandleMethod {
      */
     public static startTiXian = async (ctx: Context) => {
         const flag = await this.isLogin(ctx)
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        if(this.localCache.get('mark_'+chatId) == 1)return
         // 如果密码为空就开始设置密码
         if (!flag) {
-            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
             return
         }
-        console.log("startTiXian")
+
+        ctx.answerCbQuery('⚠️操作失败，余额不足\n\uD83D\uDCB0当前余额：0 USDT', {
+            show_alert: true
+        })
         return Promise.resolve()
     }
 
@@ -248,13 +254,33 @@ class WalletHandleMethod {
      */
     public static startZhuanZhang = async (ctx: Context) => {
         const flag = await this.isLogin(ctx)
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        if(this.localCache.get('mark_'+chatId) == 1)return
         // 如果密码为空就开始设置密码
         if (!flag) {
-            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
             return
         }
 
+        console.log("ctx.updateType",ctx.updateType)
+        var result :InlineQueryResultArticle[] = [
+            {
+                type: 'article',
+                id: "1",
+                title: "111",
+                description: `Postado em 1111`,
+                input_message_content: {
+                    message_text: `👉 <a href="x">xxxx [LINK]</a>\n\n🗃 Postado em <a href="d">ccc</a>`,
+                    parse_mode: 'HTML',
+                },
+                url: 'x',
+            }
+        ]
+        try {
+            await ctx.answerInlineQuery(result);
+        }catch(e){
+            console.log("e",e)
+        }
         console.log("startZhuanZhang")
         return Promise.resolve()
     }
@@ -266,9 +292,10 @@ class WalletHandleMethod {
      */
     public static startShouKuan = async (ctx: Context) => {
         const flag = await this.isLogin(ctx)
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        if(this.localCache.get('mark_'+chatId) == 1)return
         // 如果密码为空就开始设置密码
         if (!flag) {
-            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
             return
         }
@@ -285,12 +312,12 @@ class WalletHandleMethod {
     public static startHongBao = async (ctx: Context) => {
         const flag = await this.isLogin(ctx)
         // 如果密码为空就开始设置密码
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        if(this.localCache.get('mark_'+chatId) == 1)return
         if (!flag) {
-            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
             return
         }
-
         console.log("startHongBao")
         return Promise.resolve()
     }

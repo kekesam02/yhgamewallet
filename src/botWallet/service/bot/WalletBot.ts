@@ -29,6 +29,7 @@ bot.command('start', (ctx) => {
  * 监听用户发送过来的消息
  */
 bot.on(message('text'), async (ctx: Context) => {
+    console.log("ctx====================>",ctx)
     let messageHandle = new WalletMessageHandle();
     messageHandle.listenerMessage(ctx)
 })
@@ -41,7 +42,7 @@ bot.on('callback_query', async (ctx) => {
 })
 
 bot.on('inline_query', async (ctx) => {
-    console.log('内连按钮回调--------------', ctx)
+    console.log('--------------------内连按钮回调--------------', ctx)
     try {
         const query = ctx.inlineQuery.query
 
@@ -101,9 +102,11 @@ startJob()
 // Enable graceful stop
 process.once('SIGINT', () => {
     console.log('监听到关闭了1')
+    WalletHandleMethod.localCache.clear()
     bot.stop('SIGINT')
 })
 process.once('SIGTERM', () => {
     console.log('监听到关闭了2')
+    WalletHandleMethod.localCache.clear()
     bot.stop('SIGTERM');
 })
