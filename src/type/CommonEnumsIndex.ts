@@ -1,5 +1,6 @@
 import GameTypeEnum from "./gameEnums/GameTypeEnum";
 import WalletType from "./WalletType";
+import PaymentType from "./PaymentType";
 
 
 /**
@@ -39,6 +40,104 @@ class CommonEnumsIndex {
                 return '彩T'
             case WalletType.JIFEN:
                 return '积分'
+        }
+    }
+
+    /**
+     * 获取订单类型描述文字
+     */
+    public getPaymentTypeStr = (paymentType: PaymentType): string =>{
+        switch (paymentType) {
+            case PaymentType.CZ:
+                return '充值'
+            case PaymentType.SZ:
+                return '上注'
+            case PaymentType.TX_SQ:
+                return '申请提现'
+            case PaymentType.FS:
+                return '反水'
+            case PaymentType.ZJ:
+                return '中奖'
+            case PaymentType.SZ_QX:
+                return '取消上注'
+            case PaymentType.CJTX:
+                return '彩金提现'
+            case PaymentType.TX_DKJL:
+                return '提现打款记录'
+            case PaymentType.CJ_DKJL:
+                return '彩金打款记录'
+            case PaymentType.YHZZ:
+                return '用户转账'
+            case PaymentType.YHSK:
+                return '用户收款'
+            case PaymentType.FHB:
+                return '发送红包'
+            case PaymentType.LHB:
+                return '领红包'
+            case PaymentType.TKZZ:
+                return '转账退款'
+            case PaymentType.TKHB:
+                return '红包退款'
+            case PaymentType.SCFL:
+                return '首充返利'
+            case PaymentType.KYHL:
+                return '开业豪礼'
+            case PaymentType.JYJ:
+                return '救援金'
+            case PaymentType.HYFL:
+                return '好友返利'
+            case PaymentType.HYCJ:
+                return '好运彩金'
+        }
+    }
+
+    /**
+     * 判断当前订单金额增加还是减少
+     *  1: 增加
+     *  0: 减少
+     */
+    public getPaymentAddOrReduce = (paymentType: PaymentType): number => {
+        switch (paymentType) {
+            case PaymentType.CZ:
+                return 1
+            case PaymentType.SZ:
+                return 0
+            case PaymentType.TX_SQ:
+                return 0
+            case PaymentType.FS:
+                return 1
+            case PaymentType.ZJ:
+                return 1
+            case PaymentType.SZ_QX:
+                return 1
+            case PaymentType.CJTX:
+                return 0
+            case PaymentType.TX_DKJL:
+                return 0
+            case PaymentType.CJ_DKJL:
+                return 0
+            case PaymentType.YHZZ:
+                return 0
+            case PaymentType.YHSK:
+                return 1
+            case PaymentType.FHB:
+                return 0
+            case PaymentType.LHB:
+                return 1
+            case PaymentType.TKZZ:
+                return 1
+            case PaymentType.TKHB:
+                return 1
+            case PaymentType.SCFL:
+                return 1
+            case PaymentType.KYHL:
+                return 1
+            case PaymentType.JYJ:
+                return 1
+            case PaymentType.HYFL:
+                return 1
+            case PaymentType.HYCJ:
+                return 1
         }
     }
 }

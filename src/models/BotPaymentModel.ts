@@ -7,8 +7,17 @@ import ContextUtil from "../commons/ContextUtil";
 import BotGameModel from "./BotGameModel";
 import BotExchangeModel from "./BotExchangeModel";
 import ComputeUtils from "../commons/ComputeUtils";
-import TimeUtils from "../commons/TimeUtils";
+import TimeUtils from "../commons/date/TimeUtils";
 import PaymentType from "../type/PaymentType";
+import UserModel from "./UserModel";
+import userModel from "./UserModel";
+import CommonEnumsIndex from "../type/CommonEnumsIndex";
+import OrderUtils from "../commons/OrderUtils";
+import {DefectListType} from "../type/BotGameType/BotGameType";
+import GameDefectHtml from "../html/gameHtml/GameDefectHtml";
+import MessageUtils from "../commons/message/MessageUtils";
+import BotPledgeUpModel from "./BotPledgeUpModel";
+import database from "../config/database";
 
 /**
  * 用户流水表
@@ -45,7 +54,7 @@ class BotPaymentModel extends BaseEntity {
     nickname: string
 
     /**
-     * 赔率 下注入 1 中奖金额 = 1 * 赔率
+     * 订单类型
      */
     @Column({
         name: 'payment_type'
@@ -64,9 +73,9 @@ class BotPaymentModel extends BaseEntity {
      * 充值之前
      */
     @Column({
-        name: 'balance_bfter'
+        name: 'balance_before'
     })
-    balanceBfter: string
+    balanceBefore: string
 
     /**
      * 充值之后
@@ -80,7 +89,8 @@ class BotPaymentModel extends BaseEntity {
      * 备注，提现的订单号
      */
     @Column({
-        name: 'payment_method'
+        name: 'payment_method',
+        default: null
     })
     paymentMethod: number
 
@@ -105,7 +115,7 @@ class BotPaymentModel extends BaseEntity {
     /**
      * 是增加还是减少
      *  1: 增加
-     *  2: 减少
+     *  0: 减少
      */
     @Column({
         name: 'operate_type'
@@ -118,7 +128,8 @@ class BotPaymentModel extends BaseEntity {
      *      1: 数据已删除
      */
     @Column({
-        name: 'del'
+        name: 'del',
+        default: 0
     })
     del: number
 
@@ -153,6 +164,40 @@ class BotPaymentModel extends BaseEntity {
         name: 'update_time'
     })
     updateTime: string
+
+    /**
+     * 保存用户订单对象
+     * @param userModel 用户
+     * @param gameType 游戏类型
+     * @param paymentType  订单类型
+     * @param wallType 金额类型
+     * @param money 金额
+     * @param linkAddr 充值之类的链接地址 / 订单id
+     */
+    public createPaymentModel = (
+        userModel: UserModel,
+        gameType: GameTypeEnum,
+        paymentType: PaymentType,
+        wallType: WalletType,
+        money: string,
+        linkAddr: string = new OrderUtils().createPaymentModelId()
+    ) =>{
+        this.tgId = userModel.tgId
+        this.username = userModel.userName
+        this.nickname = userModel.nickName
+        this.paymentType = paymentType
+        this.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
+        this.balanceBefore = userModel.getUserMoney(wallType)
+        this.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
+            ? new ComputeUtils(userModel.getUserMoney(wallType)).add(money).toString()
+            : new ComputeUtils(userModel.getUserMoney(wallType)).minus(money).toString()
+        this.paymentTypeNumber = linkAddr
+        this.paymentAmount = money
+        this.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
+        this.walletType = wallType
+        this.gameType = gameType
+        return this
+    }
 
     /**
      * 获取用户流水分类列表
@@ -268,6 +313,75 @@ class BotPaymentModel extends BaseEntity {
     }
 
     /**
+     * 用户反水
+     * @param ctx
+     * @param groupModel
+     * @param userModel
+     */
+    public startDefect = async (ctx, groupModel: BotGameModel, userModel: UserModel) => {
+        // 最近的一次反水记录
+        let near = await this.getUserDefect(ctx)
+        // 需要反水的订单
+        let paymentList = await BotPaymentModel
+            .createQueryBuilder()
+            .where('user_id = :tgId', {
+                tgId: ContextUtil.getUserId(ctx)
+            })
+            .andWhere('payment_type = :paymentType', {
+                paymentType: PaymentType.SZ
+            })
+            .andWhere('del = 0')
+            .whereTime(
+                near? near.createTime: '',
+                ''
+            )
+            .getMany()
+
+        // 没有需要反水的订单
+        if (paymentList.length <= 0) {
+            return  this.sendFSTOGroup(ctx, [], near)
+        }
+
+        // 需要反水的数据列表
+        let needList = this.defectResultHandle(paymentList, userModel)
+        let saveList = []
+
+        // 没有需要反水的订单
+        if (paymentList.length <= 0) {
+            return  this.sendFSTOGroup(ctx, [], near)
+        }
+
+        needList.forEach(item => {
+            saveList.push(new BotPaymentModel().createPaymentModel(
+                userModel,
+                groupModel.gameType,
+                PaymentType.FS,
+                item.wallType,
+                item.backMoney
+            ))
+        })
+        let queryRunner = database.createQueryRunner()
+        await queryRunner.startTransaction()
+        try {
+            await queryRunner.manager.save(saveList)
+            await queryRunner.manager.save(userModel)
+            let html = new GameDefectHtml().createDefectHtml(needList, near? near.createTime: '')
+            await new MessageUtils().sendTextReply(ctx, html)
+            await queryRunner.commitTransaction()
+        } catch (err) {
+            await queryRunner.rollbackTransaction()
+        } finally {
+            await queryRunner.release()
+        }
+    }
+
+
+
+
+
+    // ------------- 下面主要上当前对象的一些私有方法
+
+    /**
      * 根据时间段整理用户流水数据列表
      * @param gameType: 当前群组游戏类型
      * @param resultList: 查询到的数据
@@ -333,6 +447,89 @@ class BotPaymentModel extends BaseEntity {
             dayWater: dayWater,
             dayList: dayList
         }
+    }
+
+    /**
+     * 发送反水消息到群组
+     */
+    private sendFSTOGroup = async (ctx, needList: DefectListType, near: BotPaymentModel | null) => {
+        let html = new GameDefectHtml().createDefectHtml(needList, near? near.createTime: '')
+        await new MessageUtils().sendTextReply(ctx, html)
+    }
+
+    /**
+     * 获取用户最近一次的反水数据
+     */
+    public getUserDefect = async (ctx): Promise<BotPaymentModel | null> => {
+        return BotPaymentModel
+            .createQueryBuilder()
+            .where('user_id = :tgId', {
+                tgId: ContextUtil.getUserId(ctx)
+            })
+            .andWhere('payment_type = :paymentType', {
+                paymentType: PaymentType.FS
+            })
+            .orderBy('create_time', 'DESC')
+            .getOne()
+    }
+
+
+    /**
+     * 获取需要反水的数据列表
+     */
+    private defectResultHandle = (paymentList: Array<BotPaymentModel>, user: UserModel): DefectListType => {
+        let result = [
+            { wallType: WalletType.USDT, waterMoney: '0', backMoney: '0' },
+            { wallType: WalletType.CUSDT, waterMoney: '0', backMoney: '0'  },
+            { wallType: WalletType.TRX, waterMoney: '0', backMoney: '0'  },
+            { wallType: WalletType.CTRX, waterMoney: '0', backMoney: '0'  },
+            { wallType: WalletType.JIFEN, waterMoney: '0', backMoney: '0'  },
+        ]
+        paymentList.forEach(item => {
+            switch (item.walletType) {
+                case WalletType.USDT:
+                    result[0].waterMoney = new ComputeUtils(result[0].waterMoney).add(item.paymentAmount).toString()
+                    break
+                case WalletType.CUSDT:
+                    result[1].waterMoney = new ComputeUtils(result[1].waterMoney).add(item.paymentAmount).toString()
+                    break
+                case WalletType.TRX:
+                    result[2].waterMoney = new ComputeUtils(result[2].waterMoney).add(item.paymentAmount).toString()
+                    break
+                case WalletType.CTRX:
+                    result[3].waterMoney = new ComputeUtils(result[3].waterMoney).add(item.paymentAmount).toString()
+                    break
+                case WalletType.JIFEN:
+                    result[4].waterMoney = new ComputeUtils(result[4].waterMoney).add(item.paymentAmount).toString()
+                    break
+            }
+        })
+        // 过滤出需要反水的数据列表
+        result = result.filter(item => {
+            if (item.waterMoney >= 100) {
+                item.backMoney = new ComputeUtils(item.waterMoney).multiplied(0.002).toString()
+                switch (item.wallType) {
+                    case WalletType.USDT:
+                        user.USDT = new ComputeUtils(user.USDT).add(item.backMoney).getValue()
+                        break
+                    case WalletType.TRX:
+                        user.TRX = new ComputeUtils(user.TRX).add(item.backMoney).getValue()
+                        break
+                    case WalletType.JIFEN:
+                        user.KK = new ComputeUtils(user.KK).add(item.backMoney).getValue()
+                        break
+                    case WalletType.CUSDT:
+                        user.CUSDT = new ComputeUtils(user.CUSDT).add(item.backMoney).getValue()
+                        break
+                    case WalletType.CTRX:
+                        user.CTRX = new ComputeUtils(user.CTRX).add(item.backMoney).getValue()
+                        break
+
+                }
+                return true
+            }
+        })
+        return result
     }
 
 }

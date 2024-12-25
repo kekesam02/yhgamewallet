@@ -54,7 +54,7 @@ class GameMessageHandle {
             case CommandController.defect.includes(text):
                 // 反水
                 console.log('进行反水')
-                await new CommandController().createUserBalance(ctx)
+                await new CommandController().createDefect(ctx)
                 break
             case CommandController.cancel.includes(text):
                 // 取消上注

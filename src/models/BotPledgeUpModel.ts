@@ -17,6 +17,8 @@ import BotGameModel from "./BotGameModel";
 import ComputeUtils from "../commons/ComputeUtils";
 import database from "../config/database";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
+import BotPaymentModel from "./BotPaymentModel";
+import PaymentType from "../type/PaymentType";
 
 
 /**
@@ -251,12 +253,16 @@ class BotPledgeUpModel extends BaseEntity {
             let updateResult = await this.getUpdatePledgeUpList(ctx, pledgeUpInfo, userModel, group)
             userModel = updateResult.userModel
             let updatePledgeUpList = updateResult.pledgeUpList
+            let paymentModelList = updateResult.paymentModelList
 
             // console.log('保存用户信息')
             // await queryRunner.manager.save(userModel as UserModel)
             console.log('保存用户信息结束')
             let wallType = updatePledgeUpList[0].walletType
             await queryRunner.manager.save(updatePledgeUpList)
+            console.log('保存订单信息')
+            await queryRunner.manager.save(paymentModelList)
+            console.log('保存订单信息结束')
             let html = new GameBotHtml().getBettingHtml(userModel, pledgeUpInfo, wallType)
             await new MessageUtils().sendTextReply(ctx, html)
             await queryRunner.commitTransaction()
@@ -289,17 +295,26 @@ class BotPledgeUpModel extends BaseEntity {
 
     /**
      * 获取需要更新的数据列表
+     * @param ctx
      * @param pledgeUpInfo: 下注信息列表
      * @param userModel: 用户对象
+     * @param group 群组
      */
     private getUpdatePledgeUpList = async (
         ctx: Context,
         pledgeUpInfo: PledgeUpInfoType,
         userModel: UserModel,
         group: BotGameModel
-    ): Promise<{ userModel: UserModel; pledgeUpList: BotPledgeUpModel[] }> => {
+    ): Promise<{
+        userModel: UserModel;
+        pledgeUpList: BotPledgeUpModel[],
+        // 用户订单对象更新
+        paymentModelList: BotPaymentModel[]
+    }> => {
         let totalMoney = '0'
         let wallType = WalletType.USDT
+        // 需要更新的订单对象
+        let paymentModelList: BotPaymentModel[] = []
         if (pledgeUpInfo.list[0].command == '梭哈') {
             console.log('进来梭哈')
             if (new ComputeUtils(userModel.CUSDT).comparedTo(1) >= 0) {
@@ -336,11 +351,20 @@ class BotPledgeUpModel extends BaseEntity {
             pledgeUp.state = 0
             pledgeUp.del = 0
             pledgeUpInfo.totalMoney = totalMoney
+
+            let paymentModel = new BotPaymentModel().createPaymentModel(
+                userModel,
+                group.gameType,
+                PaymentType.SZ,
+                wallType,
+                totalMoney
+            )
             return {
                 userModel: userModel,
                 pledgeUpList: [
                     pledgeUp
-                ]
+                ],
+                paymentModelList: [paymentModel]
             }
         }
         // 返回的更新数据列表
@@ -373,10 +397,20 @@ class BotPledgeUpModel extends BaseEntity {
             pledgeUp.state = 0
             pledgeUp.del = 0
             pledgeUpList.push(pledgeUp)
+
+            let paymentModel = new BotPaymentModel().createPaymentModel(
+                userModel,
+                group.gameType,
+                PaymentType.SZ,
+                wallType,
+                item.money
+            )
+            paymentModelList.push(paymentModel)
         }
         return {
             userModel: userModel,
-            pledgeUpList: pledgeUpList
+            pledgeUpList: pledgeUpList,
+            paymentModelList : paymentModelList
         }
     }
 

@@ -1,4 +1,4 @@
-import {customAlphabet} from "nanoid";
+import {customAlphabet, nanoid} from "nanoid";
 
 
 /**
@@ -12,6 +12,13 @@ class OrderUtils {
      */
     public createPledgeUpModelId = (): number => {
         return Number(customAlphabet('0123456789', 18)())
+    }
+
+    /**
+     * 生成订单表唯一id
+     */
+    public createPaymentModelId = (): string => {
+        return 'dd-' + nanoid(20)
     }
 
 }

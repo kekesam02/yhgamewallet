@@ -8,6 +8,8 @@ import PC28Controller from "./PC28Controller";
 import UserModel from "../../models/UserModel";
 import GameUserHtml from "../../html/userHtml/GameUserHtml";
 import GameFindController from "./GameFindController";
+import BotPaymentModel from "../../models/BotPaymentModel";
+import userModel from "../../models/UserModel";
 
 
 /**
@@ -113,10 +115,8 @@ class CommandController {
         if (!groupModel?.gameType) {
             return
         }
-        // let oddsList = await new BotOddsModel().getOddsList([
-        //     groupModel!.gameType
-        // ])
-        console.log('获取到的赔率表数据')
+        let userModel = await new UserModel().getUserModel(ctx)
+        await new BotPaymentModel().startDefect(ctx, groupModel, userModel)
     }
 
     /**
