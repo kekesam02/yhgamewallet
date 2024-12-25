@@ -281,6 +281,24 @@ class UserModel extends BaseEntity{
     }
 
     /**
+     * 获取用户当前金额
+     */
+    public getUserMoney = (wallType: WalletType) => {
+        switch (wallType) {
+            case WalletType.USDT:
+                return this.USDT
+            case WalletType.TRX:
+                return this.TRX
+            case WalletType.CUSDT:
+                return this.CUSDT
+            case WalletType.CTRX:
+                return this.CTRX
+            default:
+                return this.USDT
+        }
+    }
+
+    /**
      * 获取用户信息
      * @param ctx
      */

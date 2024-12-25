@@ -88,7 +88,11 @@ class ComputeUtils {
             .dividedBy(currNum)
             .precision(Number(have) + 1, 0)
             .valueOf()
-        result = result.substring(0, result.length - 1)
+        if (result.split('.').length > 1) {
+            if (result.split('.')[1].length > 2) {
+                result = result.substring(0, result.length - 1)
+            }
+        }
         let remain = this.num1
             .minus(new BigNumber(currNum).multipliedBy(result).valueOf())
             .valueOf()

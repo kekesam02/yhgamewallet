@@ -17,6 +17,8 @@ import BotGameModel from "./BotGameModel";
 import ComputeUtils from "../commons/ComputeUtils";
 import database from "../config/database";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
+import BotPaymentModel from "./BotPaymentModel";
+import PaymentType from "../type/PaymentType";
 
 
 /**
@@ -215,7 +217,7 @@ class BotPledgeUpModel extends BaseEntity {
      * @param json: 获取到的中奖数据
      */
     public getUserList = async (json: Pc28LotteryJsonType) => {
-        let roundId = json.data[0].open_code
+        let roundId = json.data[0].expect
         let result = BotPledgeUpModel
             .createQueryBuilder()
             .where('round_id = :roundId', {
@@ -251,15 +253,19 @@ class BotPledgeUpModel extends BaseEntity {
             let updateResult = await this.getUpdatePledgeUpList(ctx, pledgeUpInfo, userModel, group)
             userModel = updateResult.userModel
             let updatePledgeUpList = updateResult.pledgeUpList
+            let paymentModelList = updateResult.paymentModelList
 
             // console.log('保存用户信息')
             // await queryRunner.manager.save(userModel as UserModel)
             console.log('保存用户信息结束')
             let wallType = updatePledgeUpList[0].walletType
             await queryRunner.manager.save(updatePledgeUpList)
-            console.log('发送通知消息')
+            console.log('保存订单信息')
+            await queryRunner.manager.save(paymentModelList)
+            console.log('保存订单信息结束')
             let html = new GameBotHtml().getBettingHtml(userModel, pledgeUpInfo, wallType)
             await new MessageUtils().sendTextReply(ctx, html)
+            await queryRunner.commitTransaction()
         } catch (err) {
             console.log('出现错误了进行回滚', err)
             await queryRunner.rollbackTransaction()
@@ -289,17 +295,26 @@ class BotPledgeUpModel extends BaseEntity {
 
     /**
      * 获取需要更新的数据列表
+     * @param ctx
      * @param pledgeUpInfo: 下注信息列表
      * @param userModel: 用户对象
+     * @param group 群组
      */
     private getUpdatePledgeUpList = async (
         ctx: Context,
         pledgeUpInfo: PledgeUpInfoType,
         userModel: UserModel,
         group: BotGameModel
-    ): Promise<{ userModel: UserModel; pledgeUpList: BotPledgeUpModel[] }> => {
+    ): Promise<{
+        userModel: UserModel;
+        pledgeUpList: BotPledgeUpModel[],
+        // 用户订单对象更新
+        paymentModelList: BotPaymentModel[]
+    }> => {
         let totalMoney = '0'
         let wallType = WalletType.USDT
+        // 需要更新的订单对象
+        let paymentModelList: BotPaymentModel[] = []
         if (pledgeUpInfo.list[0].command == '梭哈') {
             console.log('进来梭哈')
             if (new ComputeUtils(userModel.CUSDT).comparedTo(1) >= 0) {
@@ -336,11 +351,20 @@ class BotPledgeUpModel extends BaseEntity {
             pledgeUp.state = 0
             pledgeUp.del = 0
             pledgeUpInfo.totalMoney = totalMoney
+
+            let paymentModel = new BotPaymentModel().createPaymentModel(
+                userModel,
+                group.gameType,
+                PaymentType.SZ,
+                wallType,
+                totalMoney
+            )
             return {
                 userModel: userModel,
                 pledgeUpList: [
                     pledgeUp
-                ]
+                ],
+                paymentModelList: [paymentModel]
             }
         }
         // 返回的更新数据列表
@@ -360,11 +384,11 @@ class BotPledgeUpModel extends BaseEntity {
             pledgeUp.roundId = pledgeUpInfo.roundId
             pledgeUp.amountMoney = item.money
             pledgeUp.gameType = group.gameType
-            pledgeUp.bettingType = pledgeUpInfo.list[0].odds.id
+            pledgeUp.bettingType = item.odds.id
             pledgeUp.upId = new OrderUtils().createPledgeUpModelId()
             pledgeUp.walletType = wallType
-            pledgeUp.gameData = pledgeUpInfo.list[0].content
-            pledgeUp.content = pledgeUpInfo.list[0].content
+            pledgeUp.gameData = item.content
+            pledgeUp.content = item.content
             pledgeUp.groupId = group.groupId
             pledgeUp.isWinning = 0
             pledgeUp.winningAmount = '0'
@@ -373,10 +397,20 @@ class BotPledgeUpModel extends BaseEntity {
             pledgeUp.state = 0
             pledgeUp.del = 0
             pledgeUpList.push(pledgeUp)
+
+            let paymentModel = new BotPaymentModel().createPaymentModel(
+                userModel,
+                group.gameType,
+                PaymentType.SZ,
+                wallType,
+                item.money
+            )
+            paymentModelList.push(paymentModel)
         }
         return {
             userModel: userModel,
-            pledgeUpList: pledgeUpList
+            pledgeUpList: pledgeUpList,
+            paymentModelList : paymentModelList
         }
     }
 
@@ -395,7 +429,6 @@ class BotPledgeUpModel extends BaseEntity {
             new ComputeUtils(userModel.USDT).comparedTo(1) < 0 &&
             new ComputeUtils(userModel.CUSDT).comparedTo(1) < 0
         ) {
-            console.log('余额111判断')
             // 判断用户余额小于1提示用户余额不足
             await new MessageUtils().sendTextReply(
                 ctx,
@@ -405,7 +438,6 @@ class BotPledgeUpModel extends BaseEntity {
             return false
         }
         if (money == '梭哈') {
-            console.log('余额333判断')
             // 梭哈处理
             return true
         }
@@ -413,7 +445,6 @@ class BotPledgeUpModel extends BaseEntity {
             new ComputeUtils(userModel.USDT).comparedTo(money) < 0 &&
             new ComputeUtils(userModel.CUSDT).comparedTo(money) < 0
         ) {
-            console.log('余额222判断')
             // 判断用户余额小于1提示用户余额不足
             await new MessageUtils().sendTextReply(
                 ctx,

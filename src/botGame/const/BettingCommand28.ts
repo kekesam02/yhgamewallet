@@ -4,6 +4,8 @@ import BotOddsModel from "../../models/BotOddsModel";
 import BotPledgeUpModel, {PledgeUpInfoType} from "../../models/BotPledgeUpModel";
 import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/ComputeUtils";
+import ScheduleHandle from "../../commons/ScheduleHandle";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 
 
 /**
@@ -23,6 +25,9 @@ class BettingCommand28 {
      */
     public oddsList: Array<BotOddsModel>
 
+    /**
+     * 公共下注指令
+     */
     public commandList = [
 
         /**
@@ -102,6 +107,23 @@ class BettingCommand28 {
         ['双', 's']
     ]
 
+    /**
+     * pc28高倍下注指令
+     * @private
+     */
+    private commandHeightList = [
+        ...this.commandList,
+        /**
+         * 极大
+         */
+        ['极大', 'jd'],
+
+        /**
+         * 极小
+         */
+        ['极小', 'jx']
+    ]
+
     constructor(
         ctx: Context,
         group: BotGameModel,
@@ -132,7 +154,7 @@ class BettingCommand28 {
     public parseCommand = (text: string): PledgeUpInfoType => {
         let arr = text.split(' ')
         let resultList: PledgeUpInfoType = {
-            roundId: 123,
+            roundId: Number(ScheduleHandle.pc28Config.roundId),
             totalMoney: '0',
             list: []
         }
@@ -142,8 +164,10 @@ class BettingCommand28 {
             let money = '0'
             // 当前是几杀
             let sha = ''
+            // 当前下注使用的指令
+            let currCommandList = this.group.gameType == GameTypeEnum.PC28DI? this.commandList: this.commandHeightList
             // 获取当前指令
-            let currCommand: Array<string> | undefined = this.commandList.find(item2 => {
+            let currCommand: Array<string> | undefined = currCommandList.find(item2 => {
                 // 点杀处理
                 if (item2[0] == '杀' && new StringUtils().isStartWithNum(itemText)) {
                     // 判断传入的是杀还是.   true 杀
@@ -180,7 +204,7 @@ class BettingCommand28 {
                 if (money == '梭哈') {
                     break
                 }
-                let exit = this.commandList.find(item2 => item2.indexOf(money) > -1)
+                let exit = currCommandList.find(item2 => item2.indexOf(money) > -1)
                 if (!exit) {
                     break
                 }
@@ -218,7 +242,7 @@ class BettingCommand28 {
             // 获取投注总金额、在后面用来判定余额是否足够
             if (currCommand[0] != '梭哈') {
                 // 设置下注的总金额
-                resultList.totalMoney = new ComputeUtils(0).add(money).toString()
+                resultList.totalMoney = new ComputeUtils(resultList.totalMoney).add(money).toString()
             }
             resultList.list.push({
                 money: money,

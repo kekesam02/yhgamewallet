@@ -19,6 +19,8 @@ type lotteryResultType = {
  */
 class WinningTypeConfirm {
 
+    public gameType: GameTypeEnum
+
     /**
      * 大
      */
@@ -208,6 +210,13 @@ class WinningTypeConfirm {
             sum: number,
             gameType: GameTypeEnum
         ) => {
+            // pc28高倍单独判定
+            if (gameType == GameTypeEnum.PC28GAO) {
+                let result = this.gao28Special(num1, num2, num3, sum, gameType)
+                if (result) {
+                    return true
+                }
+            }
             if  (num3 - num2 == 1 && num2 - num1 == 1) {
                 return true
             }
@@ -280,16 +289,60 @@ class WinningTypeConfirm {
     }
 
     /**
+     * PC28高倍顺子单独处理
+     */
+    private gao28Special = (
+        num1: number,
+        num2: number,
+        num3: number,
+        sum: number,
+        gameType: GameTypeEnum
+    ): boolean => {
+        // 890单独处理
+        if (sum == 17) {
+            if (num1 == 8){
+                if (num2 == 0 && num3 == 9) return true
+                if (num2 == 9 && num3 == 0) return true
+            }
+            if (num1 == 0){
+                if (num2 == 8 && num3 == 9) return true
+                if (num2 == 9 && num3 == 8) return true
+            }
+            if (num1 == 9){
+                if (num2 == 0 && num3 == 8) return true
+                if (num2 == 8 && num3 == 0) return true
+            }
+        }
+
+        // 901单独处理
+        if (sum == 10) {
+            if (num1 == 9){
+                if (num2 == 0 && num3 == 1) return true
+                if (num2 == 1 && num3 == 0) return true
+            }
+            if (num1 == 0){
+                if (num2 == 9 && num3 == 1) return true
+                if (num2 == 1 && num3 == 9) return true
+            }
+            if (num1 == 1){
+                if (num2 == 9 && num3 == 0) return true
+                if (num2 == 0 && num3 == 9) return true
+            }
+        }
+        return false
+    }
+
+    /**
      * 获取开奖结果
      */
     public getLotteryDesc = (result: string, gameType: GameTypeEnum) => {
         switch (gameType) {
             case GameTypeEnum.PC28DI:
-                return this.getLotteryDescPC28DI(result)
+                return this.getLotteryDescPC28DI(result, gameType)
             case GameTypeEnum.PC28GAO:
-                return this.getLotteryDescPC28DI(result)
+                return this.getLotteryDescPC28DI(result, gameType)
             default:
-                return this.getLotteryDescPC28DI(result)
+                return this.getLotteryDescPC28DI(result, gameType)
         }
     }
 
@@ -297,7 +350,7 @@ class WinningTypeConfirm {
      * 获取开奖结果描述文字
      * @param result: 开奖结果
      */
-    public getLotteryDescPC28DI = (result: string): {
+    public getLotteryDescPC28DI = (result: string, gameType: GameTypeEnum): {
         code: {
             key: string,
             value: any
@@ -325,7 +378,7 @@ class WinningTypeConfirm {
         }, 0)
         // 特殊代码结果(单双之类的)
         let codeResult = codeList.find(item => {
-            return item.value(num1, num2, num3, sum, GameTypeEnum.PC28DI)
+            return item.value(num1, num2, num3, sum, gameType)
         })
 
         // 需要判定的形态列表
@@ -336,7 +389,7 @@ class WinningTypeConfirm {
         ]
         // 形态判定结果
         let formResult = formList.find(item => {
-            return item.value(num1, num2, num3, sum, GameTypeEnum.PC28DI)
+            return item.value(num1, num2, num3, sum, gameType)
         })
 
         if (!formResult) {

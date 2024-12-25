@@ -16,6 +16,8 @@ import request from "../../commons/request/request";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import WinningTypeConfirm from "../const/WinningTypeConfirm";
 import BotOddsStorage from "../../storage/BotOddsStorage";
+import StringUtils from "../../commons/StringUtils";
+import ComputeUtils from "../../commons/ComputeUtils";
 
 const schedule = require('node-schedule')
 
@@ -166,6 +168,7 @@ class PC28Controller {
         for (let i = 0; i < groupList.length; i++) {
             let item = groupList[0]
             let winningList = await this.getUserIsWinning(pledgeUpMap, lotteryJson, item.gameType)
+            console.log('获取中奖列表结束', winningList)
             let html = new GameBotHtml().getLotteryTextHtml(
                 lotteryJson,
                 roundId,
@@ -173,6 +176,7 @@ class PC28Controller {
                 item.gameType,
                 winningList
             )
+            console.log('获取到到html', html)
             await new MessageUtils().botSendText(bot, item.groupId, html)
         }
     }
@@ -266,7 +270,7 @@ class PC28Controller {
      */
     public saveLotteryJson = async (json: Pc28LotteryJsonType) => {
         await new BotRoundModel().saveRound(json, GameTypeEnum.PC28DI, 1)
-        await new BotRoundModel().saveRound(json, GameTypeEnum.PC28DI, 1)
+        await new BotRoundModel().saveRound(json, GameTypeEnum.PC28GAO, 1)
         return json
     }
 
@@ -303,6 +307,14 @@ class PC28Controller {
             url: 'http://api.openjiang.com/api?token=230F534DE38145D7&t=jnd28&rows=5&p=json',
             method: 'get'
         })
+        if (json.data instanceof String && json.data.indexOf('请求频率太快') > 0) {
+            return {
+                "rows": 5,
+                "t": "jisu28",
+                "message": "请求频率太快",
+                "data": []
+            }
+        }
         console.log('返回的结果', json.data)
         return json.data
         // return Promise.resolve({
@@ -338,28 +350,87 @@ class PC28Controller {
         }
         // 当前中奖结果
         let openCode = lotteryJson.data[0].open_code
+        let openSum = this.getLotterySum(openCode)
         // 获取判定后的开奖结果
         let winningType = new WinningTypeConfirm().getLotteryDesc(openCode, gameType)
         // 更新后的数据
         let needChangeList: Array<BotPledgeUpModel> = []
         for (let i = 0; i < currList.length; i++) {
             let item = currList[i]
+
+            // 如果第一位是数字开头的证明是点杀
+            if (new StringUtils().isStartWithNum(item.content)) {
+                console.log('进行点杀判断', item.content)
+                let arr = item.content.split('杀')
+                if (new ComputeUtils(arr[0]).comparedTo(openSum) == 0) {
+                    item.isWinning = 1
+                    item.winningAmount = await BotOddsStorage.getOddsMoney(
+                        item.bettingType,
+                        item.amountMoney,
+                        openCode,
+                        gameType
+                    )
+                    needChangeList.push(item)
+                }
+            }
+
+            // 如果第二位是以数字开头证明只下了 单双大小
+            let last = item.content.substring(1, item.content.length)
+            if (new StringUtils().isStartWithNum(last)) {
+                console.log('进行单双判定', item.content)
+                let fist = item.content.substring(0, 1)
+                if (winningType.code.key.indexOf(fist) > -1) {
+                    item.isWinning = 1
+                    item.winningAmount = await BotOddsStorage.getOddsMoney(
+                        item.bettingType,
+                        item.amountMoney,
+                        openCode,
+                        gameType
+                    )
+                    needChangeList.push(item)
+                }
+                continue
+            }
+
+            console.log('特码判定', item.content)
+            // 判定特码能否对上
             if (item.content.indexOf(winningType.code.key) > -1) {
                 item.isWinning = 1
-                item.winningAmount = await BotOddsStorage.getOddsMoney(item.bettingType, item.amountMoney)
+                item.winningAmount = await BotOddsStorage.getOddsMoney(
+                    item.bettingType,
+                    item.amountMoney,
+                    openCode,
+                    gameType
+                )
                 needChangeList.push(item)
-                break
+                continue
             }
+
+            console.log('形态判定', item.content)
+            // 判断形态是否对上
             if (item.content.indexOf(winningType.form.key) > -1) {
                 item.isWinning = 1
-                item.winningAmount = await BotOddsStorage.getOddsMoney(item.bettingType, item.amountMoney)
+                item.winningAmount = await BotOddsStorage.getOddsMoney(
+                    item.bettingType,
+                    item.amountMoney,
+                    openCode,
+                    gameType
+                )
                 needChangeList.push(item)
-                break
             }
         }
         let update = await new BotPledgeUpModel().updatePledgeUpList(needChangeList)
-        console.log('更新后的数据', update)
         return needChangeList
+    }
+
+
+    /**
+     * 获取开奖结果之和
+     */
+    private getLotterySum = (openCode: string) => {
+        return openCode.split(',').reduce((prev, curr) => {
+            return prev + Number(curr)
+        }, 0)
     }
 }
 

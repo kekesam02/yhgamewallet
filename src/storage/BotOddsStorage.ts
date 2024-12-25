@@ -1,6 +1,6 @@
 import BotOddsModel from "../models/BotOddsModel"
-import GameEnumsIndex from "../type/gameEnums/GameEnumsIndex"
 import botOddsModel from "../models/BotOddsModel"
+import GameEnumsIndex from "../type/gameEnums/GameEnumsIndex"
 import GameTypeEnum from "../type/gameEnums/GameTypeEnum"
 import ComputeUtils from "../commons/ComputeUtils";
 
@@ -30,18 +30,66 @@ class BotOddsStorage {
     public static getOddsListById = async (id: string): Promise<BotOddsModel> => {
         if (BotOddsStorage.oddsList.length <= 0) {
             await BotOddsStorage.init()
-            return BotOddsStorage.oddsList.find(item => item.id = Number(id))!
+            return BotOddsStorage.oddsList.find(item => item.id == Number(id))!
         }
-        return BotOddsStorage.oddsList.find(item => item.id = Number(id))!
+        return BotOddsStorage.oddsList.find(item => item.id == Number(id))!
     }
 
     /**
      * 根据id 获取需要赔付的金额
      * @param id: oddsModel 的id
      * @param money: 下注金额
+     * @param openCode: 开奖结果
+     * @param gameType: 游戏类型
      */
-    public static getOddsMoney = async (id: number, money: string): Promise<string> => {
+    public static getOddsMoney = async (
+        id: number,
+        money: string,
+        openCode: string,
+        gameType: GameTypeEnum
+    ): Promise<string> => {
         let botOdds = await BotOddsStorage.getOddsListById(`${id}`)
+        let arr = openCode.split(',')
+        let sum = arr.reduce((prev, curr) => Number(curr) + prev, 0)
+
+        // pc28高倍特殊处理
+        if (gameType == GameTypeEnum.PC28DI) {
+            if (sum == 13 || sum == 14) {
+                // 遇13/14大/小/单/双赔 1.6
+                if (
+                    botOdds.name == '单'
+                    || botOdds.name == '双'
+                    || botOdds.name == '大'
+                    || botOdds.name == '小'
+                ) {
+                    return new ComputeUtils(money).multiplied(1.6).toString()
+                }
+
+                // 遇13/14下注组合下注回本
+                if (
+                    botOdds.name == '大单'
+                    || botOdds.name == '大双'
+                    || botOdds.name == '小双'
+                    || botOdds.name == '小单'
+                ) {
+                    return new ComputeUtils(money).multiplied(1).toString()
+                }
+            }
+        }
+
+        // pc28高倍特殊处理
+        if (gameType == GameTypeEnum.PC28GAO) {
+            if (sum == 13 || sum == 14) {
+                // 遇13/14下注组合下注回本
+                if (
+                    botOdds.name == '对子'
+                    || botOdds.name == '顺子'
+                    || botOdds.name == '豹子'
+                ) {
+                    return new ComputeUtils(money).multiplied(1).toString()
+                }
+            }
+        }
         return new ComputeUtils(money).multiplied(botOdds.odds).toString()
     }
 

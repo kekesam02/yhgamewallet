@@ -43,7 +43,7 @@ class GameBotHtml {
         let userId = AESUtils.decodeUserId(user.tgId)
         let content = ''
         pledgeUpInfo.list.forEach(item => {
-            content = `${item.content}${this.N}`
+            content = `${content}${item.content}${this.N}`
         })
         return `
             昵称: <a href="tg://user?id=${userId}">${user.userName}</a>${this.N
@@ -132,7 +132,7 @@ class GameBotHtml {
                 gquserName = '@'
                 return ''
             case GameTypeEnum.PC28DI:
-                gquserName = `⚠️遇13/14大/小/单/双赔 1.6 \n⚠️遇13/14下注组合回本\n`
+                gquserName = `⚠️遇13/14大/小/单/双赔 1.6 \n⚠️遇13/14下注组合回本`
                 baJiuLin = '不属于'
                 gameName = 'pc2.0'
                 defect = oddsMap.get(5)?.get('pc反水')?.odds ?? '0'
@@ -145,7 +145,7 @@ class GameBotHtml {
                     defect
                 )
             case GameTypeEnum.PC28GAO:
-                gquserName = `⚠️遇13/14 、对子、顺子、豹子，中奖回本金\n`
+                gquserName = `⚠️遇13/14 、对子、顺子、豹子，中奖回本金`
                 baJiuLin = '属于'
                 gameName = 'pc2.8'
                 defect = oddsMap.get(6)?.get('pc2.8反水')?.odds ?? '0'
@@ -187,15 +187,20 @@ class GameBotHtml {
         startTime: string,
         pledgeUpList: Array<BotPledgeUpModel>
     ): string => {
+        let personLength: Array<string> = []
+        pledgeUpList.map(item => {
+            if (personLength.indexOf(item.userName) < 0) {
+                personLength.push(item.userName)
+            }
+        })
         let headerHtml = `
             <tg-emoji emoji-id='5368324170671202286'>\uD83D\uDC47</tg-emoji>期号：<code> ${roundId}</code> 停止下注${this.N
             }<tg-emoji emoji-id='5368324170671202286'>\uD83D\uDC47</tg-emoji>开奖时间：${startTime}${this.N
             }-----------------------${this.N
-            }本期人数: ${pledgeUpList.length}${this.N
-            }-----本期下注玩家-----${this.N}
-        `
+            }本期人数: ${personLength.length}${this.N
+            }-----本期下注玩家-----`
         pledgeUpList.forEach(item => {
-            headerHtml += `${item.userName} ${item.content}${new CommonEnumsIndex().getWalletTypeStr(item.walletType)}`
+            headerHtml += `${this.N}${item.userName} ${item.content}${new CommonEnumsIndex().getWalletTypeStr(item.walletType)}`
         })
         return headerHtml
     }
@@ -229,7 +234,7 @@ class GameBotHtml {
             let contentText = item.content.replaceAll(item.amountMoney, '')
             // 倍率
             let rate = new ComputeUtils(item.winningAmount).dividedBy(item.amountMoney, 2).toString()
-            html += `${item.userName}${contentText} 中${item.winningAmount}(${rate})倍率`
+            html += `${item.userName} ${contentText} ${item.amountMoney} 中${item.winningAmount}(${rate})倍率${this.N}`
         })
         return html
     }

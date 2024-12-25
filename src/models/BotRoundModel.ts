@@ -141,14 +141,18 @@ class BotRoundModel extends BaseEntity{
     ) => {
         let curr = json.data[0]
         let arr = json.data[0].open_code.split(',')
-        let winnerType = new WinningTypeConfirm().getLotteryDescPC28DI(curr.open_code)
+        let winnerType = new WinningTypeConfirm().getLotteryDescPC28DI(curr.open_code, gameType)
         console.log('获取到的开奖结果', winnerType.code)
         console.log('获取到的开奖结果', winnerType.form)
         let result = curr.open_code.split(',')
         let resultStr = ''
         let sum = new ComputeUtils(0)
-        result.map(item => {
-            resultStr = `${resultStr}+item`
+        result.map((item, index) => {
+            if (index == 0) {
+                resultStr = item
+            } else {
+                resultStr = `${resultStr}+${item}`
+            }
             sum.add(item)
         })
         resultStr = `${resultStr}=${sum}`

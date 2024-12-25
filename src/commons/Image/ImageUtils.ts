@@ -12,7 +12,10 @@ class ImageUtils {
      * 将 html 转化为 图片
      * @param html
      */
-    public htmlToImage = async (html: string): Promise<InputFile> => {
+    public htmlToImage = async (html: string): Promise<{
+        source: Buffer
+        filename?: string
+    }> => {
         let result = await nodeHtmlToImage({
             html: html
         }) as Buffer
