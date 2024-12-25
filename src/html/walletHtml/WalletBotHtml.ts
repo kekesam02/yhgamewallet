@@ -1,26 +1,35 @@
 import AESUtils from '../../commons/AESUtils'
+import DateFormatUtils from '../../commons/date/DateFormatUtils'
 import UserModel from "../../models/UserModel";
-import WalletUserModel from "../../models/WalletUserModel";
 
 /**
  * 游戏机器人返回的html字段
  */
 class WalletBotHtml {
 
-    // 结果模版字符串缩进会在 html 中展示问题
-    private N = '\n'
 
+    static getBotUserHtml = (s: string) => {
+        // 获取当前日期和时间
+        const formattedDate = DateFormatUtils .DateFormat(new Date());
+        var html = '\n<strong>当前中国时间：' + formattedDate + '</strong>\n\n' +
+            '\uD83D\uDCB0 充值专属钱包地址: （目前只收TRC20 USDT，转错概不负责。）\n' +
+            '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
+            '<code>' + s + '</code>（点击可复制）\n' +
+            '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
+            '请仔细比对地址，如果和图片中地址不一致，请停止充值，立即重新安装飞机软件。';
+        return html
+    }
     /**
      * 生成开始游戏的html字符串
      */
-    getBotStartHtml = (tgId:number,model:UserModel): string => {
+    static getBotStartHtml = (tgId: number, model: UserModel): string => {
         var vipHtml = '';
         if (model.vip && model.vip < 10) {
             vipHtml = "💎尊贵的VIP" + model.vip + "💎\n";
         }
         var add = '';
         if (model.rechargeLink) {
-            add = "\n🧾提现地址：" + AESUtils.encodeAddr(model.rechargeLink) + "\n";
+            add = "\n🧾提现地址：" + AESUtils.decodeAddr(model.rechargeLink) + "\n";
         } else {
             add = "\n👐D暂无提现地址请前往个人中心绑定👐\n";
         }

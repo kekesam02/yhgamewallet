@@ -95,6 +95,10 @@ class WalletButtonCallbackHandle {
                 case StartWalletEnum.UPDATEPWDBTN:
                     WalletHandleMethod.startUpdatePwdCallback(ctx)
                     break
+                // 关闭计算器
+                case StartWalletEnum.CLOSECOMPUTER:
+                    WalletHandleMethod.closeComputer(ctx)
+                    break
             }
         }
     }

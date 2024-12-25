@@ -3,7 +3,7 @@ import ButtonUtils from '../../../commons/button/ButtonUtils'
 import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
 import AESUtils from "../../../commons/AESUtils";
 import UserModel from "../../../models/UserModel";
-import walletController from "../../controller/WalletController";
+import WalletController from "../../controller/WalletController";
 
 /**
  * 公共方法处理
@@ -58,10 +58,10 @@ class WalletUserCenterHandleMethod {
             ctx.deleteMessage(messageId)
         }
         // 3：发送带有分享按钮的消息
-        var html = new WalletBotHtml().getBotStartHtml(tgId, user!)
+        var html = WalletBotHtml.getBotStartHtml(tgId, user!)
         try {
             // 4: 机器人回复，显示信息和按钮相关
-            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(walletController.UserHomeBtns))
+            await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(WalletController.UserHomeBtns))
         } catch (err) {
 
         }

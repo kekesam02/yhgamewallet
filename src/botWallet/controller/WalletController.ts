@@ -17,11 +17,27 @@ class WalletController {
     }
 
     /**
+     * 关闭计算器
+     */
+    public static CloseComputer = {
+        text: '✖️ 关闭',
+        query: 'close_computer'
+    }
+
+    /**
      * 保存密码
      */
     public static SaveUserPwd = {
-        text: "✏️ 保存密码",
+        text: "✏️ 提交保存",
         query: "update_pwd_btn"
+    }
+
+    /**
+     * 保存密码
+     */
+    public static CompareUserPwd = {
+        text: "✏️ 确定密码",
+        query: "compare_pwd_btn"
     }
 
     /**
@@ -139,7 +155,7 @@ class WalletController {
     /**
      * 创建返回按钮
      */
-    public createBackBtn = () => {
+    public static createBackBtn = () => {
         return new ButtonUtils().createCallbackBtn([
             [
                 WalletController.BackHome

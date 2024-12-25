@@ -8,9 +8,9 @@ import MCoinRechargeAddrPoolModel from "../../../models/MCoinRechargeAddrPoolMod
 import WalletController from "../../controller/WalletController";
 import messageUtils from "../../../commons/message/MessageUtils";
 import QRCodeUtils from "../../../commons/qrcode/QRCodeUtils";
-import DateFormatUtils from "../../../commons/date/DateFormatUtils";
 import {ButtonCallbackType} from "../../../commons/button/ButtonCallbackType";
 import LocalCache from "../../../commons/cache/LocalCache";
+import WalletMessage from "../../const/WalletMessage";
 
 
 /**
@@ -41,9 +41,20 @@ class WalletHandleMethod {
      * 清除缓存相关
      * @param ctx
      */
-    public static clearCacheRelation = (ctx:Context)=>{
+    public static clearCacheRelation = (ctx: Context) => {
         var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        this.localCache.del(chatId + "")
+        this.localCache.del(chatId )
+        this.localCache.del('mark_'+chatId)
+    }
+
+    /**
+     * 清除缓存登录
+     * @param ctx
+     */
+    public static clearCacheLogin = (ctx: Context) => {
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        this.localCache.set("login_" + chatId, "success")
+        this.localCache.del('mark_'+chatId)
     }
 
     /**
@@ -57,6 +68,7 @@ class WalletHandleMethod {
         var firstName: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
         this.clearCacheRelation(ctx)
+        this.clearCacheLogin(ctx)
         this.startCommand(ctx, tgId, username, firstName)
     }
 
@@ -70,6 +82,7 @@ class WalletHandleMethod {
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
         this.clearCacheRelation(ctx)
+        this.clearCacheLogin(ctx)
         this.startCommand(ctx, tgId, username, firstName)
     }
 
@@ -114,14 +127,13 @@ class WalletHandleMethod {
                 nickName: firstName
             }).where('id = :id', {id: user.id}).execute();
         }
-
         // 3：发送带有分享按钮的消息
-        var html = new WalletBotHtml().getBotStartHtml(tgId, user!)
+        var html = WalletBotHtml.getBotStartHtml(tgId, user!)
         try {
             // 4: 机器人回复，显示信息和按钮相关
             await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(WalletController.HomeBtns))
         } catch (err) {
-            ctx.reply("提示：尊敬的用户，网络繁忙中请稍后再试！如遇到问题可联系客服：@Yhclub01")
+            ctx.reply(WalletMessage.ERROR_CLIENT)
         }
     }
 
@@ -212,55 +224,153 @@ class WalletHandleMethod {
 
             var s = AESUtils.decodeAddr(link);
             const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s);
-            // 获取当前日期和时间
-            const formattedDate = DateFormatUtils.DateFormat(new Date());
-            var html = '\n<strong>当前中国时间：' + formattedDate + '</strong>\n\n' +
-                '\uD83D\uDCB0 充值专属钱包地址: （目前只收TRC20 USDT，转错概不负责。）\n' +
-                '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
-                '<code>' + s + '</code>（点击可复制）\n' +
-                '➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n' +
-                '请仔细比对地址，如果和图片中地址不一致，请停止充值，立即重新安装飞机软件。';
-            let replyMarkup = new WalletController().createBackBtn().reply_markup
-            new messageUtils().sendPhotoHtmlCtxBtn(ctx, html, replyMarkup, qrCodeImage)
+            let replyMarkup = WalletController.createBackBtn().reply_markup
+            new messageUtils().sendPhotoHtmlCtxBtn(ctx, WalletBotHtml.getBotUserHtml(s), replyMarkup, qrCodeImage)
         }
+    }
+
+    /**
+     * 提现
+     * 代号：tixian_btn
+     * @param ctx
+     */
+    public static startTiXian = async (ctx: Context) => {
+        const flag = await this.isLogin(ctx)
+        // 如果密码为空就开始设置密码
+        if (!flag) {
+            this.removeMessage(ctx)
+            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            return
+        }
+        console.log("startTiXian")
+        return Promise.resolve()
+    }
+
+    /**
+     * 转账
+     * 代号：zhuanzhang_btn
+     * @param ctx
+     */
+    public static startZhuanZhang = async (ctx: Context) => {
+        const flag = await this.isLogin(ctx)
+        // 如果密码为空就开始设置密码
+        if (!flag) {
+            this.removeMessage(ctx)
+            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            return
+        }
+
+        console.log("startZhuanZhang")
+        return Promise.resolve()
+    }
+
+    /**
+     * 收款
+     * 代号：shoukuan_btn
+     * @param ctx
+     */
+    public static startShouKuan = async (ctx: Context) => {
+        const flag = await this.isLogin(ctx)
+        // 如果密码为空就开始设置密码
+        if (!flag) {
+            this.removeMessage(ctx)
+            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            return
+        }
+
+        console.log("startShouKuan")
+        return Promise.resolve()
+    }
+
+    /**
+     * 红包
+     * 代号：hongbao_btn
+     * @param ctx
+     */
+    public static startHongBao = async (ctx: Context) => {
+        const flag = await this.isLogin(ctx)
+        // 如果密码为空就开始设置密码
+        if (!flag) {
+            this.removeMessage(ctx)
+            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            return
+        }
+
+        console.log("startHongBao")
+        return Promise.resolve()
+    }
+
+    /**
+     * 闪兑
+     * 代号：shandui_btn
+     * @param ctx
+     */
+    public static startShanDui = async (ctx: Context) => {
+        const flag = await this.isLogin(ctx)
+        // 如果密码为空就开始设置密码
+        if (!flag) {
+            this.removeMessage(ctx)
+            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            return
+        }
+
+        console.log("startShanDui")
+        return Promise.resolve()
     }
 
     /**
      * 计算器输入
      * @param ctx
      */
-    public static startInputPassword = async(ctx:Context) => {
+    public static startInputPassword = async (ctx: Context) => {
         var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data || ""
-        if(callbackStr.startsWith("num_")) {
-            var cacheValue = this.localCache.get(chatId + "") || ""
+        if (callbackStr.startsWith("num_")) {
+            var cacheValue = this.localCache.get(chatId) || ""
             var currentVal = callbackStr.replaceAll('num_', '')
             var cvalue = cacheValue + currentVal
-            if(cvalue.length > 4 )return
-            this.localCache.set(chatId + "", cvalue)
-            await this.sendPasswordSetupMessage(ctx, cvalue, false,false)
-        }else if(callbackStr == 'clear'){
-            this.localCache.del(chatId + "")
-            await this.sendPasswordSetupMessage(ctx, "", false,false)
-        }else if(callbackStr == 'delete'){
-            var cacheKey = this.localCache.get(chatId + "")
+            if (cvalue.length > 4) return
+            this.localCache.set(chatId , cvalue)
+            await this.sendPasswordSetupMessage(ctx, cvalue, false)
+        } else if (callbackStr == 'clear') {
+            this.localCache.del(chatId)
+            await this.sendPasswordSetupMessage(ctx, "", false)
+        } else if (callbackStr == 'delete') {
+            var cacheKey = this.localCache.get(chatId)
             if (cacheKey) {
                 var arr = cacheKey.split("")
                 arr.pop()
                 var join = arr.join('');
-                this.localCache.set(chatId + "", join)
-                await this.sendPasswordSetupMessage(ctx, join, false,true)
+                this.localCache.set(chatId, join)
+                await this.sendPasswordSetupMessage(ctx, join, false)
             }
         }
+    }
+
+    /**
+     * 关闭计算器
+     * @param ctx
+     */
+    public static closeComputer = async (ctx: Context) => {
+        // 清除缓存
+        this.clearCacheRelation(ctx)
+        // 删除缓存
+        this.removeMessage(ctx)
     }
 
     /**
      * 转账、红包、提现、收款、闪兑提示输入密码
      * @param ctx
      */
-    public static sendPasswordSetupMessage = async (ctx: Context,callbackStr:string="",firstFlag:boolean=true,surebtn:boolean = false) => {
+    public static sendPasswordSetupMessage = async (ctx: Context, callbackStr: string = "", firstFlag: boolean = true) => {
         try {
+            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             var arr = ["🔑 "]
             let length = callbackStr.length
             for (let i = 0; i < length; i++) {
@@ -269,8 +379,8 @@ class WalletHandleMethod {
             for (let i = length; i < 4; i++) {
                 arr.push("_ ")
             }
-            surebtn = length >= 4
-            const html = "\uD83C\uDFE6欢迎使用一号公馆钱包\n为了您的资金安全\n✏️请设置 4 位支付密码\n\n" + arr.join("") ;
+            let surebtn = length >= 4
+            const html = WalletMessage.PASSWORD_TIP(arr);
             const keybordsArr: Array<Array<ButtonCallbackType>> = []
             for (let i = 1; i <= 9; i += 3) {
                 var rowInline: Array<ButtonCallbackType> = []
@@ -285,105 +395,101 @@ class WalletHandleMethod {
             // 计算器清空，删除，zero按钮
             keybordsArr.push(WalletController.ComputeClearDel)
             if (surebtn) {
-                keybordsArr.push([WalletController.BackHome,WalletController.SaveUserPwd])
-            }else{
+                keybordsArr.push([WalletController.CloseComputer, WalletController.SaveUserPwd])
+            } else {
                 var len = keybordsArr.length
-                var index = keybordsArr[len - 1].findIndex(c=>c.query == 'surebtn')
+                var index = keybordsArr[len - 1].findIndex(c => c.query == 'update_pwd_btn')
                 if (index != -1) {
                     keybordsArr[len - 1].splice(index, 1)
                 }
             }
+            // 设置启动开关
+            this.localCache.set("mark_"+chatId,1)
             if (firstFlag) {
                 // 4: 机器人回复，显示信息和按钮相关
                 await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(keybordsArr))
-            }else{
+            } else {
                 // 4: 机器人回复，显示信息和按钮相关
                 await ctx.editMessageText(html, new ButtonUtils().createCallbackBtn(keybordsArr))
             }
         } catch (err) {
-            console.log("err",err)
-            ctx.reply("提示：尊敬的用户，网络繁忙中请稍后再试！如遇到问题可联系客服：@Yhclub01")
+            ctx.reply(WalletMessage.ERROR_CLIENT)
         }
     }
 
+
     /**
-     * 修改密码
+     * 提交密码
      * 代号：update_pwd_btn
      * @param ctx
      */
-    public static  startUpdatePwdCallback = async (ctx: Context) => {
+    public static startUpdatePwdCallback = async (ctx: Context) => {
         var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        let update: any = ctx?.update
-        let callbackStr: string = update.callback_query?.data || ""
-        var cacheValue = this.localCache.get(chatId + "") || ""
+        var cacheValue = this.localCache.get(chatId) || ""
         if (cacheValue) {
-            if (cacheValue.length >= 4 ) {
-                console.log("最终修改密码是：cacheValue----->", cacheValue)
-                // 开始执行密码修改
-
-                const html = "✅ 密码设置成功！当前密码是：("+cacheValue+")\n\n⚠️ 请牢记密码，你的所有资金都是和密码绑定，避免遗忘。"
-                // 清除计算器消息
-                this.removeMessage(ctx)
-                // 清空缓存
-                this.clearCacheRelation(ctx)
-                // 发送消息
-                ctx.replyWithHTML(html)
-            }else{
-                ctx.replyWithHTML("⚠️ 密码长度不够，必须是4位!")
+            if (cacheValue.length >= 4) {
+                var tgId: number = ctx.callbackQuery?.from?.id || 0
+                var firstName: string = ctx.callbackQuery?.from?.first_name || ''
+                let userId = AESUtils.encodeUserId(tgId?.toString())
+                var password = cacheValue.substring(0, 4)
+                // 开始查询密码
+                const resp = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
+                if (resp?.paymentPassword) {
+                    if (resp.paymentPassword == password) {
+                        // 清除计算器消息
+                        this.removeMessage(ctx)
+                        // 清空缓存
+                        this.clearCacheRelation(ctx)
+                        // 发送消息
+                        ctx.replyWithHTML(WalletMessage.PASSWORD_SUCCESS_MESSAGE)
+                        // 设置登录成功的标识
+                        this.localCache.set("login_" + chatId, "success")
+                    } else {
+                        ctx.replyWithHTML(WalletMessage.C_PASSWPORD_ERROR)
+                    }
+                } else {
+                    // 开始执行密码修改
+                    await UserModel.createQueryBuilder().update()
+                        .set({paymentPassword: password, nickName: firstName})
+                        .where("tg_id=:tgId", {'tgId': userId}).execute()
+                    // 设置密码消息
+                    const html = WalletMessage.PASSWORD_MESSAGE(cacheValue)
+                    // 清除计算器消息
+                    this.removeMessage(ctx)
+                    // 清空缓存
+                    this.clearCacheRelation(ctx)
+                    // 发送消息
+                    ctx.replyWithHTML(html)
+                    // 设置登录成功的标识
+                    this.localCache.set("login_" + chatId, "success")
+                }
+            } else {
+                ctx.replyWithHTML(WalletMessage.PASSWPORD_ERROR)
             }
-        }else{
-            ctx.replyWithHTML("⚠️ 请输入密码")
+        } else {
+            ctx.replyWithHTML(WalletMessage.PASSWPORD_EMPTY)
         }
     }
 
-    /**
-     * 提现
-     * 代号：tixian_btn
-     * @param ctx
-     */
-    public static  startTiXian = async (ctx: Context) => {
-        await this.sendPasswordSetupMessage(ctx)
-        return Promise.resolve()
-    }
 
     /**
-     * 转账
-     * 代号：zhuanzhang_btn
+     * 是否登录
+     * 公共方法
      * @param ctx
      */
-    public static startZhuanZhang = async (ctx: Context) => {
-        await this.sendPasswordSetupMessage(ctx)
-        return Promise.resolve()
-    }
-
-    /**
-     * 收款
-     * 代号：shoukuan_btn
-     * @param ctx
-     */
-    public static  startShouKuan = async (ctx: Context) => {
-        await this.sendPasswordSetupMessage(ctx)
-        return Promise.resolve()
-    }
-
-    /**
-     * 红包
-     * 代号：hongbao_btn
-     * @param ctx
-     */
-    public static startHongBao = async (ctx: Context) => {
-        await this.sendPasswordSetupMessage(ctx)
-        return Promise.resolve()
-    }
-
-    /**
-     * 闪兑
-     * 代号：shandui_btn
-     * @param ctx
-     */
-    public static  startShanDui = async (ctx: Context) => {
-        await this.sendPasswordSetupMessage(ctx)
-        return Promise.resolve()
+    public static isLogin = async (ctx: Context)  => {
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        let userId = AESUtils.encodeUserId(tgId?.toString())
+        // 查询的目的，是用户忘记密码。后台可以清空密码。这样可以让用户重新设置。
+        const resp = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
+        if (!resp?.paymentPassword) {
+            this.localCache.del("login_" + chatId)
+            this.localCache.del(chatId)
+            return false
+        }
+        // 获取登录成功的标识
+        return this.localCache.get("login_" + chatId) == "success"
     }
 }
 
