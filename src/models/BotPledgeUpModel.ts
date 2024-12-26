@@ -15,7 +15,7 @@ import AESUtils from "../commons/AESUtils";
 import OrderUtils from "../commons/OrderUtils";
 import BotGameModel from "./BotGameModel";
 import ComputeUtils from "../commons/ComputeUtils";
-import database from "../config/database";
+import database, {queryRunner} from "../config/database";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
 import BotPaymentModel from "./BotPaymentModel";
 import PaymentType from "../type/PaymentType";
@@ -242,7 +242,7 @@ class BotPledgeUpModel extends BaseEntity {
         group: BotGameModel,
         pledgeUpInfo: PledgeUpInfoType
     ) => {
-        let queryRunner = database.createQueryRunner()
+
         await queryRunner.startTransaction('REPEATABLE READ')
 
         try {
@@ -273,8 +273,6 @@ class BotPledgeUpModel extends BaseEntity {
         } catch (err) {
             console.log('出现错误了进行回滚', err)
             await queryRunner.rollbackTransaction()
-        } finally {
-            await queryRunner.release()
         }
     }
 
@@ -304,7 +302,6 @@ class BotPledgeUpModel extends BaseEntity {
         paymentList.forEach(item => {
             item.del = 1
         })
-        let queryRunner = database.createQueryRunner()
         await queryRunner.startTransaction('REPEATABLE READ')
         try{
             console.log('开始更新数据')
@@ -315,8 +312,6 @@ class BotPledgeUpModel extends BaseEntity {
         } catch (err) {
             console.log('出现错误了进行回滚', err)
             await queryRunner.rollbackTransaction()
-        } finally {
-            await queryRunner.release()
         }
         return {
             userModel,
@@ -368,7 +363,7 @@ class BotPledgeUpModel extends BaseEntity {
             console.log('梭哈金额', totalMoney)
             let upId = new OrderUtils().createPledgeUpModelId()
             let pledgeUp = new BotPledgeUpModel()
-            pledgeUp.tgId = AESUtils.decodeUserId(userModel.tgId)
+            pledgeUp.tgId = userModel.tgId
             pledgeUp.roundId = pledgeUpInfo.roundId
             pledgeUp.amountMoney = totalMoney
             pledgeUp.gameType = group.gameType
@@ -414,7 +409,7 @@ class BotPledgeUpModel extends BaseEntity {
                 userModel.CUSDT = new ComputeUtils(userModel.CUSDT).minus(money).toString()
             }
             let pledgeUp = new BotPledgeUpModel()
-            pledgeUp.tgId = AESUtils.decodeUserId(userModel.tgId)
+            pledgeUp.tgId = userModel.tgId
             pledgeUp.roundId = pledgeUpInfo.roundId
             pledgeUp.amountMoney = item.money
             pledgeUp.gameType = group.gameType

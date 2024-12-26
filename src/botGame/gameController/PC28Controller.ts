@@ -19,6 +19,10 @@ import BotOddsStorage from "../../storage/BotOddsStorage";
 import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/ComputeUtils";
 import GameCommandHtml from "../../html/gameHtml/GameCommandHtml";
+import UserModel from "../../models/UserModel";
+import AESUtils from "../../commons/AESUtils";
+import userModel from "../../models/UserModel";
+import database, {queryRunner} from "../../config/database";
 
 const schedule = require('node-schedule')
 
@@ -169,6 +173,41 @@ class PC28Controller {
         for (let i = 0; i < groupList.length; i++) {
             let item = groupList[i]
             let winningList = await this.getUserIsWinning(pledgeUpMap, lotteryJson, item.gameType)
+            // 需要更新的用户列表
+            let updateUserList = []
+            for (let i = 0; i < winningList.length; i++) {
+                let item = winningList[i]
+                if (item.tgId) {
+                    console.log('传入查询的id---->', item.tgId)
+                    let user = await new UserModel().getUserModelById(item.tgId)
+                    console.log('获取到的添加金额=====>', user)
+                    if (!user) {
+                        continue
+                    }
+                    user.updateUserMoney(item.walletType, item.amountMoney)
+                    console.log('添加金额结束------>', user)
+                    updateUserList.push(user)
+                }
+            }
+            console.log('需要更新的用户列表数据', updateUserList)
+
+            try {
+                console.log('进入事务处理------')
+                await queryRunner.startTransaction('REPEATABLE READ')
+                // await new BotPledgeUpModel().updatePledgeUpList(winningList)
+                console.log('创建结束====')
+                console.log('保存中奖结果结束======')
+                await queryRunner.manager.save(winningList)
+                console.log('保存用户列表')
+                await queryRunner.manager.save(updateUserList)
+                console.log('保存用1111户里表')
+                await queryRunner.commitTransaction()
+                console.log('结束了=====')
+            } catch (err) {
+                console.log('出现错误了进行回滚', err)
+                await queryRunner.rollbackTransaction()
+            }
+
             console.log('获取中奖列表结束', winningList)
             let html = new GameBotHtml().getLotteryTextHtml(
                 lotteryJson,
@@ -255,7 +294,7 @@ class PC28Controller {
             })
             .andWhere('state = 0')
             .andWhere('del = 0')
-            .andWhere('game_type = gameType', {
+            .andWhere('game_type = :gameType', {
                 gameType: GameTypeEnum.PC28DI
             })
             .getMany()
@@ -266,8 +305,8 @@ class PC28Controller {
             })
             .andWhere('state = 0')
             .andWhere('del = 0')
-            .andWhere('game_type = gameType', {
-                gameType: GameTypeEnum.PC28DI
+            .andWhere('game_type = :gameType', {
+                gameType: GameTypeEnum.PC28GAO
             })
             .getMany()
         // 遍历群组列表、并发送游戏信息到群组
@@ -447,7 +486,6 @@ class PC28Controller {
                 needChangeList.push(item)
             }
         }
-        let update = await new BotPledgeUpModel().updatePledgeUpList(needChangeList)
         return needChangeList
     }
 
