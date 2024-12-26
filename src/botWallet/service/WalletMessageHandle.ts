@@ -20,7 +20,8 @@ class WalletMessageHandle {
             return
         }
         text = text.trim()
-        // 获取telegram的tgId
+
+        // 这里是处理提现地址的地方
         var tgId: number = ctx.message?.from?.id || 0
         const addtxaddr: string = await redis.get("addtxaddr" + tgId) || ""
         if (addtxaddr == 'addtxaddr') {
