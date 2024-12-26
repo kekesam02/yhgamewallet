@@ -259,7 +259,7 @@ class BotPledgeUpModel extends BaseEntity {
             let paymentModelList = updateResult.paymentModelList
 
             // console.log('保存用户信息')
-            // await queryRunner.manager.save(userModel as UserModel)
+            await queryRunner.manager.save(userModel as UserModel)
             console.log('保存用户信息结束')
             let wallType = updatePledgeUpList[0].walletType
             await queryRunner.manager.save(updatePledgeUpList)
