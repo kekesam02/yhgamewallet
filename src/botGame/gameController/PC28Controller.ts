@@ -23,6 +23,7 @@ import UserModel from "../../models/UserModel";
 import AESUtils from "../../commons/AESUtils";
 import userModel from "../../models/UserModel";
 import database, {queryRunner} from "../../config/database";
+import {map} from "yaml/dist/schema/common/map";
 
 const schedule = require('node-schedule')
 
@@ -174,41 +175,39 @@ class PC28Controller {
             let item = groupList[i]
             let winningList = await this.getUserIsWinning(pledgeUpMap, lotteryJson, item.gameType)
             // 需要更新的用户列表
-            let updateUserList = []
+            let updateUserList: Array<UserModel> = []
+            let userMap = new Map()
             for (let i = 0; i < winningList.length; i++) {
                 let item = winningList[i]
                 if (item.tgId) {
-                    console.log('传入查询的id---->', item.tgId)
-                    let user = await new UserModel().getUserModelById(item.tgId)
-                    console.log('获取到的添加金额=====>', user)
+                    let user = null
+                    if (userMap.has(item.tgId)) {
+                        user = userMap.get(item.tgId)
+                    } else {
+                        user = await new UserModel().getUserModelById(item.tgId)
+                        userMap.set(item.tgId, user)
+                    }
                     if (!user) {
                         continue
                     }
-                    user.updateUserMoney(item.walletType, item.amountMoney)
-                    console.log('添加金额结束------>', user)
-                    updateUserList.push(user)
+                    user.updateUserMoney(item.walletType, item.winningAmount)
                 }
             }
-            console.log('需要更新的用户列表数据', updateUserList)
+            userMap.forEach((value, key, map) => {
+                updateUserList.push(value)
+            })
 
             try {
-                console.log('进入事务处理------')
                 await queryRunner.startTransaction('REPEATABLE READ')
                 // await new BotPledgeUpModel().updatePledgeUpList(winningList)
-                console.log('创建结束====')
-                console.log('保存中奖结果结束======')
                 await queryRunner.manager.save(winningList)
-                console.log('保存用户列表')
                 await queryRunner.manager.save(updateUserList)
-                console.log('保存用1111户里表')
                 await queryRunner.commitTransaction()
-                console.log('结束了=====')
             } catch (err) {
                 console.log('出现错误了进行回滚', err)
                 await queryRunner.rollbackTransaction()
             }
 
-            console.log('获取中奖列表结束', winningList)
             let html = new GameBotHtml().getLotteryTextHtml(
                 lotteryJson,
                 roundId,
@@ -216,7 +215,6 @@ class PC28Controller {
                 item.gameType,
                 winningList
             )
-            console.log('获取到到html', html)
             await new MessageUtils().botSendText(bot, item.groupId, html)
         }
     }
