@@ -18,6 +18,7 @@ import GameDefectHtml from "../html/gameHtml/GameDefectHtml";
 import MessageUtils from "../commons/message/MessageUtils";
 import BotPledgeUpModel from "./BotPledgeUpModel";
 import database from "../config/database";
+import ScheduleHandle from "../commons/ScheduleHandle";
 
 /**
  * 用户流水表
@@ -180,17 +181,17 @@ class BotPaymentModel extends BaseEntity {
         paymentType: PaymentType,
         wallType: WalletType,
         money: string,
-        linkAddr: string = new OrderUtils().createPaymentModelId()
+        linkAddr: string = ScheduleHandle.pc28Config.roundId ?? new OrderUtils().createPaymentModelId()
     ) =>{
         this.tgId = userModel.tgId
         this.username = userModel.userName
         this.nickname = userModel.nickName
         this.paymentType = paymentType
         this.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
-        this.balanceBefore = userModel.getUserMoney(wallType)
+        this.balanceBefore = userModel.getBalance(wallType)
         this.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
-            ? new ComputeUtils(userModel.getUserMoney(wallType)).add(money).toString()
-            : new ComputeUtils(userModel.getUserMoney(wallType)).minus(money).toString()
+            ? new ComputeUtils(userModel.getBalance(wallType)).add(money).toString()
+            : new ComputeUtils(userModel.getBalance(wallType)).minus(money).toString()
         this.paymentTypeNumber = linkAddr
         this.paymentAmount = money
         this.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
@@ -375,6 +376,23 @@ class BotPaymentModel extends BaseEntity {
         }
     }
 
+    /**
+     * 获取用户当前下注列表数据
+     * @param roundId
+     */
+    public getPaymentModelList = ({
+        roundId
+    }: {
+        roundId: string
+    }) => {
+        return BotPaymentModel
+            .createQueryBuilder()
+            .where('payment_type_number = :paymentTypeNumber', {
+                paymentTypeNumber: roundId
+            })
+            .andWhere('del = 0')
+            .getMany()
+    }
 
 
 
