@@ -9,6 +9,14 @@ import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 class WalletController {
 
     /**
+     * 前往个人中心
+     */
+    public static BackUserCenter = {
+        text: '↪️ 前往个人中心',
+        query: 'center_btn'
+    }
+
+    /**
      * 返回首页
      */
     public static BackHome = {
@@ -151,6 +159,18 @@ class WalletController {
             }
         ]
     ]
+
+    /**
+     * 创建返回按钮和到个人中心
+     */
+    public static createBackDoubleBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                WalletController.BackHome,
+                WalletController.BackUserCenter
+            ]
+        ])
+    }
 
     /**
      * 创建返回按钮

@@ -29,7 +29,6 @@ bot.command('start', (ctx) => {
  * 监听用户发送过来的消息
  */
 bot.on(message('text'), async (ctx: Context) => {
-    console.log("ctx====================>",ctx)
     let messageHandle = new WalletMessageHandle();
     messageHandle.listenerMessage(ctx)
 })
@@ -45,9 +44,7 @@ bot.on('inline_query', async (ctx) => {
     console.log('--------------------内连按钮回调--------------', ctx)
     try {
         const query = ctx.inlineQuery.query
-
         if (!query) return
-
         // 创建一个可分享的结果
         const result = [{
             type: 'article',

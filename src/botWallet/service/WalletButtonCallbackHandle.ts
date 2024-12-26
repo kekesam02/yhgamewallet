@@ -84,7 +84,6 @@ class WalletButtonCallbackHandle {
                     break
                 // 个人中心
                 case StartWalletEnum.USERCENTER:
-                    WalletUserCenterHandleMethod.removeMessage(ctx)
                     WalletUserCenterHandleMethod.startUserCenterCallback(ctx).then()
                     break
                 // ===============================按钮组3：功能业务中的一些按钮===========================

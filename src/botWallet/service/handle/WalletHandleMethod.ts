@@ -12,6 +12,9 @@ import {ButtonCallbackType} from "../../../commons/button/ButtonCallbackType";
 import LocalCache from "../../../commons/cache/LocalCache";
 import WalletMessage from "../../const/WalletMessage";
 import {InlineQueryResultArticle} from "@telegraf/types/inline";
+import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
+import redis from "../../../config/redis";
+import walletBotHtml from "../../../html/walletHtml/WalletBotHtml";
 
 
 /**
@@ -110,7 +113,7 @@ class WalletHandleMethod {
         // 1：如果不存在就添加
         if (!user) {
             // 如果用户不存在就添加用户
-            var insertResultPromise = await UserModel.createQueryBuilder().insert().into(UserModel).values({
+            await UserModel.createQueryBuilder().insert().into(UserModel).values({
                 tgId: userId,
                 nickName: firstName,
                 userName: username,
@@ -129,8 +132,12 @@ class WalletHandleMethod {
                 nickName: firstName
             }).where('id = :id', {id: user.id}).execute();
         }
-        // 3：发送带有分享按钮的消息
-        var html = WalletBotHtml.getBotStartHtml(tgId, user!)
+        // 3：查询用户是否存在交易地址
+        const botWithdrawalAddrModel =  await BotWithdrawalAddrModel.createQueryBuilder("t1")
+            .where('tg_id = :tgId and del = 0',{tgId: userId}).getOne()
+        // 4：发送带有分享按钮的消息
+        var addr = botWithdrawalAddrModel?.addr || "";
+        var html = WalletBotHtml.getBotStartHtml(tgId, addr,user!)
         try {
             // 4: 机器人回复，显示信息和按钮相关
             await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(WalletController.HomeBtns))
@@ -241,9 +248,25 @@ class WalletHandleMethod {
             return
         }
 
+        // 查询是否有提现地址
+        // 获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 查询用户信息
+        let userId = AESUtils.encodeUserId(tgId?.toString())
+        // 查询用户是否存在交易地址
+        const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
+            .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
+        if (!botWithdrawalAddrModel?.addr) {
+            ctx.replyWithHTML("⚠️ 尚未设置提现地址请前往个人中心设置",
+                WalletController.createBackDoubleBtn())
+            return;
+        }
+        ctx.replyWithHTML(WalletBotHtml.getTixianHtml(),
+            WalletController.createBackBtn())
         ctx.answerCbQuery('⚠️操作失败，余额不足\n\uD83D\uDCB0当前余额：0 USDT', {
             show_alert: true
         })
+
         return Promise.resolve()
     }
 

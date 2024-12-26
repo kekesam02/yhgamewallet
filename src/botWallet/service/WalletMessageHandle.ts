@@ -1,6 +1,8 @@
 import type {Context} from "telegraf";
 import WalletCommand from "../const/WalletCommand";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
+import redis from "../../config/redis";
+import WalletUserCenterHandleMethod from "./handle/WalletUserCenterHandleMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -11,12 +13,21 @@ import WalletHandleMethod from "./handle/WalletHandleMethod";
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
 class WalletMessageHandle {
-    public listenerMessage = (ctx: Context) => {
+    public listenerMessage = async (ctx: Context) => {
         console.log('传入的用户消息', ctx)
         let text = ctx.text
         if (!text || text.length <= 0 || text == '') {
             return
         }
+
+        // 获取telegram的tgId
+        var tgId: number = ctx.message?.from?.id || 0
+        const addtxaddr: string = await redis.get("addtxaddr" + tgId) || ""
+        if (addtxaddr == 'addtxaddr') {
+            WalletUserCenterHandleMethod.addtxaddrtx(text,tgId,ctx)
+            return;
+        }
+
         switch (true) {
             // 下面是指令相关的消息------------
             case WalletCommand.command.includes(text):
