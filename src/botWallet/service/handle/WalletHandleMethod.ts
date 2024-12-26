@@ -239,16 +239,7 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static startTiXian = async (ctx: Context) => {
-        const flag = await this.isLogin(ctx)
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        if(this.localCache.get('mark_'+chatId) == 1)return
-        // 如果密码为空就开始设置密码
-        if (!flag) {
-            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
-            return
-        }
-
-        // 查询是否有提现地址
+        // 1：查询是否有提现地址
         // 获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 查询用户信息
@@ -257,16 +248,23 @@ class WalletHandleMethod {
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
         if (!botWithdrawalAddrModel?.addr) {
+            this.removeMessage(ctx)
             ctx.replyWithHTML("⚠️ 尚未设置提现地址请前往个人中心设置",
                 WalletController.createBackDoubleBtn())
             return;
         }
-        ctx.replyWithHTML(WalletBotHtml.getTixianHtml(),
-            WalletController.createBackBtn())
-        ctx.answerCbQuery('⚠️操作失败，余额不足\n\uD83D\uDCB0当前余额：0 USDT', {
-            show_alert: true
-        })
-
+        // 2：密码确认
+        const flag = await this.isLogin(ctx)
+        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        if(this.localCache.get('mark_'+chatId) == 1)return
+        // 如果密码为空就开始设置密码
+        if (!flag) {
+            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            return
+        }
+        //ctx.answerCbQuery('⚠️操作失败，余额不足\n\uD83D\uDCB0当前余额：0 USDT', { show_alert: true })
+        this.removeMessage(ctx)
+        ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
         return Promise.resolve()
     }
 
