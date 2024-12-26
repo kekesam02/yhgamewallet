@@ -6,6 +6,7 @@ import UserModel from "../../../models/UserModel";
 import WalletController from "../../controller/WalletController";
 import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
 import redis from "../../../config/redis";
+import WalletHandleMethod from "./WalletHandleMethod";
 
 /**
  * 公共方法处理
@@ -198,6 +199,8 @@ class WalletUserCenterHandleMethod {
         redis.set("addtxaddrvalue" + tgId, text, 'EX', 60 * 60 * 6)
         // 发送机器人消息
         ctx.replyWithHTML("✔️ 设置成功\n👜 提现地址是：" + text)
+        // 进入到主页
+        WalletHandleMethod.startButtonBack(ctx)
     }
 
 }
