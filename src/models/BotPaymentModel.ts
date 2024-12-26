@@ -17,7 +17,7 @@ import {DefectListType} from "../type/BotGameType/BotGameType";
 import GameDefectHtml from "../html/gameHtml/GameDefectHtml";
 import MessageUtils from "../commons/message/MessageUtils";
 import BotPledgeUpModel from "./BotPledgeUpModel";
-import database from "../config/database";
+import database, {queryRunner} from "../config/database";
 import ScheduleHandle from "../commons/ScheduleHandle";
 
 /**
@@ -370,7 +370,6 @@ class BotPaymentModel extends BaseEntity {
                 item.backMoney
             ))
         })
-        let queryRunner = database.createQueryRunner()
         await queryRunner.startTransaction('REPEATABLE READ')
         try {
             await queryRunner.manager.save(saveList)
@@ -380,8 +379,6 @@ class BotPaymentModel extends BaseEntity {
             await queryRunner.commitTransaction()
         } catch (err) {
             await queryRunner.rollbackTransaction()
-        } finally {
-            await queryRunner.release()
         }
     }
 

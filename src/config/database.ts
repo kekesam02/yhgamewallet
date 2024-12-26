@@ -18,11 +18,17 @@ const dataSource = new DataSource({
   // subscribers: ['src/subscriber/**/*{.ts,.js}'],
 })
 
+const queryRunner = dataSource.createQueryRunner()
+
 /**
  * 添加事务处理
  */
 export let startTransaction = () => {
 
+}
+
+export {
+  queryRunner
 }
 
 export default dataSource

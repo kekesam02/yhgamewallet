@@ -1,4 +1,4 @@
-import {BaseEntity, Column, Entity, PrimaryGeneratedColumn, UpdateResult} from "typeorm";
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import {Context} from "telegraf";
 import AESUtils from "../commons/AESUtils";
 import WalletType from "../type/WalletType";
@@ -297,6 +297,20 @@ class UserModel extends BaseEntity{
             user = await new UserModel().createNewUser(ctx)
         }
         return user
+    }
+
+    /**
+     * 获取用户信息根据 tgId
+     * @param tgId
+     */
+    public getUserModelById = async (tgId: string): Promise<UserModel | null> => {
+        let user = UserModel
+            .createQueryBuilder()
+            .where('tg_id = :tgId', {
+                tgId: tgId
+            })
+            .getOne()
+        return user!
     }
 
     /**
