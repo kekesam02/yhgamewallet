@@ -166,8 +166,6 @@ class WalletUserCenterHandleMethod {
             ctx.replyWithHTML("👜 请在消息框填写您的提现地址")
             return;
         }
-
-        redis.set("addtxaddr" + tgId, AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || ''), 'EX', 60 * 60 * 6)
         ctx.replyWithHTML("👜 您的提现地址是：" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || ''))
     }
 
@@ -189,14 +187,17 @@ class WalletUserCenterHandleMethod {
             ctx.replyWithHTML(html);
             return;
         }
+
         // 保存提现地址
         await BotWithdrawalAddrModel.createQueryBuilder().insert().into(BotWithdrawalAddrModel).values({
             tgId: userId,
             del:0,
             addr: AESUtils.encodeAddr(text)
         }).execute();
+
+        redis.set("addtxaddrvalue" + tgId, text, 'EX', 60 * 60 * 6)
         // 发送机器人消息
-        ctx.replyWithHTML("👜 您的提现地址是：" + text)
+        ctx.replyWithHTML("✔️ 设置成功\n👜 提现地址是：" + text)
     }
 
 }

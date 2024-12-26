@@ -167,7 +167,10 @@ class WalletController {
         return new ButtonUtils().createCallbackBtn([
             [
                 WalletController.BackHome,
-                WalletController.BackUserCenter
+                {
+                    text: '🛄 设置提现地址',
+                    query: WalletUserCenterEnum.SZTXDZ,
+                }
             ]
         ])
     }

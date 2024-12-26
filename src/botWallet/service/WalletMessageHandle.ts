@@ -19,7 +19,7 @@ class WalletMessageHandle {
         if (!text || text.length <= 0 || text == '') {
             return
         }
-
+        text = text.trim()
         // 获取telegram的tgId
         var tgId: number = ctx.message?.from?.id || 0
         const addtxaddr: string = await redis.get("addtxaddr" + tgId) || ""
