@@ -248,20 +248,34 @@ class PC28Controller {
         let result = await this.getJoinGameGroup()
         let stopImage = await new ImageUtils().readImageFile('./../../../static/images/stop.png')
         let replyMarkup = new GameController().createCommonBtnList().reply_markup
-        let pledgeUpList = await BotPledgeUpModel
+        let pledgeUpList28Di = await BotPledgeUpModel
             .createQueryBuilder()
             .where('round_id = :roundId', {
                 roundId: roundId
             })
             .andWhere('state = 0')
             .andWhere('del = 0')
+            .andWhere('game_type = gameType', {
+                gameType: GameTypeEnum.PC28DI
+            })
+            .getMany()
+        let pledgeUpList28Gao = await BotPledgeUpModel
+            .createQueryBuilder()
+            .where('round_id = :roundId', {
+                roundId: roundId
+            })
+            .andWhere('state = 0')
+            .andWhere('del = 0')
+            .andWhere('game_type = gameType', {
+                gameType: GameTypeEnum.PC28DI
+            })
             .getMany()
         // 遍历群组列表、并发送游戏信息到群组
         result.forEach((item) => {
             let html = new GameBotHtml().getStopTopHtml(
                 roundId,
                 openTime,
-                pledgeUpList
+                item.gameType == GameTypeEnum.PC28DI ? pledgeUpList28Di: pledgeUpList28Gao
             )
             new MessageUtils().sendPhotoHtmlBtn(bot, item.groupId, html, replyMarkup, stopImage)
         })
