@@ -243,7 +243,8 @@ class BotPledgeUpModel extends BaseEntity {
         pledgeUpInfo: PledgeUpInfoType
     ) => {
         let queryRunner = database.createQueryRunner()
-        await queryRunner.startTransaction()
+        await queryRunner.startTransaction('REPEATABLE READ')
+
         try {
             console.log('开始查询用户')
             // 用户对象
@@ -304,7 +305,7 @@ class BotPledgeUpModel extends BaseEntity {
             item.del = 1
         })
         let queryRunner = database.createQueryRunner()
-        await queryRunner.startTransaction()
+        await queryRunner.startTransaction('REPEATABLE READ')
         try{
             console.log('开始更新数据')
             await queryRunner.manager.save(pledgeModelList)
