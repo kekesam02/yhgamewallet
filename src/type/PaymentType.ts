@@ -55,6 +55,7 @@ enum PaymentType {
      */
     YHZZ = 10,
 
+
     /**
      * 用户收款
      */
