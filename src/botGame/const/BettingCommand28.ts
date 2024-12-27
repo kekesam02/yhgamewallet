@@ -7,6 +7,10 @@ import ComputeUtils from "../../commons/ComputeUtils";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import {addLockByCtx} from "../../commons/lock/MutexUtils";
+import BotGameConfig from "../BotGameConfig";
+import MessageUtils from "../../commons/message/MessageUtils";
+import gameBettingTips from "../../html/gameHtml/GameBettingTips";
+import GameBettingTips from "../../html/gameHtml/GameBettingTips";
 
 
 /**
@@ -146,12 +150,41 @@ class BettingCommand28 {
             console.log('指令不存在直接退出')
             return
         }
+
         await addLockByCtx(this.ctx,async () => {
-            await new BotPledgeUpModel().createNewPledgeUp(
-                this.ctx,
-                this.group,
-                parseList
-            )
+            // 下注规则判定失败直接退出
+            let ruleNum = await this.ruleJudge(parseList, text)
+            // 用户下注金额超过最大限制
+            if (ruleNum == 1) {
+                console.log('用户对押')
+                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().limitMaxMoney())
+            }
+            // 用户对押
+            if (ruleNum == 2) {
+                console.log('用户对押')
+                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().onPledgeErrHtml())
+            }
+            // 杀组合下注限制
+            if (ruleNum == 3) {
+                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().killGroupHtml())
+            }
+            // 反组合下注限制
+            if (ruleNum == 4) {
+                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().callbackHtml())
+            }
+            // 双向下注限制
+            if (ruleNum == 5) {
+                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().twoWayHtml())
+            }
+
+            console.log('解析到的指令', parseList)
+            // 开始上注
+            // await new BotPledgeUpModel().createNewPledgeUp(
+            //     this.ctx,
+            //     this.group,
+            //     parseList
+            // )
+            // ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
         })
     }
 
@@ -215,7 +248,9 @@ class BettingCommand28 {
                     break
                 }
                 let exit = currCommandList.find(item2 => item2.indexOf(money) > -1)
-                if (!exit) {
+                if (exit) {
+                    itemText = `${currCommand[0]}${exit[0]}`
+                } else {
                     break
                 }
             }
@@ -271,6 +306,177 @@ class BettingCommand28 {
         }
         console.log('整理后的数据', resultList)
         return resultList
+    }
+
+    /**
+     * 判断用户下注是否符合规则
+     *      0: 符合下注规则
+     *      1: 超过最大金额限制
+     *      2: 用户对押
+     */
+    public ruleJudge = async (info: PledgeUpInfoType, currText: string): Promise<number> => {
+        // 下注判定结果
+        let returnNum = this.rule_onPledge(info)
+        if (returnNum != 0 && returnNum != 5) {
+            return returnNum
+        }
+        // 本次下注条件满足需要从数据库取数据出来再次判定
+        let pledgeList = await new BotPledgeUpModel().getHistory(this.ctx, 20, [this.group.gameType])
+
+        if (pledgeList.length > 0) {
+            let currRoundId = Number(ScheduleHandle.pc28Config.roundId)
+            // 本期多群下注text
+            let currAllText = ''
+            // 上期多群下注text
+            let prevText = ''
+            // 上次下注期数
+            let prevRoundId: number = 0
+
+            pledgeList.forEach((item, index) => {
+                // 设置本期所有上注 text 数据
+                if (currRoundId == item.roundId) {
+                    currAllText = currAllText == ''
+                        ? `${item.content}`
+                        : `${currAllText} ${item.content}`
+                }
+
+                // 设置上期开奖期数
+                if (prevRoundId == 0 && item.roundId != info.roundId) {
+                    prevRoundId = item.roundId
+                }
+                // 设置上期开奖下注 text 数据
+                if (prevRoundId != 0 && prevRoundId == item.roundId) {
+                    prevText = prevText == ''
+                        ? item.content
+                        : `${prevText} ${item.content}`
+                }
+            })
+
+            // 重新生成本期下注数据进行判定
+            currAllText = currAllText == ''? currAllText: `${currText} ${currAllText}`
+            // 本期多群下注整理后的数据
+            let currAllInfo = this.parseCommand(currAllText)
+            returnNum = this.rule_onPledge(currAllInfo)
+            if (returnNum != 5) {
+                return returnNum
+            }
+
+            // 上期整理后的下注数据
+            let prevInfo = this.parseCommand(prevText)
+            returnNum = this.rule_onPledge(prevInfo, true)
+            return returnNum
+        }
+
+        return  returnNum
+    }
+
+    /**
+     * 规则判定1、不能大小、单双对押
+     *      双向下注：
+     *          双向下注：一直买大单小双、或者大双小单
+     *      普通列表判定:
+     *          1、对押金：不能大小对押、单双对押 —  下了单不能下双 - 下了大不能下小
+     *          2、杀组合：下注三个及以上普通组合
+     *          3、反组合：大小单双配相反组合、比如大10、小单10；单10、小双10
+     *      金额限制：
+     *          最大金额 new BotGameConfig().maxMoney28 现在是1000
+     *      组合下注：
+     *          组合下注不能超过3个、如：大单10、大双10、小单10
+     * @param info 本期下注数据
+     * @param isTwo 是否只判断是否双向
+     * @return number
+     *      0: 符合下注规则
+     *      1: 超过最大金额限制
+     *      2: 对押
+     *      3: 杀组合
+     *      4: 反组合
+     *      5、存在双项下注限制、需要在根据数据库数据判定一次
+     */
+    private rule_onPledge = (info: PledgeUpInfoType, isTwo: boolean = false): number => {
+        /**
+         * 错误代码
+         *  1: 超过最大金额限制
+         *  2: 对押
+         *  3: 双向下注
+         *  4: 反组合
+         *  5: 双向下注
+         */
+        let errIndex = 0
+        // 最大下注金额限制
+        let limitMoney = new BotGameConfig().maxMoney28
+        if (new ComputeUtils(info.totalMoney).comparedTo(limitMoney) > 0) {
+            errIndex = 1
+            return errIndex
+        }
+        // 双向下注数据列表
+        let ruleList = [
+            // 大小对押限制
+            ['单', '双'],
+            ['大', '小'],
+
+            // 杀组合
+            ['大单', '大双', '小双'],
+            ['大单', '大双', '小单'],
+            ['大单', '小双', '小单'],
+            ['大双', '小双', '小单'],
+
+            // 返组合
+            ['大', '小单'],
+            ['大', '小双'],
+            ['小', '大单'],
+            ['小', '大双'],
+
+            // 双向下注
+            ['大单', '小双'],
+            ['大双', '小单']
+        ]
+        let newRuleList: Array<Array<string>> = []
+
+        info.list.forEach((item, index) => {
+            ruleList.forEach((item2, index2) => {
+                if (index == 0) {
+                    newRuleList[index2] = [...item2]
+                }
+                if (item2.includes(item.command)) {
+                    let removeIndex = newRuleList[index2].indexOf(item.command)
+                    if (removeIndex !== -1 && newRuleList[index2][removeIndex] == item.command) {
+                        newRuleList[index2].splice(removeIndex, 1)
+                    }
+                }
+            })
+        })
+
+        for (let i = 0; i < newRuleList.length; i++) {
+            // 只判定双向下注结果
+            if (isTwo) {
+                if (i >= 10) {
+                    if (newRuleList[i].length == 0) {
+                        errIndex = 5
+                    }
+                }
+                continue
+            }
+
+            // 判定所有下注结果
+            if (newRuleList[i].length == 0) {
+                if (i < 2) {
+                    errIndex = 2
+                    break
+                }
+                if (i < 6) {
+                    errIndex = 3
+                    break
+                }
+                if (i < 10) {
+                    errIndex = 4
+                    break
+                }
+                errIndex = 5
+                break
+            }
+        }
+
+        return errIndex
     }
 }
 

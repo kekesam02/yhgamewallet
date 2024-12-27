@@ -1,5 +1,5 @@
 // @ts-nocheck
-import {BaseEntity, Column, Entity, PrimaryGeneratedColumn, Transaction} from "typeorm";
+import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import WalletType from "../type/WalletType";
 import ContextUtil from "../commons/ContextUtil";
 import {Context} from "telegraf";
@@ -14,7 +14,7 @@ import BotOddsModel from "./BotOddsModel";
 import OrderUtils from "../commons/OrderUtils";
 import BotGameModel from "./BotGameModel";
 import ComputeUtils from "../commons/ComputeUtils";
-import database, {queryRunner} from "../config/database";
+import {queryRunner} from "../config/database";
 import BotPaymentModel from "./BotPaymentModel";
 import PaymentType from "../type/PaymentType";
 import ScheduleHandle from "../commons/ScheduleHandle";
@@ -214,19 +214,23 @@ class BotPledgeUpModel extends BaseEntity {
 
     /**
      * 根据当前期数所有下注的用户
-     * @param expect: 获取到的中奖数据
+     * @param roundId: 当前游戏期数
+     * @param tgId: 用户id
      */
-    public getUserList = async (expect: string) => {
-        let roundId = expect
-        let result = BotPledgeUpModel
+    public getUserList = async (roundId: string, tgId: string | null = null) => {
+        let query = BotPledgeUpModel
             .createQueryBuilder()
             .where('round_id = :roundId', {
                 roundId: roundId
             })
-            .andWhere('state = 0')
+        if (tgId) {
+            query.andWhere('user_id = :tgId', {
+                tgId: tgId
+            })
+        }
+        return await query.andWhere('state = 0')
             .andWhere('del = 0')
             .getMany()
-        return result
     }
 
     /**
@@ -289,9 +293,8 @@ class BotPledgeUpModel extends BaseEntity {
      * 取消上注(取消用户本期所有的下注内容)
      */
     public cancelPledgeUp = async (ctx: Context, groupModel: BotGameModel, roundId: string) => {
-        // 当前群组
         let userModel = await new UserModel().getUserModel(ctx)
-        let pledgeModelList = await this.getUserList(`${ScheduleHandle.pc28Config.roundId}`)
+        let pledgeModelList = await this.getUserList(`${ScheduleHandle.pc28Config.roundId}`, userModel.tgId)
         pledgeModelList.forEach(item => {
             item.state = -1
             item.del = 1
@@ -470,7 +473,6 @@ class BotPledgeUpModel extends BaseEntity {
             return true
         }
         if (
-            new ComputeUtils(userModel.USDT).comparedTo(money) < 0 &&
             new ComputeUtils(userModel.CUSDT).comparedTo(money) < 0
         ) {
             // 判断用户余额小于1提示用户余额不足
