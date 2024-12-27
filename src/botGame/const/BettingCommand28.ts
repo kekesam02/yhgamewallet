@@ -179,11 +179,11 @@ class BettingCommand28 {
 
             console.log('解析到的指令', parseList)
             // 开始上注
-            // await new BotPledgeUpModel().createNewPledgeUp(
-            //     this.ctx,
-            //     this.group,
-            //     parseList
-            // )
+            await new BotPledgeUpModel().createNewPledgeUp(
+                this.ctx,
+                this.group,
+                parseList
+            )
             // ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
         })
     }
