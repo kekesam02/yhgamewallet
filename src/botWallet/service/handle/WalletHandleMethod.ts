@@ -287,8 +287,9 @@ class WalletHandleMethod {
         }
 
         var lockKey = "tx_lock_"+tgId
-        const lock = await redisLock.lock(lockKey, 10 * 1000);
-        if (lock){
+        let lock = null
+        try {
+            lock = await redisLock.lock(lockKey, 30 * 1000);
             // 查询用户信息
             let userId = AESUtils.encodeUserId(tgId?.toString())
             // 查询用户余额
@@ -333,12 +334,16 @@ class WalletHandleMethod {
                     // 提交事务：
                     await queryRunner.commitTransaction();
                     // 释放锁
-                    await redisLock.unlock(lock);
+                    await lock.unlock();
                 }catch (e){
+                    ctx.reply('亲，操作慢点，休息一会在操作 error!')
                     await queryRunner.rollbackTransaction()
-                    await redisLock.unlock(lock);
+                    await lock.unlock();
                 }
             }
+        }catch (e){
+            ctx.reply('亲，操作慢点，休息一会在操作!')
+            lock = null
         }
     }
 
