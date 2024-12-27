@@ -176,6 +176,21 @@ class WalletController {
     }
 
     /**
+     * 返回和财务
+     */
+    public static createBackClientBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                WalletController.BackHome,
+                {
+                    text: '🛄 客服财务',
+                    url: 'https://t.me/Yhclub01'
+                }
+            ]
+        ])
+    }
+
+    /**
      * 创建返回按钮
      */
     public static createBackBtn = () => {

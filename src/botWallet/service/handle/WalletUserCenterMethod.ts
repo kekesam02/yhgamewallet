@@ -17,7 +17,7 @@ import WalletHandleMethod from "./WalletHandleMethod";
  * telegraf官网： https://telegraf.js.org/classes/Context.html#replyWithHTML
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
-class WalletUserCenterHandleMethod {
+class WalletUserCenterMethod {
 
     /**
      * 删除上一次消息
@@ -163,7 +163,7 @@ class WalletUserCenterHandleMethod {
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
         if (!botWithdrawalAddrModel?.addr) {
-            redis.set("addtxaddr" + tgId, "addtxaddr", 'EX', 60 * 60 * 6)
+            redis.set("currentop" + tgId, "addtxaddr", 'EX', 60 * 60 * 6)
             ctx.replyWithHTML("👜 请在消息框填写您的提现地址")
             return;
         }
@@ -173,7 +173,6 @@ class WalletUserCenterHandleMethod {
 
     // console.log(WalletUserCenterHandleMethod.isValidTronAddress("TQKKuYk3zNBJoBjLbZ1rp99URZuPQgNFey"))
     // console.log(WalletUserCenterHandleMethod.isValidTronAddress("xxxxxxxxx"))
-
     public static isValidTronAddress = (address: string) => {
         // 波场地址以'T'开头，长度为34字符，且只包含字母和数字
         return address != null && address.length == 34 && address.charAt(0) == 'T' && /^[A-Za-z0-9]+$/.test(address);
@@ -206,4 +205,4 @@ class WalletUserCenterHandleMethod {
 }
 
 
-export default WalletUserCenterHandleMethod
+export default WalletUserCenterMethod

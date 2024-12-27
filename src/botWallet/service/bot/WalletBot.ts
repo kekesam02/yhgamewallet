@@ -3,7 +3,7 @@ import {message} from 'telegraf/filters'
 import process from 'node:process'
 import {getConfig} from "../../../config/config";
 import WalletMessageHandle from '../WalletMessageHandle'
-import WalletButtonCallbackHandle from "../WalletButtonCallbackHandle";
+import WalletCallbackHandle from "../WalletCallbackHandle";
 import WalletHandleMethod from "../handle/WalletHandleMethod";
 
 /**
@@ -37,7 +37,7 @@ bot.on(message('text'), async (ctx: Context) => {
  * 监听用户点击按钮回调
  */
 bot.on('callback_query', async (ctx) => {
-    WalletButtonCallbackHandle.listenerMessage(ctx)
+    WalletCallbackHandle.listenerMessage(ctx)
 })
 
 bot.on('inline_query', async (ctx) => {
@@ -99,11 +99,9 @@ startJob()
 // Enable graceful stop
 process.once('SIGINT', () => {
     console.log('监听到关闭了1')
-    WalletHandleMethod.localCache.clear()
     bot.stop('SIGINT')
 })
 process.once('SIGTERM', () => {
     console.log('监听到关闭了2')
-    WalletHandleMethod.localCache.clear()
     bot.stop('SIGTERM');
 })

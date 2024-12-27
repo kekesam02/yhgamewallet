@@ -8,7 +8,7 @@ import UserModel from "../../models/UserModel";
 class WalletBotHtml {
 
     static getTixianHtml = ()=> {
-       var  html = "➖➖➖➖\uD83D\uDD39 提现指南 \uD83D\uDD39➖➖➖➖\n\n" +
+       var  html = "\uD83D\uDD39 提现指南 \uD83D\uDD39\n\n" +
             "提现模板： 提现 金额 （比如：提现 100）\n\n" +
             "➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
             "\uD83D\uDD3A 1、最低提现金额：10 USDT \uD83D\uDCB5\n" +

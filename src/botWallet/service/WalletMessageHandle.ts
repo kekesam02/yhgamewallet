@@ -2,7 +2,7 @@ import type {Context} from "telegraf";
 import WalletCommand from "../const/WalletCommand";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
 import redis from "../../config/redis";
-import WalletUserCenterHandleMethod from "./handle/WalletUserCenterHandleMethod";
+import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -19,13 +19,39 @@ class WalletMessageHandle {
         if (!text || text.length <= 0 || text == '') {
             return
         }
-        text = text.trim()
 
-        // 这里是处理提现地址的地方
+        text = text.trim()
+        // 设置提现地址
         var tgId: number = ctx.message?.from?.id || 0
-        const addtxaddr: string = await redis.get("addtxaddr" + tgId) || ""
-        if (addtxaddr == 'addtxaddr') {
-            WalletUserCenterHandleMethod.addtxaddrtx(text,tgId,ctx)
+        const currentop: string = await redis.get("currentop" + tgId) || ""
+        // 收款
+        if (currentop == 'addtxaddr') {
+            WalletUserCenterMethod.addtxaddrtx(text,tgId,ctx)
+            return;
+        }
+        // 提现
+        if (currentop == 'tx'){
+            WalletHandleMethod.startTxHandle(text,tgId,ctx)
+            return;
+        }
+        // 转账
+        if (currentop == 'zhuanzhang'){
+            WalletHandleMethod.startZhuangzhangHandle(text,tgId,ctx)
+            return;
+        }
+        // 收款
+        if (currentop == 'shoukuan'){
+            WalletHandleMethod.startShouKuanHandle(text,tgId,ctx)
+            return;
+        }
+        // 红包
+        if (currentop == 'hongbao'){
+            WalletHandleMethod.startHongBaoHandle(text,tgId,ctx)
+            return;
+        }
+        // 闪兑
+        if (currentop == 'shangdui'){
+            WalletHandleMethod.startShangduiHandle(text,tgId,ctx)
             return;
         }
 
