@@ -368,9 +368,22 @@ class PC28Controller {
      * 获取pc28开奖结果
      */
     public getLotteryJson = async (): Promise<Pc28LotteryJsonType> => {
+        // let json = await request({
+        //     url: 'http://api.openjiang.com/api?token=230F534DE38145D7&t=jnd28&rows=5&p=json',
+        //     method: 'get'
+        // })
         let json = await request({
-            url: 'http://api.openjiang.com/api?token=230F534DE38145D7&t=jnd28&rows=5&p=json',
+            url: 'https://api.8828355.com/api?token=11EB9FBB41B4D90C&t=jnd28&rows=5&p=json',
             method: 'get'
+        })
+        console.log('请求结???果', json.data.data)
+        json.data.data = json.data.data.map((item: any) => {
+            item.expect = item['expect']
+            item.open_code = item['opencode']
+            item.open_time = item['opentime']
+            item.next_expect = item['drawIssue']
+            item.next_time = item['drawTime']
+            return item
         })
         if (json.data instanceof String && json.data.indexOf('请求频率太快') > 0) {
             return {

@@ -1,5 +1,5 @@
 import { getConfig } from "./config"
-import {DataSource} from "typeorm";
+import {DataSource, EntityManager} from "typeorm";
 
 const dataSource = new DataSource({
   type: 'mysql',
@@ -18,13 +18,16 @@ const dataSource = new DataSource({
   // subscribers: ['src/subscriber/**/*{.ts,.js}'],
 })
 
+
 const queryRunner = dataSource.createQueryRunner()
 
 /**
  * 添加事务处理
  */
-export let startTransaction = () => {
-
+export let startTransaction = (cb: any) => {
+  return dataSource.manager.transaction('SERIALIZABLE', (entityManager: EntityManager) => {
+    return cb()
+  })
 }
 
 export {

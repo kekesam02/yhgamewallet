@@ -17,7 +17,17 @@ class ImageUtils {
         filename?: string
     }> => {
         let result = await nodeHtmlToImage({
-            html: html
+            html: html,
+            puppeteerArgs: {
+                args: [
+                    '--disable-gpu',
+                    '--disable-setuid-sandbox',
+                    '--no-sandbox',
+                    '--no-zygote'
+                ],
+                // ignoreDefaultArgs: ['--disable-extensions'],
+                executablePath: '/usr/bin/chromium-browser'
+            }
         }) as Buffer
         return {
             source: Buffer.from(result),
