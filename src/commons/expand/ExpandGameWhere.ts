@@ -20,6 +20,8 @@ SelectQueryBuilder.prototype.whereGameType = function(gameTypeList: Array<GameTy
         }
     })
     gameTypeStr += gameTypeList.length > 1? ')': ''
+    console.log('查询语句', gameTypeStr)
+    console.log('查询参数', gameTypeParams)
     this.andWhere(gameTypeStr, gameTypeParams)
     return this
 }

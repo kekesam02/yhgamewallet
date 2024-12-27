@@ -264,14 +264,14 @@ class BotPaymentModel extends BaseEntity {
         ctx: Context,
         paymentTypeList: Array<PaymentType>,
         gameTypeList: Array<GameTypeEnum> = [
-            GameTypeEnum.TOUZI ,
-            GameTypeEnum.PC28DI ,
-            GameTypeEnum.PC28GAO ,
-            GameTypeEnum.TOUZIFS ,
-            GameTypeEnum.PC28DIFS ,
-            GameTypeEnum.PC28GAOFS ,
-            GameTypeEnum.TOUZIJS ,
-            GameTypeEnum.PCDWQ ,
+            GameTypeEnum.TOUZI,
+            GameTypeEnum.PC28DI,
+            GameTypeEnum.PC28GAO,
+            GameTypeEnum.TOUZIFS,
+            GameTypeEnum.PC28DIFS,
+            GameTypeEnum.PC28GAOFS,
+            GameTypeEnum.TOUZIJS,
+            GameTypeEnum.PCDWQ,
             GameTypeEnum.PCDWQFS
         ],
         pageSize: number = 0
@@ -298,9 +298,11 @@ class BotPaymentModel extends BaseEntity {
             .whereGameType(gameTypeList)
             .wherePaymentType(paymentTypeList)
             .andWhere('del = 0')
-            .andWhere('(wallet_type = :walletType or wallet_type = :walletType2)', {
+            .andWhere('(wallet_type = :walletType or wallet_type = :walletType2 or wallet_type = :walletType3 or wallet_type = :walletType4)', {
                 walletType: WalletType.USDT,
                 walletType2: WalletType.TRX,
+                walletType3: WalletType.CUSDT,
+                walletType4: WalletType.CTRX,
             })
             .orderBy('create_time', 'DESC')
         if (pageSize > 0) {

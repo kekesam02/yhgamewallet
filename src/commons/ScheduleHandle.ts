@@ -86,6 +86,7 @@ class ScheduleHandle {
             console.log('数组', rule.second)
             let job = schedule.scheduleJob(rule, async () => {
 
+                console.log('开奖期期数', ScheduleHandle.pc28Config.roundId)
                 console.log('当前时间', moment().format('YYYY-MM-DD HH:mm:ss'))
                 console.log('停止上注时间', ScheduleHandle.pc28Config.stopUpTime)
                 console.log('开奖时间', ScheduleHandle.pc28Config.openTime)

@@ -20,12 +20,12 @@ class GameDefectHtml {
         time = moment(time).format('YYYY-MM-DD HH:mm:ss')
         let html = ``
         if (needList.length <= 0) {
-            html += `当前无反水`
+            html += `当前无反水${this.N}`
         }
         needList.forEach(item => {
             html = `${new CommonEnumsIndex().getWalletTypeStr(item.wallType)}反水: ${item.backMoney}成功${this.N}`
         })
-        html += `${this.N}${this.N}上次领取时间: ${(time && time != '')? time: '无'}`
+        html += `${this.N}上次领取时间: ${(time && time != '')? time: '无'}`
         return html
     }
 }
