@@ -270,30 +270,30 @@ class WalletHandleMethod {
 
     // 提现具体逻辑
     public static startTxHandle = async(text:string,tgId:number,ctx:Context)=>{
-        // 1: 判断是否提现开头
-        if(!text.startsWith('提现')){
-            ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现100或者提现 100")
-            return;
-        }
-        // 获取提现金额
-        const price = parseFloat(text.replaceAll('提现','').trim() )
-        if (isNaN(price) || price < 0){
-            ctx.replyWithHTML("⚠️ 提现金额必须是正整数！")
-            return;
-        }
-        if (price < 10) {
-            ctx.replyWithHTML("⚠️ 最低提现10u！")
-            return;
-        }
-
         var lockKey = "tx_lock_"+tgId
         let lock = null
         try {
             lock = await redisLock.lock(lockKey, 30 * 1000);
+            // 1: 判断是否提现开头
+            if(!text.startsWith('提现')){
+                ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现100或者提现 100")
+                return;
+            }
+            // 获取提现金额
+            const price = parseFloat(text.replaceAll('提现','').trim() )
+            if (isNaN(price) || price < 0){
+                ctx.replyWithHTML("⚠️ 提现金额必须是正整数！")
+                return;
+            }
+            if (price < 10) {
+                ctx.replyWithHTML("⚠️ 最低提现10u！")
+                return;
+            }
+
             // 查询用户信息
             let userId = AESUtils.encodeUserId(tgId?.toString())
-            // 查询用户余额
             let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
+            // 查询用户余额
             if (botUser) {
                 const userUsdt = parseFloat(botUser.USDT)
                 const shengyuUsdt = userUsdt - price
@@ -302,8 +302,6 @@ class WalletHandleMethod {
                     ctx.replyWithHTML("⚠️ 账户余额不足！");
                     return
                 }
-                const queryRunner = dataSource.createQueryRunner();
-                queryRunner.startTransaction();
                 try {
                     // 查询用户是否存在交易地址
                     const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
@@ -327,15 +325,12 @@ class WalletHandleMethod {
                         paymentAmount: (price-1) + '',
                         walletType:1
                     } ).execute()
-                    // 提交事务：
-                    await queryRunner.commitTransaction();
                     //判断是否为异常用户
                     // 发送消息给财务
                     // 6: 发送消息
                     ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT,shengyuUsdt,price,botWithdrawalAddrModel?.addr),WalletController.createBackClientBtn())
                 }catch (e){
                     ctx.reply('亲，操作慢点，休息一会在操作 error!')
-                    await queryRunner.rollbackTransaction()
                 }finally {
                     await lock.unlock();
                     lock = null
