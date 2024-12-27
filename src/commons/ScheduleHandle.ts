@@ -8,6 +8,7 @@ import {string} from "yaml/dist/schema/common/string";
 import TimeUtils from "./date/TimeUtils";
 import MessageUtils from "./message/MessageUtils";
 import GameCommandHtml from "../html/gameHtml/GameCommandHtml";
+import {accessResource} from "./lock/MutexUtils";
 
 /**
  * 定时任务控制器
@@ -200,7 +201,9 @@ class ScheduleHandle {
                         console.log('保存122结果')
                         let pledgeUpMap = await pc28Controller.getWinningUser(openJson)
                         console.log('保存33结果')
-                        await pc28Controller.getLotteryTextBot(bot, openJson, pledgeUpMap)
+                        await accessResource(async () => {
+                            await pc28Controller.getLotteryTextBot(bot, openJson, pledgeUpMap)
+                        })
                         console.log('保存44结果')
                         await pc28Controller.getLotteryListBot(bot)
                         console.log('保存55结果')

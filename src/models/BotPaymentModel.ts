@@ -361,7 +361,7 @@ class BotPaymentModel extends BaseEntity {
                 item.backMoney
             ))
         })
-        await queryRunner.startTransaction('REPEATABLE READ')
+        await queryRunner.startTransaction()
         try {
             await queryRunner.manager.save(saveList)
             await queryRunner.manager.save(userModel)
