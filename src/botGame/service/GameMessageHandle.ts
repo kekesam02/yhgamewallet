@@ -64,7 +64,9 @@ class GameMessageHandle {
             case CommandController.cancel.includes(text):
                 // 取消上注
                 console.log('取消上注')
-                await new CommandController().cancelBet(ctx)
+                if (moment().isBefore(ScheduleHandle.pc28Config.stopUpTime)) {
+                    await new CommandController().cancelBet(ctx)
+                }
                 break
             case CommandController.water.includes(text):
                 // 流水
