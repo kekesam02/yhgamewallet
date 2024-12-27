@@ -241,12 +241,9 @@ class BotPledgeUpModel extends BaseEntity {
         group: BotGameModel,
         pledgeUpInfo: PledgeUpInfoType
     ) => {
-        console.log('使用事务了==========')
-        await queryRunner.startTransaction('SERIALIZABLE')
+        await queryRunner.startTransaction()
 
         try {
-            // let user = new UserModel()
-            // user.tgId = AESUtils.encodeUserId(ctx?.from?.id.toString())
             let userModelList = await queryRunner.manager.find(UserModel, {
                 where: {
                     tgId: AESUtils.encodeUserId(ctx?.from?.id.toString())
@@ -255,49 +252,23 @@ class BotPledgeUpModel extends BaseEntity {
                     mode: 'pessimistic_read'
                 }
             }) as Array<UserModel>
-            console.log('查询到的数据', userModelList)
-            console.log('查询到的数据', userModelList.length)
-            console.log('查询到的数据', userModelList[0])
             if (!userModelList.length > 0) {
                 return
             }
             let userModel = userModelList[0]
-            // 用户对象
-            // let userModel = await new UserModel().getUserModel(ctx)
-            console.log('获取到的用户对象')
-            console.log('开始查询用户')
-            console.log('查询到到用户数')
             if (!await this.userBalanceJudge(ctx, userModel, pledgeUpInfo.totalMoney, pledgeUpInfo.roundId, pledgeUpInfo)) {
                 // 用户余额不足
                 return
             }
-            console.log('什么啊1 啊啊啊 ')
             let updateResult = await this.getUpdatePledgeUpList(ctx, pledgeUpInfo, userModel, group)
-            console.log('什么啊2 啊啊啊 ')
             userModel = updateResult.userModel
-            console.log('什么啊3 啊啊啊 ')
             let updatePledgeUpList = updateResult.pledgeUpList
             let paymentModelList = updateResult.paymentModelList
 
-            console.log('保存用户信息', userModel)
-            // await queryRunner.manager.save(userModel as UserModel)
-            await queryRunner.manager.createQueryBuilder()
-                .setLock('pessimistic_read')
-                .update(UserModel)
-                .set({
-                    USDT: userModel.USDT,
-                    CUSDT: userModel.CUSDT
-                })
-                .where('tg_id = :tgId', {
-                    tgId: userModel.tgId
-                })
-                .execute()
-            console.log('保存用户信息结束')
+            await queryRunner.manager.save(userModel as UserModel)
             let wallType = updatePledgeUpList[0].walletType
             await queryRunner.manager.save(updatePledgeUpList)
-            console.log('保存订单信息')
             await queryRunner.manager.save(paymentModelList)
-            console.log('保存订单信息结束')
             let html = new GameBotHtml().getBettingHtml(userModel, pledgeUpInfo, wallType)
             await new MessageUtils().sendTextReply(ctx, html)
             await queryRunner.commitTransaction()
@@ -318,7 +289,6 @@ class BotPledgeUpModel extends BaseEntity {
      * 取消上注(取消用户本期所有的下注内容)
      */
     public cancelPledgeUp = async (ctx: Context, groupModel: BotGameModel, roundId: string) => {
-        console.log('取消上注')
         // 当前群组
         let userModel = await new UserModel().getUserModel(ctx)
         let pledgeModelList = await this.getUserList(`${ScheduleHandle.pc28Config.roundId}`)
@@ -333,9 +303,8 @@ class BotPledgeUpModel extends BaseEntity {
         paymentList.forEach(item => {
             item.del = 1
         })
-        await queryRunner.startTransaction('REPEATABLE READ')
+        await queryRunner.startTransaction()
         try{
-            console.log('开始更新数据')
             await queryRunner.manager.save(pledgeModelList)
             await queryRunner.manager.save(userModel)
             await queryRunner.manager.save(paymentList)
@@ -391,7 +360,6 @@ class BotPledgeUpModel extends BaseEntity {
                     return
                 }
             }
-            console.log('梭哈金额', totalMoney)
             let upId = new OrderUtils().createPledgeUpModelId()
             let pledgeUp = new BotPledgeUpModel()
             pledgeUp.tgId = userModel.tgId
@@ -429,10 +397,10 @@ class BotPledgeUpModel extends BaseEntity {
         }
         // 返回的更新数据列表
         let pledgeUpList: Array<BotPledgeUpModel> = []
-        // 当前下注钱包类型
-        wallType = new ComputeUtils(userModel.CUSDT).comparedTo(totalMoney) >= 0? WalletType.CUSDT: WalletType.USDT
         for (let i = 0; i < pledgeUpInfo.list.length; i++) {
             let item = pledgeUpInfo.list[i]
+            // 当前下注钱包类型
+            wallType = new ComputeUtils(userModel.CUSDT).comparedTo(item.money) >= 0? WalletType.CUSDT: WalletType.USDT
             let money = item.money
             if (wallType == WalletType.USDT) {
                 userModel.USDT = new ComputeUtils(userModel.USDT).minus(money).toString()

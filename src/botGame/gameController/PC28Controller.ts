@@ -198,7 +198,7 @@ class PC28Controller {
             })
 
             try {
-                await queryRunner.startTransaction('REPEATABLE READ')
+                await queryRunner.startTransaction()
                 // await new BotPledgeUpModel().updatePledgeUpList(winningList)
                 await queryRunner.manager.save(winningList)
                 await queryRunner.manager.save(updateUserList)
@@ -376,7 +376,7 @@ class PC28Controller {
             url: 'https://api.8828355.com/api?token=11EB9FBB41B4D90C&t=jnd28&rows=5&p=json',
             method: 'get'
         })
-        console.log('请求结???果', json.data.data)
+        console.log('开奖数据', json.data)
         json.data.data = json.data.data.map((item: any) => {
             item.expect = item['expect']
             item.open_code = item['opencode']

@@ -50,7 +50,7 @@ class GameMessageHandle {
                 break
             case CommandController.balance.includes(text):
                 // 查询开奖数据
-                console.log('查询开奖信息')
+                console.log('查询用户余额')
                 await new CommandController().createUserBalance(ctx)
                 break
             case CommandController.defect.includes(text):
@@ -77,9 +77,10 @@ class GameMessageHandle {
             // 下面是下注相关 =================
             default:
                 if (text && text.length > 0 && text.indexOf('/') < 0) {
-                    if (moment().isBefore(ScheduleHandle.pc28Config.stopUpTime)) {
-                        await new BettingController(ctx, text).listenerBettingCommand()
-                    }
+                    await new BettingController(ctx, text).listenerBettingCommand()
+                    // if (moment().isBefore(ScheduleHandle.pc28Config.stopUpTime)) {
+                    //     await new BettingController(ctx, text).listenerBettingCommand()
+                    // }
                 }
         }
     }

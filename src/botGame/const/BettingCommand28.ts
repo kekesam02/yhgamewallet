@@ -6,6 +6,7 @@ import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/ComputeUtils";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import MutexUtils, {accessResource} from "../../commons/lock/MutexUtils";
 
 
 /**
@@ -145,11 +146,13 @@ class BettingCommand28 {
             console.log('指令不存在直接退出')
             return
         }
-        await new BotPledgeUpModel().createNewPledgeUp(
-            this.ctx,
-            this.group,
-            parseList
-        )
+        await accessResource(async () => {
+            await new BotPledgeUpModel().createNewPledgeUp(
+                this.ctx,
+                this.group,
+                parseList
+            )
+        })
     }
 
     /**
@@ -171,7 +174,7 @@ class BettingCommand28 {
             // 当前下注使用的指令
             let currCommandList = this.group.gameType == GameTypeEnum.PC28DI? this.commandList: this.commandHeightList
             // 获取当前指令
-            let currCommand: Array<string> | undefined = currCommandList.find(item2 => {
+            let currCommand: Array<string> | undefined = currCommandList.find((item2, index2) => {
                 // 点杀处理
                 if (item2[0] == '杀' && new StringUtils().isStartWithNum(itemText)) {
                     // 判断传入的是杀还是.   true 杀
@@ -186,16 +189,20 @@ class BettingCommand28 {
                     }
                     return item2
                 }
+
                 // 其他指令处理
-                if (
-                    itemText.substring(0, item2[0].length) == item2[0]
-                    || itemText.substring(0, item2[1].length) == item2[1]
-                ) {
-                    money =  itemText.substring(0, item2[0].length) == item2[0]
-                        ? itemText.replaceAll(item2[0], '')
-                        : itemText.replaceAll(item2[1], '')
+                let isExit = false;
+                item2.forEach((item3, index3) => {
+                    if (itemText.substring(0, item3.length) == item3) {
+                        money = itemText.replaceAll(item3, '')
+                        itemText = itemText.replaceAll(item3, item2[0])
+                        isExit = true
+                    }
+                })
+                if (isExit) {
                     return item2
                 }
+                return false
             })
             if (!currCommand) {
                 console.log('指令不存在')
@@ -214,7 +221,14 @@ class BettingCommand28 {
             }
 
             // 如果不是梭哈的话判定后面文字是否为数字、不是数字直接break
-            if (currCommand[0] != '梭哈' && isNaN(Number(money))) {
+            if (currCommand[0] != '梭哈'
+                && (
+                    !money
+                    || money == '0'
+                    || money == ''
+                    || isNaN(Number(money))
+                )
+            ) {
                 console.log('解析不到金额指令')
                 break
             }
@@ -247,6 +261,7 @@ class BettingCommand28 {
                 // 设置下注的总金额
                 resultList.totalMoney = new ComputeUtils(resultList.totalMoney).add(money).toString()
             }
+
             resultList.list.push({
                 money: money,
                 content: itemText,

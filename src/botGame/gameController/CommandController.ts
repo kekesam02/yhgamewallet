@@ -12,6 +12,7 @@ import BotPaymentModel from "../../models/BotPaymentModel";
 import userModel from "../../models/UserModel";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import GamePledgeUpHtml from "../../html/gameHtml/GamePledgeUpHtml";
+import {accessResource} from "../../commons/lock/MutexUtils";
 
 
 /**
@@ -103,6 +104,7 @@ class CommandController {
      */
     public createUserBalance = async (ctx: Context) => {
         let user = await new UserModel().getUserModel(ctx)
+        console.log('获取到的用户余额信息')
         let html = new GameUserHtml().getUserBalanceHtml(user!, true)
         return  new MessageUtils().sendTextReply(ctx, html)
     }
@@ -118,7 +120,9 @@ class CommandController {
             return
         }
         let userModel = await new UserModel().getUserModel(ctx)
-        await new BotPaymentModel().startDefect(ctx, groupModel, userModel)
+        await accessResource(async () => {
+            await new BotPaymentModel().startDefect(ctx, groupModel, userModel)
+        })
     }
 
     /**
@@ -131,9 +135,11 @@ class CommandController {
         if (!groupModel?.gameType) {
             return
         }
-        let {pledgeModelList, userModel} = await new BotPledgeUpModel().cancelPledgeUp(ctx, groupModel, ScheduleHandle.pc28Config.roundId)
-        let html = new GamePledgeUpHtml().cancelUp(userModel, pledgeModelList, ScheduleHandle.pc28Config.roundId)
-        await new MessageUtils().sendTextReply(ctx, html)
+        await accessResource(async () => {
+            let {pledgeModelList, userModel} = await new BotPledgeUpModel().cancelPledgeUp(ctx, groupModel, ScheduleHandle.pc28Config.roundId)
+            let html = new GamePledgeUpHtml().cancelUp(userModel, pledgeModelList, ScheduleHandle.pc28Config.roundId)
+            await new MessageUtils().sendTextReply(ctx, html)
+        })
     }
 
     /**
