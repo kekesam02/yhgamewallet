@@ -6,7 +6,7 @@ import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/ComputeUtils";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
-import MutexUtils, {accessResource} from "../../commons/lock/MutexUtils";
+import {addLockByCtx} from "../../commons/lock/MutexUtils";
 
 
 /**
@@ -146,7 +146,7 @@ class BettingCommand28 {
             console.log('指令不存在直接退出')
             return
         }
-        await accessResource(async () => {
+        await addLockByCtx(this.ctx,async () => {
             await new BotPledgeUpModel().createNewPledgeUp(
                 this.ctx,
                 this.group,

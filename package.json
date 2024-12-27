@@ -34,7 +34,6 @@
   },
   "dependencies": {
     "@types/node-schedule": "^2.1.7",
-    "async-mutex": "^0.5.0",
     "axios": "^1.7.9",
     "bcryptjs": "^2.4.3",
     "bignumber.js": "^9.1.2",
@@ -58,6 +57,7 @@
     "node-schedule": "^2.1.1",
     "qr-image": "^3.2.0",
     "qrcode": "^1.5.4",
+    "redlock": "^v5.0.0-beta.2",
     "sharp": "^0.33.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
