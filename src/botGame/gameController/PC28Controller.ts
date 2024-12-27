@@ -24,6 +24,7 @@ import AESUtils from "../../commons/AESUtils";
 import userModel from "../../models/UserModel";
 import database, {queryRunner} from "../../config/database";
 import {map} from "yaml/dist/schema/common/map";
+import {addLockByTgId} from "../../commons/lock/MutexUtils";
 
 const schedule = require('node-schedule')
 
@@ -176,37 +177,42 @@ class PC28Controller {
             let winningList = await this.getUserIsWinning(pledgeUpMap, lotteryJson, item.gameType)
             // 需要更新的用户列表
             let updateUserList: Array<UserModel> = []
-            let userMap = new Map()
+            let tgIdList: Array<string> = []
+            let userMap: Map<string, UserModel> = new Map()
             for (let i = 0; i < winningList.length; i++) {
                 let item = winningList[i]
                 if (item.tgId) {
-                    let user = null
+                    let user: UserModel
                     if (userMap.has(item.tgId)) {
-                        user = userMap.get(item.tgId)
+                        user = userMap.get(item.tgId)!
                     } else {
-                        user = await new UserModel().getUserModelById(item.tgId)
+                        let user_ = await new UserModel().getUserModelById(item.tgId)
+                        if (!user_) {
+                            continue
+                        }
+                        user = user_
                         userMap.set(item.tgId, user)
-                    }
-                    if (!user) {
-                        continue
                     }
                     user.updateUserMoney(item.walletType, item.winningAmount)
                 }
             }
             userMap.forEach((value, key, map) => {
                 updateUserList.push(value)
+                tgIdList.push(value.tgId)
             })
 
-            try {
-                await queryRunner.startTransaction()
-                // await new BotPledgeUpModel().updatePledgeUpList(winningList)
-                await queryRunner.manager.save(winningList)
-                await queryRunner.manager.save(updateUserList)
-                await queryRunner.commitTransaction()
-            } catch (err) {
-                console.log('出现错误了进行回滚', err)
-                await queryRunner.rollbackTransaction()
-            }
+            await addLockByTgId(tgIdList, async () => {
+                try {
+                    await queryRunner.startTransaction()
+                    await queryRunner.manager.save(winningList)
+                    await queryRunner.manager.save(updateUserList)
+                    await queryRunner.commitTransaction()
+                } catch (err) {
+                    console.log('出现错误了进行回滚', err)
+                    await queryRunner.rollbackTransaction()
+                }
+            })
+
 
             let html = new GameBotHtml().getLotteryTextHtml(
                 lotteryJson,
