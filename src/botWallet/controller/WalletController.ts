@@ -36,7 +36,7 @@ class WalletController {
      * 保存密码
      */
     public static SaveUserPwd = {
-        text: "✏️ 提交保存",
+        text: "✏️ 提交",
         query: "update_pwd_btn"
     }
 

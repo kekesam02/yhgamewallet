@@ -327,18 +327,18 @@ class WalletHandleMethod {
                         paymentAmount: (price-1) + '',
                         walletType:1
                     } ).execute()
+                    // 提交事务：
+                    await queryRunner.commitTransaction();
                     //判断是否为异常用户
                     // 发送消息给财务
                     // 6: 发送消息
                     ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT,shengyuUsdt,price,botWithdrawalAddrModel?.addr),WalletController.createBackClientBtn())
-                    // 提交事务：
-                    await queryRunner.commitTransaction();
-                    // 释放锁
-                    await lock.unlock();
                 }catch (e){
                     ctx.reply('亲，操作慢点，休息一会在操作 error!')
                     await queryRunner.rollbackTransaction()
+                }finally {
                     await lock.unlock();
+                    lock = null
                 }
             }
         }catch (e){
