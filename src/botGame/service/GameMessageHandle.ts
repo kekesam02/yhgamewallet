@@ -7,6 +7,8 @@ import CommandController from "../gameController/CommandController";
 import BettingController from "../gameController/BettingController";
 import moment from "moment";
 import ScheduleHandle from "../../commons/ScheduleHandle";
+import BotPledgeUpModel from "../../models/BotPledgeUpModel";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -18,6 +20,7 @@ class GameMessageHandle {
         if (!text || text.length <= 0 || text == '') {
             return
         }
+
         switch (true) {
             case text === 'start'
             || text === '/start'
@@ -77,10 +80,10 @@ class GameMessageHandle {
             // 下面是下注相关 =================
             default:
                 if (text && text.length > 0 && text.indexOf('/') < 0) {
-                    // await new BettingController(ctx, text).listenerBettingCommand()
-                    if (moment().isBefore(ScheduleHandle.pc28Config.stopUpTime)) {
-                        await new BettingController(ctx, text).listenerBettingCommand()
-                    }
+                    await new BettingController(ctx, text).listenerBettingCommand()
+                    // if (moment().isBefore(ScheduleHandle.pc28Config.stopUpTime)) {
+                    //     await new BettingController(ctx, text).listenerBettingCommand()
+                    // }
                 }
         }
     }

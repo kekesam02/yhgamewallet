@@ -402,11 +402,6 @@ class BotPledgeUpModel extends BaseEntity {
             // 当前下注钱包类型
             wallType = new ComputeUtils(userModel.CUSDT).comparedTo(item.money) >= 0? WalletType.CUSDT: WalletType.USDT
             let money = item.money
-            if (wallType == WalletType.USDT) {
-                userModel.USDT = new ComputeUtils(userModel.USDT).minus(money).toString()
-            } else {
-                userModel.CUSDT = new ComputeUtils(userModel.CUSDT).minus(money).toString()
-            }
             let pledgeUp = new BotPledgeUpModel()
             pledgeUp.tgId = userModel.tgId
             pledgeUp.roundId = pledgeUpInfo.roundId
@@ -433,6 +428,11 @@ class BotPledgeUpModel extends BaseEntity {
                 wallType,
                 item.money
             )
+            if (wallType == WalletType.USDT) {
+                userModel.USDT = new ComputeUtils(userModel.USDT).minus(money).toString()
+            } else {
+                userModel.CUSDT = new ComputeUtils(userModel.CUSDT).minus(money).toString()
+            }
             paymentModelList.push(paymentModel)
         }
         return {

@@ -44,13 +44,15 @@ class MessageUtils {
         return ctx.replyWithHTML(text, {
             parse_mode: 'HTML',
             protect_content: true,
+            link_preview_options: {
+                is_disabled: true
+            },
             reply_parameters: {
                 chat_id: chatId,
                 message_id: messageId
             },
             reply_markup: {
-                force_reply: true,
-                selective: true,
+                selective: false,
                 inline_keyboard: list
             }
         })
