@@ -59,6 +59,7 @@ class GameUserHtml {
      *     weekWater: 用户周流水金额
      *     totalWater: 用户总流水金额
      * }
+     * @param isHtml
      */
     public getUserPaymentHtml = (ctx: Context, {
         gameType,
