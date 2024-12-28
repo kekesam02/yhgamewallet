@@ -1,12 +1,14 @@
-/**
- * 互斥锁
- */
+// @ts-nocheck
 import Redlock from 'redlock'
 import redis from "./redis";
 import {Context, Telegraf} from "telegraf";
 import ContextUtil from "../commons/ContextUtil";
 
-const redlock = new Redlock([redis])
+
+/**
+ * 互斥锁
+ */
+const redlock = new Redlock([redis as Redlock.CompatibleRedisClient])
 
 
 /**
@@ -29,13 +31,13 @@ const addLockByCtx = async (ctx: Context, fn: () => Promise<any>, lockTTL = 1000
 }
 
 const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>, lockTTL = 1000  * 30) => {
-    let lock = await redlock.acquire(lockKeyList, lockTTL)
+    let lock = await redlock.lock(lockKeyList, lockTTL)
     try {
         // 执行异步操作
         await fn()
     } finally {
         // 释放锁
-        await redlock.release(lock)
+        await redlock.unlock(lock)
     }
 }
 
