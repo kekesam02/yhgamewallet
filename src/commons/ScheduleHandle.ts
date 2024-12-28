@@ -1,13 +1,10 @@
 import schedule, {Job} from "node-schedule";
 import PC28Controller from "../botGame/gameController/PC28Controller";
 import {Context, Telegraf} from "telegraf";
-import moment from "moment";
+import moment from "moment-timezone";
 import BotGameConfig from "../botGame/BotGameConfig";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
-import {string} from "yaml/dist/schema/common/string";
 import TimeUtils from "./date/TimeUtils";
-import MessageUtils from "./message/MessageUtils";
-import GameCommandHtml from "../html/gameHtml/GameCommandHtml";
 
 /**
  * 定时任务控制器
