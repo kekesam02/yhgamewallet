@@ -14,10 +14,19 @@ class DateFormatUtils {
     /**
      * 日期格式化
      * @param date
-     * @param outputPath
+     * @param format
      */
     public static DateFormatString =  (date: string, format: string = "YYYY-MM-DD HH:mm:ss")  => {
         return moment(new Date(date)).format(format)
+    }
+
+
+    /**
+     * 日期格式化
+     * @param format
+     */
+    public static CurrentDateFormatString =  ( format: string = "YYYY-MM-DD HH:mm:ss")  => {
+        return moment(new Date()).format(format)
     }
 }
 

@@ -14,7 +14,7 @@ import {Telegraf} from "telegraf";
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
 class WalletMessageHandle {
-    public listenerMessage = async (ctx: Context,bot:Telegraf<Context>) => {
+    public listenerMessage = async (ctx: Context,cbot:Telegraf<Context>) => {
         console.log('传入的用户消息', ctx)
         let text = ctx.text
         if (!text || text.length <= 0 || text == '') {
@@ -32,7 +32,7 @@ class WalletMessageHandle {
         }
         // 提现
         if (currentop == 'tx'){
-            WalletHandleMethod.startTxHandle(text,tgId,ctx)
+            WalletHandleMethod.startTxHandle(text,tgId,ctx,cbot)
             return;
         }
         // 转账

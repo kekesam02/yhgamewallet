@@ -191,6 +191,24 @@ class WalletController {
     }
 
     /**
+     * 财务审核按钮
+     */
+    public static createMarkClientBtn = (tgId:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '✅标记已打款',
+                    query: 'bjydk'+tgId
+                },
+                {
+                    text: '\uD83D\uDEAB异常退回',
+                    query: 'txycth'+tgId
+                }
+            ]
+        ])
+    }
+
+    /**
      * 创建返回按钮
      */
     public static createBackBtn = () => {
