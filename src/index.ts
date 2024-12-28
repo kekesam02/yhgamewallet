@@ -4,7 +4,9 @@ import LocalCache from "./commons/cache/LocalCache";
 const moment = require('moment-timezone')
 
 require('./commons/expand/ExpandSelectQueryBuilder')
-// require('./botGame/GameServe')
+if (process.env.RUNNING_ENV == 'zs' || process.env.RUNNING_ENV == 'dev') {
+    require('./botGame/GameServe')
+}
 require('./botWallet/WalletServe')
 
 moment.tz?.setDefault('Asia/Shanghai')
