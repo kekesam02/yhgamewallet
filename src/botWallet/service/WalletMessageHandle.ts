@@ -3,6 +3,7 @@ import WalletCommand from "../const/WalletCommand";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
 import redis from "../../config/redis";
 import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
+import {Telegraf} from "telegraf";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -13,7 +14,7 @@ import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
 class WalletMessageHandle {
-    public listenerMessage = async (ctx: Context) => {
+    public listenerMessage = async (ctx: Context,bot:Telegraf<Context>) => {
         console.log('传入的用户消息', ctx)
         let text = ctx.text
         if (!text || text.length <= 0 || text == '') {

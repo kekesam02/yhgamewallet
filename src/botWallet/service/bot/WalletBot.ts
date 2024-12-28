@@ -10,6 +10,7 @@ import WalletHandleMethod from "../handle/WalletHandleMethod";
  * 娱乐机器人核心代码
  */
 const bot = new Telegraf(getConfig().botConfig.WalletToken)
+const botWallet = new Telegraf(getConfig().botConfig.WalletTokenTest)
 bot.command('quit', async (ctx) => {
     // Explicit usage
     await ctx.telegram.leaveChat(ctx.message.chat.id)
@@ -30,14 +31,14 @@ bot.command('start', (ctx) => {
  */
 bot.on(message('text'), async (ctx: Context) => {
     let messageHandle = new WalletMessageHandle();
-    messageHandle.listenerMessage(ctx)
+    messageHandle.listenerMessage(ctx,botWallet)
 })
 
 /**
  * 监听用户点击按钮回调
  */
 bot.on('callback_query', async (ctx) => {
-    WalletCallbackHandle.listenerMessage(ctx)
+    WalletCallbackHandle.listenerMessage(ctx,botWallet)
 })
 
 bot.on('inline_query', async (ctx) => {
@@ -85,7 +86,9 @@ bot.on('inline_query', async (ctx) => {
 })
 
 
-bot.launch().then(() => console.log('钱包walletBot已经成功启动'))
+bot.launch().then(() =>{
+    console.log('钱包walletBot已经成功启动')
+})
 
 /**
  * 开启默认需要运行的游戏定时器

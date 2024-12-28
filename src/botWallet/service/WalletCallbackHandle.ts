@@ -1,4 +1,4 @@
-import {Context} from "telegraf";
+import {Context, Telegraf} from "telegraf";
 import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
 import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
@@ -9,7 +9,7 @@ import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
  * 钱包回调
  */
 class WalletCallbackHandle {
-    public static listenerMessage = async (ctx: Context) => {
+    public static listenerMessage = async (ctx: Context,bot:Telegraf<Context>) => {
         console.log('callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
@@ -63,7 +63,7 @@ class WalletCallbackHandle {
                     break
                 // 提现
                 case StartWalletEnum.TIXIAN:
-                    WalletHandleMethod.startTiXian(ctx)
+                    WalletHandleMethod.startTiXian(ctx,bot)
                     break
                 // 转账
                 case StartWalletEnum.ZHUANZHANG:
