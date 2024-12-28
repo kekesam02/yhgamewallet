@@ -96,7 +96,12 @@ botWallet.on('callback_query', async (ctx) => {
 
 
 bot.launch().then(() =>{
-    console.log('钱包walletBot已经成功启动')
+    console.log('bot钱包walletBot已经成功启动')
+})
+
+
+botWallet.launch().then(() =>{
+    console.log('botWallet钱包walletBot已经成功启动')
 })
 
 /**
@@ -116,4 +121,16 @@ process.once('SIGINT', () => {
 process.once('SIGTERM', () => {
     console.log('监听到关闭了2')
     bot.stop('SIGTERM');
+})
+
+
+
+// Enable graceful stop
+process.once('SIGINT', () => {
+    console.log('监听到关闭了3')
+    botWallet.stop('SIGINT')
+})
+process.once('SIGTERM', () => {
+    console.log('监听到关闭了4')
+    botWallet.stop('SIGTERM');
 })
