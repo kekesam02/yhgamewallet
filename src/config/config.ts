@@ -21,6 +21,8 @@ interface Config {
     GameBotToken: string,
     // 钱包token
     WalletToken: string
+    // 钱包token--财务测试
+    WalletTokenTest: string
   }
   jwt_secret: string;
   cors: CorsConfig;
