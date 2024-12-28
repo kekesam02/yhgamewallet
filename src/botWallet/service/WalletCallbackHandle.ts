@@ -90,6 +90,10 @@ class WalletCallbackHandle {
                 case StartWalletEnum.BACKHOME:
                     WalletHandleMethod.startButtonBack(ctx)
                     break
+                // 返回按钮
+                case StartWalletEnum.CLOSE_COMPUTER:
+                    WalletHandleMethod.removeMessage(ctx)
+                    break
                 // 修改密码按钮
                 case StartWalletEnum.UPDATEPWDBTN:
                     WalletHandleMethod.startUpdatePwdCallback(ctx)
