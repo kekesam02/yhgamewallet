@@ -9,6 +9,14 @@ import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 class WalletController {
 
     /**
+     * 前往个人中心
+     */
+    public static BackUserCenter = {
+        text: '↪️ 前往个人中心',
+        query: 'center_btn'
+    }
+
+    /**
      * 返回首页
      */
     public static BackHome = {
@@ -28,7 +36,7 @@ class WalletController {
      * 保存密码
      */
     public static SaveUserPwd = {
-        text: "✏️ 提交保存",
+        text: "✏️ 提交",
         query: "update_pwd_btn"
     }
 
@@ -151,6 +159,36 @@ class WalletController {
             }
         ]
     ]
+
+    /**
+     * 创建返回按钮和到个人中心
+     */
+    public static createBackDoubleBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                WalletController.BackHome,
+                {
+                    text: '🛄 设置提现地址',
+                    query: WalletUserCenterEnum.SZTXDZ,
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 返回和财务
+     */
+    public static createBackClientBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                WalletController.BackHome,
+                {
+                    text: '🛄 客服财务',
+                    url: 'https://t.me/Yhclub01'
+                }
+            ]
+        ])
+    }
 
     /**
      * 创建返回按钮

@@ -1,14 +1,14 @@
 import {Context} from "telegraf";
 import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
-import WalletUserCenterHandleMethod from "./handle/WalletUserCenterHandleMethod";
+import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 
 
 /**
  * 钱包回调
  */
-class WalletButtonCallbackHandle {
+class WalletCallbackHandle {
     public static listenerMessage = async (ctx: Context) => {
         console.log('callback_query回调', ctx)
         let update: any = ctx?.update
@@ -22,35 +22,35 @@ class WalletButtonCallbackHandle {
                 // ===========================按钮组1：用户中心===========================
                 // 我的账单
                 case WalletUserCenterEnum.BACCOUNT:
-                    WalletUserCenterHandleMethod.startBAccount(ctx)
+                    WalletUserCenterMethod.startBAccount(ctx)
                     break
                 // 提币历史
                 case WalletUserCenterEnum.TBLS:
-                    WalletUserCenterHandleMethod.startTbls(ctx)
+                    WalletUserCenterMethod.startTbls(ctx)
                     break
                 // 彩金转化
                 case WalletUserCenterEnum.CTRXZH:
-                    WalletUserCenterHandleMethod.startCtrxzh(ctx)
+                    WalletUserCenterMethod.startCtrxzh(ctx)
                     break
                 // 领取邀请返利
                 case WalletUserCenterEnum.YQFL:
-                    WalletUserCenterHandleMethod.startYqfl(ctx)
+                    WalletUserCenterMethod.startYqfl(ctx)
                     break
                 // 首充返利
                 case WalletUserCenterEnum.SCFL:
-                    WalletUserCenterHandleMethod.startScfl(ctx)
+                    WalletUserCenterMethod.startScfl(ctx)
                     break
                 // 小额免密
                 case WalletUserCenterEnum.XEMM:
-                    WalletUserCenterHandleMethod.startXemm(ctx)
+                    WalletUserCenterMethod.startXemm(ctx)
                     break
                 // 邀请好友
                 case WalletUserCenterEnum.YQHY:
-                    WalletUserCenterHandleMethod.startYqhy(ctx)
+                    WalletUserCenterMethod.startYqhy(ctx)
                     break
                 // 设置提现地址
                 case WalletUserCenterEnum.SZTXDZ:
-                    WalletUserCenterHandleMethod.startTxdz(ctx)
+                    WalletUserCenterMethod.startTxdz(ctx)
                     break
                 // 主菜单
                 case WalletUserCenterEnum.HOME:
@@ -59,7 +59,6 @@ class WalletButtonCallbackHandle {
                 // ===============================按钮组2：用户充值、提现===========================
                 // 充值
                 case StartWalletEnum.CHONGZHI:
-                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleMethod.startChongZhi(ctx)
                     break
                 // 提现
@@ -84,13 +83,11 @@ class WalletButtonCallbackHandle {
                     break
                 // 个人中心
                 case StartWalletEnum.USERCENTER:
-                    WalletUserCenterHandleMethod.removeMessage(ctx)
-                    WalletUserCenterHandleMethod.startUserCenterCallback(ctx).then()
+                    WalletUserCenterMethod.startUserCenterCallback(ctx).then()
                     break
                 // ===============================按钮组3：功能业务中的一些按钮===========================
                 // 返回按钮
                 case StartWalletEnum.BACKHOME:
-                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleMethod.startButtonBack(ctx)
                     break
                 // 修改密码按钮
@@ -110,4 +107,4 @@ class WalletButtonCallbackHandle {
     }
 }
 
-export default WalletButtonCallbackHandle
+export default WalletCallbackHandle

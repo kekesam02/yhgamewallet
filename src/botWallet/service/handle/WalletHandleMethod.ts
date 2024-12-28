@@ -9,9 +9,13 @@ import WalletController from "../../controller/WalletController";
 import messageUtils from "../../../commons/message/MessageUtils";
 import QRCodeUtils from "../../../commons/qrcode/QRCodeUtils";
 import {ButtonCallbackType} from "../../../commons/button/ButtonCallbackType";
-import LocalCache from "../../../commons/cache/LocalCache";
 import WalletMessage from "../../const/WalletMessage";
 import {InlineQueryResultArticle} from "@telegraf/types/inline";
+import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
+import redis from "../../../config/redis";
+import BotPaymentModel from "../../../models/BotPaymentModel";
+import dataSource from "../../../config/database";
+import redisLock, {addLockByTgId} from "../../../config/redisLock";
 
 
 /**
@@ -26,7 +30,6 @@ import {InlineQueryResultArticle} from "@telegraf/types/inline";
  */
 class WalletHandleMethod {
 
-    public static localCache: LocalCache = new LocalCache();
     /**
      * 删除上一次消息
      * @param ctx
@@ -43,9 +46,9 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static clearCacheRelation = (ctx: Context) => {
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        this.localCache.del(chatId )
-        this.localCache.del('mark_'+chatId)
+        var tgId: number | string = ctx.callbackQuery?.message?.chat?.id  || ctx.message?.from?.id || 0
+        redis.del(tgId+'')
+        redis.del('mark_'+tgId)
     }
 
     /**
@@ -53,9 +56,9 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static clearCacheLogin = (ctx: Context) => {
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        this.localCache.set("login_" + chatId, "success")
-        this.localCache.del('mark_'+chatId)
+        var tgId: number | string = ctx.callbackQuery?.message?.chat?.id  || ctx.message?.from?.id || 0
+        redis.del("login_" + tgId)
+        redis.del('mark_'+tgId)
     }
 
     /**
@@ -68,6 +71,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         var firstName: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
+        redis.del("currentop" + tgId)
         this.removeMessage(ctx)
         this.clearCacheRelation(ctx)
         this.clearCacheLogin(ctx)
@@ -83,6 +87,8 @@ class WalletHandleMethod {
         var tgId: number = ctx.message?.from?.id || 0
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
+        redis.del("currentop" + tgId)
+        this.removeMessage(ctx)
         this.clearCacheRelation(ctx)
         this.clearCacheLogin(ctx)
         this.startCommand(ctx, tgId, username, firstName)
@@ -110,7 +116,7 @@ class WalletHandleMethod {
         // 1：如果不存在就添加
         if (!user) {
             // 如果用户不存在就添加用户
-            var insertResultPromise = await UserModel.createQueryBuilder().insert().into(UserModel).values({
+            await UserModel.createQueryBuilder().insert().into(UserModel).values({
                 tgId: userId,
                 nickName: firstName,
                 userName: username,
@@ -129,8 +135,12 @@ class WalletHandleMethod {
                 nickName: firstName
             }).where('id = :id', {id: user.id}).execute();
         }
-        // 3：发送带有分享按钮的消息
-        var html = WalletBotHtml.getBotStartHtml(tgId, user!)
+        // 3：查询用户是否存在交易地址
+        const botWithdrawalAddrModel =  await BotWithdrawalAddrModel.createQueryBuilder("t1")
+            .where('tg_id = :tgId and del = 0',{tgId: userId}).getOne()
+        // 4：发送带有分享按钮的消息
+        var addr = botWithdrawalAddrModel?.addr || "";
+        var html = WalletBotHtml.getBotStartHtml(tgId, addr,user!)
         try {
             // 4: 机器人回复，显示信息和按钮相关
             await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(WalletController.HomeBtns))
@@ -232,37 +242,129 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static startTiXian = async (ctx: Context) => {
-        const flag = await this.isLogin(ctx)
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        if(this.localCache.get('mark_'+chatId) == 1)return
+        // 1：获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 2：设置操作
+        redis.set("currentop" + tgId, "tx", 'EX', 60 * 60)
+        // 查询用户信息
+        let userId = AESUtils.encodeUserId(tgId?.toString())
+        // 查询用户是否存在交易地址
+        const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
+            .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
+        if (!botWithdrawalAddrModel?.addr) {
+            this.removeMessage(ctx)
+            ctx.replyWithHTML("⚠️ 尚未设置提现地址请前往个人中心设置",
+                WalletController.createBackDoubleBtn())
+            return;
+        }
+        // 2：密码确认
+        const flag:boolean = await this.isLogin(ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
-            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            var mark = await redis.get('mark_'+tgId) || '0'
+            await this.sendPasswordSetupMessage(ctx, "",   mark != '1')
             return
         }
-
-        ctx.answerCbQuery('⚠️操作失败，余额不足\n\uD83D\uDCB0当前余额：0 USDT', {
-            show_alert: true
-        })
-        return Promise.resolve()
+        return ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
     }
 
-    /**
+    // 提现具体逻辑
+    public static startTxHandle = async(text:string,tgId:number,ctx:Context)=>{
+        await addLockByTgId([tgId], async () => {
+            try {
+                // 1: 判断是否提现开头
+                if(!text.startsWith('提现')){
+                    return ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现100或者提现 100")
+                }
+                // 获取提现金额
+                const price = parseFloat(text.replaceAll('提现','').trim() )
+                if (isNaN(price) || price < 0){
+                    await ctx.replyWithHTML("⚠️ 提现金额必须是正整数！")
+                }
+                if (price < 10) {
+                    return ctx.replyWithHTML("⚠️ 最低提现10u！")
+                }
+
+                // 查询用户信息
+                let userId = AESUtils.encodeUserId(tgId?.toString())
+                let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
+                // 查询用户余额
+                if (botUser) {
+                    const userUsdt = parseFloat(botUser.USDT)
+                    const shengyuUsdt = userUsdt - price
+                    // 用户的余额 - 提现的余额 如果小于1，说明不够，因为手续费需要1U
+                    if (shengyuUsdt < 1){
+                        return ctx.replyWithHTML("⚠️ 账户余额不足！")
+                    }
+                    try {
+                        // 查询用户是否存在交易地址
+                        const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
+                            .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
+                        // 扣减用户余额
+                        // 修改用户交易地址
+                        await UserModel.createQueryBuilder().update(UserModel).set({USDT: shengyuUsdt+''})
+                            .where('id = :id', {id: botUser.id}).execute()
+                        // 开始新增订单
+                        await BotPaymentModel.createQueryBuilder().insert().into(BotPaymentModel).values({
+                            tgId:botUser.tgId ,
+                            userId:botUser.id,
+                            username:botUser.userName,
+                            nickname:botUser.nickName,
+                            balanceBefore:userUsdt+'',
+                            balanceAfter:shengyuUsdt+'',
+                            paymentType:1,
+                            paymentTypeName:"充值",
+                            operateType:0,
+                            paymentTypeNumber: botWithdrawalAddrModel?.addr,
+                            paymentAmount: (price-1) + '',
+                            walletType:1
+                        } ).execute()
+                        //判断是否为异常用户
+                        // 发送消息给财务
+                        // 6: 发送消息
+                        return  ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT,shengyuUsdt,price,botWithdrawalAddrModel?.addr),WalletController.createBackClientBtn())
+                    }catch (e){
+                        return  ctx.reply('亲，操作慢点，休息一会在操作 error!')
+                    }
+                }
+            } catch (e){
+                await ctx.reply('亲，操作慢点，休息一会在操作!')
+            }
+        })
+    }
+
+
+    public static  noteOrderTxcg = (ye: string,shengyuUsdt:number, je: number, address: string | undefined)=>{
+        var html =
+            "提现成功、等待到账\n" +
+            "当前提现金额："+(je)+"U，手续费：1U、实际到账金额："+(je-1)+"U\n" +
+            "➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
+            "\uD83D\uDD3A 提之前余额："+ye+" USDT\n" +
+            "\uD83D\uDD3A 提之后余额："+shengyuUsdt+" USDT\n" +
+            "\uD83D\uDD3A 提现地址："+AESUtils.decodeAddr(address||"");
+        return html;
+    }
+
+
+/**
      * 转账
      * 代号：zhuanzhang_btn
      * @param ctx
      */
     public static startZhuanZhang = async (ctx: Context) => {
+        // 1：获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 2：设置操作
+        redis.set("currentop" + tgId, "zhuanzhang", 'EX', 60 * 60)
         const flag = await this.isLogin(ctx)
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        if(this.localCache.get('mark_'+chatId) == 1)return
+        var mark = await redis.get('mark_'+tgId) || '0'
+        if(mark &&  mark == '1')return
         // 如果密码为空就开始设置密码
         if (!flag) {
-            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            var mark = await redis.get('mark_'+tgId) || '0'
+            await this.sendPasswordSetupMessage(ctx, "",  mark != '1')
             return
         }
-
-        console.log("ctx.updateType",ctx.updateType)
         var result :InlineQueryResultArticle[] = [
             {
                 type: 'article',
@@ -285,18 +387,27 @@ class WalletHandleMethod {
         return Promise.resolve()
     }
 
+    // 转账具体逻辑
+    public static startZhuangzhangHandle = async(text:string,tgId:number,ctx:Context)=>{
+        ctx.reply(text)
+    }
+
     /**
      * 收款
      * 代号：shoukuan_btn
      * @param ctx
      */
     public static startShouKuan = async (ctx: Context) => {
+        // 1：获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 2：设置操作
+        redis.set("currentop" + tgId, "shoukuan", 'EX', 60 * 60)
         const flag = await this.isLogin(ctx)
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        if(this.localCache.get('mark_'+chatId) == 1)return
+        var mark = await redis.get('mark_'+tgId) || '0'
+        if(mark &&  mark == '1')return
         // 如果密码为空就开始设置密码
         if (!flag) {
-            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            await this.sendPasswordSetupMessage(ctx, "",  mark != '1')
             return
         }
 
@@ -304,22 +415,37 @@ class WalletHandleMethod {
         return Promise.resolve()
     }
 
+    // 收款具体逻辑
+    public static startShouKuanHandle = async(text:string,tgId:number,ctx:Context)=>{
+        ctx.reply(text)
+    }
+
+
     /**
      * 红包
      * 代号：hongbao_btn
      * @param ctx
      */
     public static startHongBao = async (ctx: Context) => {
+        // 1：获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 2：设置操作
+        redis.set("currentop" + tgId, "hongbao", 'EX', 60 * 60)
         const flag = await this.isLogin(ctx)
         // 如果密码为空就开始设置密码
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        if(this.localCache.get('mark_'+chatId) == 1)return
+        var mark = await redis.get('mark_'+tgId) || '0'
+        if(mark &&  mark == '1')return
         if (!flag) {
-            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            await this.sendPasswordSetupMessage(ctx, "",  mark != '1')
             return
         }
         console.log("startHongBao")
         return Promise.resolve()
+    }
+
+    // 红包具体逻辑
+    public static startHongBaoHandle = async(text:string,tgId:number,ctx:Context)=>{
+        ctx.reply(text)
     }
 
     /**
@@ -328,11 +454,15 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static startShanDui = async (ctx: Context) => {
+        // 1：获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 2：设置操作
+        redis.set("currentop" + tgId, "shangdui", 'EX', 60 * 60)
         const flag = await this.isLogin(ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
-            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-            await this.sendPasswordSetupMessage(ctx, "", this.localCache.get('mark_'+chatId) != 1)
+            var mark = await redis.get('mark_'+tgId) || '0'
+            await this.sendPasswordSetupMessage(ctx, "",  mark != '1')
             return
         }
 
@@ -340,31 +470,37 @@ class WalletHandleMethod {
         return Promise.resolve()
     }
 
+
+    // 闪兑具体逻辑
+    public static startShangduiHandle = async(text:string,tgId:number,ctx:Context)=>{
+        ctx.reply(text)
+    }
+
     /**
      * 计算器输入
      * @param ctx
      */
     public static startInputPassword = async (ctx: Context) => {
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        var tgId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data || ""
         if (callbackStr.startsWith("num_")) {
-            var cacheValue = this.localCache.get(chatId) || ""
+            var cacheValue =  await redis.get(tgId) || ""
             var currentVal = callbackStr.replaceAll('num_', '')
             var cvalue = cacheValue + currentVal
             if (cvalue.length > 4) return
-            this.localCache.set(chatId , cvalue)
+            redis.set(tgId , cvalue)
             await this.sendPasswordSetupMessage(ctx, cvalue, false)
         } else if (callbackStr == 'clear') {
-            this.localCache.del(chatId)
+            redis.del(tgId)
             await this.sendPasswordSetupMessage(ctx, "", false)
         } else if (callbackStr == 'delete') {
-            var cacheKey = this.localCache.get(chatId)
+            var cacheKey =  await redis.get(tgId)
             if (cacheKey) {
                 var arr = cacheKey.split("")
                 arr.pop()
                 var join = arr.join('');
-                this.localCache.set(chatId, join)
+                redis.set(tgId, join)
                 await this.sendPasswordSetupMessage(ctx, join, false)
             }
         }
@@ -377,7 +513,7 @@ class WalletHandleMethod {
      */
     public static sendPasswordSetupMessage = async (ctx: Context, callbackStr: string = "", firstFlag: boolean = true) => {
         try {
-            var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+            var tgId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
             var arr = ["🔑 "]
             let length = callbackStr.length
             for (let i = 0; i < length; i++) {
@@ -411,7 +547,7 @@ class WalletHandleMethod {
                 }
             }
             // 设置启动开关
-            this.localCache.set("mark_"+chatId,1)
+            redis.set("mark_"+tgId,1)
             if (firstFlag) {
                 // 4: 机器人回复，显示信息和按钮相关
                 await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(keybordsArr))
@@ -431,11 +567,10 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static startUpdatePwdCallback = async (ctx: Context) => {
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
-        var cacheValue = this.localCache.get(chatId) || ""
+        var tgId: string = ctx.callbackQuery?.from?.id +"" || ""
+        var cacheValue = await redis.get(tgId)
         if (cacheValue) {
             if (cacheValue.length >= 4) {
-                var tgId: number = ctx.callbackQuery?.from?.id || 0
                 var firstName: string = ctx.callbackQuery?.from?.first_name || ''
                 let userId = AESUtils.encodeUserId(tgId?.toString())
                 var password = cacheValue.substring(0, 4)
@@ -450,7 +585,7 @@ class WalletHandleMethod {
                         // 发送消息
                         ctx.replyWithHTML(WalletMessage.PASSWORD_SUCCESS_MESSAGE)
                         // 设置登录成功的标识
-                        this.localCache.set("login_" + chatId, "success")
+                        redis.set("login_" + tgId, "success")
                     } else {
                         ctx.replyWithHTML(WalletMessage.C_PASSWPORD_ERROR)
                     }
@@ -468,7 +603,7 @@ class WalletHandleMethod {
                     // 发送消息
                     ctx.replyWithHTML(html)
                     // 设置登录成功的标识
-                    this.localCache.set("login_" + chatId, "success")
+                    redis.set("login_" + tgId, "success")
                 }
             } else {
                 ctx.replyWithHTML(WalletMessage.PASSWPORD_ERROR)
@@ -485,18 +620,18 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static isLogin = async (ctx: Context)  => {
-        var chatId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         let userId = AESUtils.encodeUserId(tgId?.toString())
         // 查询的目的，是用户忘记密码。后台可以清空密码。这样可以让用户重新设置。
         const resp = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
         if (!resp?.paymentPassword) {
-            this.localCache.del("login_" + chatId)
-            this.localCache.del(chatId)
+            redis.del("login_" + tgId)
+            redis.del(tgId+'')
             return false
         }
         // 获取登录成功的标识
-        return this.localCache.get("login_" + chatId) == "success"
+        const loginFlag = await redis.get("login_" + tgId)
+        return  loginFlag == "success"
     }
 }
 

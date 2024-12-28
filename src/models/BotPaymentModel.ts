@@ -34,9 +34,18 @@ class BotPaymentModel extends BaseEntity {
      * 用户tgId
      */
     @Column({
-        name: 'user_id'
+        name: 'user_id',
+        default:''
     })
     tgId: string
+
+    /**
+     * 用户
+     */
+    @Column({
+        name: 'uid'
+    })
+    userId: number
 
     /**
      * 用户名称

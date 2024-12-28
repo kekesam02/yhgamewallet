@@ -2,9 +2,9 @@
  * 互斥锁
  */
 import Redlock from 'redlock'
-import redis from "../../config/redis";
+import redis from "./redis";
 import {Context, Telegraf} from "telegraf";
-import ContextUtil from "../ContextUtil";
+import ContextUtil from "../commons/ContextUtil";
 
 const redlock = new Redlock([redis])
 
@@ -13,23 +13,22 @@ const redlock = new Redlock([redis])
  * 添加分布式锁根据 tgid 锁定
  * @param tgList
  * @param fn
+ * @param lockTTL
  */
-const addLockByTgId = async (tgList: Array<string>, fn: () => Promise<any>) => {
-    return addLock(tgList, fn)
+const addLockByTgId = async (tgList: Array<string>, fn: () => Promise<any>, lockTTL = 1000 * 30) => {
+    return addLock(tgList, fn, lockTTL)
 }
 
 /**
  * 添加分布式锁根据 ctx.tgId 锁定
  */
-const addLockByCtx = async (ctx: Context, fn: () => Promise<any>) => {
+const addLockByCtx = async (ctx: Context, fn: () => Promise<any>, lockTTL = 1000 * 30) => {
     // 分布式锁的key
     let lockKey = [ContextUtil.getUserId(ctx)]
-    return addLock(lockKey, fn)
+    return addLock(lockKey, fn, lockTTL)
 }
 
-const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>) => {
-    // 锁持续时间
-    let lockTTL = 10000
+const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>, lockTTL = 1000  * 30) => {
     let lock = await redlock.acquire(lockKeyList, lockTTL)
     try {
         // 执行异步操作

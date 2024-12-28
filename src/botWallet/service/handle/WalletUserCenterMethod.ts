@@ -4,6 +4,9 @@ import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
 import AESUtils from "../../../commons/AESUtils";
 import UserModel from "../../../models/UserModel";
 import WalletController from "../../controller/WalletController";
+import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
+import redis from "../../../config/redis";
+import WalletHandleMethod from "./WalletHandleMethod";
 
 /**
  * 公共方法处理
@@ -14,7 +17,7 @@ import WalletController from "../../controller/WalletController";
  * telegraf官网： https://telegraf.js.org/classes/Context.html#replyWithHTML
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
-class WalletUserCenterHandleMethod {
+class WalletUserCenterMethod {
 
     /**
      * 删除上一次消息
@@ -65,12 +68,16 @@ class WalletUserCenterHandleMethod {
         }
 
         // 删除上一次消息
-        var messageId:number = ctx.callbackQuery?.message?.message_id || 0
+        var messageId: number = ctx.callbackQuery?.message?.message_id || 0
         if (messageId > 0) {
             ctx.deleteMessage(messageId)
         }
-        // 3：发送带有分享按钮的消息
-        var html = WalletBotHtml.getBotStartHtml(tgId, user!)
+        // 3：查询用户是否存在交易地址
+        const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder()
+            .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
+        // 4：发送带有分享按钮的消息
+        var addr = botWithdrawalAddrModel?.addr || "";
+        var html = WalletBotHtml.getBotStartHtml(tgId, addr, user!)
         try {
             // 4: 机器人回复，显示信息和按钮相关
             await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(WalletController.UserHomeBtns))
@@ -148,9 +155,54 @@ class WalletUserCenterHandleMethod {
      * @param ctx
      */
     public static startTxdz = async (ctx: Context) => {
-        return Promise.resolve()
+        // 获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 查询用户信息
+        let userId = AESUtils.encodeUserId(tgId?.toString())
+        // 查询用户是否存在交易地址
+        const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
+            .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
+        if (!botWithdrawalAddrModel?.addr) {
+            redis.set("currentop" + tgId, "addtxaddr", 'EX', 60 * 60 * 6)
+            ctx.replyWithHTML("👜 请在消息框填写您的提现地址")
+            return;
+        }
+        ctx.replyWithHTML("👜 您的提现地址是：" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || ''))
     }
+
+
+    // console.log(WalletUserCenterHandleMethod.isValidTronAddress("TQKKuYk3zNBJoBjLbZ1rp99URZuPQgNFey"))
+    // console.log(WalletUserCenterHandleMethod.isValidTronAddress("xxxxxxxxx"))
+    public static isValidTronAddress = (address: string) => {
+        // 波场地址以'T'开头，长度为34字符，且只包含字母和数字
+        return address != null && address.length == 34 && address.charAt(0) == 'T' && /^[A-Za-z0-9]+$/.test(address);
+    }
+
+    public static addtxaddrtx = async (text: string, tgId: number, ctx: Context) => {
+        // 查询用户信息
+        let userId = AESUtils.encodeUserId(tgId?.toString())
+        if (!this.isValidTronAddress(text)) {
+            //更换提现地址
+            var html = "\uD83D\uDCA6 请输入正确的波场提现地址";
+            ctx.replyWithHTML(html);
+            return;
+        }
+
+        // 保存提现地址
+        await BotWithdrawalAddrModel.createQueryBuilder().insert().into(BotWithdrawalAddrModel).values({
+            tgId: userId,
+            del:0,
+            addr: AESUtils.encodeAddr(text)
+        }).execute();
+
+        redis.set("addtxaddrvalue" + tgId, text, 'EX', 60 * 60 * 6)
+        // 发送机器人消息
+        ctx.replyWithHTML("✔️ 设置成功\n👜 提现地址是：" + text)
+        // 进入到主页
+        WalletHandleMethod.startButtonBack(ctx)
+    }
+
 }
 
 
-export default WalletUserCenterHandleMethod
+export default WalletUserCenterMethod

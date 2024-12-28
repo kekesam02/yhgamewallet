@@ -1,6 +1,8 @@
 import type {Context} from "telegraf";
 import WalletCommand from "../const/WalletCommand";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
+import redis from "../../config/redis";
+import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -11,12 +13,48 @@ import WalletHandleMethod from "./handle/WalletHandleMethod";
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
 class WalletMessageHandle {
-    public listenerMessage = (ctx: Context) => {
+    public listenerMessage = async (ctx: Context) => {
         console.log('传入的用户消息', ctx)
         let text = ctx.text
         if (!text || text.length <= 0 || text == '') {
             return
         }
+
+        text = text.trim()
+        // 设置提现地址
+        var tgId: number = ctx.message?.from?.id || 0
+        const currentop: string = await redis.get("currentop" + tgId) || ""
+        // 收款
+        if (currentop == 'addtxaddr') {
+            WalletUserCenterMethod.addtxaddrtx(text,tgId,ctx)
+            return;
+        }
+        // 提现
+        if (currentop == 'tx'){
+            WalletHandleMethod.startTxHandle(text,tgId,ctx)
+            return;
+        }
+        // 转账
+        if (currentop == 'zhuanzhang'){
+            WalletHandleMethod.startZhuangzhangHandle(text,tgId,ctx)
+            return;
+        }
+        // 收款
+        if (currentop == 'shoukuan'){
+            WalletHandleMethod.startShouKuanHandle(text,tgId,ctx)
+            return;
+        }
+        // 红包
+        if (currentop == 'hongbao'){
+            WalletHandleMethod.startHongBaoHandle(text,tgId,ctx)
+            return;
+        }
+        // 闪兑
+        if (currentop == 'shangdui'){
+            WalletHandleMethod.startShangduiHandle(text,tgId,ctx)
+            return;
+        }
+
         switch (true) {
             // 下面是指令相关的消息------------
             case WalletCommand.command.includes(text):

@@ -6,7 +6,7 @@ import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/ComputeUtils";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
-import {addLockByCtx} from "../../commons/lock/MutexUtils";
+import {addLockByCtx} from "../../config/redislock";
 import BotGameConfig from "../BotGameConfig";
 import MessageUtils from "../../commons/message/MessageUtils";
 import gameBettingTips from "../../html/gameHtml/GameBettingTips";
