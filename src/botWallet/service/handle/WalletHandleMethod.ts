@@ -14,8 +14,7 @@ import {InlineQueryResultArticle} from "@telegraf/types/inline";
 import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
 import redis from "../../../config/redis";
 import BotPaymentModel from "../../../models/BotPaymentModel";
-import dataSource from "../../../config/database";
-import redisLock, {addLockByTgId} from "../../../config/redisLock";
+import {addLockByTgId} from "../../../config/redisLock";
 
 
 /**
@@ -29,7 +28,6 @@ import redisLock, {addLockByTgId} from "../../../config/redisLock";
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
 class WalletHandleMethod {
-
     /**
      * 删除上一次消息
      * @param ctx
@@ -241,9 +239,11 @@ class WalletHandleMethod {
      * 代号：tixian_btn
      * @param ctx
      */
-    public static startTiXian = async (ctx: Context) => {
+    public static startTiXian = async ( ctx: Context , bot:Telegraf<Context>) => {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
+        //6253392707
+        await bot.telegram.sendMessage(6253392707,"hahah")
         // 2：设置操作
         redis.set("currentop" + tgId, "tx", 'EX', 60 * 60)
         // 查询用户信息
