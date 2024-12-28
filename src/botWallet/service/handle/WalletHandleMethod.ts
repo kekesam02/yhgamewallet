@@ -15,7 +15,6 @@ import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
 import redis from "../../../config/redis";
 import BotPaymentModel from "../../../models/BotPaymentModel";
 import {addLockByTgId} from "../../../config/redislock";
-import dateFormatUtils from "../../../commons/date/DateFormatUtils";
 import DateFormatUtils from "../../../commons/date/DateFormatUtils";
 
 
@@ -245,6 +244,7 @@ class WalletHandleMethod {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         //6253392707
+        //await cbot.telegram.sendMessage(6253392707,"hahah")
         // 2：设置操作
         redis.set("currentop" + tgId, "tx", 'EX', 60 * 60)
         // 查询用户信息
@@ -275,7 +275,8 @@ class WalletHandleMethod {
             try {
                 // 1: 判断是否提现开头
                 if(!text.startsWith('提现')){
-                    return ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现10或者提现 10")
+                    await ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现100或者提现 100")
+                    return
                 }
                 // 获取提现金额
                 const price = parseFloat(text.replaceAll('提现','').trim() )
@@ -284,7 +285,7 @@ class WalletHandleMethod {
                     return
                 }
                 if (price < 10) {
-                    return ctx.replyWithHTML("⚠️ 最低提现10u！")
+                    await ctx.replyWithHTML("⚠️ 最低提现10u！")
                     return
                 }
 
@@ -297,20 +298,23 @@ class WalletHandleMethod {
                     const shengyuUsdt = userUsdt - price
                     // 用户的余额 - 提现的余额 如果小于1，说明不够，因为手续费需要1U
                     if (shengyuUsdt < 1){
-                        return ctx.replyWithHTML("⚠️ 账户余额不足！")
+                        await ctx.replyWithHTML("⚠️ 账户余额不足！")
+                        return
                     }
                     try {
                         // 查询用户是否存在交易地址
                         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
                             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
                         if (!botWithdrawalAddrModel?.addr){
-                            return ctx.replyWithHTML("⚠️ 交易异常，提现地址不存在！")
+                            await ctx.replyWithHTML("⚠️ 交易异常，提现地址不存在！")
                             return
                         }
                         // 扣减用户余额
+
                         // 修改用户交易地址
                         await UserModel.createQueryBuilder().update(UserModel).set({USDT: shengyuUsdt+''})
                             .where('id = :id', {id: botUser.id}).execute()
+
                         // 开始新增订单
                         await BotPaymentModel.createQueryBuilder().insert().into(BotPaymentModel).values({
                             tgId:botUser.tgId ,
@@ -326,7 +330,6 @@ class WalletHandleMethod {
                             paymentAmount: (price-1) + '',
                             walletType:1
                         } ).execute()
-
 
                         //判断是否为异常用户 ----------------这里要思考
 
@@ -379,7 +382,7 @@ class WalletHandleMethod {
                     }
                 }
             } catch (e){
-                await ctx.reply('⌛️ 亲操作慢点，休息一会在操作!')
+                await ctx.reply('亲，操作慢点，休息一会在操作!')
             }
         })
     }
@@ -392,9 +395,9 @@ class WalletHandleMethod {
             "\uD83D\uDD3A实际到账金额："+(je-1)+"U，手续费：1U\n" +
             "\uD83D\uDD3A操作时间："+DateFormatUtils.CurrentDateFormatString()+"\n" +
             "➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
-            "\uD83D\uDD3A提之前余额："+ye+" USDT\n" +
-            "\uD83D\uDD3A提之后余额："+shengyuUsdt+" USDT\n" +
-            "\uD83D\uDD3A提现地址："+AESUtils.decodeAddr(address||"");
+            "\uD83D\uDD3A 提之前余额："+ye+" USDT\n" +
+            "\uD83D\uDD3A 提之后余额："+shengyuUsdt+" USDT\n" +
+            "\uD83D\uDD3A 提现地址："+AESUtils.decodeAddr(address||"");
         return html;
     }
 

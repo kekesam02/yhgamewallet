@@ -9,7 +9,7 @@ jwt_secret: your_jwt_secret
 
 botConfig:
   GameBotToken: '7840670913:AAHlRHjs_TJHpfXEHERi1leLkaz3uz9FHEQ'
-  WalletToken: '7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk'
+  WalletToken: '7635600144:AAHELBLU6wF63MQ7j3o7A50DF7TleH6icls'
   WalletTokenTest: '7873009878:AAH0MmDGevJYp5ZVK9GbML_fBjVeYh6gA-Q'
 
 cors:
@@ -31,9 +31,8 @@ database:
   password : 0287dfc565570ecd
 
 redis:
-  host: 202.79.175.11
+  host: localhost
   port: 6379
-  password: rLJ45%ki@
   db: 1
 
 rateLimit:

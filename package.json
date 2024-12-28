@@ -5,7 +5,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node-dev src/index.ts"
+    "dev": "RUNNING_ENV=dev ts-node-dev src/index.ts",
+    "fg": "RUNNING_ENV=fg ts-node-dev src/index.ts",
+    "zs": "RUNNING_ENV=zs ts-node-dev src/index.ts"
   },
   "keywords": [
     "express",
