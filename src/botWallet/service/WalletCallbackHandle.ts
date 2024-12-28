@@ -9,11 +9,27 @@ import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
  * 钱包回调
  */
 class WalletCallbackHandle {
-    public static listenerMessage = async (ctx: Context,bot:Telegraf<Context>) => {
+
+    /**
+     * 监听财务机器人
+     * @param ctx
+     * @param bot
+     */
+    public static cBotlistenerMessage = async (ctx: Context,ubot:Telegraf<Context>) => {
+        console.log('cbot_callback_query回调', ctx)
+        let update: any = ctx?.update
+        let callbackStr: string = update.callback_query?.data
+        if(callbackStr.startsWith('bjydk')){ // 标记打款
+            WalletHandleMethod.startMarkTixian(ctx)
+        } else if(callbackStr.startsWith('txycth')){ // 异常驳回
+            WalletHandleMethod.startRefuseTixian(ctx)
+        }
+    }
+
+    public static listenerMessage = async (ctx: Context,cbot:Telegraf<Context>) => {
         console.log('callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
-        console.log("========>callbackStr",callbackStr)
         // 计算器callback
         if (callbackStr.startsWith('num_') || callbackStr === 'delete' || callbackStr === 'clear') {
             WalletHandleMethod.startInputPassword(ctx)
@@ -63,7 +79,7 @@ class WalletCallbackHandle {
                     break
                 // 提现
                 case StartWalletEnum.TIXIAN:
-                    WalletHandleMethod.startTiXian(ctx,bot)
+                    WalletHandleMethod.startTiXian(ctx,cbot)
                     break
                 // 转账
                 case StartWalletEnum.ZHUANZHANG:

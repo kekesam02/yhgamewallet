@@ -193,16 +193,16 @@ class WalletController {
     /**
      * 财务审核按钮
      */
-    public static createMarkClientBtn = (tgId:string) => {
+    public static createMarkClientBtn = (botPaymentId:string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
                     text: '✅标记已打款',
-                    query: 'bjydk'+tgId
+                    query: 'bjydk'+botPaymentId
                 },
                 {
                     text: '\uD83D\uDEAB异常退回',
-                    query: 'txycth'+tgId
+                    query: 'txycth'+botPaymentId
                 }
             ]
         ])

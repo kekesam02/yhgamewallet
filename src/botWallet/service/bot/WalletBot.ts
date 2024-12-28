@@ -41,6 +41,7 @@ bot.on('callback_query', async (ctx) => {
     WalletCallbackHandle.listenerMessage(ctx,botWallet)
 })
 
+
 bot.on('inline_query', async (ctx) => {
     console.log('--------------------内连按钮回调--------------', ctx)
     try {
@@ -83,6 +84,14 @@ bot.on('inline_query', async (ctx) => {
             console.error('发送错误响应失败:', e)
         }
     }
+})
+
+
+/**
+ * 监听财务机器人按钮回调
+ */
+botWallet.on('callback_query', async (ctx) => {
+    WalletCallbackHandle.cBotlistenerMessage(ctx,bot)
 })
 
 

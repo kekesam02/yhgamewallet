@@ -316,7 +316,7 @@ class WalletHandleMethod {
                             .where('id = :id', {id: botUser.id}).execute()
 
                         // 开始新增订单
-                        await BotPaymentModel.createQueryBuilder().insert().into(BotPaymentModel).values({
+                        const botPayment = await BotPaymentModel.createQueryBuilder().insert().into(BotPaymentModel).values({
                             tgId:botUser.tgId ,
                             userId:botUser.id,
                             username:botUser.userName,
@@ -338,34 +338,55 @@ class WalletHandleMethod {
                             .where('t1.user_id = :tgId and del = 0 and wallet_type = 1', {tgId: botUser.tgId})
                             .groupBy("t1.payment_type").execute();
 
-                        var botPayMentObj = {}
+                        var botPayMentObj:any = {
+                            'm_1':0,
+                            'm_2':0,
+                            'm_3':0,
+                            'm_4':0,
+                            'm_5':0,
+                            'm_6':0,
+                            'm_7':0,
+                            'm_8':0,
+                            'm_9':0,
+                            'm_10':0,
+                            'm_11':0,
+                            'm_12':0,
+                            'm_13':0,
+                            'm_14':0,
+                            'm_15':0,
+                            'm_16':0,
+                            'm_17':0,
+                            'm_18':0,
+                            'm_19':0,
+                            'm_101':0,
+                            'm_201':0,
+                        }
                         if(sumPriceArr && sumPriceArr.length > 0){
                             for(let i=0;i<sumPriceArr.length;i++){
-                                botPayMentObj['m_'+sumPriceArr[i].ptype] = sumPriceArr[i].num || 0
+                                botPayMentObj['m_'+sumPriceArr[i]?.ptype?.toString()] = sumPriceArr[i].num || 0
                             }
                         }
 
                         const tixian="⌛️ 需要财务处理\n" +
-                            "\n" +
                             "用户：<a href=\"tg://user?id="+tgId+"\">"+botUser?.nickName+"</a>\n" +
                             "用户名 : <code>"+botUser?.userName+"</code>\n" +
-                            "上注流水 :  "+botPayMentObj['m_2'] || 0+"\n" +
-                            "中奖流水 :  "+botPayMentObj['m_5'] || 0+"\n" +
-                            "充值总额 :  "+botPayMentObj['m_1'] || 0+"\n" +
-                            "反水总额 :  "+botPayMentObj['m_4'] || 0+"\n" +
-                            "已提现流水 :  "+botPayMentObj['m_8'] || 0+"\n" +
-                            "申请提现流水 :  "+botPayMentObj['m_3'] || 0+"\n" +
-                            "彩金转化流水 :  "+botPayMentObj['m_9'] || 0+"\n" +
-                            "转账支出流水 :  "+botPayMentObj['m_10'] || 0+"\n" +
-                            "转账收入流水 :  "+botPayMentObj['m_11'] || 0+"\n" +
-                            "红包支出流水 :  "+botPayMentObj['m_12'] || 0+"\n" +
-                            "红包收入流水 :  "+botPayMentObj['m_13'] || 0+"\n" +
-                            "每日首充返利流水 :  "+botPayMentObj['m_16'] || 0+"\n" +
-                            "开业豪礼 :  "+botPayMentObj['m_17'] || 0+"\n" +
-                            "每日首充返利流水 :  "+botPayMentObj['m_16'] || 0+"\n" +
+                            "上注流水 :  "+(botPayMentObj['m_2'] || 0)+"\n" +
+                            "中奖流水 :  "+(botPayMentObj['m_5'] || 0)+"\n" +
+                            "充值总额 :  "+(botPayMentObj['m_1'] || 0)+"\n" +
+                            "反水总额 :  "+(botPayMentObj['m_4'] || 0)+"\n" +
+                            "已提现流水 :  "+(botPayMentObj['m_8'] || 0)+"\n" +
+                            "申请提现流水 :  "+(botPayMentObj['m_3'] || 0)+"\n" +
+                            "彩金转化流水 :  "+(botPayMentObj['m_9'] || 0)+"\n" +
+                            "转账支出流水 :  "+(botPayMentObj['m_10'] || 0)+"\n" +
+                            "转账收入流水 :  "+(botPayMentObj['m_11'] || 0)+"\n" +
+                            "红包支出流水 :  "+(botPayMentObj['m_12'] || 0)+"\n" +
+                            "红包收入流水 :  "+(botPayMentObj['m_13'] || 0)+"\n" +
+                            "每日首充返利流水 :  "+(botPayMentObj['m_16'] || 0)+"\n" +
+                            "开业豪礼 :  "+(botPayMentObj['m_17'] || 0)+"\n" +
+                            "每日首充返利流水 :  "+(botPayMentObj['m_16'] || 0)+"\n" +
                             "提现货币类型（❗️） : USDT\n" +
-                            "提现金额 : "+price || 0+"\n" +
-                            "实际金额 : "+(price-1) || 0+"\n" +
+                            "提现金额 : "+(price || 0)+"\n" +
+                            "实际金额 : "+((price-1) || 0)+"\n" +
                             "提现地址(点击复制) : <code>"+AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"</code>\n"+
                             "备注 : "+botUser.notes+"\n"+
                             "是否异常用户 : 没有异常";
@@ -373,7 +394,7 @@ class WalletHandleMethod {
                         // 6: 财务消息
                         await cbot.telegram.sendMessage(tgId,tixian,{
                             parse_mode:"HTML",
-                            reply_markup: WalletController.createMarkClientBtn(tgId+"").reply_markup
+                            reply_markup: WalletController.createMarkClientBtn(botPayment.identifiers[0].id+"").reply_markup
                         })
                         // 7: 发送消息
                         return  ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT,shengyuUsdt,price,botWithdrawalAddrModel?.addr),WalletController.createBackClientBtn())
@@ -385,6 +406,28 @@ class WalletHandleMethod {
                 await ctx.reply('亲，操作慢点，休息一会在操作!')
             }
         })
+    }
+
+    /**
+     * 财务标记打款
+     * @param ctx
+     */
+    public static startMarkTixian = async (ctx:Context)=>{
+        var tgId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        let update: any = ctx?.update
+        let callbackStr: string = update.callback_query?.data || ""
+        console.log("startMarkTixian=============",callbackStr)
+    }
+
+    /**
+     * 财务异常驳回
+     * @param ctx
+     */
+    public static startRefuseTixian = async (ctx:Context)=>{
+        var tgId: string = ctx.callbackQuery?.message?.chat?.id + "" || ""
+        let update: any = ctx?.update
+        let callbackStr: string = update.callback_query?.data || ""
+        console.log("startRefuseTixian=============",callbackStr)
     }
 
 
@@ -689,6 +732,8 @@ class WalletHandleMethod {
         const loginFlag = await redis.get("login_" + tgId)
         return  loginFlag == "success"
     }
+
+
 }
 
 
