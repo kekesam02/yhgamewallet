@@ -6,11 +6,14 @@ import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/ComputeUtils";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
-import {addLockByCtx} from "../../config/redislock";
+import {addLockByCtx, redlock} from "../../config/redislock";
 import BotGameConfig from "../BotGameConfig";
 import MessageUtils from "../../commons/message/MessageUtils";
-import gameBettingTips from "../../html/gameHtml/GameBettingTips";
 import GameBettingTips from "../../html/gameHtml/GameBettingTips";
+import UserModel from "../../models/UserModel";
+import {queryRunner} from "../../config/database";
+import AESUtils from "../../commons/AESUtils";
+import ContextUtil from "../../commons/ContextUtil";
 
 
 /**
@@ -151,30 +154,44 @@ class BettingCommand28 {
             return
         }
 
+        // // 判断是否是USDT下注、如果是USDT下注没有下注限制
+        let userModel = await new UserModel().getUserModel(this.ctx)
+        let isJudge = false
+        if (
+            new ComputeUtils(userModel.CUSDT).comparedTo(parseList.totalMoney) < 0
+            && new ComputeUtils(userModel.USDT).comparedTo(parseList.totalMoney) >= 0
+        ) {
+            isJudge = true
+        }
+
+
         await addLockByCtx(this.ctx,async () => {
-            // 下注规则判定失败直接退出
-            let ruleNum = await this.ruleJudge(parseList, text)
-            // 用户下注金额超过最大限制
-            if (ruleNum == 1) {
-                console.log('用户对押')
-                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().limitMaxMoney())
-            }
-            // 用户对押
-            if (ruleNum == 2) {
-                console.log('用户对押')
-                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().onPledgeErrHtml())
-            }
-            // 杀组合下注限制
-            if (ruleNum == 3) {
-                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().killGroupHtml())
-            }
-            // 反组合下注限制
-            if (ruleNum == 4) {
-                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().callbackHtml())
-            }
-            // 双向下注限制
-            if (ruleNum == 5) {
-                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().twoWayHtml())
+            // USDT 下注没有限制
+            if (!isJudge) {
+                // 下注规则判定失败直接退出
+                let ruleNum = await this.ruleJudge(parseList, text)
+                // 用户下注金额超过最大限制
+                if (ruleNum == 1) {
+                    console.log('用户对押')
+                    return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().limitMaxMoney())
+                }
+                // 用户对押
+                if (ruleNum == 2) {
+                    console.log('用户对押')
+                    return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().onPledgeErrHtml())
+                }
+                // 杀组合下注限制
+                if (ruleNum == 3) {
+                    return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().killGroupHtml())
+                }
+                // 反组合下注限制
+                if (ruleNum == 4) {
+                    return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().callbackHtml())
+                }
+                // 双向下注限制
+                if (ruleNum == 5) {
+                    return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().twoWayHtml())
+                }
             }
 
             console.log('解析到的指令', parseList)
@@ -321,7 +338,10 @@ class BettingCommand28 {
             return returnNum
         }
         // 本次下注条件满足需要从数据库取数据出来再次判定
-        let pledgeList = await new BotPledgeUpModel().getHistory(this.ctx, 20, [this.group.gameType])
+        let pledgeList = await new BotPledgeUpModel().getHistory(this.ctx, 20, [
+            GameTypeEnum.PC28GAO,
+            GameTypeEnum.PC28DI
+        ])
 
         if (pledgeList.length > 0) {
             let currRoundId = Number(ScheduleHandle.pc28Config.roundId)

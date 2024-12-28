@@ -251,12 +251,9 @@ class BotPledgeUpModel extends BaseEntity {
             let userModelList = await queryRunner.manager.find(UserModel, {
                 where: {
                     tgId: AESUtils.encodeUserId(ctx?.from?.id.toString())
-                },
-                lock: {
-                    mode: 'pessimistic_read'
                 }
             }) as Array<UserModel>
-            if (!userModelList.length > 0) {
+            if (userModelList.length < 0) {
                 return
             }
             let userModel = userModelList[0]
@@ -473,6 +470,7 @@ class BotPledgeUpModel extends BaseEntity {
             return true
         }
         if (
+            new ComputeUtils(userModel.CUSDT).comparedTo(0) > 0 &&
             new ComputeUtils(userModel.CUSDT).comparedTo(money) < 0
         ) {
             // 判断用户余额小于1提示用户余额不足
