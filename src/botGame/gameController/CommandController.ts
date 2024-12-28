@@ -12,7 +12,7 @@ import BotPaymentModel from "../../models/BotPaymentModel";
 import userModel from "../../models/UserModel";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import GamePledgeUpHtml from "../../html/gameHtml/GamePledgeUpHtml";
-import {addLockByCtx} from "../../commons/lock/MutexUtils";
+import {addLockByCtx} from "../../config/redislock";
 
 
 /**

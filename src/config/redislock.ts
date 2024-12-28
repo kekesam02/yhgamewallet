@@ -1,12 +1,47 @@
+// @ts-nocheck
+import Redlock from 'redlock'
 import redis from "./redis";
-const Redlock = require('redlock');
-// 创建Redlock实例，需要传入Redis客户端和重试次数
-const redisLock = new Redlock([redis], {
-  driftFactor: 0.01, // 默认值
-  retryCount: 10, // 默认值
-  retryDelay: 200 // 默认值
-});
+import {Context, Telegraf} from "telegraf";
+import ContextUtil from "../commons/ContextUtil";
 
 
+/**
+ * 互斥锁
+ */
+const redlock = new Redlock([redis as Redlock.CompatibleRedisClient])
 
-export  default redisLock
+
+/**
+ * 添加分布式锁根据 tgid 锁定
+ * @param tgList
+ * @param fn
+ * @param lockTTL
+ */
+const addLockByTgId = async (tgList: Array<string>, fn: () => Promise<any>, lockTTL = 1000 * 30) => {
+    return addLock(tgList, fn, lockTTL)
+}
+
+/**
+ * 添加分布式锁根据 ctx.tgId 锁定
+ */
+const addLockByCtx = async (ctx: Context, fn: () => Promise<any>, lockTTL = 1000 * 30) => {
+    // 分布式锁的key
+    let lockKey = [ContextUtil.getUserId(ctx)]
+    return addLock(lockKey, fn, lockTTL)
+}
+
+const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>, lockTTL = 1000  * 30) => {
+    let lock = await redlock.lock(lockKeyList, lockTTL)
+    try {
+        // 执行异步操作
+        await fn()
+    } finally {
+        // 释放锁
+        await redlock.unlock(lock)
+    }
+}
+
+export {
+    addLockByCtx,
+    addLockByTgId
+}
