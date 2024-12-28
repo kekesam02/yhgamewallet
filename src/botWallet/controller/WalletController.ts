@@ -52,8 +52,8 @@ class WalletController {
      * 计算器清空
      */
     public static ComputeClearDel = [{
-        text: "清空",
-        query: "clear"
+        text: "关闭",
+        query: "close_computer"
     }, {
         text: "0",
         query: "num_0"

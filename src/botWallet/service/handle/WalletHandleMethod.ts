@@ -1,4 +1,4 @@
-import type {Context} from "telegraf";
+import type {Context,Telegraf} from "telegraf";
 import ButtonUtils from '../../../commons/button/ButtonUtils'
 import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
 import BotTronAddrModel from "../../../models/BotTronAddrModel";
@@ -244,7 +244,7 @@ class WalletHandleMethod {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         //6253392707
-        await bot.telegram.sendMessage(6253392707,"hahah")
+        //await cbot.telegram.sendMessage(6253392707,"hahah")
         // 2：设置操作
         redis.set("currentop" + tgId, "tx", 'EX', 60 * 60)
         // 查询用户信息
@@ -271,7 +271,7 @@ class WalletHandleMethod {
 
     // 提现具体逻辑
     public static startTxHandle = async(text:string,tgId:number,ctx:Context)=>{
-        await addLockByTgId([`${tgId}`], async () => {
+        await addLockByTgId([tgId+''], async () => {
             try {
                 // 1: 判断是否提现开头
                 if(!text.startsWith('提现')){
@@ -281,9 +281,11 @@ class WalletHandleMethod {
                 const price = parseFloat(text.replaceAll('提现','').trim() )
                 if (isNaN(price) || price < 0){
                     await ctx.replyWithHTML("⚠️ 提现金额必须是正整数！")
+                    return
                 }
                 if (price < 10) {
                     return ctx.replyWithHTML("⚠️ 最低提现10u！")
+                    return
                 }
 
                 // 查询用户信息
@@ -302,9 +304,11 @@ class WalletHandleMethod {
                         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
                             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
                         // 扣减用户余额
+
                         // 修改用户交易地址
                         await UserModel.createQueryBuilder().update(UserModel).set({USDT: shengyuUsdt+''})
                             .where('id = :id', {id: botUser.id}).execute()
+
                         // 开始新增订单
                         await BotPaymentModel.createQueryBuilder().insert().into(BotPaymentModel).values({
                             tgId:botUser.tgId ,
@@ -321,7 +325,50 @@ class WalletHandleMethod {
                             walletType:1
                         } ).execute()
                         //判断是否为异常用户
-                        // 发送消息给财务
+
+                        // 如果用户交易地址不存在。视为异常用户
+                        // 如果用户交易地址不存在。视为异常用户
+
+
+                        // // 发送消息给财务
+                        // List<BotUser> list = botUserService.lambdaQuery().eq(BotUser::getVip, 100).eq(BotUser::getDel,CommonEnums.ZERO).list();
+                        //
+                        // //计算参数
+                        // BigDecimal lssz = chax(tgId,BetPaymentTypeEnum.SZ,betCurrencyTypeEnum);
+                        // BigDecimal lszj = chax(tgId,BetPaymentTypeEnum.ZJ,betCurrencyTypeEnum);
+                        // BigDecimal lscz = chax(tgId,BetPaymentTypeEnum.CZ,betCurrencyTypeEnum);
+                        // BigDecimal lstx = chax(tgId,BetPaymentTypeEnum.TX,betCurrencyTypeEnum);
+                        // BigDecimal lstcjdk = chax(tgId,BetPaymentTypeEnum.CJDK,betCurrencyTypeEnum);
+                        // BigDecimal lsttxdk = chax(tgId,BetPaymentTypeEnum.TXDK,betCurrencyTypeEnum);
+                        // BigDecimal lstyhzz = chax(tgId,BetPaymentTypeEnum.YHZZ,betCurrencyTypeEnum);
+                        // BigDecimal lstyhsk = chax(tgId,BetPaymentTypeEnum.YYSK,betCurrencyTypeEnum);
+                        // BigDecimal lstfhb = chax(tgId,BetPaymentTypeEnum.FHB,betCurrencyTypeEnum);
+                        // BigDecimal lstlhb = chax(tgId,BetPaymentTypeEnum.LHB,betCurrencyTypeEnum);
+                        // BigDecimal lstscfl = chax(tgId,BetPaymentTypeEnum.SCFL,betCurrencyTypeEnum);
+                        //
+                        // String tixian="⌛️ 需要财务处理\n" +
+                        //     "\n" +
+                        //     "用户：<a href=\"tg://user?id="+tgId+"\">"+userById.getNickName()+"</a>\n" +
+                        //     "用户名 : <code>"+userById.getUserName()+"</code>\n" +
+                        //     "上注流水 :  "+lssz+"\n" +
+                        //     "中奖流水 :  "+lszj+"\n" +
+                        //     "充值总额 :  "+lscz+"\n" +
+                        //     "已提现流水 :  "+lsttxdk+"\n" +
+                        //     "申请提现流水 :  "+lstx+"\n" +
+                        //     "彩金转化流水 :  "+lstcjdk+"\n" +
+                        //     "转账支出流水 :  "+lstyhzz+"\n" +
+                        //     "转账收入流水 :  "+lstyhsk+"\n" +
+                        //     "红包支出流水 :  "+lstfhb+"\n" +
+                        //     "红包收入流水 :  "+lstlhb+"\n" +
+                        //     "每日首充返利流水 :  "+lstscfl+"\n" +
+                        //     "提现货币类型（❗️） : "+betCurrencyTypeEnum.getDesc()+"\n" +
+                        //     "提现金额 : "+amountMoney+"\n" +
+                        //     "实际金额 : "+subtract1+"\n" +
+                        //     "提现地址(点击复制) : <code>"+addr+"</code>\n"+
+                        //     "备注 : "+userById.getNotes()+"\n"+
+                        //     "是否异常用户 : "+isfk;
+
+
                         // 6: 发送消息
                         return  ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT,shengyuUsdt,price,botWithdrawalAddrModel?.addr),WalletController.createBackClientBtn())
                     }catch (e){
@@ -539,7 +586,7 @@ class WalletHandleMethod {
             // 计算器清空，删除，zero按钮
             keybordsArr.push(WalletController.ComputeClearDel)
             if (surebtn) {
-                keybordsArr.push([WalletController.CloseComputer, WalletController.SaveUserPwd])
+                keybordsArr.push([WalletController.SaveUserPwd])
             } else {
                 var len = keybordsArr.length
                 var index = keybordsArr[len - 1].findIndex(c => c.query == 'update_pwd_btn')

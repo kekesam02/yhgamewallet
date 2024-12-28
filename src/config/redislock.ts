@@ -4,7 +4,6 @@ import redis from "./redis";
 import {Context, Telegraf} from "telegraf";
 import ContextUtil from "../commons/ContextUtil";
 
-
 /**
  * 互斥锁
  */
