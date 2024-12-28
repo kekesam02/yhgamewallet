@@ -15,7 +15,7 @@ import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
 import redis from "../../../config/redis";
 import BotPaymentModel from "../../../models/BotPaymentModel";
 import dataSource from "../../../config/database";
-import redisLock, {addLockByTgId} from "../../../config/redisLock";
+import {addLockByTgId} from "../../../config/redislock";
 
 
 /**
@@ -270,7 +270,7 @@ class WalletHandleMethod {
 
     // 提现具体逻辑
     public static startTxHandle = async(text:string,tgId:number,ctx:Context)=>{
-        await addLockByTgId([tgId], async () => {
+        await addLockByTgId([`${tgId}`], async () => {
             try {
                 // 1: 判断是否提现开头
                 if(!text.startsWith('提现')){
