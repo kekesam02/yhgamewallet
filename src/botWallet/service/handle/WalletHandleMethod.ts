@@ -15,6 +15,7 @@ import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
 import redis from "../../../config/redis";
 import BotPaymentModel from "../../../models/BotPaymentModel";
 import {addLockByTgId} from "../../../config/redislock";
+import {Telegraf} from "telegraf";
 
 
 /**
@@ -239,7 +240,7 @@ class WalletHandleMethod {
      * 代号：tixian_btn
      * @param ctx
      */
-    public static startTiXian = async ( ctx: Context , bot:Telegraf<Context>) => {
+    public static startTiXian = async ( ctx: Context , bot: Telegraf<Context>) => {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         //6253392707
