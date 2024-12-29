@@ -197,7 +197,7 @@ class WalletUserCenterMethod {
 
         redis.set("addtxaddrvalue" + tgId, text, 'EX', 60 * 60 * 6)
         // 发送机器人消息
-        ctx.replyWithHTML("✔️ 设置成功\n👜 提现地址是：" + text)
+        ctx.replyWithHTML("✅ 设置成功\n👜 提现地址是：" + text)
         // 进入到主页
         WalletHandleMethod.startButtonBack(ctx)
     }

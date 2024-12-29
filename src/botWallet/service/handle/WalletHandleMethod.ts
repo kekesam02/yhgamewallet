@@ -46,7 +46,7 @@ class WalletHandleMethod {
      */
     public static clearCacheRelation = (ctx: Context) => {
         var tgId: number | string = ctx.callbackQuery?.message?.chat?.id  || ctx.message?.from?.id || 0
-        redis.del(tgId+'')
+        redis.del('pwd_'+tgId+'')
         redis.del('mark_'+tgId)
     }
 
@@ -73,7 +73,6 @@ class WalletHandleMethod {
         redis.del("currentop" + tgId)
         this.removeMessage(ctx)
         this.clearCacheRelation(ctx)
-        this.clearCacheLogin(ctx)
         this.startCommand(ctx, tgId, username, firstName)
     }
 
@@ -89,7 +88,6 @@ class WalletHandleMethod {
         redis.del("currentop" + tgId)
         this.removeMessage(ctx)
         this.clearCacheRelation(ctx)
-        this.clearCacheLogin(ctx)
         this.startCommand(ctx, tgId, username, firstName)
     }
 
@@ -271,141 +269,159 @@ class WalletHandleMethod {
 
     // 提现具体逻辑
     public static startTxHandle = async(text:string,tgId:number,ctx:Context, cbot:Telegraf<Context>)=>{
-        await addLockByTgId([tgId+''], async () => {
-            try {
-                // 1: 判断是否提现开头
-                if(!text.startsWith('提现')){
-                    await ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现100或者提现 100")
-                    return
-                }
-                // 获取提现金额
-                const price = parseFloat(text.replaceAll('提现','').trim() )
-                if (isNaN(price) || price < 0){
-                    await ctx.replyWithHTML("⚠️ 提现金额必须是正整数！")
-                    return
-                }
-                if (price < 10) {
-                    await ctx.replyWithHTML("⚠️ 最低提现10u！")
-                    return
-                }
+        await addLockByTgId(['tx_lock_'+tgId+''], async () => {
+            // 1: 判断是否提现开头
+            if(!text.startsWith('提现')){
+                await ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现100或者提现 100")
+                return
+            }
+            // 获取提现金额
+            const price = parseFloat(text.replaceAll('提现','').trim() )
+            if (isNaN(price) || price < 0){
+                await ctx.replyWithHTML("⚠️ 提现金额必须是正整数！")
+                return
+            }
+            if (price < 10) {
+                await ctx.replyWithHTML("⚠️ 最低提现10u！")
+                return
+            }
 
-                // 查询用户信息
-                let userId = AESUtils.encodeUserId(tgId?.toString())
-                let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
-                // 查询用户余额
-                if (botUser) {
-                    const userUsdt = parseFloat(botUser.USDT)
-                    const shengyuUsdt = userUsdt - price
-                    // 用户的余额 - 提现的余额 如果小于1，说明不够，因为手续费需要1U
-                    if (shengyuUsdt < 1){
-                        await ctx.replyWithHTML("⚠️ 账户余额不足！")
+            // 查询用户信息
+            let userId = AESUtils.encodeUserId(tgId?.toString())
+            let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
+            // 查询用户余额
+            if (botUser) {
+                const userUsdt = parseFloat(botUser.USDT)
+                const shengyuUsdt = userUsdt - price
+                // 用户的余额 - 提现的余额 如果小于1，说明不够，因为手续费需要1U
+                if (shengyuUsdt < 1){
+                    await ctx.replyWithHTML("⚠️ 账户余额不足！")
+                    return
+                }
+                try {
+                    // 查询用户是否存在交易地址
+                    const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
+                        .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
+                    if (!botWithdrawalAddrModel?.addr){
+                        await ctx.replyWithHTML("⚠️ 交易异常，提现地址不存在！")
                         return
                     }
-                    try {
-                        // 查询用户是否存在交易地址
-                        const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
-                            .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
-                        if (!botWithdrawalAddrModel?.addr){
-                            await ctx.replyWithHTML("⚠️ 交易异常，提现地址不存在！")
-                            return
+                    // 扣减用户余额
+
+                    // 修改用户交易地址
+                    await UserModel.createQueryBuilder().update(UserModel).set({USDT: shengyuUsdt+''})
+                        .where('id = :id', {id: botUser.id}).execute()
+
+                    // 申请时间
+                    var applyTime = DateFormatUtils.CurrentDateFormatString();
+                    const chatId = ctx?.chat?.id+'' || "";
+                    // 开始新增订单
+                    const botPayment = await BotPaymentModel.createQueryBuilder().insert().into(BotPaymentModel).values({
+                        tgId:botUser.tgId ,
+                        userId:botUser.id,
+                        username:botUser.userName,
+                        nickname:botUser.nickName,
+                        balanceBefore:userUsdt+'',
+                        balanceAfter:shengyuUsdt+'',
+                        paymentType:3,
+                        paymentTypeName:"申请体现",
+                        operateType:0,
+                        paymentTypeNumber: botWithdrawalAddrModel?.addr,
+                        paymentAmount: (price-1) + '',
+                        paymentRealAmount:price + '',
+                        walletType:1,
+                        applyTime:applyTime,
+                        chatId:chatId
+                    } ).execute()
+
+                    //判断是否为异常用户 ----------------这里要思考
+                    var userByLinks = await UserModel.createQueryBuilder()
+                        .where('recharge_link = :rechargeLink and del = 0',{'rechargeLink':botUser.rechargeLink})
+                        .getMany();
+                    let result = "没有异常"
+                    if (userByLinks && userByLinks.length > 1){
+                        for (let userByLink of userByLinks) {
+                            result = "风控用户"
+                            await UserModel.createQueryBuilder().update()
+                                .set({riskManagement:1}).where("id=:id",{id:userByLink.id}).execute()
                         }
-                        // 扣减用户余额
-
-                        // 修改用户交易地址
-                        await UserModel.createQueryBuilder().update(UserModel).set({USDT: shengyuUsdt+''})
-                            .where('id = :id', {id: botUser.id}).execute()
-
-                        // 开始新增订单
-                        const botPayment = await BotPaymentModel.createQueryBuilder().insert().into(BotPaymentModel).values({
-                            tgId:botUser.tgId ,
-                            userId:botUser.id,
-                            username:botUser.userName,
-                            nickname:botUser.nickName,
-                            balanceBefore:userUsdt+'',
-                            balanceAfter:shengyuUsdt+'',
-                            paymentType:3,
-                            paymentTypeName:"申请体现",
-                            operateType:0,
-                            paymentTypeNumber: botWithdrawalAddrModel?.addr,
-                            paymentAmount: (price-1) + '',
-                            walletType:1
-                        } ).execute()
-
-                        //判断是否为异常用户 ----------------这里要思考
-
-                        var sumPriceArr = await BotPaymentModel.createQueryBuilder("t1")
-                            .select(['t1.payment_type as ptype','t1.payment_type_name as pname','SUM(payment_amount) as num'])
-                            .where('t1.user_id = :tgId and del = 0 and wallet_type = 1', {tgId: botUser.tgId})
-                            .groupBy("t1.payment_type").execute();
-
-                        var botPayMentObj:any = {
-                            'm_1':0,
-                            'm_2':0,
-                            'm_3':0,
-                            'm_4':0,
-                            'm_5':0,
-                            'm_6':0,
-                            'm_7':0,
-                            'm_8':0,
-                            'm_9':0,
-                            'm_10':0,
-                            'm_11':0,
-                            'm_12':0,
-                            'm_13':0,
-                            'm_14':0,
-                            'm_15':0,
-                            'm_16':0,
-                            'm_17':0,
-                            'm_18':0,
-                            'm_19':0,
-                            'm_101':0,
-                            'm_201':0,
-                        }
-                        if(sumPriceArr && sumPriceArr.length > 0){
-                            for(let i=0;i<sumPriceArr.length;i++){
-                                botPayMentObj['m_'+sumPriceArr[i]?.ptype?.toString()] = sumPriceArr[i].num || 0
-                            }
-                        }
-
-                        const tixian="⌛️ 需要财务处理\n" +
-                            "用户：<a href=\"tg://user?id="+tgId+"\">"+botUser?.nickName+"</a>\n" +
-                            "用户名 : <code>"+botUser?.userName+"</code>\n" +
-                            "上注流水 :  "+(botPayMentObj['m_2'] || 0)+"\n" +
-                            "中奖流水 :  "+(botPayMentObj['m_5'] || 0)+"\n" +
-                            "充值总额 :  "+(botPayMentObj['m_1'] || 0)+"\n" +
-                            "反水总额 :  "+(botPayMentObj['m_4'] || 0)+"\n" +
-                            "已提现流水 :  "+(botPayMentObj['m_8'] || 0)+"\n" +
-                            "申请提现流水 :  "+(botPayMentObj['m_3'] || 0)+"\n" +
-                            "彩金转化流水 :  "+(botPayMentObj['m_9'] || 0)+"\n" +
-                            "转账支出流水 :  "+(botPayMentObj['m_10'] || 0)+"\n" +
-                            "转账收入流水 :  "+(botPayMentObj['m_11'] || 0)+"\n" +
-                            "红包支出流水 :  "+(botPayMentObj['m_12'] || 0)+"\n" +
-                            "红包收入流水 :  "+(botPayMentObj['m_13'] || 0)+"\n" +
-                            "每日首充返利流水 :  "+(botPayMentObj['m_16'] || 0)+"\n" +
-                            "开业豪礼 :  "+(botPayMentObj['m_17'] || 0)+"\n" +
-                            "每日首充返利流水 :  "+(botPayMentObj['m_16'] || 0)+"\n" +
-                            "提现货币类型（❗️） : USDT\n" +
-                            "提现金额 : "+(price || 0)+"\n" +
-                            "实际金额 : "+((price-1) || 0)+"\n" +
-                            "提现地址(点击复制) : <code>"+AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"</code>\n"+
-                            "备注 : "+botUser.notes+"\n"+
-                            "是否异常用户 : 没有异常";
-
-                        // 6: 财务消息
-                        await cbot.telegram.sendMessage(tgId,tixian,{
-                            parse_mode:"HTML",
-                            reply_markup: WalletController.createMarkClientBtn(botPayment.identifiers[0].id+"").reply_markup
-                        })
-                        // 7: 发送消息
-                        return  ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT,shengyuUsdt,price,botWithdrawalAddrModel?.addr),WalletController.createBackClientBtn())
-                    }catch (e){
-                        return  ctx.reply('⌛️ 亲操作慢点，休息一会在操作!')
                     }
+
+                    var sumPriceArr = await BotPaymentModel.createQueryBuilder("t1")
+                        .select(['t1.payment_type as ptype','t1.payment_type_name as pname','SUM(payment_amount) as num'])
+                        .where('t1.user_id = :tgId and del = 0 and wallet_type = 1', {tgId: botUser.tgId})
+                        .groupBy("t1.payment_type").execute();
+
+                    var botPayMentObj:any = {
+                        'm_1':0,
+                        'm_2':0,
+                        'm_3':0,
+                        'm_4':0,
+                        'm_5':0,
+                        'm_6':0,
+                        'm_7':0,
+                        'm_8':0,
+                        'm_9':0,
+                        'm_10':0,
+                        'm_11':0,
+                        'm_12':0,
+                        'm_13':0,
+                        'm_14':0,
+                        'm_15':0,
+                        'm_16':0,
+                        'm_17':0,
+                        'm_18':0,
+                        'm_19':0,
+                        'm_101':0,
+                        'm_201':0,
+                    }
+
+                    if(sumPriceArr && sumPriceArr.length > 0){
+                        for(let i=0;i<sumPriceArr.length;i++){
+                            botPayMentObj['m_'+sumPriceArr[i]?.ptype?.toString()] = sumPriceArr[i].num || 0
+                        }
+                    }
+
+                    const tixian="⌛️ 需要财务处理\n" +
+                        "用户：<a href=\"tg://user?id="+tgId+"\">"+botUser?.nickName+"</a>\n" +
+                        "用户名 : <code>"+botUser?.userName+"</code>\n" +
+                        "申请时间 : "+applyTime+"\n" +
+                        "提现货币类型（❗️） : USDT\n" +
+                        "提现金额 : "+(price || 0)+"\n" +
+                        "实际金额 : "+((price-1) || 0)+"\n" +
+                        "提现地址(点击复制) : <code>"+AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"</code>\n"+
+                        "备注 : "+botUser.notes+"\n" +
+                        "是否异常用户 : " + result+"\n" +
+                        "➖➖➖➖➖其他信息➖➖➖➖➖\n" +
+                        "上注流水 :  "+(botPayMentObj['m_2'] || 0)+"\n" +
+                        "中奖流水 :  "+(botPayMentObj['m_5'] || 0)+"\n" +
+                        "充值总额 :  "+(botPayMentObj['m_1'] || 0)+"\n" +
+                        "反水总额 :  "+(botPayMentObj['m_4'] || 0)+"\n" +
+                        "已提现流水 :  "+(botPayMentObj['m_8'] || 0)+"\n" +
+                        "申请提现流水 :  "+(botPayMentObj['m_3'] || 0)+"\n" +
+                        "彩金转化流水 :  "+(botPayMentObj['m_9'] || 0)+"\n" +
+                        "转账支出流水 :  "+(botPayMentObj['m_10'] || 0)+"\n" +
+                        "转账收入流水 :  "+(botPayMentObj['m_11'] || 0)+"\n" +
+                        "红包支出流水 :  "+(botPayMentObj['m_12'] || 0)+"\n" +
+                        "红包收入流水 :  "+(botPayMentObj['m_13'] || 0)+"\n" +
+                        "每日首充返利流水 :  "+(botPayMentObj['m_16'] || 0)+"\n" +
+                        "开业豪礼 :  "+(botPayMentObj['m_17'] || 0)+"\n" +
+                        "每日首充返利流水 :  "+(botPayMentObj['m_16'] || 0)+"\n"
+
+                    // 6: 财务消息
+                    await cbot.telegram.sendMessage(tgId,tixian,{
+                        parse_mode:"HTML",
+                        reply_markup: WalletController.createMarkClientBtn(botPayment.identifiers[0].id+"").reply_markup
+                    })
+                    // 7: 发送消息
+                    return  ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT,shengyuUsdt,price,botWithdrawalAddrModel?.addr),WalletController.createBackClientBtn())
+                }catch (e){
+                    return  ctx.reply('⌛️ 亲操作慢点，休息一会在操作!')
                 }
-            } catch (e){
-                await ctx.reply('亲，操作慢点，休息一会在操作!')
             }
-        })
+        },async()=>{
+            await ctx.reply('亲，操作慢点，休息一会在操作!')
+        } )
     }
 
     /**
@@ -584,22 +600,22 @@ class WalletHandleMethod {
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data || ""
         if (callbackStr.startsWith("num_")) {
-            var cacheValue =  await redis.get(tgId) || ""
+            var cacheValue =  await redis.get('pwd_'+tgId) || ""
             var currentVal = callbackStr.replaceAll('num_', '')
             var cvalue = cacheValue + currentVal
             if (cvalue.length > 4) return
-            redis.set(tgId , cvalue)
+            redis.set('pwd_'+tgId , cvalue)
             await this.sendPasswordSetupMessage(ctx, cvalue, false)
         } else if (callbackStr == 'clear') {
-            redis.del(tgId)
+            redis.del('pwd_'+tgId)
             await this.sendPasswordSetupMessage(ctx, "", false)
         } else if (callbackStr == 'delete') {
-            var cacheKey =  await redis.get(tgId)
+            var cacheKey =  await redis.get('pwd_'+tgId)
             if (cacheKey) {
                 var arr = cacheKey.split("")
                 arr.pop()
                 var join = arr.join('');
-                redis.set(tgId, join)
+                redis.set('pwd_'+tgId, join)
                 await this.sendPasswordSetupMessage(ctx, join, false)
             }
         }
@@ -667,7 +683,7 @@ class WalletHandleMethod {
      */
     public static startUpdatePwdCallback = async (ctx: Context) => {
         var tgId: string = ctx.callbackQuery?.from?.id +"" || ""
-        var cacheValue = await redis.get(tgId)
+        var cacheValue = await redis.get('pwd_'+tgId)
         if (cacheValue) {
             if (cacheValue.length >= 4) {
                 var firstName: string = ctx.callbackQuery?.from?.first_name || ''
@@ -684,7 +700,7 @@ class WalletHandleMethod {
                         // 发送消息
                         ctx.replyWithHTML(WalletMessage.PASSWORD_SUCCESS_MESSAGE)
                         // 设置登录成功的标识
-                        redis.set("login_" + tgId, "success")
+                        redis.set("login_" + tgId, "success",'EX',1000 * 60 * 60 * 24)
                     } else {
                         ctx.replyWithHTML(WalletMessage.C_PASSWPORD_ERROR)
                     }
@@ -702,7 +718,7 @@ class WalletHandleMethod {
                     // 发送消息
                     ctx.replyWithHTML(html)
                     // 设置登录成功的标识
-                    redis.set("login_" + tgId, "success")
+                    redis.set("login_" + tgId, "success",'EX',1000 * 60 * 60 * 24)
                 }
             } else {
                 ctx.replyWithHTML(WalletMessage.PASSWPORD_ERROR)
@@ -725,7 +741,7 @@ class WalletHandleMethod {
         const resp = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
         if (!resp?.paymentPassword) {
             redis.del("login_" + tgId)
-            redis.del(tgId+'')
+            redis.del('pwd_'+tgId+'')
             return false
         }
         // 获取登录成功的标识

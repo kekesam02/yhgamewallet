@@ -208,6 +208,7 @@ class PC28Controller {
                     console.log('出现错误了进行回滚', err)
                     await queryRunner.rollbackTransaction()
                 }
+            },async()=>{
             })
 
 

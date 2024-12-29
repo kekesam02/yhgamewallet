@@ -123,6 +123,14 @@ class BotPaymentModel extends BaseEntity {
     paymentAmount: string
 
     /**
+     * 实际金额
+     */
+    @Column({
+        name: 'payment_real_amount'
+    })
+    paymentRealAmount: string
+
+    /**
      * 是增加还是减少
      *  1: 增加
      *  0: 减少
@@ -174,6 +182,47 @@ class BotPaymentModel extends BaseEntity {
         name: 'update_time'
     })
     updateTime: string
+
+    /**
+     * 申请时间
+     */
+    @Column({
+        name: 'apply_time'
+    })
+    applyTime: string
+
+
+    /**
+     * 财务审核和拒绝时间
+     */
+    @Column({
+        name: 'pass_time'
+    })
+    passTime: string
+
+    /**
+     * 审核人
+     */
+    @Column({
+        name: 'pass_username'
+    })
+    passUsername: string
+
+    /**
+     * 审核昵称
+     */
+    @Column({
+        name: 'pass_nickname'
+    })
+    passNickname: string
+
+    /**
+     * 聊天窗口
+     */
+    @Column({
+        name: 'chat_id'
+    })
+    chatId: string
 
     /**
      * 保存用户订单对象

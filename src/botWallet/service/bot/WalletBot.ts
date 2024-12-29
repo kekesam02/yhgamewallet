@@ -11,20 +11,29 @@ import WalletHandleMethod from "../handle/WalletHandleMethod";
  */
 const bot = new Telegraf(getConfig().botConfig.WalletToken)
 const botWallet = new Telegraf(getConfig().botConfig.WalletTokenTest)
-bot.command('quit', async (ctx) => {
-    // Explicit usage
-    await ctx.telegram.leaveChat(ctx.message.chat.id)
-    // Using context shortcut
-    await ctx.leaveChat()
+
+bot.command('quit', async (ctx:Context) => {
+    WalletHandleMethod.clearCacheLogin(ctx)
+    WalletHandleMethod.clearCacheRelation(ctx)
+    ctx.reply("退出成功，谢谢你的使用！")
+    //await ctx.telegram.leaveChat(ctx?.chat?.id || '')
 })
 
+bot.telegram.setMyCommands([
+    { command: "start", description: "启动机器人" },
+    { command: "quit", description: "退出机器人" },
+    // 可以添加更多命令
+]).then(() => {
+    console.log("命令设置成功");
+}) .catch((err) => {
+    console.error("设置命令时出错", err);
+});
 /**
  * 监听/start命令
  */
-bot.command('start', (ctx) => {
+bot.command('start', async (ctx) => {
     WalletHandleMethod.startCommandCallback(ctx)
 })
-
 
 /**
  * 监听用户发送过来的消息
@@ -40,7 +49,6 @@ bot.on(message('text'), async (ctx: Context) => {
 bot.on('callback_query', async (ctx) => {
     WalletCallbackHandle.listenerMessage(ctx,botWallet)
 })
-
 
 bot.on('inline_query', async (ctx) => {
     console.log('--------------------内连按钮回调--------------', ctx)
@@ -93,7 +101,6 @@ bot.on('inline_query', async (ctx) => {
 botWallet.on('callback_query', async (ctx) => {
     WalletCallbackHandle.cBotlistenerMessage(ctx,bot)
 })
-
 
 bot.launch().then(() =>{
     console.log('bot钱包walletBot已经成功启动')

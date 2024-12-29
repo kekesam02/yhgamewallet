@@ -184,7 +184,7 @@ class WalletController {
                 WalletController.BackHome,
                 {
                     text: '🛄 客服财务',
-                    url: 'https://t.me/Yhclub01'
+                    url: 'https://t.me/xukefeifeibot'
                 }
             ]
         ])
