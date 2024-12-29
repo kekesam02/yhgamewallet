@@ -242,8 +242,6 @@ class WalletHandleMethod {
     public static startTiXian = async ( ctx: Context , cbot:Telegraf<Context>) => {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
-        //6253392707
-        //await cbot.telegram.sendMessage(6253392707,"hahah")
         // 2：设置操作
         redis.set("currentop" + tgId, "tx", 'EX', 60 * 60)
         // 查询用户信息
@@ -574,40 +572,49 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
         redis.set("currentop" + tgId, "zhuanzhang", 'EX', 60 * 60)
-        const flag = await this.isLogin(tgId,ctx)
-        var mark = await redis.get('mark_'+tgId) || '0'
-        if(mark &&  mark == '1')return
+        // 3：密码确认
+        const flag:boolean = await this.isLogin(tgId,ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
             var mark = await redis.get('mark_'+tgId) || '0'
-            await this.sendPasswordSetupMessage(ctx, "",  mark != '1')
+            await this.sendPasswordSetupMessage(ctx, "",   mark != '1')
             return
         }
-        var result :InlineQueryResultArticle[] = [
-            {
-                type: 'article',
-                id: "1",
-                title: "111",
-                description: `Postado em 1111`,
-                input_message_content: {
-                    message_text: `👉 <a href="x">xxxx [LINK]</a>\n\n🗃 Postado em <a href="d">ccc</a>`,
-                    parse_mode: 'HTML',
-                },
-                url: 'x',
+
+        const html="\uD83D\uDC47 点击下方按钮选择收款人";
+        const shareButton = {
+            reply_markup: {
+                inline_keyboard: [
+                    [
+                        { text: '分享机器人', url: 'https://t.me/${ctx.botInfo.username}' },
+                        {
+                            text: '选择转账对象',
+                            switch_inline_query: '1'
+                        }
+                    ]
+                ]
             }
-        ]
-        try {
-            await ctx.answerInlineQuery(result);
-        }catch(e){
-            console.log("e",e)
         }
-        console.log("startZhuanZhang")
-        return Promise.resolve()
+        return ctx.replyWithHTML(html, WalletController.createSwitchBtn())
     }
 
     // 转账具体逻辑
     public static startZhuangzhangHandle = async(text:string,tgId:number,ctx:Context)=>{
-        ctx.reply(text)
+        await addLockByTgId(['zhuanzhang_lock_'+tgId+''], async () => {
+            // 1：密码确认
+            const flag: boolean = await this.isLogin(tgId, ctx)
+            // 如果密码为空就开始设置密码
+            if (!flag) {
+                var mark = await redis.get('mark_' + tgId) || '0'
+                await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+                return
+            }
+
+            ctx.reply(text)
+
+        },async()=>{
+            await ctx.reply('亲，操作慢点，休息一会在操作!')
+        })
     }
 
     /**
@@ -635,7 +642,21 @@ class WalletHandleMethod {
 
     // 收款具体逻辑
     public static startShouKuanHandle = async(text:string,tgId:number,ctx:Context)=>{
-        ctx.reply(text)
+        await addLockByTgId(['zhuanzhang_lock_'+tgId+''], async () => {
+            // 1：密码确认
+            const flag: boolean = await this.isLogin(tgId, ctx)
+            // 如果密码为空就开始设置密码
+            if (!flag) {
+                var mark = await redis.get('mark_' + tgId) || '0'
+                await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+                return
+            }
+
+            ctx.reply(text)
+
+        },async()=>{
+            await ctx.reply('亲，操作慢点，休息一会在操作!')
+        })
     }
 
 
@@ -663,7 +684,21 @@ class WalletHandleMethod {
 
     // 红包具体逻辑
     public static startHongBaoHandle = async(text:string,tgId:number,ctx:Context)=>{
-        ctx.reply(text)
+        await addLockByTgId(['zhuanzhang_lock_'+tgId+''], async () => {
+            // 1：密码确认
+            const flag: boolean = await this.isLogin(tgId, ctx)
+            // 如果密码为空就开始设置密码
+            if (!flag) {
+                var mark = await redis.get('mark_' + tgId) || '0'
+                await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+                return
+            }
+
+            ctx.reply(text)
+
+        },async()=>{
+            await ctx.reply('亲，操作慢点，休息一会在操作!')
+        })
     }
 
     /**
@@ -691,7 +726,21 @@ class WalletHandleMethod {
 
     // 闪兑具体逻辑
     public static startShangduiHandle = async(text:string,tgId:number,ctx:Context)=>{
-        ctx.reply(text)
+        await addLockByTgId(['zhuanzhang_lock_'+tgId+''], async () => {
+            // 1：密码确认
+            const flag: boolean = await this.isLogin(tgId, ctx)
+            // 如果密码为空就开始设置密码
+            if (!flag) {
+                var mark = await redis.get('mark_' + tgId) || '0'
+                await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+                return
+            }
+
+            ctx.reply(text)
+
+        },async()=>{
+            await ctx.reply('亲，操作慢点，休息一会在操作!')
+        })
     }
 
     /**
