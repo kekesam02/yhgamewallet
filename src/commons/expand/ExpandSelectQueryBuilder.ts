@@ -1,6 +1,7 @@
 import {ObjectLiteral} from "typeorm/common/ObjectLiteral";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import PaymentType from "../../type/PaymentType";
+import WalletType from "../../type/WalletType";
 require('./ExpandGameWhere')
 require('./ExpandPaymentWhere')
 require('./ExpandCommandWhere')
@@ -15,6 +16,12 @@ declare module 'typeorm/query-builder/SelectQueryBuilder' {
          * @param gameTypeList 要查询的游戏类型
          */
         whereGameType: (gameTypeList: Array<GameTypeEnum>) => this
+
+        /**
+         * 扩展钱包类型查询方法
+         * @param gameTypeList 要查询的钱包类型
+         */
+        whereWalletType: (gameTypeList: Array<WalletType>) => this
 
         /**
          * 扩展支付类型查询方法
