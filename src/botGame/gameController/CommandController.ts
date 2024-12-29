@@ -104,7 +104,6 @@ class CommandController {
      */
     public createUserBalance = async (ctx: Context) => {
         let user = await new UserModel().getUserModel(ctx)
-        console.log('获取到的用户余额信息')
         let html = new GameUserHtml().getUserBalanceHtml(user!, true)
         return  new MessageUtils().sendTextReply(ctx, html)
     }

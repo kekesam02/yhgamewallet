@@ -456,8 +456,24 @@ class PC28Controller {
                 }
             }
 
-            // 如果第二位是以数字开头证明只下了 单双大小
+            // 梭哈处理
+            if (item.content.indexOf('梭哈') == 0) {
+                let last = item.content.substring(2, item.content.length)
+                if (winningType.code.key.indexOf(last) > -1) {
+                    item.isWinning = 1
+                    item.winningAmount = await BotOddsStorage.getOddsMoney(
+                        item.bettingType,
+                        item.amountMoney,
+                        openCode,
+                        gameType
+                    )
+                    needChangeList.push(item)
+                }
+                continue
+            }
+
             let last = item.content.substring(1, item.content.length)
+            // 如果第二位是以数字开头证明只下了 单双大小
             if (new StringUtils().isStartWithNum(last)) {
                 console.log('进行单双判定', item.content)
                 let fist = item.content.substring(0, 1)

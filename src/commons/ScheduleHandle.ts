@@ -34,7 +34,7 @@ class ScheduleHandle {
         openTime: '',
 
         // 当前开奖期数
-        roundId: '500004',
+        roundId: '500008',
 
         // 本次是否已经开奖
         isOpenLottery: false,
@@ -213,10 +213,10 @@ class ScheduleHandle {
                 }
             })
             this.currJobList.push(job)
-            // setTimeout(() => {
-            //     let pc28Controller = new PC28Controller()
-            //     pc28Controller.startPCLow(bot).then((val) => {})
-            // }, 2000)
+            setTimeout(() => {
+                let pc28Controller = new PC28Controller()
+                pc28Controller.startPCLow(bot).then((val) => {})
+            }, 2000)
         }
     }
 
