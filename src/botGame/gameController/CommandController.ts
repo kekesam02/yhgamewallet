@@ -121,6 +121,8 @@ class CommandController {
         let userModel = await new UserModel().getUserModel(ctx)
         await addLockByCtx(ctx,async () => {
             await new BotPaymentModel().startDefect(ctx, groupModel, userModel)
+        }, async () => {
+
         })
     }
 
@@ -138,6 +140,8 @@ class CommandController {
             let {pledgeModelList, userModel} = await new BotPledgeUpModel().cancelPledgeUp(ctx, groupModel, ScheduleHandle.pc28Config.roundId)
             let html = new GamePledgeUpHtml().cancelUp(userModel, pledgeModelList, ScheduleHandle.pc28Config.roundId)
             await new MessageUtils().sendTextReply(ctx, html)
+        }, async () => {
+
         })
     }
 

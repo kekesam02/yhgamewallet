@@ -7,7 +7,7 @@
     "start": "node dist/index.js",
     "dev": "ts-node-dev src/index.ts RUNNING_ENV=dev ",
     "fg": "ts-node-dev src/index.ts RUNNING_ENV=fg ",
-    "zs": "ts-node-dev src/index.ts RUNNING_ENV=zs "
+    "zs": "RUNNING_ENV=zs ts-node-dev src/index.ts"
   },
   "keywords": [
     "express",

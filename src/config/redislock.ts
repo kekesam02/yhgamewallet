@@ -14,6 +14,7 @@ const redlock = new Redlock([redis as Redlock.CompatibleRedisClient])
  * 添加分布式锁根据 tgid 锁定
  * @param tgList
  * @param fn
+ * @param efn
  * @param lockTTL
  */
 const addLockByTgId = async (tgList: Array<string>, fn: () => Promise<any>, efn: () => Promise<any>, lockTTL = 1000 * 30) => {

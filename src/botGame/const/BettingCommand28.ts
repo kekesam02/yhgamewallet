@@ -195,7 +195,6 @@ class BettingCommand28 {
                 }
             }
 
-            console.log('解析到的指令', parseList)
             // 开始上注
             await new BotPledgeUpModel().createNewPledgeUp(
                 this.ctx,
@@ -203,6 +202,8 @@ class BettingCommand28 {
                 parseList
             )
             // ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
+        }, async () => {
+
         })
     }
 
@@ -349,8 +350,10 @@ class BettingCommand28 {
          * 如果当前下注数字不等于5证明不需要进行双向下注限制判定了
          * 如果点杀次数不等于1的话、需要从数据库进行查找本次下注的点杀数据
          */
-        if (errIndex != 0 && errIndex != 5 && killNum != 0) {
-            return errIndex
+        if (killNum == 0) {
+            if (errIndex != 0 && errIndex != 5) {
+                return errIndex
+            }
         }
 
         // 本次下注条件满足需要从数据库取数据出来再次判定、只判定 cusdt
@@ -396,7 +399,7 @@ class BettingCommand28 {
             })
 
             // 重新生成本期下注数据进行判定
-            currAllText = currAllText == ''? currAllText: `${currText} ${currAllText}`
+            currAllText = currAllText == ''? currText: `${currText} ${currAllText}`
             // 本期多群下注整理后的数据
             let currAllInfo = this.parseCommand(currAllText)
             let result2 = this.rule_onPledge(currAllInfo)
@@ -501,6 +504,7 @@ class BettingCommand28 {
             let item = info.list[i]
             let index = i
             if (item.command.indexOf('杀') > -1) {
+                console.log('进来杀了吗')
                 let key = item.content.split('杀')[0]
                 if (killMap.has(key)) {
                     let num = killMap?.get(key) ?? 0
