@@ -218,6 +218,24 @@ class WalletController {
             ]
         ])
     }
+
+    /**
+     * 创建返回按钮
+     */
+    public static createSwitchBtn = () => {
+        return new ButtonUtils().createInlineKeySwitchBoard([
+            [
+                {
+                    text: '选择转账对象',
+                    switch_inline_query: '100'
+                }
+            ],
+            [
+                WalletController.BackHome
+            ]
+        ])
+    }
+
     /**
      * 创建空按钮
      */

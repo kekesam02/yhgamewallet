@@ -70,6 +70,17 @@ bot.on('inline_query', async (ctx) => {
             cache_time: 0
         }] as const
 
+        await ctx.answerInlineQuery([{
+            type: 'article',
+            id: '1',
+            title: '出错了',
+            description: '请重试',
+            input_message_content: {
+                message_text: '操作失败，请重试'
+            }
+        }])
+
+
         // 添加错误处理和超时控制
         await Promise.race([
             ctx.answerInlineQuery(result),
