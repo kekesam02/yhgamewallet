@@ -6,14 +6,12 @@ import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/ComputeUtils";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
-import {addLockByCtx, redlock} from "../../config/redislock";
+import {addLockByCtx} from "../../config/redislock";
 import BotGameConfig from "../BotGameConfig";
 import MessageUtils from "../../commons/message/MessageUtils";
 import GameBettingTips from "../../html/gameHtml/GameBettingTips";
 import UserModel from "../../models/UserModel";
-import {queryRunner} from "../../config/database";
-import AESUtils from "../../commons/AESUtils";
-import ContextUtil from "../../commons/ContextUtil";
+import WalletType from "../../type/WalletType";
 
 
 /**
@@ -192,6 +190,9 @@ class BettingCommand28 {
                 if (ruleNum == 5) {
                     return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().twoWayHtml())
                 }
+                if (ruleNum == 6) {
+                    return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().killNumHtml())
+                }
             }
 
             console.log('解析到的指令', parseList)
@@ -329,19 +330,41 @@ class BettingCommand28 {
      * 判断用户下注是否符合规则
      *      0: 符合下注规则
      *      1: 超过最大金额限制
-     *      2: 用户对押
+     *      2: 对押
+     *      3: 杀组合
+     *      4: 反组合
+     *      5、存在双项下注限制、需要在根据数据库数据判定一次
+     *      6、点杀最多下注10个数字
      */
     public ruleJudge = async (info: PledgeUpInfoType, currText: string): Promise<number> => {
         // 下注判定结果
-        let returnNum = this.rule_onPledge(info)
-        if (returnNum != 0 && returnNum != 5) {
-            return returnNum
+        let {errIndex, killNum} = this.rule_onPledge(info)
+
+        // 如果本次下注点杀数字大于10退出
+        if (killNum > 10) {
+             return 6
         }
-        // 本次下注条件满足需要从数据库取数据出来再次判定
-        let pledgeList = await new BotPledgeUpModel().getHistory(this.ctx, 20, [
-            GameTypeEnum.PC28GAO,
-            GameTypeEnum.PC28DI
-        ])
+        /**
+         * 如果当前已经出现错误了直接退出
+         * 如果当前下注数字不等于5证明不需要进行双向下注限制判定了
+         * 如果点杀次数不等于1的话、需要从数据库进行查找本次下注的点杀数据
+         */
+        if (errIndex != 0 && errIndex != 5 && killNum != 0) {
+            return errIndex
+        }
+
+        // 本次下注条件满足需要从数据库取数据出来再次判定、只判定 cusdt
+        let pledgeList = await new BotPledgeUpModel().getHistory(
+            this.ctx,
+            20,
+            [
+                GameTypeEnum.PC28GAO,
+                GameTypeEnum.PC28DI
+            ],
+            [
+                WalletType.CUSDT
+            ]
+        )
 
         if (pledgeList.length > 0) {
             let currRoundId = Number(ScheduleHandle.pc28Config.roundId)
@@ -376,18 +399,27 @@ class BettingCommand28 {
             currAllText = currAllText == ''? currAllText: `${currText} ${currAllText}`
             // 本期多群下注整理后的数据
             let currAllInfo = this.parseCommand(currAllText)
-            returnNum = this.rule_onPledge(currAllInfo)
-            if (returnNum != 5) {
-                return returnNum
+            let result2 = this.rule_onPledge(currAllInfo)
+            let returnNum2 = result2.errIndex
+            let killNum2 = result2.killNum
+
+            // 如果本次下注点杀数字大于10退出
+            if (killNum2 > 10) {
+                return 6
+            }
+
+            // 如果当前下注数字不等于5证明不需要进行双向下注限制判定了
+            if (returnNum2 != 5) {
+                return returnNum2
             }
 
             // 上期整理后的下注数据
             let prevInfo = this.parseCommand(prevText)
-            returnNum = this.rule_onPledge(prevInfo, true)
-            return returnNum
+            let result3 = this.rule_onPledge(prevInfo, true)
+            return result3.errIndex
         }
 
-        return  returnNum
+        return  errIndex
     }
 
     /**
@@ -404,15 +436,23 @@ class BettingCommand28 {
      *          组合下注不能超过3个、如：大单10、大双10、小单10
      * @param info 本期下注数据
      * @param isTwo 是否只判断是否双向
-     * @return number
-     *      0: 符合下注规则
-     *      1: 超过最大金额限制
-     *      2: 对押
-     *      3: 杀组合
-     *      4: 反组合
-     *      5、存在双项下注限制、需要在根据数据库数据判定一次
+     * @return {
+     *     errIndex
+     *          0: 符合下注规则
+     *          1: 超过最大金额限制
+     *          2: 对押
+     *          3: 杀组合
+     *          4: 反组合
+     *          5、存在双项下注限制、需要在根据数据库数据判定一次
+     *          6、点杀最多下注10个数字
+     * }
      */
-    private rule_onPledge = (info: PledgeUpInfoType, isTwo: boolean = false): number => {
+    private rule_onPledge = (info: PledgeUpInfoType, isTwo: boolean = false): {
+        // 错误代码
+        errIndex: number,
+        // 点杀不同数字下注次数
+        killNum: number
+    } => {
         /**
          * 错误代码
          *  1: 超过最大金额限制
@@ -426,7 +466,10 @@ class BettingCommand28 {
         let limitMoney = new BotGameConfig().maxMoney28
         if (new ComputeUtils(info.totalMoney).comparedTo(limitMoney) > 0) {
             errIndex = 1
-            return errIndex
+            return {
+                errIndex: errIndex,
+                killNum: 0
+            }
         }
         // 双向下注数据列表
         let ruleList = [
@@ -451,8 +494,24 @@ class BettingCommand28 {
             ['大双', '小单']
         ]
         let newRuleList: Array<Array<string>> = []
+        // 当前点杀下注map
+        let killMap = new Map<string, number>()
 
-        info.list.forEach((item, index) => {
+        for (let i = 0; i < info.list.length; i++) {
+            let item = info.list[i]
+            let index = i
+            if (item.command.indexOf('杀') > -1) {
+                let key = item.content.split('杀')[0]
+                if (killMap.has(key)) {
+                    let num = killMap?.get(key) ?? 0
+                    let value = num + 1
+                    killMap.set(key, value)
+                } else {
+                    killMap.set(key, 1)
+                }
+                continue
+            }
+
             ruleList.forEach((item2, index2) => {
                 if (index == 0) {
                     newRuleList[index2] = [...item2]
@@ -464,7 +523,7 @@ class BettingCommand28 {
                     }
                 }
             })
-        })
+        }
 
         for (let i = 0; i < newRuleList.length; i++) {
             // 只判定双向下注结果
@@ -496,7 +555,10 @@ class BettingCommand28 {
             }
         }
 
-        return errIndex
+        return {
+            errIndex: errIndex,
+            killNum: killMap.size
+        }
     }
 }
 

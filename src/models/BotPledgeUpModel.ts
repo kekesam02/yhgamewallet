@@ -196,7 +196,8 @@ class BotPledgeUpModel extends BaseEntity {
     public getHistory = (
         ctx: Context,
         total: number,
-        gameTypeList: Array<GameTypeEnum> = new GameEnumsIndex().getGameTypeAll()
+        gameTypeList: Array<GameTypeEnum> = new GameEnumsIndex().getGameTypeAll(),
+        wallTypeList: Array<WalletType> = new GameEnumsIndex().getWallTypeAll()
     ) => {
         let result = BotPledgeUpModel
             .createQueryBuilder()
@@ -204,6 +205,7 @@ class BotPledgeUpModel extends BaseEntity {
                 userId: ContextUtil.getUserId(ctx)
             })
             .whereGameType(gameTypeList)
+            .whereWalletType(wallTypeList)
             .andWhere('state = 0')
             .andWhere('del = 0')
             .take(total)

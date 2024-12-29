@@ -1,5 +1,6 @@
 import GameTypeEnum from "./GameTypeEnum";
 import StartGameEnum from "./StartGameEnum";
+import WalletType from "../WalletType";
 
 
 /**
@@ -21,6 +22,19 @@ class GameEnumsIndex {
             GameTypeEnum.TOUZIJS ,
             GameTypeEnum.PCDWQ ,
             GameTypeEnum.PCDWQFS
+        ]
+    }
+
+    /**
+     * 获取所有的钱包类型
+     */
+    public getWallTypeAll = () => {
+        return [
+            WalletType.USDT,
+            WalletType.CUSDT,
+            WalletType.TRX,
+            WalletType.CTRX,
+            WalletType.JIFEN,
         ]
     }
 

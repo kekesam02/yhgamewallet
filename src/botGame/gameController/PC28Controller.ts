@@ -381,6 +381,9 @@ class PC28Controller {
             method: 'get'
         })
         console.log('开奖数据', json.data)
+        if (!json.data || !json.data.data) {
+            throw Error(json.statusText ?? '您无权访问改ip')
+        }
         json.data.data = json.data.data.map((item: any) => {
             item.expect = item['expect']
             item.open_code = item['opencode']

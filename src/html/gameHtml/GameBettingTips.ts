@@ -40,6 +40,13 @@ class GameBettingTips {
     public killGroupHtml = () => {
         return `禁止杀组合下注`
     }
+
+    /**
+     * 点杀数字最多下注10个
+     */
+    public killNumHtml = () => {
+        return `点杀数字最多下注10个`
+    }
 }
 
 

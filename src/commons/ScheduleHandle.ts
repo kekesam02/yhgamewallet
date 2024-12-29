@@ -34,7 +34,7 @@ class ScheduleHandle {
         openTime: '',
 
         // 当前开奖期数
-        roundId: '500008',
+        roundId: '500010',
 
         // 本次是否已经开奖
         isOpenLottery: false,
@@ -187,11 +187,42 @@ class ScheduleHandle {
                         ScheduleHandle.pc28Config.isOpenLottery = true
                         let pc28Controller = new PC28Controller()
                         let openJson = await pc28Controller.getLotteryJson()
+
+                        // 开奖结果判定
                         if (openJson.data.length > 0 && openJson.data[0].expect != ScheduleHandle.pc28Config.roundId) {
                             console.log('开奖结果错误或者卡奖了、需要重新获取开奖结果')
-                            ScheduleHandle.pc28Config.isOpenLottery = false
-                            return
+                            /**
+                             * 从取到的结果中取判定是否有当前奖、有的话去修正json数据
+                             * 将当前期数的数据放到 data 第一位、下期开奖期数取data[0]的中的数据
+                             */
+                            let isExit = false
+                            let currIndex = 0
+                            openJson.data.forEach((item, index) => {
+                                if (item.expect == ScheduleHandle.pc28Config.roundId) {
+                                    isExit = true
+                                    currIndex = index
+                                }
+                            })
+                            if (isExit) {
+                                // 获取到本期的开奖数据了进行数据修正
+                                openJson.data = [
+                                    {
+                                        expect: openJson.data[currIndex]!.expect,
+                                        open_code: openJson.data[currIndex]!.open_code,
+                                        open_time: openJson.data[currIndex]!.open_time,
+                                        next_expect: openJson.data[0]!.next_expect,
+                                        next_time: openJson.data[0]!.next_time
+                                    },
+                                    ...openJson.data
+                                ]
+                                console.log('修正后的数据', openJson)
+                            } else {
+                                ScheduleHandle.pc28Config.isOpenLottery = false
+                                return
+                            }
                         }
+
+
                         // 保存开奖结果到数据库
                         console.log('保存11结果')
                         await pc28Controller.saveLotteryJson(openJson)

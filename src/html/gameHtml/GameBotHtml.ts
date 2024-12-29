@@ -234,7 +234,7 @@ class GameBotHtml {
             let contentText = item.content.replaceAll(item.amountMoney, '')
             // 倍率
             let rate = new ComputeUtils(item.winningAmount).dividedBy(item.amountMoney, 2).toString()
-            html += `${item.userName} ${contentText} ${item.amountMoney} 中${item.winningAmount}(${rate})倍率${this.N}`
+            html += `${item.userName} ${contentText} 中 ${item.winningAmount}(${rate})倍率${this.N}`
         })
         return html
     }

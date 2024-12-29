@@ -1,6 +1,7 @@
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import {SelectQueryBuilder} from "typeorm/query-builder/SelectQueryBuilder";
 import PaymentType from "../../type/PaymentType";
+import WalletType from "../../type/WalletType";
 
 
 
@@ -22,8 +23,29 @@ SelectQueryBuilder.prototype.wherePaymentType = function(paymentTypeList: Array<
         }
     })
     paymentTypeStr += paymentTypeList.length > 1? ')': ''
-    console.log('查询语句', paymentTypeStr)
-    console.log('查询参数', paymentTypeParams)
     this.andWhere(paymentTypeStr, paymentTypeParams)
+    return this
+}
+
+
+/**
+ * 扩展钱包类型查询sql
+ */
+SelectQueryBuilder.prototype.whereWalletType = function(walletTypeList: Array<WalletType>) {
+    if (!walletTypeList || walletTypeList.length < 1) {
+        return this
+    }
+    let walletTypeParams: any = {}
+    let walletTypeStr = walletTypeList.length > 1? '(': ''
+    walletTypeList.forEach((item, index) => {
+        walletTypeParams[`walletType${index}`] = item
+        if (index > 0) {
+            walletTypeStr += ` or wallet_type = :walletType${index}`
+        } else {
+            walletTypeStr += `wallet_type = :walletType${index}`
+        }
+    })
+    walletTypeStr += walletTypeList.length > 1? ')': ''
+    this.andWhere(walletTypeStr, walletTypeParams)
     return this
 }
