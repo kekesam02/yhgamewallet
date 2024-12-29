@@ -19,6 +19,8 @@ bot.command('quit', async (ctx:Context) => {
     //await ctx.telegram.leaveChat(ctx?.chat?.id || '')
 })
 
+
+
 bot.telegram.setMyCommands([
     { command: "start", description: "启动机器人" },
     { command: "quit", description: "退出机器人" },

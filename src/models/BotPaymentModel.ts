@@ -45,7 +45,7 @@ class BotPaymentModel extends BaseEntity {
     @Column({
         name: 'uid'
     })
-    userId: number
+    uid: number
 
     /**
      * 用户名称
@@ -199,6 +199,15 @@ class BotPaymentModel extends BaseEntity {
         name: 'pass_time'
     })
     passTime: string
+
+    /**
+     * 审核人
+     */
+    @Column({
+        name: 'pass_tgid'
+    })
+    passTgid: string
+
 
     /**
      * 审核人

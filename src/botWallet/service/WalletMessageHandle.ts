@@ -25,50 +25,55 @@ class WalletMessageHandle {
         // 设置提现地址
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
-        // 收款
-        if (currentop == 'addtxaddr') {
-            WalletUserCenterMethod.addtxaddrtx(text,tgId,ctx)
-            return;
-        }
-        // 提现
-        if (currentop == 'tx'){
-            WalletHandleMethod.startTxHandle(text,tgId,ctx,cbot)
-            return;
-        }
-        // 转账
-        if (currentop == 'zhuanzhang'){
-            WalletHandleMethod.startZhuangzhangHandle(text,tgId,ctx)
-            return;
-        }
-        // 收款
-        if (currentop == 'shoukuan'){
-            WalletHandleMethod.startShouKuanHandle(text,tgId,ctx)
-            return;
-        }
-        // 红包
-        if (currentop == 'hongbao'){
-            WalletHandleMethod.startHongBaoHandle(text,tgId,ctx)
-            return;
-        }
-        // 闪兑
-        if (currentop == 'shangdui'){
-            WalletHandleMethod.startShangduiHandle(text,tgId,ctx)
-            return;
+        if (currentop) {
+            // 收款
+            if (currentop == 'addtxaddr') {
+                WalletUserCenterMethod.addtxaddrtx(text, tgId, ctx)
+                return;
+            }
+            // 提现
+            if (currentop == 'tx') {
+                WalletHandleMethod.startTxHandle(text, tgId, ctx, cbot)
+                return;
+            }
+            // 转账
+            if (currentop == 'zhuanzhang') {
+                WalletHandleMethod.startZhuangzhangHandle(text, tgId, ctx)
+                return;
+            }
+            // 收款
+            if (currentop == 'shoukuan') {
+                WalletHandleMethod.startShouKuanHandle(text, tgId, ctx)
+                return;
+            }
+            // 红包
+            if (currentop == 'hongbao') {
+                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx)
+                return;
+            }
+            // 闪兑
+            if (currentop == 'shangdui') {
+                WalletHandleMethod.startShangduiHandle(text, tgId, ctx)
+                return;
+            }
+        }else{
+            ctx.reply("会话已失效，请重新点击面板的操作!")
+            WalletHandleMethod.startCommandCallback(ctx).then()
         }
 
-        switch (true) {
-            // 下面是指令相关的消息------------
-            case WalletCommand.command.includes(text):
-                console.log('查询到的指令信息--')
-                WalletHandleMethod.startCommandCallback(ctx).then()
-                break
-            case WalletCommand.noteOrder.includes(text):
-                console.log('查询注单信息')
-                WalletHandleMethod.startCommandCallback(ctx).then()
-                break
-            default:
-                console.log('未能识别消息')
-        }
+        // switch (true) {
+        //     // 下面是指令相关的消息------------
+        //     case WalletCommand.command.includes(text):
+        //         console.log('查询到的指令信息--')
+        //         WalletHandleMethod.startCommandCallback(ctx).then()
+        //         break
+        //     case WalletCommand.noteOrder.includes(text):
+        //         console.log('查询注单信息')
+        //         WalletHandleMethod.startCommandCallback(ctx).then()
+        //         break
+        //     default:
+        //         console.log('未能识别消息')
+        // }
     }
 }
 

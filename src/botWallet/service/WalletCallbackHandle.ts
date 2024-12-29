@@ -19,10 +19,14 @@ class WalletCallbackHandle {
         console.log('cbot_callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
-        if(callbackStr.startsWith('bjydk')){ // 标记打款
-            WalletHandleMethod.startMarkTixian(ctx)
-        } else if(callbackStr.startsWith('txycth')){ // 异常驳回
-            WalletHandleMethod.startRefuseTixian(ctx)
+        // 1：获取telegram的tgId
+        var tgId: string = ctx.callbackQuery?.from?.id + '' || "0"
+        if(callbackStr.startsWith('bjydk')){
+            // 标记打款
+            WalletHandleMethod.startMarkTixian(tgId,callbackStr,ctx,ubot)
+        } else if(callbackStr.startsWith('txycth')){
+            // 异常驳回
+            WalletHandleMethod.startRefuseTixian(tgId,callbackStr,ctx,ubot)
         }
     }
 

@@ -46,6 +46,11 @@ enum PaymentType {
     TX_DKJL = 8,
 
     /**
+     * 提现退款记录
+     */
+    TK_DKJL = 88,
+
+    /**
      * 彩金打款记录
      */
     CJ_DKJL = 9,
