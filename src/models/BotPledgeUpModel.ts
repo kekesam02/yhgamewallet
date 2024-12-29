@@ -347,7 +347,6 @@ class BotPledgeUpModel extends BaseEntity {
         // 需要更新的订单对象
         let paymentModelList: BotPaymentModel[] = []
         if (pledgeUpInfo.list[0].command == '梭哈') {
-            console.log('进来梭哈')
             if (new ComputeUtils(userModel.CUSDT).comparedTo(1) >= 0) {
                 totalMoney = userModel.CUSDT
                 userModel.CUSDT = '0'

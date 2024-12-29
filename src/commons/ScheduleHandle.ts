@@ -34,7 +34,7 @@ class ScheduleHandle {
         openTime: '',
 
         // 当前开奖期数
-        roundId: '500021',
+        roundId: '500024',
 
         // 本次是否已经开奖
         isOpenLottery: false,

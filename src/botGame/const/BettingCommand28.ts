@@ -502,9 +502,7 @@ class BettingCommand28 {
 
         for (let i = 0; i < info.list.length; i++) {
             let item = info.list[i]
-            let index = i
             if (item.command.indexOf('杀') > -1) {
-                console.log('进来杀了吗')
                 let key = item.content.split('杀')[0]
                 if (killMap.has(key)) {
                     let num = killMap?.get(key) ?? 0
@@ -517,7 +515,7 @@ class BettingCommand28 {
             }
 
             ruleList.forEach((item2, index2) => {
-                if (index == 0) {
+                if (!newRuleList[index2]) {
                     newRuleList[index2] = [...item2]
                 }
                 if (item2.includes(item.command)) {
