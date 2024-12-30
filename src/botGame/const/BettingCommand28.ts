@@ -12,6 +12,8 @@ import MessageUtils from "../../commons/message/MessageUtils";
 import GameBettingTips from "../../html/gameHtml/GameBettingTips";
 import UserModel from "../../models/UserModel";
 import WalletType from "../../type/WalletType";
+import {queryRunner} from "../../config/database";
+import AESUtils from "../../commons/AESUtils";
 
 
 /**
@@ -164,6 +166,23 @@ class BettingCommand28 {
 
 
         await addLockByCtx(this.ctx,async () => {
+            // await queryRunner.startTransaction()
+            // let userModelList = await queryRunner.manager.find(UserModel, {
+            //     where: {
+            //         tgId: AESUtils.encodeUserId(this.ctx?.from?.id.toString())
+            //     }
+            // }) as Array<UserModel>
+            // if (userModelList.length < 0) {
+            //     return
+            // }
+            // let userModel = userModelList[0]
+            if (
+                new ComputeUtils(userModel.CUSDT).comparedTo(parseList.totalMoney) < 0
+                && new ComputeUtils(userModel.USDT).comparedTo(parseList.totalMoney) >= 0
+            ) {
+                isJudge = true
+            }
+
             // USDT 下注没有限制
             if (!isJudge) {
                 // 下注规则判定失败直接退出
@@ -203,7 +222,7 @@ class BettingCommand28 {
             )
             // ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
         }, async () => {
-
+            console.log('上注出现错误')
         })
     }
 

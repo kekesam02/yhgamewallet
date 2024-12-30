@@ -9,6 +9,8 @@ import moment from "moment";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import MessageUtils from "../../commons/message/MessageUtils";
+import GameBettingTips from "../../html/gameHtml/GameBettingTips";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -85,6 +87,9 @@ class GameMessageHandle {
                     // await new BettingController(ctx, text).listenerBettingCommand()
                     if (moment().isBefore(ScheduleHandle.pc28Config.stopUpTime)) {
                         await new BettingController(ctx, text).listenerBettingCommand()
+                    } else {
+                        let stopHtml = new GameBettingTips().stopPledgeUpHtml()
+                        await new MessageUtils().sendTextReply(ctx, stopHtml)
                     }
                 }
         }
