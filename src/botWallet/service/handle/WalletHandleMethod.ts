@@ -503,7 +503,7 @@ class WalletHandleMethod {
                 }
                 // 如果审核已经通过，就无须在操作了
                 if(botPayment.paymentType == PaymentTypeEnum.TX_DKJL.value){
-                    await ctx.replyWithHTML("⚠️ 已操作过过打款操作，不要重复操作!")
+                    await ctx.replyWithHTML("⚠️ 已操作过打款业务，不要重复操作!")
                     return;
                 }
 
@@ -567,7 +567,7 @@ class WalletHandleMethod {
      * 代号：zhuanzhang_btn
      * @param ctx
      */
-    public static startZhuanZhang = async (ctx: Context) => {
+    public static startZhuanZhang = async (ctx: Context, cbot:Telegraf<Context>) => {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
@@ -622,7 +622,7 @@ class WalletHandleMethod {
      * 代号：shoukuan_btn
      * @param ctx
      */
-    public static startShouKuan = async (ctx: Context) => {
+    public static startShouKuan = async (ctx: Context, cbot:Telegraf<Context>) => {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
@@ -665,7 +665,7 @@ class WalletHandleMethod {
      * 代号：hongbao_btn
      * @param ctx
      */
-    public static startHongBao = async (ctx: Context) => {
+    public static startHongBao = async (ctx: Context, cbot:Telegraf<Context>) => {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
@@ -706,7 +706,7 @@ class WalletHandleMethod {
      * 代号：shandui_btn
      * @param ctx
      */
-    public static startShanDui = async (ctx: Context) => {
+    public static startShanDui = async (ctx: Context, cbot:Telegraf<Context>) => {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
@@ -833,7 +833,7 @@ class WalletHandleMethod {
      * 代号：update_pwd_btn
      * @param ctx
      */
-    public static startUpdatePwdCallback = async (ctx: Context) => {
+    public static startUpdatePwdCallback = async (ctx: Context, cbot:Telegraf<Context>) => {
         var tgId: string = ctx.callbackQuery?.from?.id +"" || ""
         var cacheValue = await redis.get('pwd_'+tgId)
         if (cacheValue) {
@@ -853,6 +853,19 @@ class WalletHandleMethod {
                         ctx.replyWithHTML(WalletMessage.PASSWORD_SUCCESS_MESSAGE)
                         // 设置登录成功的标识
                         redis.set("login_" + tgId, "success",'EX',1000 * 60 * 60 * 24)
+                        // 可以考虑进行交易的处理
+                        const currentOp = await redis.get("currentop" + tgId)
+                        if(currentOp == 'tx'){
+                            this.startTiXian(ctx,cbot)
+                        }else if(currentOp == 'zhuanzhang'){
+                            this.startZhuanZhang(ctx,cbot)
+                        }else if(currentOp == 'shoukuan'){
+                            this.startShouKuan(ctx,cbot)
+                        }else if(currentOp == 'hongbao'){
+                            this.startHongBao(ctx,cbot)
+                        }else if(currentOp == 'shandui'){
+                            this.startShanDui(ctx,cbot)
+                        }
                     } else {
                         ctx.replyWithHTML(WalletMessage.C_PASSWPORD_ERROR)
                     }
@@ -871,6 +884,19 @@ class WalletHandleMethod {
                     ctx.replyWithHTML(html)
                     // 设置登录成功的标识
                     redis.set("login_" + tgId, "success",'EX',1000 * 60 * 60 * 24)
+                    // 可以考虑进行交易的处理
+                    const currentOp = await redis.get("currentop" + tgId)
+                    if(currentOp == 'tx'){
+                        this.startTiXian(ctx,cbot)
+                    }else if(currentOp == 'zhuanzhang'){
+                        this.startZhuanZhang(ctx,cbot)
+                    }else if(currentOp == 'shoukuan'){
+                        this.startShouKuan(ctx,cbot)
+                    }else if(currentOp == 'hongbao'){
+                        this.startHongBao(ctx,cbot)
+                    }else if(currentOp == 'shandui'){
+                        this.startShanDui(ctx,cbot)
+                    }
                 }
             } else {
                 ctx.replyWithHTML(WalletMessage.PASSWPORD_ERROR)

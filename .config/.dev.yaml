@@ -26,7 +26,7 @@ cors:
 database:
   host : 127.0.0.1
   port : 3306
-  database : spinach_robot
+  database : spinach_robot_test
   user: root
   password : mkxiaoer
 

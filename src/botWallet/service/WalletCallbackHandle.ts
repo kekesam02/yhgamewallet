@@ -87,19 +87,19 @@ class WalletCallbackHandle {
                     break
                 // 转账
                 case StartWalletEnum.ZHUANZHANG:
-                    WalletHandleMethod.startZhuanZhang(ctx)
+                    WalletHandleMethod.startZhuanZhang(ctx,cbot)
                     break
                 // 收款
                 case StartWalletEnum.SHOUKUANG:
-                    WalletHandleMethod.startShouKuan(ctx)
+                    WalletHandleMethod.startShouKuan(ctx,cbot)
                     break
                 // 红包
                 case StartWalletEnum.HONGBAO:
-                    WalletHandleMethod.startHongBao(ctx)
+                    WalletHandleMethod.startHongBao(ctx,cbot)
                     break
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:
-                    WalletHandleMethod.startShanDui(ctx)
+                    WalletHandleMethod.startShanDui(ctx,cbot)
                     break
                 // 个人中心
                 case StartWalletEnum.USERCENTER:
@@ -116,7 +116,7 @@ class WalletCallbackHandle {
                     break
                 // 修改密码按钮
                 case StartWalletEnum.UPDATEPWDBTN:
-                    WalletHandleMethod.startUpdatePwdCallback(ctx)
+                    WalletHandleMethod.startUpdatePwdCallback(ctx,cbot)
                     break
             }
         }
