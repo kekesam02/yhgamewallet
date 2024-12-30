@@ -178,13 +178,13 @@ class WalletController {
     /**
      * 返回和财务
      */
-    public static createBackClientBtn = () => {
+    public static createBackClientBtn = (username:string='xukefeifeibot') => {
         return new ButtonUtils().createCallbackBtn([
             [
                 WalletController.BackHome,
                 {
                     text: '🛄 客服财务',
-                    url: 'https://t.me/xukefeifeibot'
+                    url: 'https://t.me/'+username
                 }
             ]
         ])
@@ -220,18 +220,63 @@ class WalletController {
     }
 
     /**
-     * 创建返回按钮
+     * 创建转账返回按钮
      */
-    public static createSwitchBtn = () => {
+    public static createZhuanzhangSwitchBtn = (query:string) => {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 {
                     text: '选择转账对象',
-                    switch_inline_query: '100'
+                    switch_inline_query: query
                 }
             ],
             [
                 WalletController.BackHome
+            ]
+        ])
+    }
+
+    /**
+     * 创建收款按钮
+     */
+    public static createShouKuanSwitchBtn = (query:string) => {
+        return new ButtonUtils().createInlineKeySwitchBoard([
+            [
+                {
+                    text: '选择付款对象',
+                    switch_inline_query: query
+                }
+            ],
+            [
+                WalletController.BackHome
+            ]
+        ])
+    }
+
+    /**
+     * 创建审核通过
+     */
+    public static createSuccessBtn = (username:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '✅ 操作成功，点击联系用户',
+                    url: 'https://t.me/'+username
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 创建拒绝
+     */
+    public static createFailBtn = (username:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '⚠️ 已拒绝，点击联系用户',
+                    url: 'https://t.me/'+username
+                }
             ]
         ])
     }

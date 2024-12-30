@@ -8,9 +8,10 @@ import UserModel from "../../models/UserModel";
 class WalletBotHtml {
 
     static getTixianHtml = ()=> {
-       var  html = "\uD83D\uDD39 提现指南 \uD83D\uDD39\n\n" +
-            "提现模板： 提现+金额 （比如：提现10）\n\n" +
-            "➖➖➖➖➖➖➖➖➖➖➖➖\n" +
+       var  html = "\uD83D\uDD39 提现指南 \uD83D\uDD39\n" +
+            "——————————————————\n" +
+            "提现模板： 提现+金额 （比如：提现10）\n" +
+            "——————————————————\n" +
             "\uD83D\uDD3A 1、最低提现金额：10 USDT \uD83D\uDCB5\n" +
             "\uD83D\uDD3A 2、手续费：1 USDT，将从余额中扣除 \uD83D\uDCB8\n" +
             "\uD83D\uDD3A 3、提现操作不可撤销，请仔细核对信息！\n" +

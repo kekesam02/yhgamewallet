@@ -87,10 +87,12 @@ class WalletCallbackHandle {
                     break
                 // 转账
                 case StartWalletEnum.ZHUANZHANG:
+                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleMethod.startZhuanZhang(ctx,cbot)
                     break
                 // 收款
                 case StartWalletEnum.SHOUKUANG:
+                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleMethod.startShouKuan(ctx,cbot)
                     break
                 // 红包
