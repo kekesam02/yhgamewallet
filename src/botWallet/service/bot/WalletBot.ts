@@ -19,8 +19,6 @@ bot.command('quit', async (ctx:Context) => {
     //await ctx.telegram.leaveChat(ctx?.chat?.id || '')
 })
 
-
-
 bot.telegram.setMyCommands([
     { command: "start", description: "启动机器人" },
     { command: "quit", description: "退出机器人" },
@@ -29,7 +27,7 @@ bot.telegram.setMyCommands([
     console.log("命令设置成功");
 }) .catch((err) => {
     console.error("设置命令时出错", err);
-});
+})
 /**
  * 监听/start命令
  */

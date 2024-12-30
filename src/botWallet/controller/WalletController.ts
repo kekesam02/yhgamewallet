@@ -178,13 +178,13 @@ class WalletController {
     /**
      * 返回和财务
      */
-    public static createBackClientBtn = () => {
+    public static createBackClientBtn = (username:string='xukefeifeibot') => {
         return new ButtonUtils().createCallbackBtn([
             [
                 WalletController.BackHome,
                 {
                     text: '🛄 客服财务',
-                    url: 'https://t.me/xukefeifeibot'
+                    url: 'https://t.me/'+username
                 }
             ]
         ])
@@ -232,6 +232,34 @@ class WalletController {
             ],
             [
                 WalletController.BackHome
+            ]
+        ])
+    }
+
+    /**
+     * 创建审核通过
+     */
+    public static createSuccessBtn = (username:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '✅ 操作成功，点击联系用户',
+                    url: 'https://t.me/'+username
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 创建拒绝
+     */
+    public static createFailBtn = (username:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '⚠️ 已拒绝，点击联系用户',
+                    url: 'https://t.me/'+username
+                }
             ]
         ])
     }

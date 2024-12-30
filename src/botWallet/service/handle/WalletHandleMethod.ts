@@ -316,12 +316,9 @@ class WalletHandleMethod {
                         await ctx.replyWithHTML("⚠️ 交易异常，提现地址不存在！")
                         return
                     }
-                    // 扣减用户余额
-
                     // 修改用户交易地址
                     await UserModel.createQueryBuilder().update(UserModel).set({USDT: shengyuUsdt+''})
                         .where('id = :id', {id: botUser.id}).execute()
-
                     // 申请时间
                     var applyTime = DateFormatUtils.CurrentDateFormatString();
                     const chatId = ctx?.chat?.id+'' || "";
@@ -475,13 +472,14 @@ class WalletHandleMethod {
                     "1号公馆祝您赌运昌隆\uD83C\uDF8A\n" +
                     "\uD83D\uDD3A提现地址："+addr+"\n" +
                     "\uD83D\uDD3A申请时间："+botPayment.applyTime+"\n" +
-                    "\uD83D\uDD3A打款时间："+botPayment.passTime+"\n" +
-                    "\uD83D\uDD3A实际提现：" + (botPayment?.paymentRealAmount || 0) + "\n货币类型: USDT";
-                    "\uD83D\uDD3A到账金额：" + (botPayment?.paymentAmount || 0) + "\n"
+                    "\uD83D\uDD3A打款时间："+passTime+"\n" +
+                    "\uD83D\uDD3A实际提现：" + (botPayment?.paymentRealAmount || 0) +
+                    "\uD83D\uDD3A到账金额：" + (botPayment?.paymentAmount || 0) + "\n" +
                     "\uD83D\uDD3A货币类型：USDT";
-                // 给申请人发消息
-                await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML"})
-                await ctx.replyWithHTML("✅ 操作成功!!!")
+                // 5:给申请人发消息
+                await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML",reply_markup:WalletController.createBackClientBtn().reply_markup})
+                // 6: 编辑回复的按钮
+                await ctx.editMessageReplyMarkup(WalletController.createSuccessBtn(botPayment.username).reply_markup)
             }
         }
     }
@@ -538,12 +536,13 @@ class WalletHandleMethod {
                     "\uD83D\uDD3A地址："+addr+"\n" +
                     "\uD83D\uDD3A申请时间："+botPayment.applyTime+"\n" +
                     "\uD83D\uDD3A退回时间："+refuseTime+"\n" +
-                "\uD83D\uDD3A退回金额：" + (botPayment?.paymentRealAmount || 0) + "\n" +
-                "\uD83D\uDD3A退之前余额：" + (botPayment?.balanceAfter || 0) + "\n"+
-                "\uD83D\uDD3A退之后余额：" + (botPayment?.balanceBefore || 0)
+                    "\uD83D\uDD3A退回金额：" + (botPayment?.paymentRealAmount || 0) + "\n" +
+                    "\uD83D\uDD3A退之前余额：" + (botPayment?.balanceAfter || 0) + "\n"+
+                    "\uD83D\uDD3A退之后余额：" + (botPayment?.balanceBefore || 0)
                 // 给申请人发消息
-                await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML"})
-                await ctx.replyWithHTML("✅ 操作成功!!!")
+                await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML",reply_markup:WalletController.createBackClientBtn().reply_markup})
+                // 6: 编辑回复的按钮
+                await ctx.editMessageReplyMarkup(WalletController.createFailBtn(botPayment.username).reply_markup)
             }
         }
     }
@@ -557,7 +556,8 @@ class WalletHandleMethod {
             "\uD83D\uDD3A提之前余额："+ye+" USDT\n" +
             "\uD83D\uDD3A提之后余额："+shengyuUsdt+" USDT\n" +
             "\uD83D\uDD3A申请时间："+DateFormatUtils.CurrentDateFormatString()+"\n" +
-            "\uD83D\uDD3A提现地址："+AESUtils.decodeAddr(address||"");
+            "\uD83D\uDD3A提现地址："+AESUtils.decodeAddr(address||"")+"\n" +
+            "\uD83D\uDD3A货币类型: USDT"
         return html;
     }
 
@@ -836,22 +836,6 @@ class WalletHandleMethod {
     public static startUpdatePwdCallback = async (ctx: Context, cbot:Telegraf<Context>) => {
         var tgId: string = ctx.callbackQuery?.from?.id +"" || ""
         var cacheValue = await redis.get('pwd_'+tgId)
-
-        async function  loginCallback() {
-            const currentOp = await redis.get("currentop" + tgId)
-            if (currentOp == 'tx') {
-                this.startTiXian(ctx, cbot)
-            } else if (currentOp == 'zhuanzhang') {
-                this.startZhuanZhang(ctx, cbot)
-            } else if (currentOp == 'shoukuan') {
-                this.startShouKuan(ctx, cbot)
-            } else if (currentOp == 'hongbao') {
-                this.startHongBao(ctx, cbot)
-            } else if (currentOp == 'shandui') {
-                this.startShanDui(ctx, cbot)
-            }
-        }
-
         if (cacheValue) {
             if (cacheValue.length >= 4) {
                 var firstName: string = ctx.callbackQuery?.from?.first_name || ''
@@ -870,7 +854,7 @@ class WalletHandleMethod {
                         // 设置登录成功的标识
                         redis.set("login_" + tgId, "success",'EX',1000 * 60 * 60 * 24)
                         // 可以考虑进行交易的处理
-                        await loginCallback.call(this);
+                        await this.loginCallback(tgId,ctx,cbot);
                     } else {
                         ctx.replyWithHTML(WalletMessage.C_PASSWPORD_ERROR)
                     }
@@ -890,13 +874,34 @@ class WalletHandleMethod {
                     // 设置登录成功的标识
                     redis.set("login_" + tgId, "success",'EX',1000 * 60 * 60 * 24)
                     // 可以考虑进行交易的处理
-                    await loginCallback.call(this);
+                    await this.loginCallback(tgId,ctx,cbot);
                 }
             } else {
                 ctx.replyWithHTML(WalletMessage.PASSWPORD_ERROR)
             }
         } else {
             ctx.replyWithHTML(WalletMessage.PASSWPORD_EMPTY)
+        }
+    }
+
+    /**
+     * 登录成功以后直接激活具体业务
+     * @param tgId
+     * @param ctx
+     * @param cbot
+     */
+    public static  loginCallback = async (tgId:string,ctx:Context,cbot:Telegraf<Context>) =>{
+        const currentOp = await redis.get("currentop" + tgId)
+        if (currentOp == 'tx') {
+            this.startTiXian(ctx, cbot)
+        } else if (currentOp == 'zhuanzhang') {
+            this.startZhuanZhang(ctx, cbot)
+        } else if (currentOp == 'shoukuan') {
+            this.startShouKuan(ctx, cbot)
+        } else if (currentOp == 'hongbao') {
+            this.startHongBao(ctx, cbot)
+        } else if (currentOp == 'shandui') {
+            this.startShanDui(ctx, cbot)
         }
     }
 
