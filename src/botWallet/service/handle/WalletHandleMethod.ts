@@ -836,6 +836,22 @@ class WalletHandleMethod {
     public static startUpdatePwdCallback = async (ctx: Context, cbot:Telegraf<Context>) => {
         var tgId: string = ctx.callbackQuery?.from?.id +"" || ""
         var cacheValue = await redis.get('pwd_'+tgId)
+
+        async function  loginCallback() {
+            const currentOp = await redis.get("currentop" + tgId)
+            if (currentOp == 'tx') {
+                this.startTiXian(ctx, cbot)
+            } else if (currentOp == 'zhuanzhang') {
+                this.startZhuanZhang(ctx, cbot)
+            } else if (currentOp == 'shoukuan') {
+                this.startShouKuan(ctx, cbot)
+            } else if (currentOp == 'hongbao') {
+                this.startHongBao(ctx, cbot)
+            } else if (currentOp == 'shandui') {
+                this.startShanDui(ctx, cbot)
+            }
+        }
+
         if (cacheValue) {
             if (cacheValue.length >= 4) {
                 var firstName: string = ctx.callbackQuery?.from?.first_name || ''
@@ -854,18 +870,7 @@ class WalletHandleMethod {
                         // 设置登录成功的标识
                         redis.set("login_" + tgId, "success",'EX',1000 * 60 * 60 * 24)
                         // 可以考虑进行交易的处理
-                        const currentOp = await redis.get("currentop" + tgId)
-                        if(currentOp == 'tx'){
-                            this.startTiXian(ctx,cbot)
-                        }else if(currentOp == 'zhuanzhang'){
-                            this.startZhuanZhang(ctx,cbot)
-                        }else if(currentOp == 'shoukuan'){
-                            this.startShouKuan(ctx,cbot)
-                        }else if(currentOp == 'hongbao'){
-                            this.startHongBao(ctx,cbot)
-                        }else if(currentOp == 'shandui'){
-                            this.startShanDui(ctx,cbot)
-                        }
+                        await loginCallback.call(this);
                     } else {
                         ctx.replyWithHTML(WalletMessage.C_PASSWPORD_ERROR)
                     }
@@ -885,18 +890,7 @@ class WalletHandleMethod {
                     // 设置登录成功的标识
                     redis.set("login_" + tgId, "success",'EX',1000 * 60 * 60 * 24)
                     // 可以考虑进行交易的处理
-                    const currentOp = await redis.get("currentop" + tgId)
-                    if(currentOp == 'tx'){
-                        this.startTiXian(ctx,cbot)
-                    }else if(currentOp == 'zhuanzhang'){
-                        this.startZhuanZhang(ctx,cbot)
-                    }else if(currentOp == 'shoukuan'){
-                        this.startShouKuan(ctx,cbot)
-                    }else if(currentOp == 'hongbao'){
-                        this.startHongBao(ctx,cbot)
-                    }else if(currentOp == 'shandui'){
-                        this.startShanDui(ctx,cbot)
-                    }
+                    await loginCallback.call(this);
                 }
             } else {
                 ctx.replyWithHTML(WalletMessage.PASSWPORD_ERROR)

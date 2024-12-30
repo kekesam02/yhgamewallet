@@ -1,4 +1,4 @@
-// @ts-nocheck
+// @TS-NOCHECK
 import Redlock from 'redlock'
 import redis from "./redis";
 import {Context, Telegraf} from "telegraf";
