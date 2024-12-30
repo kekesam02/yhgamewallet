@@ -467,15 +467,17 @@ class WalletHandleMethod {
                     .where("id=:id",{id:botPayment.id})
                     .execute()
                 const addr = AESUtils.decodeAddr(botPayment.paymentTypeNumber) || ""
-                const html: string = "\uD83D\uDCE3尊敬的用户：" + botPayment?.nickname + "您好！财务已确认打款，请查收\n" +
+                const html: string = "\uD83D\uDCE3尊敬的用户：" + botPayment?.nickname + "您好！\n" +
+                    "财务已确认打款，请查收\n" +
                     "温馨提示，提现手续费usdt为1u，TRX为实时等额汇率\n" +
                     "1号公馆祝您赌运昌隆\uD83C\uDF8A\n" +
-                    "\uD83D\uDD3A提现地址："+addr+"\n" +
+                    "\uD83D\uDD3A实际提现：" + (botPayment?.paymentRealAmount || 0) + "\n" +
+                    "\uD83D\uDD3A到账金额：" + (botPayment?.paymentAmount || 0) + "\n" +
                     "\uD83D\uDD3A申请时间："+botPayment.applyTime+"\n" +
                     "\uD83D\uDD3A打款时间："+passTime+"\n" +
-                    "\uD83D\uDD3A实际提现：" + (botPayment?.paymentRealAmount || 0) +
-                    "\uD83D\uDD3A到账金额：" + (botPayment?.paymentAmount || 0) + "\n" +
-                    "\uD83D\uDD3A货币类型：USDT";
+                    "\uD83D\uDD3A货币类型：USDT"+"\n" +
+                    "\uD83D\uDD3A提现地址："+addr
+
                 // 5:给申请人发消息
                 await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML",reply_markup:WalletController.createBackClientBtn().reply_markup})
                 // 6: 编辑回复的按钮
@@ -533,12 +535,13 @@ class WalletHandleMethod {
                 const html: string = "\uD83D\uDCE3尊敬的用户：" + botPayment?.nickname + "您好！财务异常退回金额\n" +
                     "温馨提示，请核对地址后重新提交，如有疑问请联系财务\n" +
                     "1号公馆祝您赌运昌隆\uD83C\uDF8A\n\n" +
-                    "\uD83D\uDD3A地址："+addr+"\n" +
-                    "\uD83D\uDD3A申请时间："+botPayment.applyTime+"\n" +
-                    "\uD83D\uDD3A退回时间："+refuseTime+"\n" +
                     "\uD83D\uDD3A退回金额：" + (botPayment?.paymentRealAmount || 0) + "\n" +
                     "\uD83D\uDD3A退之前余额：" + (botPayment?.balanceAfter || 0) + "\n"+
-                    "\uD83D\uDD3A退之后余额：" + (botPayment?.balanceBefore || 0)
+                    "\uD83D\uDD3A退之后余额：" + (botPayment?.balanceBefore || 0)+"\n" +
+                    "\uD83D\uDD3A申请时间："+botPayment.applyTime+"\n" +
+                    "\uD83D\uDD3A退回时间："+refuseTime+"\n" +
+                    "\uD83D\uDD3A货币类型：USDT"+"\n" +
+                    "\uD83D\uDD3A地址："+addr
                 // 给申请人发消息
                 await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML",reply_markup:WalletController.createBackClientBtn().reply_markup})
                 // 6: 编辑回复的按钮
