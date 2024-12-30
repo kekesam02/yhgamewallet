@@ -38,12 +38,12 @@ class WalletMessageHandle {
             }
             // 转账
             if (currentop == 'zhuanzhang') {
-                WalletHandleMethod.startZhuangzhangHandle(text, tgId, ctx)
+                WalletHandleMethod.startZhuangzhangHandle(text,'', tgId, ctx)
                 return;
             }
             // 收款
             if (currentop == 'shoukuan') {
-                WalletHandleMethod.startShouKuanHandle(text, tgId, ctx)
+                WalletHandleMethod.startShouKuanHandle(text,'', tgId, ctx)
                 return;
             }
             // 红包
@@ -57,7 +57,7 @@ class WalletMessageHandle {
                 return;
             }
         }else{
-            ctx.reply("会话已失效，请重新点击面板的操作!")
+            ctx.reply("会话已失效，请重新点击面板进行操作!")
             WalletHandleMethod.startCommandCallback(ctx).then()
         }
 

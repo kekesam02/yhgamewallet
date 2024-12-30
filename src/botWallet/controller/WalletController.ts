@@ -220,14 +220,31 @@ class WalletController {
     }
 
     /**
-     * 创建返回按钮
+     * 创建转账返回按钮
      */
-    public static createSwitchBtn = () => {
+    public static createZhuanzhangSwitchBtn = (query:string) => {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 {
                     text: '选择转账对象',
-                    switch_inline_query: '100'
+                    switch_inline_query: query
+                }
+            ],
+            [
+                WalletController.BackHome
+            ]
+        ])
+    }
+
+    /**
+     * 创建收款按钮
+     */
+    public static createShouKuanSwitchBtn = (query:string) => {
+        return new ButtonUtils().createInlineKeySwitchBoard([
+            [
+                {
+                    text: '选择付款对象',
+                    switch_inline_query: query
                 }
             ],
             [

@@ -17,6 +17,7 @@ import BotPaymentModel from "../../../models/BotPaymentModel";
 import {addLockByTgId} from "../../../config/redislock";
 import DateFormatUtils from "../../../commons/date/DateFormatUtils";
 import PaymentTypeEnum from "../../../type/PaymentTypeEnum";
+import ButtonInnerQueryUtils from "../../../commons/button/ButtonInnerQueryUtils";
 
 
 /**
@@ -35,10 +36,12 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static removeMessage = async (ctx: Context) => {
-        var messageId: number = ctx.callbackQuery?.message?.message_id || 0
-        if (messageId > 0) {
-            ctx.deleteMessage(messageId)
-        }
+       try {
+           var messageId: number = ctx.callbackQuery?.message?.message_id || 0
+           if (messageId > 0) {
+               ctx.deleteMessage(messageId)
+           }
+       }catch (e){}
     }
 
     /**
@@ -280,7 +283,7 @@ class WalletHandleMethod {
 
             // 2: 判断是否提现开头
             if(!text.startsWith('提现')){
-                await ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现100或者提现 100")
+                await ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现10或者提现 10")
                 return
             }
 
@@ -421,7 +424,7 @@ class WalletHandleMethod {
                         reply_markup: WalletController.createMarkClientBtn(botPayment.identifiers[0].id+"").reply_markup
                     })
                     // 7: 发送消息
-                    return  ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT,shengyuUsdt,price,botWithdrawalAddrModel?.addr),WalletController.createBackClientBtn())
+                    return  ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT,shengyuUsdt,price,botWithdrawalAddrModel?.addr),WalletController.createBackBtn())
                 }catch (e){
                     return  ctx.reply('⌛️ 亲操作慢点，休息一会在操作!')
                 }
@@ -468,18 +471,19 @@ class WalletHandleMethod {
                     .execute()
                 const addr = AESUtils.decodeAddr(botPayment.paymentTypeNumber) || ""
                 const html: string = "\uD83D\uDCE3尊敬的用户：" + botPayment?.nickname + "您好！\n" +
-                    "财务已确认打款，请查收\n" +
-                    "温馨提示，提现手续费usdt为1u，TRX为实时等额汇率\n" +
-                    "1号公馆祝您赌运昌隆\uD83C\uDF8A\n" +
+                    "\uD83D\uDCE3财务已确认打款，请查收\n" +
+                    "\uD83D\uDCE3温馨提示，提现手续费usdt为1u，TRX为实时等额汇率\n" +
+                    "\uD83D\uDCE31号公馆祝您赌运昌隆\uD83C\uDF8A\n\n" +
                     "\uD83D\uDD3A实际提现：" + (botPayment?.paymentRealAmount || 0) + "\n" +
                     "\uD83D\uDD3A到账金额：" + (botPayment?.paymentAmount || 0) + "\n" +
+                    "\uD83D\uDD3A还剩余额：" + (botPayment?.balanceAfter || 0) + "\n"+
                     "\uD83D\uDD3A申请时间："+botPayment.applyTime+"\n" +
                     "\uD83D\uDD3A打款时间："+passTime+"\n" +
                     "\uD83D\uDD3A货币类型：USDT"+"\n" +
                     "\uD83D\uDD3A提现地址："+addr
 
                 // 5:给申请人发消息
-                await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML",reply_markup:WalletController.createBackClientBtn().reply_markup})
+                await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML",reply_markup:WalletController.createBackBtn().reply_markup})
                 // 6: 编辑回复的按钮
                 await ctx.editMessageReplyMarkup(WalletController.createSuccessBtn(botPayment.username).reply_markup)
             }
@@ -532,9 +536,10 @@ class WalletHandleMethod {
                     .execute()
 
                 const addr = AESUtils.decodeAddr(botPayment.paymentTypeNumber) || ""
-                const html: string = "\uD83D\uDCE3尊敬的用户：" + botPayment?.nickname + "您好！财务异常退回金额\n" +
-                    "温馨提示，请核对地址后重新提交，如有疑问请联系财务\n" +
-                    "1号公馆祝您赌运昌隆\uD83C\uDF8A\n\n" +
+                const html: string = "\uD83D\uDCE3尊敬的用户：" + botPayment?.nickname + "您好！\n" +
+                    "\uD83D\uDCE3财务异常退回金额\n" +
+                    "\uD83D\uDCE3温馨提示，请核对地址后重新提交，如有疑问请联系财务\n" +
+                    "\uD83D\uDCE31号公馆祝您赌运昌隆\uD83C\uDF8A\n\n" +
                     "\uD83D\uDD3A退回金额：" + (botPayment?.paymentRealAmount || 0) + "\n" +
                     "\uD83D\uDD3A退之前余额：" + (botPayment?.balanceAfter || 0) + "\n"+
                     "\uD83D\uDD3A退之后余额：" + (botPayment?.balanceBefore || 0)+"\n" +
@@ -543,13 +548,12 @@ class WalletHandleMethod {
                     "\uD83D\uDD3A货币类型：USDT"+"\n" +
                     "\uD83D\uDD3A地址："+addr
                 // 给申请人发消息
-                await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML",reply_markup:WalletController.createBackClientBtn().reply_markup})
+                await ubot.telegram.sendMessage(tgId, html, {parse_mode: "HTML",reply_markup:WalletController.createBackBtn().reply_markup})
                 // 6: 编辑回复的按钮
                 await ctx.editMessageReplyMarkup(WalletController.createFailBtn(botPayment.username).reply_markup)
             }
         }
     }
-
 
     public static  noteOrderTxcg = (ye: string,shengyuUsdt:number, je: number, address: string | undefined)=>{
         var html =
@@ -565,7 +569,7 @@ class WalletHandleMethod {
     }
 
 
-/**
+    /**
      * 转账
      * 代号：zhuanzhang_btn
      * @param ctx
@@ -575,49 +579,71 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
         redis.set("currentop" + tgId, "zhuanzhang", 'EX', 60 * 60)
-        // 3：密码确认
+        // 3：判断是否登录
         const flag:boolean = await this.isLogin(tgId,ctx)
-        // 如果密码为空就开始设置密码
+        // 4: 如果没有登录就输入密码登录
         if (!flag) {
             var mark = await redis.get('mark_'+tgId) || '0'
             await this.sendPasswordSetupMessage(ctx, "",   mark != '1')
             return
         }
-
+        // 发送消息
         const html="\uD83D\uDC47 点击下方按钮选择收款人";
-        const shareButton = {
-            reply_markup: {
-                inline_keyboard: [
-                    [
-                        { text: '分享机器人', url: 'https://t.me/${ctx.botInfo.username}' },
-                        {
-                            text: '选择转账对象',
-                            switch_inline_query: '1'
-                        }
-                    ]
-                ]
-            }
-        }
-        return ctx.replyWithHTML(html, WalletController.createSwitchBtn())
+        return ctx.replyWithHTML(html, WalletController.createZhuanzhangSwitchBtn("1"))
     }
 
     // 转账具体逻辑
-    public static startZhuangzhangHandle = async(text:string,tgId:number,ctx:Context)=>{
-        await addLockByTgId(['zhuanzhang_lock_'+tgId+''], async () => {
-            // 1：密码确认
-            const flag: boolean = await this.isLogin(tgId, ctx)
-            // 如果密码为空就开始设置密码
-            if (!flag) {
-                var mark = await redis.get('mark_' + tgId) || '0'
-                await this.sendPasswordSetupMessage(ctx, "", mark != '1')
-                return
+    public static startZhuangzhangHandle = async(query:string,queryId:string,tgId:number,ctx:Context)=>{
+        // 1：密码确认
+        const flag: boolean = await this.isLogin(tgId, ctx)
+        // 如果密码为空就开始设置密码
+        if (!flag) {
+            var mark = await redis.get('mark_' + tgId) || '0'
+            await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+            return
+        }
+
+        const sid = ctx.botInfo.id
+        const snickname = ctx.botInfo.first_name
+        const susername = ctx.botInfo.username
+
+        const fid = ctx.inlineQuery?.from.id
+        const fnickname = ctx.inlineQuery?.from.first_name
+        const fusername = ctx.inlineQuery?.from.username
+
+        console.log("tgId",tgId)
+        console.log("sid===>fid",sid,fid)
+        console.log("snickname===>fnickname",snickname,fnickname)
+        console.log("susername===>fusername",susername,fusername)
+
+
+        // 查询用户余额
+        let userId = AESUtils.encodeUserId(tgId?.toString())
+        let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
+        if(botUser){
+            if(parseFloat(botUser.USDT)  > 0){
+                console.log("11111")
+            }else{
+                // 创建一个可分享的结果
+                await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
+                    id: queryId,
+                    title: '⚠️温馨提示：操作失败余额不足！',
+                    description: "\uD83D\uDCB0当前余额："+botUser.USDT+" USDT",
+                    input_message_content: {
+                        message_text: '\uD83D\uDC47 \n'
+                    },
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{
+                                text: '\uD83D\uDCB0一号公馆钱包',
+                                callback_data: 'qwe123',
+                                url: 'http://t.me/VertexPaybot'
+                            }]
+                        ]
+                    }
+                }));
             }
-
-            ctx.reply(text)
-
-        },async()=>{
-            await ctx.reply('亲，操作慢点，休息一会在操作!')
-        })
+        }
     }
 
     /**
@@ -630,21 +656,21 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
         redis.set("currentop" + tgId, "shoukuan", 'EX', 60 * 60)
-        const flag = await this.isLogin(tgId,ctx)
-        var mark = await redis.get('mark_'+tgId) || '0'
-        if(mark &&  mark == '1')return
-        // 如果密码为空就开始设置密码
+        // 3：判断是否登录
+        const flag:boolean = await this.isLogin(tgId,ctx)
+        // 4: 如果没有登录就输入密码登录
         if (!flag) {
-            await this.sendPasswordSetupMessage(ctx, "",  mark != '1')
+            var mark = await redis.get('mark_'+tgId) || '0'
+            await this.sendPasswordSetupMessage(ctx, "",   mark != '1')
             return
         }
-
-        console.log("startShouKuan")
-        return Promise.resolve()
+        // 发送消息
+        const html="\uD83D\uDC47 点击下方按钮选择付款人";
+        return ctx.replyWithHTML(html, WalletController.createShouKuanSwitchBtn("1"))
     }
 
     // 收款具体逻辑
-    public static startShouKuanHandle = async(text:string,tgId:number,ctx:Context)=>{
+    public static startShouKuanHandle = async(query:string,queryId:string,tgId:number,ctx:Context)=>{
         await addLockByTgId(['zhuanzhang_lock_'+tgId+''], async () => {
             // 1：密码确认
             const flag: boolean = await this.isLogin(tgId, ctx)
@@ -654,9 +680,6 @@ class WalletHandleMethod {
                 await this.sendPasswordSetupMessage(ctx, "", mark != '1')
                 return
             }
-
-            ctx.reply(text)
-
         },async()=>{
             await ctx.reply('亲，操作慢点，休息一会在操作!')
         })
