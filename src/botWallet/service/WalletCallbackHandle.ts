@@ -37,6 +37,8 @@ class WalletCallbackHandle {
         // 计算器callback
         if (callbackStr.startsWith('num_') || callbackStr === 'delete' || callbackStr === 'clear') {
             WalletHandleMethod.startInputPassword(ctx)
+        }else if(callbackStr.startsWith('qrjs')){
+            WalletHandleMethod.startZhuanZhangUnLock(ctx)
         } else {
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================

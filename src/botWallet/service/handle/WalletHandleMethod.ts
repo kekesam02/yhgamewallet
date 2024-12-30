@@ -616,18 +616,37 @@ class WalletHandleMethod {
         console.log("snickname===>fnickname",snickname,fnickname)
         console.log("susername===>fusername",susername,fusername)
 
-
         // 查询用户余额
         let userId = AESUtils.encodeUserId(tgId?.toString())
         let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
         if(botUser){
             if(parseFloat(botUser.USDT)  > 0){
-                console.log("11111")
+                // 创建一个可分享的结果
+                await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
+                    id: queryId,
+                    title: "转款"+query+"USDT",
+                    description: "\uD83D\uDCB0您正在向用户【@"+fusername+"】发起转账，点击【确定转账】并立即生效",
+                    input_message_content: {
+                        message_text: "\uD83D\uDD30为了您的资金安全，请验证密码来解锁此笔转账",
+                        parse_mode:"HTML"
+                    },
+                    reply_markup: {
+                        inline_keyboard: [
+                            [{
+                                text: '✅确认解锁',
+                                callback_data: "qrjs"+query + "," + tgId
+                            },{
+                                text: '\uD83D\uDEAB取消转账',
+                                callback_data: "quxiaozz"+query + "," + tgId
+                            }]
+                        ]
+                    }
+                }));
             }else{
                 // 创建一个可分享的结果
                 await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                     id: queryId,
-                    title: '⚠️温馨提示：操作失败余额不足！',
+                    title: '⚠️温馨提示：操作失败，余额不足！',
                     description: "\uD83D\uDCB0当前余额："+botUser.USDT+" USDT",
                     input_message_content: {
                         message_text: '\uD83D\uDC47 \n'
@@ -644,6 +663,23 @@ class WalletHandleMethod {
                 }));
             }
         }
+    }
+
+    /**
+     * 确认解锁
+     * @param ctx
+     */
+    public static startZhuanZhangUnLock = (ctx:Context)=>{
+        let update: any = ctx?.update
+        let callbackStr: string = update.callback_query?.data
+        // 1：获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        var nickname: string = ctx.callbackQuery?.from?.first_name || ""
+        var username: string = ctx.callbackQuery?.from?.username || ""
+        console.log(callbackStr)
+        console.log(tgId)
+        console.log(nickname)
+        console.log(username)
     }
 
     /**
