@@ -47,6 +47,13 @@ class GameBettingTips {
     public killNumHtml = () => {
         return `点杀数字最多下注10个`
     }
+
+    /**
+     * 停止下注提示
+     */
+    public stopPledgeUpHtml = () => {
+        return `当前已停止下注`
+    }
 }
 
 

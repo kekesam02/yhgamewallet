@@ -470,11 +470,22 @@ class BotPledgeUpModel extends BaseEntity {
             // 梭哈处理
             return true
         }
+
         if (
             new ComputeUtils(userModel.CUSDT).comparedTo(0) > 0 &&
             new ComputeUtils(userModel.CUSDT).comparedTo(money) < 0
         ) {
             // 判断用户余额小于1提示用户余额不足
+            await new MessageUtils().sendTextReply(
+                ctx,
+                new GameBotHtml().getBalanceNot(userModel, roundId, pledgeUpInfo),
+                new GameController().createTopUpBtn().reply_markup.inline_keyboard
+            )
+            return false
+        }
+
+        // USDT下注金额不够
+        if(new ComputeUtils(userModel.USDT).comparedTo(money) < 0) {
             await new MessageUtils().sendTextReply(
                 ctx,
                 new GameBotHtml().getBalanceNot(userModel, roundId, pledgeUpInfo),
