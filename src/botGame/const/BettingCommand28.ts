@@ -183,10 +183,10 @@ class BettingCommand28 {
                 isJudge = true
             }
 
+            // 下注规则判定返回值
+            let ruleNum = await this.ruleJudge(parseList, text)
             // USDT 下注没有限制
             if (!isJudge) {
-                // 下注规则判定失败直接退出
-                let ruleNum = await this.ruleJudge(parseList, text)
                 // 用户下注金额超过最大限制
                 if (ruleNum == 1) {
                     console.log('用户对押')
@@ -209,9 +209,10 @@ class BettingCommand28 {
                 if (ruleNum == 5) {
                     return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().twoWayHtml())
                 }
-                if (ruleNum == 6) {
-                    return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().killNumHtml())
-                }
+            }
+            // 点杀限制
+            if (ruleNum == 6) {
+                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().killNumHtml())
             }
 
             // 开始上注
@@ -537,7 +538,7 @@ class BettingCommand28 {
                 if (!newRuleList[index2]) {
                     newRuleList[index2] = [...item2]
                 }
-                if (item2.includes(item.command)) {
+                if (item2.includes(item.command) || item2.includes(item.money)) {
                     let removeIndex = newRuleList[index2].indexOf(item.command)
                     if (removeIndex !== -1 && newRuleList[index2][removeIndex] == item.command) {
                         newRuleList[index2].splice(removeIndex, 1)
