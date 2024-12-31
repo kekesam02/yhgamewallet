@@ -133,10 +133,7 @@ class MessageUtils {
      * 删除当前消息
      */
     public removeMessage = (ctx: Context) =>{
-        let messageId = ctx.message?.message_id
-        if (messageId) {
-            return ctx.deleteMessage(messageId)
-        }
+        return ctx.deleteMessage()
     }
 }
 

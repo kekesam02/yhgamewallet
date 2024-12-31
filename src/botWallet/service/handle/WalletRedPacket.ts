@@ -7,8 +7,18 @@ import MessageUtils from "../../../commons/message/MessageUtils";
 import ButtonUtils from "../../../commons/button/ButtonUtils";
 import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
 import ButtonCommonMap from "../../../commons/button/ButtonCommonMap";
-import RedPacketModel from "../../../models/RedPacketModel";
 import WalletType from "../../../type/WalletType";
+import UserModel from "../../../models/UserModel";
+import MessageTipUtils from "../../../commons/message/MessageTipUtils";
+import computeUtils from "../../../commons/ComputeUtils";
+import ComputeUtils from "../../../commons/ComputeUtils";
+import {clearTimeout} from "timers";
+import CommandController from "../../../botGame/gameController/CommandController";
+import CommonEnumsIndex from "../../../type/CommonEnumsIndex";
+import {addLockByCtx} from "../../../config/redislock";
+import {queryRunner} from "../../../config/database";
+import WalletRedPacketRedis from "./WalletRedPacketRedis";
+import ContextUtil from "../../../commons/ContextUtil";
 
 
 
@@ -24,6 +34,7 @@ class WalletRedPacket {
      * 点击红包按钮触发 - 跳转到添加红包页面
      */
     public addRedPacket = async () => {
+        await new MessageUtils().removeMessage(this.ctx)
         await new MessageUtils().sendTextReply(
             this.ctx,
             '请在下面按钮操作您的红包：',
@@ -42,13 +53,14 @@ class WalletRedPacket {
                 ]
             ]).reply_markup.inline_keyboard
         )
-        return new MessageUtils().removeMessage(this.ctx)
+        return true
     }
 
     /**
      * 点击添加红包按钮触发 - 跳转到选择货币页面
      */
     public selectWallType = async () => {
+        await new MessageUtils().removeMessage(this.ctx)
         await new MessageUtils().sendTextReply(
             this.ctx,
             '请在下面按钮操作您的红包：',
@@ -56,10 +68,10 @@ class WalletRedPacket {
                 [
                     {
                         text: 'USDT',
-                        query: StartWalletEnum.HONGBAO_ADD
+                        query: StartWalletEnum.HONGBAO_WALLET_USDT
                     }, {
                         text: "TRX",
-                        query: StartWalletEnum.CLOSE_COMPUTER
+                        query: StartWalletEnum.HONGBAO_WALLET_TRX
                     }
                 ],[
                     {
@@ -69,14 +81,15 @@ class WalletRedPacket {
                 ]
             ]).reply_markup.inline_keyboard
         )
-        new RedPacketModel().saveInit(this.ctx)
-        return new MessageUtils().removeMessage(this.ctx)
+        await new WalletRedPacketRedis().saveInit(this.ctx)
+        return true
     }
 
     /**
      * 点击选择红包金额类型按钮触发 - 跳转到选择红包类型页面
      */
     public selectRedPacketType = async (wallType: WalletType) => {
+        await new MessageUtils().removeMessage(this.ctx)
         await new MessageUtils().sendTextReply(
             this.ctx,
             '\uD83E\uDDE7 请选择发送类型：',
@@ -97,8 +110,7 @@ class WalletRedPacket {
                     ]
             ]).reply_markup.inline_keyboard
         )
-        new RedPacketModel(0, wallType).saveWalletType(this.ctx, wallType)
-        return new MessageUtils().removeMessage(this.ctx)
+        return new WalletRedPacketRedis(0, wallType).saveWalletType(this.ctx, wallType)
     }
 
     /**
@@ -108,25 +120,97 @@ class WalletRedPacket {
      *      1: 随机包
      */
     public inputMoney = async (redPacketType: number) => {
+        await new MessageUtils().removeMessage(this.ctx)
         await new MessageUtils().sendTextReply(
             this.ctx,
-            '\uD83D\uDCA1 请回复你要发送的总金额()? 例如: 8.88：',
+            '\uD83D\uDCA1 请回复你要发送的总金额()? 例如: 8.88',
             new ButtonUtils().createCallbackBtn([
                 [
                     {
                         text: "\uD83D\uDEAB取消",
-                        query: StartWalletEnum.CLOSE_COMPUTER
-                    }
-                ], [
-                    {
-                        text: ButtonCommonMap.backOne,
                         query: StartWalletEnum.HONGBAO_CANCEL_1
                     }
                 ]
             ]).reply_markup.inline_keyboard
         )
-        new RedPacketModel().saveMiddleType(this.ctx, redPacketType)
-        return new MessageUtils().removeMessage(this.ctx)
+        return new WalletRedPacketRedis().saveMiddleType(this.ctx, redPacketType)
+    }
+
+    /**
+     * 输入红包金额结束 - 发送输入红包数量按钮
+     */
+    public sendInputLength = async (money: string) => {
+        let result = await new WalletRedPacketRedis().saveMoney(this.ctx, money)
+        if (result) {
+            await new MessageUtils().sendTextReply(
+                this.ctx,
+                '\uD83D\uDCA1 请回复你要发送的数量()? 例如: 10',
+                new ButtonUtils().createCallbackBtn([
+                    [
+                        {
+                            text: "\uD83D\uDEAB取消",
+                            query: StartWalletEnum.HONGBAO_CANCEL_1
+                        }
+                    ]
+                ]).reply_markup.inline_keyboard
+            )
+        }
+        return false
+    }
+
+    /**
+     * 输入红包数量输入结束 - 返回确认支付按钮
+     */
+    public sendPayButton = async (length: number) => {
+        let isSave = await new WalletRedPacketRedis().saveLength(this.ctx, length)
+        if (!isSave) {
+            return false
+        }
+        let result = await new WalletRedPacketRedis().getRedisData(this.ctx)
+        if (result) {
+            await new MessageUtils().sendTextReply(
+                this.ctx,
+                `\uD83D\uDCA1 发送一个红包/n支付金额${result.money}${result.type == 0? '随机': '均分'}${new CommonEnumsIndex().getWalletTypeStr(result.walletType)}`,
+                new ButtonUtils().createCallbackBtn([
+                    [
+                        {
+                            text: "确认支付",
+                            query: StartWalletEnum.HONGBAO_TYPE_PAY
+                        }, {
+                            text: "\uD83D\uDEAB取消",
+                            query: StartWalletEnum.HONGBAO_CANCEL_1
+                        }
+                    ]
+                ]).reply_markup.inline_keyboard
+            )
+        }
+        return false
+    }
+
+    /**
+     * 确认支付
+     */
+    public startPay = async () => {
+        await addLockByCtx(this.ctx,async () => {
+            await queryRunner.startTransaction()
+            let userModel = await queryRunner.manager.createQueryBuilder()
+                .where('tg_id = :tgId', {
+                    tgId: ContextUtil.getUserId(this.ctx)
+                })
+                .getOne()
+            if (!userModel) {
+                return false
+            }
+            let result = await new WalletRedPacketRedis().startPay(this.ctx, userModel)
+            if (result) {
+                // 判定是否需要输入密码
+                // 密码验证通过、红包进行持久化存储
+                return await new WalletRedPacketRedis().saveLocalData(this.ctx)
+            }
+            return false
+        }, async () => {
+            console.log('保存红包失败')
+        })
     }
 }
 

@@ -21,6 +21,13 @@ class OrderUtils {
         return 'dd-' + nanoid(20)
     }
 
+    /**
+     * 生成订单表唯一id
+     */
+    public createHbModelId = (): string => {
+        return 'hb' + nanoid(20)
+    }
+
 }
 
 export default OrderUtils

@@ -19,6 +19,7 @@ import DateFormatUtils from "../../../commons/date/DateFormatUtils";
 import PaymentTypeEnum from "../../../type/PaymentTypeEnum";
 import ButtonInnerQueryUtils from "../../../commons/button/ButtonInnerQueryUtils";
 import WalletRedPacket from "./WalletRedPacket";
+import BotHb from "../../../models/BotHb";
 
 
 /**
@@ -729,7 +730,6 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static startHongBao = async (ctx: Context, cbot:Telegraf<Context>) => {
-        console.log('点击安安你-------')
         // 1：获取telegram的tgId
         let tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
@@ -746,22 +746,16 @@ class WalletHandleMethod {
         return new WalletRedPacket(ctx).addRedPacket()
     }
 
-    // 红包具体逻辑
-    public static startHongBaoHandle = async(text:string,tgId:number,ctx:Context)=>{
-        await addLockByTgId(['zhuanzhang_lock_'+tgId+''], async () => {
-            // 1：密码确认
-            const flag: boolean = await this.isLogin(tgId, ctx)
-            // 如果密码为空就开始设置密码
-            if (!flag) {
-                let mark = await redis.get('mark_' + tgId) || '0'
-                await this.sendPasswordSetupMessage(ctx, "", mark != '1')
-                return
-            }
-            await ctx.reply(text)
-
-        },async()=>{
-            await ctx.reply('亲，操作慢点，休息一会在操作!')
-        })
+    // 红包接收用户输入文字处理
+    public static startHongBaoHandle = async(text: string, tgId: number, ctx: Context, currentop: string)=>{
+        if (text.indexOf('hongbao_money') > -1) {
+            // 红包金额处理 - 结束后返回红包数量输入框
+            return new WalletRedPacket(ctx).sendInputLength(text)
+        }
+        if (text.indexOf('hongbao_length') > -1) {
+            // 红包数量处理
+            return new WalletRedPacket(ctx).sendPayButton()
+        }
     }
 
     /**

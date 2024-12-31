@@ -118,6 +118,8 @@ class WalletCallbackHandle {
                 // 点击选择红包类型触发(随机包)
                 case StartWalletEnum.HONGBAO_TYPE_RENDOM:
                     return new WalletRedPacket(ctx).inputMoney(1)
+                case StartWalletEnum.HONGBAO_TYPE_PAY:
+                    return new WalletRedPacket(ctx).startPay()
 
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:

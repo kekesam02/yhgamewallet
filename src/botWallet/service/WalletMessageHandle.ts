@@ -46,9 +46,14 @@ class WalletMessageHandle {
                 WalletHandleMethod.startShouKuanHandle(text,'', tgId, ctx)
                 return;
             }
-            // 红包
-            if (currentop == 'hongbao') {
-                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx)
+            // 红包金额
+            if (currentop == 'hongbao_money') {
+                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop)
+                return;
+            }
+            // 红包数量
+            if (currentop == 'hongbao_length') {
+                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop)
                 return;
             }
             // 闪兑
