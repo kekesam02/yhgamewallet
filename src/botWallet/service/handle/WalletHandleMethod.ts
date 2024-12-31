@@ -591,7 +591,7 @@ class WalletHandleMethod {
             "\uD83D\uDD3A提之后余额：" + shengyuUsdt + " USDT\n" +
             "\uD83D\uDD3A申请时间：" + DateFormatUtils.CurrentDateFormatString() + "\n" +
             "\uD83D\uDD3A提现地址：" + AESUtils.decodeAddr(address || '') + "\n" +
-            "\uD83D\uDD3A货币类型: USDT"
+            "\uD83D\uDD3A货币类型：USDT"
         return html;
     }
 
