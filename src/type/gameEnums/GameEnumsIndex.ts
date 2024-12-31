@@ -75,6 +75,8 @@ class GameEnumsIndex {
                 return 'pc定位球'
             case GameTypeEnum.PCDWQFS:
                 return 'pc定位球反水'
+            default:
+                return 'pc28'
         }
     }
 }

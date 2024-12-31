@@ -18,6 +18,7 @@ import {addLockByTgId} from "../../../config/redislock";
 import DateFormatUtils from "../../../commons/date/DateFormatUtils";
 import PaymentTypeEnum from "../../../type/PaymentTypeEnum";
 import ButtonInnerQueryUtils from "../../../commons/button/ButtonInnerQueryUtils";
+import WalletRedPacket from "./WalletRedPacket";
 
 
 /**
@@ -728,8 +729,9 @@ class WalletHandleMethod {
      * @param ctx
      */
     public static startHongBao = async (ctx: Context, cbot:Telegraf<Context>) => {
+        console.log('点击安安你-------')
         // 1：获取telegram的tgId
-        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        let tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
         redis.set("currentop" + tgId, "hongbao", 'EX', 60 * 60)
         const flag = await this.isLogin(tgId,ctx)
@@ -741,7 +743,7 @@ class WalletHandleMethod {
             return
         }
         console.log("startHongBao")
-        return Promise.resolve()
+        return new WalletRedPacket(ctx).addRedPacket()
     }
 
     // 红包具体逻辑
@@ -751,12 +753,11 @@ class WalletHandleMethod {
             const flag: boolean = await this.isLogin(tgId, ctx)
             // 如果密码为空就开始设置密码
             if (!flag) {
-                var mark = await redis.get('mark_' + tgId) || '0'
+                let mark = await redis.get('mark_' + tgId) || '0'
                 await this.sendPasswordSetupMessage(ctx, "", mark != '1')
                 return
             }
-
-            ctx.reply(text)
+            await ctx.reply(text)
 
         },async()=>{
             await ctx.reply('亲，操作慢点，休息一会在操作!')

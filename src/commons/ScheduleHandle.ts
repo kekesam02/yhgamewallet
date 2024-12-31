@@ -24,6 +24,33 @@ class ScheduleHandle {
     public static isStartPC28 = false
 
     public static pc28Config = {
+        // 是否是测试
+        isTest: true,
+        // 当前测试数据下标
+        testIndex: 0,
+        testList: [
+            '0,4,3',
+            '0,4,2',
+            '0,4,1',
+            '0,1,3',
+            '0,1,2',
+            '0,1,1',
+            '0,0,1',
+            '0,0,0',
+            '1,0,9',
+            '8,0,9',
+            '9,9,9',
+            '8,9,9',
+            '7,9,9',
+            '7,8,9',
+            '5,9,9',
+            '4,9,9',
+            '4,8,9',
+            '4,7,9',
+            '4,6,9',
+            '4,5,9'
+        ],
+
         // 游戏是否是第一次运行
         isFirstStart: false,
 
@@ -34,7 +61,7 @@ class ScheduleHandle {
         openTime: '',
 
         // 当前开奖期数
-        roundId: '500024',
+        roundId: '500025',
 
         // 本次是否已经开奖
         isOpenLottery: false,
@@ -244,10 +271,6 @@ class ScheduleHandle {
                 }
             })
             this.currJobList.push(job)
-            setTimeout(() => {
-                let pc28Controller = new PC28Controller()
-                pc28Controller.startPCLow(bot).then((val) => {})
-            }, 2000)
         }
     }
 
@@ -255,6 +278,10 @@ class ScheduleHandle {
      * pc28 切换到下一期
      */
     private static checkNextPC28 = (openJson: Pc28LotteryJsonType) => {
+        ScheduleHandle.pc28Config.testIndex = ScheduleHandle.pc28Config.testIndex+1
+        if (!ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex+1]) {
+            ScheduleHandle.pc28Config.testIndex = 0
+        }
         let currJson = openJson.data[0]
         ScheduleHandle.pc28Config.isOpenLottery = false
         ScheduleHandle.pc28Config.isClose = false

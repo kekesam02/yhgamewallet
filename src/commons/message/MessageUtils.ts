@@ -105,8 +105,7 @@ class MessageUtils {
     /**
      * 发送消息到群组
      *      格式为: 顶部图片 + 文本 + 底部按钮消息
-     * @param bot: 机器人对象
-     * @param groupId 群组id
+     * @param ctx
      * @param html  发送的html
      * @param replyMarkup 按钮对象
      * @param image 图片
@@ -128,6 +127,16 @@ class MessageUtils {
                 reply_markup: replyMarkup
             }
         )
+    }
+
+    /**
+     * 删除当前消息
+     */
+    public removeMessage = (ctx: Context) =>{
+        let messageId = ctx.message?.message_id
+        if (messageId) {
+            return ctx.deleteMessage(messageId)
+        }
     }
 }
 

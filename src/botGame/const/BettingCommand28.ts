@@ -539,13 +539,15 @@ class BettingCommand28 {
                     newRuleList[index2] = [...item2]
                 }
                 if (item2.includes(item.command) || item2.includes(item.money)) {
-                    let removeIndex = newRuleList[index2].indexOf(item.command)
-                    if (removeIndex !== -1 && newRuleList[index2][removeIndex] == item.command) {
+                    let command = item2.includes(item.money)? item.money: item.command
+                    let removeIndex = newRuleList[index2].indexOf(command)
+                    if (removeIndex !== -1 && newRuleList[index2][removeIndex] == command) {
                         newRuleList[index2].splice(removeIndex, 1)
                     }
                 }
             })
         }
+        console.log('过滤出的数据', )
 
         for (let i = 0; i < newRuleList.length; i++) {
             // 只判定双向下注结果

@@ -33,7 +33,7 @@ bot.telegram.setMyCommands([
  * 监听/start命令
  */
 bot.command('start', async (ctx) => {
-    WalletHandleMethod.startCommandCallback(ctx)
+    return WalletHandleMethod.startCommandCallback(ctx)
 })
 
 /**

@@ -22,6 +22,7 @@ import GameCommandHtml from "../../html/gameHtml/GameCommandHtml";
 import UserModel from "../../models/UserModel";
 import {queryRunner} from "../../config/database";
 import {addLockByTgId} from "../../config/redislock";
+import ScheduleHandle from "../../commons/ScheduleHandle";
 
 const schedule = require('node-schedule')
 
@@ -386,7 +387,13 @@ class PC28Controller {
         }
         json.data.data = json.data.data.map((item: any) => {
             item.expect = item['expect']
-            item.open_code = item['opencode']
+            if (ScheduleHandle.pc28Config.isTest) {
+                item.open_code = ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex]
+                    ? ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex]
+                    : ScheduleHandle.pc28Config.testList[0]
+            } else {
+                item.open_code = item['opencode']
+            }
             item.open_time = item['opentime']
             item.next_expect = item['drawIssue']
             item.next_time = item['drawTime']
@@ -402,20 +409,6 @@ class PC28Controller {
         }
         console.log('返回的结果', json.data)
         return json.data
-        // return Promise.resolve({
-        //     "rows": 5,
-        //     "t": "jisu28",
-        //     "message": "试用接口第一位开奖号码随机错乱,如需查看完整号码，请访www.openjiang.com购买付费接口!",
-        //     "data": [
-        //         {
-        //             "expect": "73674886",
-        //             "open_code": "9,7,3",
-        //             "open_time": "2024-12-13 22:13:00",
-        //             "next_expect": "73674887",
-        //             "next_time": "2024-12-13 22:14:15"
-        //         }
-        //     ]
-        // })
     }
 
     /**

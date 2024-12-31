@@ -46,7 +46,12 @@ enum GameTypeEnum {
     /**
      * PC定位球反水
      */
-    PCDWQFS = 10
+    PCDWQFS = 10,
+
+    /**
+     * 空游戏类型
+     */
+    MEPTY = 100
 
 }
 

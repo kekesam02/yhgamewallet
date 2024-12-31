@@ -3,6 +3,8 @@ import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
 import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
+import WalletRedPacket from "./handle/WalletRedPacket";
+import WalletType from "../../type/WalletType";
 
 
 /**
@@ -97,15 +99,29 @@ class WalletCallbackHandle {
                     WalletHandleMethod.removeMessage(ctx)
                     WalletHandleMethod.startShouKuan(ctx,cbot)
                     break
+
                 // 红包
                 case StartWalletEnum.HONGBAO:
-                    WalletHandleMethod.startHongBao(ctx,cbot)
-                    break
+                    return WalletHandleMethod.startHongBao(ctx,cbot)
+                // 点击添加红包按钮回调
+                case StartWalletEnum.HONGBAO_ADD:
+                    return new WalletRedPacket(ctx).selectWallType()
+                // 点击选择红包金额类型回掉
+                case StartWalletEnum.HONGBAO_WALLET_USDT:
+                    return new WalletRedPacket(ctx).selectRedPacketType(WalletType.USDT)
+                // 点击选择红包金额类型回掉
+                case StartWalletEnum.HONGBAO_WALLET_TRX:
+                    return new WalletRedPacket(ctx).selectRedPacketType(WalletType.TRX)
+                // 点击选择红包类型触发(均分包)
+                case StartWalletEnum.HONGBAO_TYPE_MIDDLE:
+                    return new WalletRedPacket(ctx).inputMoney(0)
+                // 点击选择红包类型触发(随机包)
+                case StartWalletEnum.HONGBAO_TYPE_RENDOM:
+                    return new WalletRedPacket(ctx).inputMoney(1)
+
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:
-                    WalletHandleMethod.startShanDui(ctx,cbot)
-                    break
-                // 个人中心
+                    return  WalletHandleMethod.startShanDui(ctx,cbot)
                 case StartWalletEnum.USERCENTER:
                     WalletUserCenterMethod.startUserCenterCallback(ctx).then()
                     break
@@ -122,6 +138,16 @@ class WalletCallbackHandle {
                 case StartWalletEnum.UPDATEPWDBTN:
                     WalletHandleMethod.startUpdatePwdCallback(ctx,cbot)
                     break
+
+                case StartWalletEnum.HONGBAO_CANCEL_1:
+                    // 红包返回按钮类型 1、回到点击红包按钮第一页
+                    return  new WalletRedPacket(ctx).addRedPacket()
+                case StartWalletEnum.HONGBAO_CANCEL_2:
+                    // 红包返回按钮类型 2、回退到红包选择货币页面
+                    return  new WalletRedPacket(ctx).addRedPacket()
+                case StartWalletEnum.HONGBAO_CANCEL_3:
+                    // 红包返回按钮类型 3、回退到红包类型页面(选择随机还是均分)
+                    return  new WalletRedPacket(ctx).addRedPacket()
             }
         }
     }

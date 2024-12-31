@@ -52,9 +52,15 @@ class BotOddsStorage {
         let arr = openCode.split(',')
         let sum = arr.reduce((prev, curr) => Number(curr) + prev, 0)
 
-        // pc28高倍特殊处理
+        // 如果是杀点杀的话就正常取计算赔率、不管13、14之类的
+        if (botOdds.name.indexOf('杀') > -1) {
+            return new ComputeUtils(money).multiplied(botOdds.odds).toString()
+        }
+
+        // pc28低倍特殊处理
         if (gameType == GameTypeEnum.PC28DI) {
             if (sum == 13 || sum == 14) {
+
                 // 遇13/14大/小/单/双赔 1.6
                 if (
                     botOdds.name == '单'
@@ -65,7 +71,7 @@ class BotOddsStorage {
                     return new ComputeUtils(money).multiplied(1.6).toString()
                 }
 
-                // 遇13/14下注组合下注回本
+                // 遇大单、大双、小双、小单下注组合下注回本
                 if (
                     botOdds.name == '大单'
                     || botOdds.name == '大双'
@@ -79,12 +85,29 @@ class BotOddsStorage {
 
         // pc28高倍特殊处理
         if (gameType == GameTypeEnum.PC28GAO) {
+            // 如果点杀的话正常计算赔率
+            if (botOdds.name.indexOf('杀') > -1) {
+                return new ComputeUtils(money).multiplied(botOdds.odds).toString()
+            }
+
+            // 遇13、14处理
             if (sum == 13 || sum == 14) {
-                // 遇13/14下注组合下注回本
+                // 遇13/14大/小/单/双赔 1
                 if (
-                    botOdds.name == '对子'
-                    || botOdds.name == '顺子'
-                    || botOdds.name == '豹子'
+                    botOdds.name == '单'
+                    || botOdds.name == '双'
+                    || botOdds.name == '大'
+                    || botOdds.name == '小'
+                ) {
+                    return new ComputeUtils(money).multiplied(1).toString()
+                }
+
+                // 遇大单、大双、小双、小单下注组合下注回本
+                if (
+                    botOdds.name == '大单'
+                    || botOdds.name == '大双'
+                    || botOdds.name == '小双'
+                    || botOdds.name == '小单'
                 ) {
                     return new ComputeUtils(money).multiplied(1).toString()
                 }
