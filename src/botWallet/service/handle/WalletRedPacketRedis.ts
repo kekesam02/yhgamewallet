@@ -97,7 +97,7 @@ class WalletRedPacketRedis {
     /**
      * 设置当前的红包类型(均分还是随机)
      */
-    public saveMiddleType = async (ctx: Context, type: number | null) => {
+    public saveMiddleType = async (ctx: Context, type:any) => {
         this.type = type | 0
         let tgId: number = ctx.message?.from?.id || 0
         redis.set('currentop' + tgId, 'hongbao_money')
@@ -190,7 +190,7 @@ class WalletRedPacketRedis {
     /**
      * 开始支付
      */
-    public startPay = async (ctx: Context, userModel) => {
+    public startPay = async (ctx: Context, userModel:UserModel) => {
         let redPacket = await this.getRedisData(ctx)
 
         // redis 中数据不存在 | 进度不同步回退
@@ -221,7 +221,7 @@ class WalletRedPacketRedis {
     /**
      * 设置数据
      */
-    public setModelData = (jsonStr: string) => {
+    public setModelData = (jsonStr: string ) => {
         let json = JSON.parse(jsonStr)
         this.process = json['process'] ?? 0
         this.walletType = json['walletType'] ?? WalletType.USDT
@@ -296,7 +296,7 @@ class WalletRedPacketRedis {
         let exists = await redis.exists(this.getRedisKey(ctx))
         console.log('获取到的结果', exists)
         if (exists == 1) {
-            let json = redis.get(this.getRedisKey(ctx)) ?? ''
+            let json = await redis.get(this.getRedisKey(ctx)) ?? ''
             return new WalletRedPacketRedis().setModelData(json)
         }
         return null

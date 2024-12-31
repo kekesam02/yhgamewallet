@@ -50,36 +50,39 @@ class MessageTipUtils {
      * 余额不足
      */
     public balanceNotErr = (ctx: Context) => {
-        return ctx.replyWithHTML(`⚠️温馨提示：操作失败，余额不足！`, {
+        var markUp:any = {
             reply_markup: {
                 selective: false,
                 inline_keyboard: new ButtonUtils().createCallbackBtn([WalletController.HomeBtns[0]])
             }
-        })
+        }
+        return ctx.replyWithHTML(`⚠️温馨提示：操作失败，余额不足！`, markUp)
     }
 
     /**
      * 最少输入金额提示
      */
     public minMoneyTips = (ctx: Context, descTitle: string = '红包', minNum = 1) => {
-        return ctx.replyWithHTML(`⚠️温馨提示：${descTitle}最小金额为${minNum}！`, {
+        var markUp:any={
             reply_markup: {
                 selective: false,
                 inline_keyboard: new ButtonUtils().createCallbackBtn([WalletController.HomeBtns[0]])
             }
-        })
+        }
+        return ctx.replyWithHTML(`⚠️温馨提示：${descTitle}最小金额为${minNum}！`, markUp)
     }
 
     /**
      * 最大数量提示
      */
     public maxLengthTip = (ctx: Context, descTitle: string = '红包', maxLength = 999) => {
-        return ctx.replyWithHTML(`⚠️温馨提示：${descTitle}最大数量为${maxLength}！`, {
+        var markUp:any = {
             reply_markup: {
                 selective: false,
                 inline_keyboard: new ButtonUtils().createCallbackBtn([WalletController.HomeBtns[0]])
             }
-        })
+        }
+        return ctx.replyWithHTML(`⚠️温馨提示：${descTitle}最大数量为${maxLength}！`,markUp)
     }
 }
 
