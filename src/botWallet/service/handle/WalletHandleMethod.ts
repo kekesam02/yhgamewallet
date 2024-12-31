@@ -851,16 +851,18 @@ class WalletHandleMethod {
                 }
 
                 // 再次查询用户信息
-               const newbotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
+                const newbotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
+                const beforeAmount =  newbotUser?.USDT * 1
                 // 3：开始修改用户余额
-                await UserModel.createQueryBuilder().update().set({
+                await UserModel.createQueryBuilder().update(UserModel).set({
                     USDT: () => {
-                        return "usdt + " + botPayment?.paymentAmount * 1
+                        return "usdt + " + botPayment?.paymentAmount
                     }
                 }).where({
                     id: newbotUser?.id
                 }).execute()
-
+                // 新增之后的余额
+                const afterAmount = beforeAmount + botPayment?.paymentAmount * 1
                 //4：修改原来的订单为为--成功
                 await queryRunner.manager.update(BotPaymentModel, {
                   id:botPayment?.id
@@ -881,8 +883,8 @@ class WalletHandleMethod {
                     uid: newbotUser?.id,
                     username: username,
                     nickname: nickname,
-                    balanceBefore: botUser?.USDT + '',
-                    balanceAfter: newbotUser?.USDT + '',
+                    balanceBefore: beforeAmount + '',
+                    balanceAfter: afterAmount + '',
                     paymentType: PaymentTypeEnum.YHSK.value,
                     paymentTypeName: PaymentTypeEnum.YHSK.name,
                     operateType: 1,
