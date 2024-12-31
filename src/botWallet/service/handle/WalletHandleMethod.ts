@@ -862,7 +862,7 @@ class WalletHandleMethod {
                     id: newbotUser?.id
                 }).execute()
                 // 新增之后的余额
-                const afterAmount = beforeAmount * 1 + botPayment?.paymentAmount * 1
+                const afterAmount:number = parseFloat(beforeAmount)  + parseFloat(botPayment?.paymentAmount || '0')
                 //4：修改原来的订单为为--成功
                 await queryRunner.manager.update(BotPaymentModel, {
                   id:botPayment?.id
