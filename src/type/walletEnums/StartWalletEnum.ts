@@ -35,32 +35,42 @@ enum StartWalletEnum {
     /**
      * 点击添加红包按钮回掉参数
      */
-    HONGBAO_ADD = 'hongbao_start',
+    HONGBAO_ADD = 'hongbaoStart',
 
     /**
      * 点击选择红包金额类型按钮 - usdt
      */
-    HONGBAO_WALLET_USDT = 'hongbao_walletType_usdt',
+    HONGBAO_WALLET_USDT = 'hongbaoWalletTypeUsdt',
 
     /**
      * 点击选择红包金额类型按钮 - trx
      */
-    HONGBAO_WALLET_TRX = 'hongbao_walletType_trx',
+    HONGBAO_WALLET_TRX = 'hongbaoWalletTypeTrx',
 
     /**
      * 点击选择红包类型按钮(均分包)
      */
-    HONGBAO_TYPE_MIDDLE = 'hongbao_walletType_middle',
+    HONGBAO_TYPE_MIDDLE = 'hongbaoWalletTypeMiddle',
 
     /**
      * 点击红包类型随机包触发(随机包)
      */
-    HONGBAO_TYPE_RENDOM = 'hongbao_walletType_rendom',
+    HONGBAO_TYPE_RENDOM = 'hongbaoWalletTypeRendom',
 
     /**
      * 红包确认支付按钮触发
      */
-    HONGBAO_TYPE_PAY = 'hongbao_walletType_pay',
+    HONGBAO_TYPE_PAY = 'hongbaoWalletTypePay',
+
+    /**
+     * 设置红包备注
+     */
+    HONGBAO_TYPE_REMARK = 'hongbaoWalletTypeRemark_',
+
+    /**
+     * 设置红包领取条件
+     */
+    HONGBAO_TYPE_CONDITION = 'hongbaoWalletTypeCondition_',
 
     /**
      * 闪兑

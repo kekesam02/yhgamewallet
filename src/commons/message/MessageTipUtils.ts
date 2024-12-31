@@ -54,6 +54,7 @@ class MessageTipUtils {
             reply_markup: {
                 selective: false,
                 inline_keyboard: new ButtonUtils().createCallbackBtn([WalletController.HomeBtns[0]])
+                    .reply_markup.inline_keyboard
             }
         }
         return ctx.replyWithHTML(`⚠️温馨提示：操作失败，余额不足！`, markUp)
@@ -63,26 +64,14 @@ class MessageTipUtils {
      * 最少输入金额提示
      */
     public minMoneyTips = (ctx: Context, descTitle: string = '红包', minNum = 1) => {
-        var markUp:any={
-            reply_markup: {
-                selective: false,
-                inline_keyboard: new ButtonUtils().createCallbackBtn([WalletController.HomeBtns[0]])
-            }
-        }
-        return ctx.replyWithHTML(`⚠️温馨提示：${descTitle}最小金额为${minNum}！`, markUp)
+        return ctx.replyWithHTML(`⚠️温馨提示：${descTitle}最小金额为${minNum}！`)
     }
 
     /**
      * 最大数量提示
      */
     public maxLengthTip = (ctx: Context, descTitle: string = '红包', maxLength = 999) => {
-        var markUp:any = {
-            reply_markup: {
-                selective: false,
-                inline_keyboard: new ButtonUtils().createCallbackBtn([WalletController.HomeBtns[0]])
-            }
-        }
-        return ctx.replyWithHTML(`⚠️温馨提示：${descTitle}最大数量为${maxLength}！`,markUp)
+        return ctx.replyWithHTML(`⚠️温馨提示：${descTitle}最大数量为${maxLength}！`)
     }
 }
 

@@ -254,6 +254,31 @@ class WalletController {
     }
 
     /**
+     * 创建添加红包完成后的按钮
+     */
+    public static createSendHbBtn = (hbId: string) => {
+        return new ButtonUtils().createInlineKeySwitchBoard([
+            [
+                {
+                    text: '\uD83D\uDC49再发一个',
+                    query: StartWalletEnum.HONGBAO_CANCEL_1
+                },{
+                    text: '\uD83E\uDDE7发送红包',
+                    switch_inline_query: hbId
+                }
+            ], [
+                {
+                    text: '✏️设置备注',
+                    query: StartWalletEnum.HONGBAO_TYPE_REMARK + hbId
+                },{
+                    text: '⚙️设置条件',
+                    query: StartWalletEnum.HONGBAO_TYPE_CONDITION + hbId
+                }
+            ]
+        ])
+    }
+
+    /**
      * 创建审核通过
      */
     public static createSuccessBtn = (username:string) => {

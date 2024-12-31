@@ -39,13 +39,18 @@ class WalletMessageHandle {
             }
 
             // 红包金额
-            if (currentop == 'hongbao_money') {
+            if (currentop == 'hongbaoMoney') {
                 WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop)
                 return;
             }
             // 红包数量
-            if (currentop == 'hongbao_length') {
+            if (currentop == 'hongbaoLength') {
                 WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop)
+                return;
+            }
+            // 红包备注文字
+            if (currentop == 'hongbaoRemark' || currentop.split('_')[0] == 'hongbaoRemark') {
+                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop.split('_')[1])
                 return;
             }
             // 闪兑

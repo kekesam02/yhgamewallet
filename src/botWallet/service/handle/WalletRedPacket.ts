@@ -17,8 +17,11 @@ import CommandController from "../../../botGame/gameController/CommandController
 import CommonEnumsIndex from "../../../type/CommonEnumsIndex";
 import {addLockByCtx} from "../../../config/redislock";
 import {queryRunner} from "../../../config/database";
-import WalletRedPacketRedis from "./WalletRedPacketRedis";
 import ContextUtil from "../../../commons/ContextUtil";
+import RedPacketHtml from "../../../html/walletHtml/RedPacketHtml";
+import BotHb from "../../../models/BotHb";
+import WalletController from "../../controller/WalletController";
+import redis from "../../../config/redis";
 
 
 
@@ -53,6 +56,7 @@ class WalletRedPacket {
                 ]
             ]).reply_markup.inline_keyboard
         )
+        await new BotHb().init(this.ctx)
         return true
     }
 
@@ -81,7 +85,6 @@ class WalletRedPacket {
                 ]
             ]).reply_markup.inline_keyboard
         )
-        await new WalletRedPacketRedis().saveInit(this.ctx)
         return true
     }
 
@@ -110,7 +113,7 @@ class WalletRedPacket {
                     ]
             ]).reply_markup.inline_keyboard
         )
-        return new WalletRedPacketRedis(0, wallType).saveWalletType(this.ctx, wallType)
+        return new BotHb().saveWalletType(this.ctx, wallType)
     }
 
     /**
@@ -133,16 +136,16 @@ class WalletRedPacket {
                 ]
             ]).reply_markup.inline_keyboard
         )
-        return new WalletRedPacketRedis().saveMiddleType(this.ctx, redPacketType)
+        return new BotHb().saveMiddleType(this.ctx, redPacketType)
     }
 
     /**
      * 输入红包金额结束 - 发送输入红包数量按钮
      */
     public sendInputLength = async (money: string) => {
-        let result = await new WalletRedPacketRedis().saveMoney(this.ctx, money)
+        let result = await new BotHb().saveMoney(this.ctx, money)
         if (result) {
-            await new MessageUtils().sendTextReply(
+            await new MessageUtils().botSendTextToBot(
                 this.ctx,
                 '\uD83D\uDCA1 请回复你要发送的数量()? 例如: 10',
                 new ButtonUtils().createCallbackBtn([
@@ -152,7 +155,7 @@ class WalletRedPacket {
                             query: StartWalletEnum.HONGBAO_CANCEL_1
                         }
                     ]
-                ]).reply_markup.inline_keyboard
+                ]).reply_markup
             )
         }
         return false
@@ -161,16 +164,17 @@ class WalletRedPacket {
     /**
      * 输入红包数量输入结束 - 返回确认支付按钮
      */
-    public sendPayButton = async (length: number) => {
-        let isSave = await new WalletRedPacketRedis().saveLength(this.ctx, length)
+    public sendPayButton = async (length: string) => {
+        console.log('保存发送红包的数量', length)
+        let isSave = await new BotHb().saveLength(this.ctx, length)
         if (!isSave) {
             return false
         }
-        let result = await new WalletRedPacketRedis().getRedisData(this.ctx)
+        let result = await new BotHb().getRedisData(this.ctx)
         if (result) {
-            await new MessageUtils().sendTextReply(
+            await new MessageUtils().botSendTextToBot(
                 this.ctx,
-                `\uD83D\uDCA1 发送一个红包/n支付金额${result.money}${result.type == 0? '随机': '均分'}${new CommonEnumsIndex().getWalletTypeStr(result.walletType)}`,
+                `\uD83D\uDCA1 发送${result.num}个红包\n支付金额${result.money}${result.hbType == 0? '随机': '均分'}${new CommonEnumsIndex().getWalletTypeStr(result.walletType)}`,
                 new ButtonUtils().createCallbackBtn([
                     [
                         {
@@ -181,7 +185,7 @@ class WalletRedPacket {
                             query: StartWalletEnum.HONGBAO_CANCEL_1
                         }
                     ]
-                ]).reply_markup.inline_keyboard
+                ]).reply_markup
             )
         }
         return false
@@ -193,25 +197,76 @@ class WalletRedPacket {
     public startPay = async () => {
         await addLockByCtx(this.ctx,async () => {
             await queryRunner.startTransaction()
-            let userModel = await queryRunner.manager.createQueryBuilder()
-                .where('tg_id = :tgId', {
+            let user = await queryRunner.manager.findOne(UserModel, {
+                where: {
                     tgId: ContextUtil.getUserId(this.ctx)
-                })
-                .getOne()
-            if (!userModel) {
+                }
+            }) as UserModel
+            await queryRunner.commitTransaction()
+            if (!user) {
                 return false
             }
-            let result = await new WalletRedPacketRedis().startPay(this.ctx, userModel)
+            let result = await new BotHb().startPay(this.ctx, user)
             if (result) {
+                let redPacket = new BotHb().getRedisData(this.ctx)
+                if (!redPacket) {
+                    return false
+                }
                 // 判定是否需要输入密码
                 // 密码验证通过、红包进行持久化存储
-                return await new WalletRedPacketRedis().saveLocalData(this.ctx)
+                let botHb = await new BotHb().saveLocalData(this.ctx)
+                if (!botHb) {
+                    return false
+                }
+                let html = new RedPacketHtml().getSuccessHtml(user, botHb)
+                await new MessageUtils().botSendTextToBot(this.ctx, html, WalletController.createSendHbBtn(botHb.hbId).reply_markup)
             }
             return false
         }, async () => {
             console.log('保存红包失败')
         })
     }
+
+    /**
+     * 发送设置红包备注文案
+     */
+    public sendRemarkIpt = async (hbId: string) => {
+        try {
+            await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), `hongbaoRemark_${hbId}`)
+            await new MessageUtils().sendTextReply(
+                this.ctx,
+                `💡请输入备注信息（150字内）`
+            )
+        } catch (err) {
+
+        }
+    }
+
+    /**
+     * 设置备注文字
+     */
+    public setRemark = async (text: string, hbId: string) => {
+        console.log('传入的红包id-----', hbId)
+        console.log('备注文字------', text)
+        let botHb = await new BotHb().getBotHb(hbId)
+        if (!botHb) {
+            return
+        }
+        try {
+            botHb.remark = text
+            await botHb.setBotHb()
+        } catch (err) {
+
+        }
+    }
+
+    /**
+     * 设置红包领取条件
+     */
+    public setGainCondition = (hbId: string) => {
+
+    }
+
 }
 
 

@@ -990,16 +990,19 @@ class WalletHandleMethod {
         return new WalletRedPacket(ctx).addRedPacket()
     }
 
-    // 红包具体逻辑
     // 红包接收用户输入文字处理
-    public static startHongBaoHandle = async (text: string, tgId: number, ctx: Context, currentop: string) => {
-        if (text.indexOf('hongbao_money') > -1) {
+    public static startHongBaoHandle = async(text: string, tgId: number, ctx: Context, currentop: string)=>{
+        if (currentop.indexOf('hongbaoMoney') > -1) {
             // 红包金额处理 - 结束后返回红包数量输入框
             return new WalletRedPacket(ctx).sendInputLength(text)
         }
-        if (text.indexOf('hongbao_length') > -1) {
+        if (currentop.indexOf('hongbaoLength') > -1) {
             // 红包数量处理
-            return new WalletRedPacket(ctx).sendPayButton(1)
+            return new WalletRedPacket(ctx).sendPayButton(text)
+        }
+        if (currentop.indexOf('hongbaoRemark') > -1) {
+            // 红包数量处理
+            return new WalletRedPacket(ctx).setRemark(text, currentop)
         }
     }
 

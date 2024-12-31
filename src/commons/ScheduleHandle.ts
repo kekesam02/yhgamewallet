@@ -118,7 +118,7 @@ class ScheduleHandle {
                 console.log('停止上注提示时间是否成功', moment().isAfter(moment(ScheduleHandle.pc28Config.closeTipsTime)))
                 console.log('是否已经提示', ScheduleHandle.pc28Config.isCloseTips)
 
-                if (new TimeUtils().isTimeBetween('20:30', '20.35')) {
+                if (new TimeUtils().isTimeBetween('20:00', '20.35')) {
                     console.log('当前应该维护了')
                     if (!ScheduleHandle.pc28Config.isSendProtect) {
                         ScheduleHandle.pc28Config.isSendProtect = true

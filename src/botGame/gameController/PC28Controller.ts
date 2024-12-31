@@ -446,7 +446,8 @@ class PC28Controller {
                         item.bettingType,
                         item.amountMoney,
                         openCode,
-                        gameType
+                        gameType,
+                        winningType.form.key
                     )
                     needChangeList.push(item)
                 }
@@ -461,7 +462,8 @@ class PC28Controller {
                         item.bettingType,
                         item.amountMoney,
                         openCode,
-                        gameType
+                        gameType,
+                        winningType.form.key
                     )
                     needChangeList.push(item)
                 }
@@ -479,7 +481,8 @@ class PC28Controller {
                         item.bettingType,
                         item.amountMoney,
                         openCode,
-                        gameType
+                        gameType,
+                        winningType.form.key
                     )
                     needChangeList.push(item)
                 }
@@ -494,7 +497,8 @@ class PC28Controller {
                     item.bettingType,
                     item.amountMoney,
                     openCode,
-                    gameType
+                    gameType,
+                    winningType.form.key
                 )
                 needChangeList.push(item)
                 continue
@@ -508,7 +512,22 @@ class PC28Controller {
                     item.bettingType,
                     item.amountMoney,
                     openCode,
-                    gameType
+                    gameType,
+                    winningType.form.key
+                )
+                needChangeList.push(item)
+            }
+
+            console.log('极值判定', item.content)
+            // 判断极值是否对上
+            if (item.content.indexOf(winningType.max) > -1) {
+                item.isWinning = 1
+                item.winningAmount = await BotOddsStorage.getOddsMoney(
+                    item.bettingType,
+                    item.amountMoney,
+                    openCode,
+                    gameType,
+                    winningType.form.key
                 )
                 needChangeList.push(item)
             }

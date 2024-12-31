@@ -122,8 +122,15 @@ class WalletCallbackHandle {
                 // 点击选择红包类型触发(随机包)
                 case StartWalletEnum.HONGBAO_TYPE_RENDOM:
                     return new WalletRedPacket(ctx).inputMoney(1)
+                // 点击红包 - 确认支付触发
                 case StartWalletEnum.HONGBAO_TYPE_PAY:
                     return new WalletRedPacket(ctx).startPay()
+                // 点击红包 - 设置备注触发
+                case StartWalletEnum.HONGBAO_TYPE_REMARK + callbackStr.split('_')[1]:
+                    return new WalletRedPacket(ctx).sendRemarkIpt(callbackStr.split('_')[1])
+                // 点击红包 - 设置领取条件触发
+                case StartWalletEnum.HONGBAO_TYPE_CONDITION + callbackStr.split('_')[1]:
+                    return new WalletRedPacket(ctx).setGainCondition(callbackStr.split('_')[1])
 
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:
