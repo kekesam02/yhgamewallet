@@ -842,29 +842,6 @@ class WalletHandleMethod {
         })
     }
 
-
-    /**
-     * 红包
-     * 代号：hongbao_btn
-     * @param ctx
-     */
-    public static startHongBao = async (ctx: Context, cbot: Telegraf<Context>) => {
-        console.log('点击安安你-------')
-        // 1：获取telegram的tgId
-        let tgId: number = ctx.callbackQuery?.from?.id || 0
-        // 2：设置操作
-        redis.set("currentop" + tgId, "hongbao", 'EX', 60 * 60)
-        const flag = await this.isLogin(tgId, ctx)
-        // 如果密码为空就开始设置密码
-        var mark = await redis.get('mark_' + tgId) || '0'
-        if (mark && mark == '1') return
-        if (!flag) {
-            await this.sendPasswordSetupMessage(ctx, "", mark != '1')
-            return
-        }
-        console.log("startHongBao")
-        return new WalletRedPacket(ctx).addRedPacket()
-    }
     /**
      * 红包
      * 代号：hongbao_btn
