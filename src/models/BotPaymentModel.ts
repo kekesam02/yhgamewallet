@@ -96,7 +96,7 @@ class BotPaymentModel extends BaseEntity {
     balanceAfter: string
 
     /**
-     * 备注，提现的订单号
+     * 备注，提现的订单号 / 红包金额类型
      */
     @Column({
         name: 'payment_method',

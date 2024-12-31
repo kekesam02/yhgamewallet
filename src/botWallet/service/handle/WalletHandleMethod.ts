@@ -1,4 +1,4 @@
-import type {Context, Telegraf} from "telegraf";
+import type {Context,Telegraf} from "telegraf";
 import ButtonUtils from '../../../commons/button/ButtonUtils'
 import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
 import BotTronAddrModel from "../../../models/BotTronAddrModel";
@@ -10,6 +10,7 @@ import messageUtils from "../../../commons/message/MessageUtils";
 import QRCodeUtils from "../../../commons/qrcode/QRCodeUtils";
 import {ButtonCallbackType} from "../../../commons/button/ButtonCallbackType";
 import WalletMessage from "../../const/WalletMessage";
+import {InlineQueryResultArticle} from "@telegraf/types/inline";
 import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
 import redis from "../../../config/redis";
 import BotPaymentModel from "../../../models/BotPaymentModel";
@@ -21,6 +22,7 @@ import WalletRedPacket from "./WalletRedPacket";
 import CustomSnowflake from "../../../commons/CustomSnowflake";
 import WalletType from "../../../type/WalletType";
 import {queryRunner} from "../../../config/database";
+import BotHb from "../../../models/BotHb";
 
 
 /**
@@ -849,6 +851,27 @@ class WalletHandleMethod {
             console.log("startHongBao")
             return new WalletRedPacket(ctx).addRedPacket()
         }
+    /**
+     * 红包
+     * 代号：hongbao_btn
+     * @param ctx
+     */
+    public static startHongBao = async (ctx: Context, cbot:Telegraf<Context>) => {
+        // 1：获取telegram的tgId
+        let tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 2：设置操作
+        redis.set("currentop" + tgId, "hongbao", 'EX', 60 * 60)
+        const flag = await this.isLogin(tgId,ctx)
+        // 如果密码为空就开始设置密码
+        var mark = await redis.get('mark_'+tgId) || '0'
+        if(mark &&  mark == '1')return
+        if (!flag) {
+            await this.sendPasswordSetupMessage(ctx, "",  mark != '1')
+            return
+        }
+        console.log("startHongBao")
+        return new WalletRedPacket(ctx).addRedPacket()
+    }
 
         // 红包具体逻辑
     public static
@@ -868,6 +891,17 @@ class WalletHandleMethod {
                 await ctx.reply('亲，操作慢点，休息一会在操作!')
             })
         }
+    // 红包接收用户输入文字处理
+    public static startHongBaoHandle = async(text: string, tgId: number, ctx: Context, currentop: string)=>{
+        if (text.indexOf('hongbao_money') > -1) {
+            // 红包金额处理 - 结束后返回红包数量输入框
+            return new WalletRedPacket(ctx).sendInputLength(text)
+        }
+        if (text.indexOf('hongbao_length') > -1) {
+            // 红包数量处理
+            return new WalletRedPacket(ctx).sendPayButton()
+        }
+    }
 
         /**
          * 闪兑
