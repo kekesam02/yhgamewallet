@@ -33,7 +33,13 @@ bot.telegram.setMyCommands([
  * 监听/start命令
  */
 bot.command('start', async (ctx) => {
-    return WalletHandleMethod.startCommandCallback(ctx)
+    // 用于监听转账，红包，收款的密码监听
+    var payload = ctx.payload
+    if (payload) {
+        return WalletHandleMethod.startCommandInputPassword(ctx,payload)
+    } else {
+        return WalletHandleMethod.startCommandCallback(ctx)
+    }
 })
 
 /**

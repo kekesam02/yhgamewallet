@@ -294,6 +294,20 @@ class WalletController {
             ]
         ])
     }
+    /**
+     * 转账的确认密码安全
+     */
+    public static createZhuanzhangPwdBtn = (op:string,inlineMessageId:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '\uD83D\uDCB0验证安全密码',
+                    // url: "https://t.me/VertexPaybot?start=inline_"+inlineMessageId+"_"+op
+                    url: "https://t.me/myxukebot?start=inline_"+inlineMessageId+"_"+op
+                }
+            ]
+        ])
+    }
 
     /**
      * 点击收款按钮

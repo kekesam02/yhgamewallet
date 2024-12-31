@@ -632,19 +632,13 @@ class WalletHandleMethod {
             return
         }
 
-        const sid = ctx.botInfo.id
-        const snickname = ctx.botInfo.first_name
-        const susername = ctx.botInfo.username
-
-        const fid = ctx.inlineQuery?.from.id
-        const fnickname = ctx.inlineQuery?.from.first_name
+        // const sid = ctx.botInfo.id
+        // const snickname = ctx.botInfo.first_name
+        // const susername = ctx.botInfo.username
+        // const fid = ctx.inlineQuery?.from.id
+        // const fnickname = ctx.inlineQuery?.from.first_name
+        const inlineMessageId = ctx.inlineMessageId
         const fusername = ctx.inlineQuery?.from.username
-
-        console.log("tgId", tgId)
-        console.log("sid===>fid", sid, fid)
-        console.log("snickname===>fnickname", snickname, fnickname)
-        console.log("susername===>fusername", susername, fusername)
-
         // 查询用户余额
         let userId = AESUtils.encodeUserId(tgId?.toString())
         let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
@@ -705,6 +699,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         var nickname: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
+        let inlineMessageId = ctx.callbackQuery?.inline_message_id || ""
         // 转账金额
         var money = callbackStr.replaceAll("qrjs", "").split(",")[0];
         var sendTgId = callbackStr.replaceAll("qrjs", "").split(",")[1];
@@ -717,7 +712,6 @@ class WalletHandleMethod {
         let userId = AESUtils.encodeUserId(tgId?.toString())
         const botUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
         if (botUser) {
-            let inlineMessageId = ctx.callbackQuery?.inline_message_id
             let userUsdt = parseFloat(botUser.USDT || "0")
             let zhuanMoney = parseFloat(money)
             let walletFreeLimit = parseFloat(botUser.withdrawalLimit || "100")
@@ -736,7 +730,6 @@ class WalletHandleMethod {
 
             // 开始验证免密额度 --- 直接转账
             if (zhuanMoney <= walletFreeLimit) {
-                // ------------------ 这里要设置红包的过期时间
                 // 扣除用户余额、用户余额递减
                 try {
                     await queryRunner.startTransaction()
@@ -777,13 +770,37 @@ class WalletHandleMethod {
                     await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
                 }
             } else {
-                await ctx.answerCbQuery('提示：哈哈开始输入密码', {show_alert: true})
-                console.log(callbackStr)
-                console.log(tgId)
-                console.log(nickname)
-                console.log(username)
+                console.log(ctx?.chat?.id)
+                redis.set("zk_inlineMessageId" + tgId, inlineMessageId, 'EX', 1000 * 60 * 60 * 6);
+                await ctx.editMessageText("请点击下方按钮验证", {parse_mode: 'HTML'})
+                await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPwdBtn(inlineMessageId,"zhuanzhang").reply_markup)
             }
         }
+    }
+
+    /**
+     * 用户输入密码
+     * @param ctx
+     * @param payload
+     */
+    public static startCommandInputPassword = async(ctx : Context,payload :string) => {
+        var qrjs = payload.replaceAll("inline_", "");
+
+        var inlineMessageId = qrjs.split("_")[1]
+
+
+        await ctx.telegram.editMessageText('',undefined,inlineMessageId,
+            "\uD83D\uDCB0 xxx转账给你 10 USDT",
+            {parse_mode: 'HTML'}
+        )
+
+        await  ctx.telegram.editMessageReplyMarkup('',undefined,inlineMessageId,
+            WalletController.createZhuanzhangSKBtn('11').reply_markup
+        )
+
+        // 可以考虑清除原来的密码
+        // 开始生成输入密码确认
+        await this.sendPasswordSetupMessage(ctx,"",true)
     }
 
     /**
@@ -824,17 +841,17 @@ class WalletHandleMethod {
         if (botPayment) {
             let botPaymentTgId = botPayment?.tgId
             let encodeUserId = AESUtils.encodeUserId(tgId)
-            if(encodeUserId == botPaymentTgId){
-                await ctx.answerCbQuery("收款人不能是自己",{show_alert:true})
-                return;
-            }
+            // if(encodeUserId == botPaymentTgId){
+            //     await ctx.answerCbQuery("收款人不能是自己",{show_alert:true})
+            //     return;
+            // }
             try {
                 // 收款时间
                 var applyTime = DateFormatUtils.CurrentDateFormatString()
                 // 转账金额
                 var zhuanMoney = botPayment?.paymentAmount
+                // 事务开启
                 await queryRunner.startTransaction()
-
                 // 1：查询收款人是否注册
                 let botUser:UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
                 // 2：如果没有注册就先注册
@@ -900,7 +917,7 @@ class WalletHandleMethod {
                     status:1,
                     chatId: inlineMessageId
                 })
-                ctx.editMessageText("✅ 已收款成功!")
+                ctx.editMessageText("✅ 收款完成!")
                 ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username||'').reply_markup)
                 await queryRunner.commitTransaction()
             } catch (e){

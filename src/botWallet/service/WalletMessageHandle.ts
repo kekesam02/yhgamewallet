@@ -22,6 +22,7 @@ class WalletMessageHandle {
         }
 
         text = text.trim()
+
         // 设置提现地址
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
@@ -56,20 +57,6 @@ class WalletMessageHandle {
             ctx.reply("会话已失效，请重新点击面板进行操作!")
             WalletHandleMethod.startCommandCallback(ctx).then()
         }
-
-        // switch (true) {
-        //     // 下面是指令相关的消息------------
-        //     case WalletCommand.command.includes(text):
-        //         console.log('查询到的指令信息--')
-        //         WalletHandleMethod.startCommandCallback(ctx).then()
-        //         break
-        //     case WalletCommand.noteOrder.includes(text):
-        //         console.log('查询注单信息')
-        //         WalletHandleMethod.startCommandCallback(ctx).then()
-        //         break
-        //     default:
-        //         console.log('未能识别消息')
-        // }
     }
 }
 
