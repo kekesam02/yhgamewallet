@@ -296,6 +296,20 @@ class WalletController {
     }
 
     /**
+     * 点击收款按钮
+     */
+    public static createZhuanzhangSureBtn = (username:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '✅ 已收款成功',
+                    url: 'https://t.me/'+username
+                }
+            ]
+        ])
+    }
+
+    /**
      * 创建空按钮
      */
     public static createEmptyBtn = () => {

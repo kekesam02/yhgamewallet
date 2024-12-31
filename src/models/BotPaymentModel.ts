@@ -152,6 +152,19 @@ class BotPaymentModel extends BaseEntity {
     del: number
 
     /**
+     * 订单状态 -- 转账，收款使用
+     *      0: 初始状态 --转账
+     *      1: 已转账 / 已收款 -- 转账
+     *      0: 初始状态 --收款
+     *      1: 发起收款 / 成功收款 -- 转账
+     */
+    @Column({
+        name: 'status',
+        default: 0
+    })
+    status: number
+
+    /**
      * 钱包类型
      */
     @Column({

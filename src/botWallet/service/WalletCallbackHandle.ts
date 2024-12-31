@@ -43,6 +43,8 @@ class WalletCallbackHandle {
             WalletHandleMethod.startZhuanZhangUnLock(ctx)
         }else if(callbackStr.startsWith('quxiaozz')){
             WalletHandleMethod.cancelZhuanZhang(ctx)
+        }else if(callbackStr.startsWith('shoukuanzk')){
+            WalletHandleMethod.startZhuanzhangSK(ctx)
         } else {
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================

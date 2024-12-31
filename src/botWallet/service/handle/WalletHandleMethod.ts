@@ -128,6 +128,7 @@ class WalletHandleMethod {
                 nickName: firstName,
                 userName: username,
                 vip: 0,
+                USDT:"0",
                 promotionLink: '',
                 rechargeLink: ''
             }).execute()
@@ -183,6 +184,7 @@ class WalletHandleMethod {
                 nickName: firstName,
                 userName: username,
                 vip: 0,
+                USDT:"0",
                 promotionLink: '',
                 rechargeLink: link
             }).execute()
@@ -767,7 +769,7 @@ class WalletHandleMethod {
                         USDT: realMoney + ''
                     })
                     // 更换收款的按钮
-                    await ctx.editMessageText("\uD83D\uDCB0 转账给你 " + zhuanMoney + " USDT", {parse_mode: 'HTML'})
+                    await ctx.editMessageText("\uD83D\uDCB0 【"+botPayment.username+"】转账给你 " + zhuanMoney + " USDT", {parse_mode: 'HTML'})
                     await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSKBtn(botPayment.id + '').reply_markup)
                     await queryRunner.commitTransaction()
                 } catch (e) {
@@ -803,6 +805,111 @@ class WalletHandleMethod {
         ctx.editMessageText("提示：对方已取消转账!")
         ctx.editMessageReplyMarkup(WalletController.createEmptyBtn().reply_markup)
     }
+
+    /**
+     * 点击收款按钮进行收款
+     * @param ctx
+     */
+    public static startZhuanzhangSK = async (ctx:Context)=>{
+        let update: any = ctx?.update
+        let callbackStr: string = update.callback_query?.data
+        // 1：获取收款人tgId
+        var tgId: string = ctx.callbackQuery?.from?.id+'' || '0'
+        var nickname: string = ctx.callbackQuery?.from?.first_name+'' || '0'
+        var username: string = ctx.callbackQuery?.from?.username+'' || '0'
+        // 2: 查询转账人
+        var botPaymentId = callbackStr.replaceAll("shoukuanzk", "");
+        var botPayment:BotPaymentModel | null = await BotPaymentModel.createQueryBuilder().where("id=:id", {id: botPaymentId}).getOne()
+        // 获取转账人信息
+        if (botPayment) {
+            let botPaymentTgId = botPayment?.tgId
+            let encodeUserId = AESUtils.encodeUserId(tgId)
+            if(encodeUserId == botPaymentTgId){
+                await ctx.answerCbQuery("收款人不能是自己",{show_alert:true})
+                return;
+            }
+            try {
+                // 收款时间
+                var applyTime = DateFormatUtils.CurrentDateFormatString()
+                // 转账金额
+                var zhuanMoney = botPayment?.paymentAmount
+                await queryRunner.startTransaction()
+
+                // 1：查询收款人是否注册
+                let botUser:UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
+                // 2：如果没有注册就先注册
+                if (!botUser){
+                    await UserModel.createQueryBuilder().insert().into(UserModel).values({
+                        tgId: encodeUserId,
+                        nickName: nickname,
+                        userName: username,
+                        vip: 0,
+                        USDT:"0",
+                        promotionLink: '',
+                        rechargeLink: ''
+                    }).execute()
+                }
+
+                // 再次查询用户信息
+               const newbotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
+                // 3：开始修改用户余额
+                await UserModel.createQueryBuilder().update().set({
+                    USDT: () => {
+                        return "usdt + " + botPayment?.paymentAmount * 1
+                    }
+                }).where({
+                    id: newbotUser?.id
+                }).execute()
+
+                //4：修改原来的订单为为--成功
+                await queryRunner.manager.update(BotPaymentModel, {
+                  id:botPayment?.id
+                },{
+                  status :1,
+                  passTime: applyTime,
+                  passTgid:encodeUserId,
+                  passUsername:username,
+                  passNickname:nickname
+                })
+
+                //5：保存收款记录
+                var orderId: string = CustomSnowflake.snowflake()
+                let inlineMessageId = ctx.callbackQuery?.inline_message_id
+                // 开始存收款订单
+                await queryRunner.manager.save(BotPaymentModel, {
+                    tgId: encodeUserId,
+                    uid: newbotUser?.id,
+                    username: username,
+                    nickname: nickname,
+                    balanceBefore: botUser?.USDT + '',
+                    balanceAfter: newbotUser?.USDT + '',
+                    paymentType: PaymentTypeEnum.YHSK.value,
+                    paymentTypeName: PaymentTypeEnum.YHSK.name,
+                    operateType: 1,
+                    paymentTypeNumber: 'zk' + orderId,
+                    paymentAmount: zhuanMoney + '',
+                    paymentRealAmount: zhuanMoney + '',
+                    walletType: WalletType.USDT,
+                    applyTime: applyTime,
+                    passTime: applyTime,
+                    passTgid:botPayment.tgId,
+                    passUsername:botPayment.username,
+                    passNickname:botPayment.passNickname,
+                    status:1,
+                    chatId: inlineMessageId
+                })
+                ctx.editMessageText("✅ 已收款成功!")
+                ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username||'').reply_markup)
+                await queryRunner.commitTransaction()
+            } catch (e){
+                ctx.editMessageText("出错了，请稍后在试试!")
+                ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username||'').reply_markup)
+                await queryRunner.rollbackTransaction()
+            }
+        }
+    }
+
+
 
     /**
      * 收款
@@ -861,7 +968,6 @@ class WalletHandleMethod {
             await this.sendPasswordSetupMessage(ctx, "", mark != '1')
             return
         }
-        console.log("startHongBao")
         return new WalletRedPacket(ctx).addRedPacket()
     }
 
