@@ -123,7 +123,7 @@ bot.on('inline_query', async (ctx) => {
             type: 'article',
             id: '1',
             title: '代币余额' + '1000 USDT',
-            description: "付款金额" + parseFloat(query) +' USDT',
+            description: "付款金额" + parseInt(query) +' USDT',
             input_message_content: {
                 message_text: query
             },

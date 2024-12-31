@@ -41,6 +41,8 @@ class WalletCallbackHandle {
             WalletHandleMethod.startInputPassword(ctx)
         }else if(callbackStr.startsWith('qrjs')){
             WalletHandleMethod.startZhuanZhangUnLock(ctx)
+        }else if(callbackStr.startsWith('quxiaozz')){
+            WalletHandleMethod.cancelZhuanZhang(ctx)
         } else {
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================

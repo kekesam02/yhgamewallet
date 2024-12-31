@@ -282,6 +282,20 @@ class WalletController {
     }
 
     /**
+     * 转账的点击按钮
+     */
+    public static createZhuanzhangSKBtn = (botPaymentId:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '\uD83D\uDCB0收款',
+                    query: "shoukuanzk"+botPaymentId
+                }
+            ]
+        ])
+    }
+
+    /**
      * 创建空按钮
      */
     public static createEmptyBtn = () => {
