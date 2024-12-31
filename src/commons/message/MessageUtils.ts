@@ -33,6 +33,22 @@ class MessageUtils {
     }
 
     /**
+     * 发送文本消息到机器人对话
+     */
+    public botSendTextToBot = (
+        bot: Context,
+        text: string,
+        reply_markup: InlineKeyboardMarkup | ReplyKeyboardMarkup | ReplyKeyboardRemove | ForceReply = {
+            inline_keyboard: []
+        }
+    ) => {
+        return bot.sendMessage(text, {
+            parse_mode: 'HTML',
+            reply_markup: reply_markup
+        })
+    }
+
+    /**
      * 发送文本、带回复用户的那条消息
      * @param ctx
      * @param text

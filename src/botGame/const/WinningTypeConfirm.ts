@@ -349,6 +349,10 @@ class WinningTypeConfirm {
     /**
      * 获取开奖结果描述文字
      * @param result: 开奖结果
+     * @return
+     *      code: 双面 大小单双、组合
+     *      form: 形态 对子顺子豹子
+     *      max: 极值
      */
     public getLotteryDescPC28DI = (result: string, gameType: GameTypeEnum): {
         code: {
@@ -358,7 +362,8 @@ class WinningTypeConfirm {
         form: {
             key: string,
             value: any
-        }
+        },
+        max: string
     } => {
         // 需要判断的单双之类的类型
         let codeList = [
@@ -396,9 +401,18 @@ class WinningTypeConfirm {
             formResult = this.formDefault
         }
 
+        let maxResult = '无'
+        if (sum >= 22) {
+            maxResult = '极大'
+        }
+        if (sum <= 5) {
+            maxResult = '极小'
+        }
+
         return {
             code: codeResult!,
-            form: formResult!
+            form: formResult!,
+            max: maxResult
         }
     }
 }

@@ -77,12 +77,12 @@ class BettingCommand28 {
         /**
          * 极大
          */
-        ['极大', 'jd'],
+        ['极大', 'jd', '级大'],
 
         /**
          * 极小
          */
-        ['极小', 'jx'],
+        ['极小', 'jx', '级小'],
 
         /**
          * 梭哈
@@ -120,16 +120,7 @@ class BettingCommand28 {
      * @private
      */
     private commandHeightList = [
-        ...this.commandList,
-        /**
-         * 极大
-         */
-        ['极大', 'jd', '级大'],
-
-        /**
-         * 极小
-         */
-        ['极小', 'jx', '级小']
+        ...this.commandList
     ]
 
     constructor(

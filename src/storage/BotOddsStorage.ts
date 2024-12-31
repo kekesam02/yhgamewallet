@@ -41,12 +41,14 @@ class BotOddsStorage {
      * @param money: 下注金额
      * @param openCode: 开奖结果
      * @param gameType: 游戏类型
+     * @param form: 形态
      */
     public static getOddsMoney = async (
         id: number,
         money: string,
         openCode: string,
-        gameType: GameTypeEnum
+        gameType: GameTypeEnum,
+        form: string
     ): Promise<string> => {
         let botOdds = await BotOddsStorage.getOddsListById(`${id}`)
         let arr = openCode.split(',')
@@ -90,29 +92,39 @@ class BotOddsStorage {
                 return new ComputeUtils(money).multiplied(botOdds.odds).toString()
             }
 
-            // 遇13、14处理
-            if (sum == 13 || sum == 14) {
-                // 遇13/14大/小/单/双赔 1
-                if (
-                    botOdds.name == '单'
-                    || botOdds.name == '双'
-                    || botOdds.name == '大'
-                    || botOdds.name == '小'
-                ) {
-                    return new ComputeUtils(money).multiplied(1).toString()
-                }
+            // 遇13/14大/小/单/双赔 1.6
+            if (
+                botOdds.name == '单'
+                || botOdds.name == '双'
+                || botOdds.name == '大'
+                || botOdds.name == '小'
+            ) {
+                return new ComputeUtils(money).multiplied(1).toString()
+            }
 
-                // 遇大单、大双、小双、小单下注组合下注回本
-                if (
-                    botOdds.name == '大单'
-                    || botOdds.name == '大双'
-                    || botOdds.name == '小双'
-                    || botOdds.name == '小单'
-                ) {
-                    return new ComputeUtils(money).multiplied(1).toString()
-                }
+            // 遇大单、大双、小双、小单下注组合下注回本
+            if (
+                botOdds.name == '大单'
+                || botOdds.name == '大双'
+                || botOdds.name == '小双'
+                || botOdds.name == '小单'
+            ) {
+                return new ComputeUtils(money).multiplied(1).toString()
             }
         }
+
+        if (form != '杂子') {
+            if (
+                botOdds.name != '对子'
+                && botOdds.name != '顺子'
+                && botOdds.name != '豹子'
+                && botOdds.name != '极大'
+                && botOdds.name != '极小'
+            ) {
+                return new ComputeUtils(money).multiplied(1).toString()
+            }
+        }
+
         return new ComputeUtils(money).multiplied(botOdds.odds).toString()
     }
 
