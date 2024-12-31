@@ -36,16 +36,7 @@ class WalletMessageHandle {
                 WalletHandleMethod.startTxHandle(text, tgId, ctx, cbot)
                 return;
             }
-            // 转账
-            if (currentop == 'zhuanzhang') {
-                WalletHandleMethod.startZhuangzhangHandle(text,'', tgId, ctx)
-                return;
-            }
-            // 收款
-            if (currentop == 'shoukuan') {
-                WalletHandleMethod.startShouKuanHandle(text,'', tgId, ctx)
-                return;
-            }
+
             // 红包金额
             if (currentop == 'hongbao_money') {
                 WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop)

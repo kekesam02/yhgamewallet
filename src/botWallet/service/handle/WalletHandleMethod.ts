@@ -775,6 +775,7 @@ class WalletHandleMethod {
                     await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
                 }
             } else {
+                await ctx.answerCbQuery('提示：哈哈开始输入密码', {show_alert: true})
                 console.log(callbackStr)
                 console.log(tgId)
                 console.log(nickname)
