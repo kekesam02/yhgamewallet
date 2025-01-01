@@ -39,16 +39,17 @@ class RedPacketHtml {
         let walletStr = new CommonEnumsIndex().getWalletTypeStr(botHb.walletType)
         if (payment.length > 0) {
             let html = `🧧 ${user.userName} 发送了一个红包${this.N
-            }💵 总金额: ${botHb.money} ${walletStr}💰 ${this.N
-            }剩余: ${botHb.receiveNum}/${botHb.num}${this.N
+            }💵 总金额: ${botHb.money} ${walletStr}${this.N
+            }💰 剩余: ${botHb.receiveNum}/${botHb.num}${this.N
             }
              `
             payment.forEach(item => {
                 html += `${this.N}-- ${item.username} 已领取 ${item.paymentAmount} ${walletStr}`
             })
         }
-        return `🧧 ${user.userName} 发送了一个红包
-            💵 总金额: ${botHb.money} ${new CommonEnumsIndex().getWalletTypeStr(botHb.walletType)}💰 剩余: ${botHb.num}/${botHb.num}`
+        return `🧧 ${user.userName} 发送了一个红包${this.N
+            }💵 总金额: ${botHb.money} ${new CommonEnumsIndex().getWalletTypeStr(botHb.walletType)}${this.N
+            }💰 剩余: ${botHb.num}/${botHb.num}`
     }
 }
 

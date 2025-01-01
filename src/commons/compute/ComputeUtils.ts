@@ -93,7 +93,7 @@ class ComputeUtils {
         }
         let result = this.num1
             .dividedBy(currNum)
-            .precision(Number(have) + 1, 0)
+            .precision(Number(have) + 1, BigNumber.ROUND_DOWN)
             .valueOf()
         if (result.split('.').length > 1) {
             if (result.split('.')[1].length > 2) {

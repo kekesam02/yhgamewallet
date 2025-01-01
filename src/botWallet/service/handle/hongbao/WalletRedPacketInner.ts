@@ -24,7 +24,6 @@ class WalletRedPacketInner {
         let botHb = await new BotHb().getBotHb(hbId)
         let paymentList = await new BotPaymentModel().getPaymentByHB(hbId)
         paymentList = paymentList.filter(item => item.paymentType == PaymentType.LHB)
-        console.log('获取到的红包对象', botHb)
         if (!botHb) {
             return
         }
@@ -32,29 +31,20 @@ class WalletRedPacketInner {
         if (!user) {
             return
         }
+        console.log('当前红包类型', botHb.hbType)
         botHb.createJson()
         botHb.hbType = 1
         botHb.createJson()
         await ctx.answerInlineQuery(
             ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                 id: queryId,
-                title: `🧧剩余数量${new ComputeUtils(botHb.num).minus(botHb.receiveNum)}\n金额${botHb.money}`,
-                description: text,
+                title: `🧧剩余数量${new ComputeUtils(botHb.num).minus(botHb.receiveNum)}`,
+                description: `金额${botHb.money} ${new CommonEnumsIndex().getWalletTypeStr(botHb.walletType)}`,
                 input_message_content: {
                     message_text: new RedPacketHtml().getSendHtml(user, botHb, paymentList)
                 },
                 reply_markup: {
-                    inline_keyboard: [
-                        [
-                            {
-                                text: '🧧 领取红包',
-                                callback_data: StartWalletEnum.HONGBAO_RECEIVE + hbId
-                            },{
-                                text: '\uD83D\uDCB0 钱包',
-                                url: getConfig().botConfig.WalletUrl
-                            }
-                        ]
-                    ]
+                    inline_keyboard: WalletController.receiveHbBtn(botHb.hbId)
                 }
             })
         )
