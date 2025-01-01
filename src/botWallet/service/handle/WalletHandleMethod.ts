@@ -54,20 +54,20 @@ class WalletHandleMethod {
      * 清除缓存相关
      * @param ctx
      */
-    public static clearCacheRelation = (ctx: Context) => {
+    public static clearCacheRelation = async (ctx: Context) => {
         var tgId: number | string = ctx.callbackQuery?.message?.chat?.id || ctx.message?.from?.id || 0
-        redis.del('pwd_' + tgId + '')
-        redis.del('mark_' + tgId)
+        await redis.del('pwd_' + tgId )
+        await redis.del('mark_' + tgId)
     }
 
     /**
      * 清除缓存登录
      * @param ctx
      */
-    public static clearCacheLogin = (ctx: Context) => {
+    public static clearCacheLogin = async (ctx: Context) => {
         var tgId: number | string = ctx.callbackQuery?.message?.chat?.id || ctx.message?.from?.id || 0
-        redis.del("login_" + tgId)
-        redis.del('mark_' + tgId)
+        await redis.del("login_" + tgId)
+        await redis.del('mark_' + tgId)
     }
 
     /**
@@ -128,7 +128,7 @@ class WalletHandleMethod {
                 nickName: firstName,
                 userName: username,
                 vip: 0,
-                USDT:"0",
+                USDT: "0",
                 promotionLink: '',
                 rechargeLink: ''
             }).execute()
@@ -184,7 +184,7 @@ class WalletHandleMethod {
                 nickName: firstName,
                 userName: username,
                 vip: 0,
-                USDT:"0",
+                USDT: "0",
                 promotionLink: '',
                 rechargeLink: link
             }).execute()
@@ -271,7 +271,7 @@ class WalletHandleMethod {
         // 如果密码为空就开始设置密码
         if (!flag) {
             var mark = await redis.get('mark_' + tgId) || '0'
-            await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+            await this.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
         return ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
@@ -285,7 +285,7 @@ class WalletHandleMethod {
             // 如果密码为空就开始设置密码
             if (!flag) {
                 var mark = await redis.get('mark_' + tgId) || '0'
-                await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+                await this.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
                 return
             }
 
@@ -331,9 +331,9 @@ class WalletHandleMethod {
                     try {
                         await queryRunner.startTransaction()
                         // 修改用户余额
-                        await queryRunner.manager.update(UserModel,{
+                        await queryRunner.manager.update(UserModel, {
                             id: botUser.id
-                        },{
+                        }, {
                             USDT: shengyuUsdt + ''
                         })
 
@@ -341,7 +341,7 @@ class WalletHandleMethod {
                         var applyTime = DateFormatUtils.CurrentDateFormatString()
                         const chatId = ctx?.chat?.id + '' || '';
                         // 开始新增订单
-                        const botPayment =  await queryRunner.manager.save(BotPaymentModel,{
+                        const botPayment = await queryRunner.manager.save(BotPaymentModel, {
                             tgId: botUser.tgId,
                             uid: botUser.id,
                             username: botUser.userName,
@@ -441,7 +441,7 @@ class WalletHandleMethod {
                         // 7: 发送消息
                         await ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT, shengyuUsdt, price, botWithdrawalAddrModel?.addr), WalletController.createBackBtn())
                         await queryRunner.commitTransaction()
-                    }catch (e){
+                    } catch (e) {
                         await queryRunner.rollbackTransaction()
                         await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
                     }
@@ -537,17 +537,17 @@ class WalletHandleMethod {
                 try {
                     await queryRunner.startTransaction()
                     // 给用户增加余额
-                    queryRunner.manager.update(UserModel,{
+                    queryRunner.manager.update(UserModel, {
                         tgId: botPayment.tgId
-                    },{
+                    }, {
                         USDT: () => {
                             return "usdt + " + botPayment?.paymentRealAmount
                         }
                     })
                     var refuseTime = DateFormatUtils.CurrentDateFormatString()
-                    queryRunner.manager.update(BotPaymentModel,{
+                    queryRunner.manager.update(BotPaymentModel, {
                         id: botPayment.id
-                    },{
+                    }, {
                         paymentType: PaymentTypeEnum.TK_DKJL.value,
                         paymentTypeName: PaymentTypeEnum.TK_DKJL.name,
                         passTgid: ctx.botInfo.id + '',
@@ -576,7 +576,7 @@ class WalletHandleMethod {
                     // 6: 编辑回复的按钮
                     await ctx.editMessageReplyMarkup(WalletController.createFailBtn(botPayment.username).reply_markup)
                     await queryRunner.commitTransaction()
-                }catch (e){
+                } catch (e) {
                     await queryRunner.rollbackTransaction()
                     await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
                 }
@@ -597,7 +597,6 @@ class WalletHandleMethod {
         return html;
     }
 
-
     /**
      * 转账
      * 代号：zhuanzhang_btn
@@ -613,7 +612,7 @@ class WalletHandleMethod {
         // 4: 如果没有登录就输入密码登录
         if (!flag) {
             var mark = await redis.get('mark_' + tgId) || '0'
-            await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+            await this.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
         // 发送消息
@@ -682,6 +681,8 @@ class WalletHandleMethod {
 
     /**
      * 确认解锁
+     * -- 小额免密
+     * -- callback_query
      * @param ctx
      */
     public static startZhuanZhangUnLock = async (ctx: Context) => {
@@ -754,7 +755,7 @@ class WalletHandleMethod {
                         USDT: realMoney + ''
                     })
                     // 更换收款的按钮
-                    await ctx.editMessageText("\uD83D\uDCB0 【"+botPayment.username+"】转账给你 " + zhuanMoney + " USDT", {parse_mode: 'HTML'})
+                    await ctx.editMessageText("\uD83D\uDCB0 【" + botPayment.username + "】转账给你 " + zhuanMoney + " USDT", {parse_mode: 'HTML'})
                     await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSKBtn(botPayment.id + '').reply_markup)
                     await queryRunner.commitTransaction()
                 } catch (e) {
@@ -762,35 +763,165 @@ class WalletHandleMethod {
                     await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
                 }
             } else {
-                console.log(ctx?.chat?.id)
-                redis.set("zk_inlineMessageId" + tgId, inlineMessageId, 'EX', 1000 * 60 * 60 * 6);
-                await ctx.editMessageText("⌛️ 请等待对方点击下方按钮验证", {parse_mode: 'HTML'})
-                await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPwdBtn(inlineMessageId,"zhuanzhang").reply_markup)
+                // 缓存用于用户输入完密码。获取对应的信息，inlineMessageId是用来修改按钮状态的
+                await ctx.editMessageText("⌛️ 请等待对方验证密码", {parse_mode: 'HTML'})
+                await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPwdBtn(tgId + '', inlineMessageId, money, "zhza").reply_markup)
             }
         }
     }
 
+
     /**
-     * 用户输入密码
+     * 请等待对方验证密码
+     * -- callback_query
      * @param ctx
      * @param payload
      */
-    public static startCommandInputPassword = async(ctx : Context,payload :string) => {
+    public static startCommandInputPassword = async (ctx: Context, payload: string) => {
         var qrjs = payload.replaceAll("inline_", "");
-
-        var inlineMessageId = qrjs.split("_")[1]
-        await ctx.telegram.editMessageText('',undefined,inlineMessageId,
-            "\uD83D\uDCB0 xxx转账给你 10 USDT",
-            {parse_mode: 'HTML'}
-        )
-
-        await  ctx.telegram.editMessageReplyMarkup('',undefined,inlineMessageId,
-            WalletController.createZhuanzhangSKBtn('11').reply_markup
-        )
-        // 可以考虑清除原来的密码
+        var tgId: number = ctx.message?.from?.id || 0
+        var inlineMessageId = qrjs.split("_")[0] || ""
+        var money = qrjs.split("_")[1] || ""
+        var operator = qrjs.split("_")[2] || ""
+        var sendTgId = qrjs.split("_")[3] || ""
+        if (sendTgId != tgId.toString()) {
+            await ctx.telegram.editMessageText('',undefined,inlineMessageId,'提示：请等待对方验证')
+            return
+        }
         // 开始生成输入密码确认
-        await this.sendPasswordSetupMessage(ctx,"",true)
+        await this.sendPasswordSetupMessage(ctx, "", true, {
+            tgId: tgId.toString(),
+            inlineMessageId: inlineMessageId,
+            money: money,
+            operator: operator
+        })
     }
+
+
+    /**
+     * 确认解锁
+     * -- 大额密码校验确认
+     * -- callback_query
+     * @param ctx
+     */
+    public static startZhuanZhangPwdUnLock = async (ctx: Context,cacheInlineMessaeData:string) => {
+        // 1：获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 如果验证通过了，就开始转账
+        let userId = AESUtils.encodeUserId(tgId?.toString())
+        const botUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
+        var nickname: string = ctx.callbackQuery?.from?.first_name || ''
+        var username: string = ctx.callbackQuery?.from?.username || ''
+        var sendTgId = cacheInlineMessaeData.split("_")[0]|| "";
+        var money = cacheInlineMessaeData.split("_")[1]|| "";
+        let inlineMessageId = cacheInlineMessaeData?.split("_")[2] || ""
+        let userUsdt = parseFloat(botUser?.USDT || "0")
+        let zhuanMoney = parseFloat(money)
+        // 必须是转账本人操作。否则返回
+        if (sendTgId != tgId.toString()) {
+            await ctx.answerCbQuery('提示：不是你发起的转账', {show_alert: true})
+            return
+        }
+        // 扣除用户余额、用户余额递减
+        try {
+            await queryRunner.startTransaction()
+            var realMoney = userUsdt - zhuanMoney
+            //保存转账记录
+            var orderId: string = CustomSnowflake.snowflake()
+            var applyTime = DateFormatUtils.CurrentDateFormatString()
+            // 开始新增订单
+            const botPayment = await queryRunner.manager.save(BotPaymentModel, {
+                tgId: botUser?.tgId,
+                uid: botUser?.id,
+                username: botUser?.userName,
+                nickname: botUser?.nickName,
+                balanceBefore: userUsdt + '',
+                balanceAfter: realMoney + '',
+                paymentType: PaymentTypeEnum.YHZZ.value,
+                paymentTypeName: PaymentTypeEnum.YHZZ.name,
+                operateType: 1,
+                paymentTypeNumber: 'zk' + orderId,
+                paymentAmount: realMoney+ '' ,
+                paymentRealAmount: realMoney+ '',
+                walletType: WalletType.USDT,
+                applyTime: applyTime,
+                chatId: inlineMessageId
+            })
+
+            await queryRunner.manager.update(UserModel, {
+                id: botUser?.id
+            }, {
+                USDT: realMoney + ''
+            })
+
+            // 更换收款的按钮
+            await ctx.telegram.editMessageText('', undefined, inlineMessageId,
+                "\uD83D\uDCB0 【" + botPayment.username + "】转账给你 " + money + " USDT",
+                {parse_mode: 'HTML'}
+            )
+            await ctx.telegram.editMessageReplyMarkup('', undefined, inlineMessageId,
+                WalletController.createZhuanzhangSKBtn(botPayment.id + '').reply_markup
+            )
+            // 提交事务
+            await queryRunner.commitTransaction()
+            // 删除密码验证------------------------------如果想续期不输入密码就注释掉
+        } catch (e) {
+            await queryRunner.rollbackTransaction()
+            await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
+        }
+    }
+
+    /**
+     * 转账用户验证密码
+     * -- callback_query
+     * @param ctx
+     */
+    public static startValidatorPwdCallback = async (ctx: Context, query: string) => {
+        var callbackData = query.replaceAll('vpb_', '');
+        var inlineMessageId = callbackData.split("_")[0] || ""
+        var money = callbackData.split("_")[1] || ""
+        var operator = callbackData.split("_")[2] || ""
+        var sendTgId = callbackData.split("_")[3] || ""
+        var tgId: string = ctx.callbackQuery?.from?.id + "" || ''
+        var cacheValue = await redis.get('pwd_' + tgId)
+        if (cacheValue) {
+            if (cacheValue.length >= 4) {
+                var firstName: string = ctx.callbackQuery?.from?.first_name || ''
+                let userId = AESUtils.encodeUserId(tgId?.toString())
+                var password = cacheValue.substring(0, 4) || ''
+                // 开始查询密码
+                const resp = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
+                if (resp?.paymentPassword) {
+                    if (resp.paymentPassword == password) {
+                        // 清除计算器消息
+                        await this.removeMessage(ctx)
+                        // 清空缓存
+                        await this.clearCacheRelation(ctx)
+                        // 同时改变按钮的状态为收款
+                        await this.startZhuanZhangPwdUnLock(ctx,tgId + '_' + money + '_' + inlineMessageId)
+                    } else {
+                        ctx.replyWithHTML(WalletMessage.C_PASSWPORD_ERROR)
+                    }
+                } else {
+                    // 开始执行密码修改
+                    await UserModel.createQueryBuilder().update()
+                        .set({paymentPassword: password, nickName: firstName})
+                        .where("tg_id=:tgId", {'tgId': userId}).execute()
+                    // 清除计算器消息
+                    await this.removeMessage(ctx)
+                    // 清空缓存
+                    await this.clearCacheRelation(ctx)
+                    // 同时改变按钮的状态为收款
+                    await this.startZhuanZhangPwdUnLock(ctx,tgId + '_' + money + '_' + inlineMessageId)
+                }
+            } else {
+                ctx.replyWithHTML(WalletMessage.PASSWPORD_ERROR)
+            }
+        } else {
+            ctx.replyWithHTML(WalletMessage.PASSWPORD_EMPTY)
+        }
+    }
+
 
     /**
      * 取消转账
@@ -816,16 +947,16 @@ class WalletHandleMethod {
      * 点击收款按钮进行收款
      * @param ctx
      */
-    public static startZhuanzhangSK = async (ctx:Context)=>{
+    public static startZhuanzhangSK = async (ctx: Context) => {
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
         // 1：获取收款人tgId
-        var tgId: string = ctx.callbackQuery?.from?.id+'' || '0'
-        var nickname: string = ctx.callbackQuery?.from?.first_name+'' || '0'
-        var username: string = ctx.callbackQuery?.from?.username+'' || '0'
+        var tgId: string = ctx.callbackQuery?.from?.id + '' || '0'
+        var nickname: string = ctx.callbackQuery?.from?.first_name + '' || '0'
+        var username: string = ctx.callbackQuery?.from?.username + '' || '0'
         // 2: 查询转账人
         var botPaymentId = callbackStr.replaceAll("shoukuanzk", "");
-        var botPayment:BotPaymentModel | null = await BotPaymentModel.createQueryBuilder().where("id=:id", {id: botPaymentId}).getOne()
+        var botPayment: BotPaymentModel | null = await BotPaymentModel.createQueryBuilder().where("id=:id", {id: botPaymentId}).getOne()
         // 获取转账人信息
         if (botPayment) {
             let botPaymentTgId = botPayment?.tgId
@@ -842,15 +973,15 @@ class WalletHandleMethod {
                 // 事务开启
                 await queryRunner.startTransaction()
                 // 1：查询收款人是否注册
-                let botUser:UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
+                let botUser: UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
                 // 2：如果没有注册就先注册
-                if (!botUser){
+                if (!botUser) {
                     await UserModel.createQueryBuilder().insert().into(UserModel).values({
                         tgId: encodeUserId,
                         nickName: nickname,
                         userName: username,
                         vip: 0,
-                        USDT:"0",
+                        USDT: "0",
                         promotionLink: '',
                         rechargeLink: ''
                     }).execute()
@@ -858,7 +989,7 @@ class WalletHandleMethod {
 
                 // 再次查询用户信息
                 const newbotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
-                const beforeAmount =  newbotUser?.USDT || "0"
+                const beforeAmount = newbotUser?.USDT || "0"
                 // 3：开始修改用户余额
                 await UserModel.createQueryBuilder().update(UserModel).set({
                     USDT: () => {
@@ -868,16 +999,16 @@ class WalletHandleMethod {
                     id: newbotUser?.id
                 }).execute()
                 // 新增之后的余额
-                const afterAmount:number = parseFloat(beforeAmount)  + parseFloat(botPayment?.paymentAmount || '0')
+                const afterAmount: number = parseFloat(beforeAmount) + parseFloat(botPayment?.paymentAmount || '0')
                 //4：修改原来的订单为为--成功
                 await queryRunner.manager.update(BotPaymentModel, {
-                  id:botPayment?.id
-                },{
-                  status :1,
-                  passTime: applyTime,
-                  passTgid:encodeUserId,
-                  passUsername:username,
-                  passNickname:nickname
+                    id: botPayment?.id
+                }, {
+                    status: 1,
+                    passTime: applyTime,
+                    passTgid: encodeUserId,
+                    passUsername: username,
+                    passNickname: nickname
                 })
 
                 //5：保存收款记录
@@ -900,23 +1031,23 @@ class WalletHandleMethod {
                     walletType: WalletType.USDT,
                     applyTime: applyTime,
                     passTime: applyTime,
-                    passTgid:botPayment.tgId,
-                    passUsername:botPayment.username,
-                    passNickname:botPayment.passNickname,
-                    status:1,
+                    passTgid: botPayment.tgId,
+                    passUsername: botPayment.username,
+                    passNickname: botPayment.passNickname,
+                    status: 1,
                     chatId: inlineMessageId
                 })
+                // 提示收款完成
                 ctx.editMessageText("✅ 收款完成!")
-                ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username||'').reply_markup)
+                ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username || '').reply_markup)
                 await queryRunner.commitTransaction()
-            } catch (e){
+            } catch (e) {
                 ctx.editMessageText("出错了，请稍后在试试!")
-                ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username||'').reply_markup)
+                ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username || '').reply_markup)
                 await queryRunner.rollbackTransaction()
             }
         }
     }
-
 
 
     /**
@@ -934,7 +1065,7 @@ class WalletHandleMethod {
         // 4: 如果没有登录就输入密码登录
         if (!flag) {
             var mark = await redis.get('mark_' + tgId) || '0'
-            await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+            await this.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
         // 发送消息
@@ -950,7 +1081,7 @@ class WalletHandleMethod {
             // 如果密码为空就开始设置密码
             if (!flag) {
                 var mark = await redis.get('mark_' + tgId) || '0'
-                await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+                await this.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
                 return
             }
         }, async () => {
@@ -973,14 +1104,14 @@ class WalletHandleMethod {
         var mark = await redis.get('mark_' + tgId) || '0'
         if (mark && mark == '1') return
         if (!flag) {
-            await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+            await this.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
         return new WalletRedPacket(ctx).addRedPacket()
     }
 
     // 红包接收用户输入文字处理
-    public static startHongBaoHandle = async(text: string, tgId: number, ctx: Context, currentop: string)=>{
+    public static startHongBaoHandle = async (text: string, tgId: number, ctx: Context, currentop: string) => {
         if (currentop.indexOf('hongbaoMoney') > -1) {
             // 红包金额处理 - 结束后返回红包数量输入框
             return new WalletRedPacket(ctx).sendInputLength(text)
@@ -1009,7 +1140,7 @@ class WalletHandleMethod {
         // 如果密码为空就开始设置密码
         if (!flag) {
             var mark = await redis.get('mark_' + tgId) || '0'
-            await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+            await this.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
 
@@ -1026,7 +1157,7 @@ class WalletHandleMethod {
             // 如果密码为空就开始设置密码
             if (!flag) {
                 var mark = await redis.get('mark_' + tgId) || '0'
-                await this.sendPasswordSetupMessage(ctx, "", mark != '1')
+                await this.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
                 return
             }
 
@@ -1045,16 +1176,21 @@ class WalletHandleMethod {
         var tgId: string = ctx.callbackQuery?.message?.chat?.id + "" || ''
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data || ''
+        var currentVals = callbackStr.replaceAll('num_', '').split("_")
+        var currentVal = currentVals[0]
+        var inlineMessageId = currentVals[1]
+        var money = currentVals[2]
+        var operator = currentVals[3]
+        var sendTgId = currentVals[4]
         if (callbackStr.startsWith("num_")) {
             var cacheValue = await redis.get('pwd_' + tgId) || ''
-            var currentVal = callbackStr.replaceAll('num_', '')
             var cvalue = cacheValue + currentVal
-            if (cvalue.length > 4) return
+            if (cvalue.length > 4) cvalue = cvalue.substring(0,4)
             redis.set('pwd_' + tgId, cvalue)
-            await this.sendPasswordSetupMessage(ctx, cvalue, false)
+            await this.sendPasswordSetupMessage(ctx, cvalue, false, {inlineMessageId,money,operator,tgId:sendTgId})
         } else if (callbackStr == 'clear') {
             redis.del('pwd_' + tgId)
-            await this.sendPasswordSetupMessage(ctx, "", false)
+            await this.sendPasswordSetupMessage(ctx, "", false, {inlineMessageId,money,operator,tgId:sendTgId})
         } else if (callbackStr == 'delete') {
             var cacheKey = await redis.get('pwd_' + tgId)
             if (cacheKey) {
@@ -1062,7 +1198,7 @@ class WalletHandleMethod {
                 arr.pop()
                 var join = arr.join('')
                 redis.set('pwd_' + tgId, join)
-                await this.sendPasswordSetupMessage(ctx, join, false)
+                await this.sendPasswordSetupMessage(ctx, join, false, {inlineMessageId,money,operator,tgId:sendTgId})
             }
         }
     }
@@ -1072,9 +1208,15 @@ class WalletHandleMethod {
      * 转账、红包、提现、收款、闪兑提示输入密码
      * @param ctx
      */
-    public static sendPasswordSetupMessage = async (ctx: Context, callbackStr: string = "", firstFlag: boolean = true) => {
+    public static sendPasswordSetupMessage = async (ctx: Context, callbackStr: string = "", firstFlag: boolean = true, validator: {
+        inlineMessageId: string,
+        money?: string,
+        tgId?: string,
+        operator?: string
+    }) => {
+        var tgId: string = ctx.callbackQuery?.message?.chat?.id+'' || ''
+        if(!tgId || tgId=='undefined')tgId=validator?.tgId || ''
         try {
-            var tgId: string = ctx.callbackQuery?.message?.chat?.id + "" || ''
             var arr = ["🔑 "]
             let length = callbackStr.length
             for (let i = 0; i < length; i++) {
@@ -1091,7 +1233,7 @@ class WalletHandleMethod {
                 for (let j = i; j < i + 3; j++) {
                     rowInline.push({
                         text: j + "",
-                        query: "num_" + j
+                        query: "num_" + j + '_' + validator.inlineMessageId+'_'+validator.money+"_"+validator.operator+'_'+validator.tgId
                     })
                 }
                 keybordsArr.push(rowInline)
@@ -1099,7 +1241,16 @@ class WalletHandleMethod {
             // 计算器清空，删除，zero按钮
             keybordsArr.push(WalletController.ComputeClearDel)
             if (surebtn) {
-                keybordsArr.push([WalletController.SaveUserPwd])
+                if (validator.inlineMessageId == "0") {
+                    keybordsArr.push([WalletController.SaveUserPwd])
+                } else {
+                    keybordsArr.push([WalletController.ValidatorUserPwd(
+                        validator?.tgId,
+                        validator?.inlineMessageId,
+                        validator?.money,
+                        validator?.operator
+                    )])
+                }
             } else {
                 var len = keybordsArr.length
                 var index = keybordsArr[len - 1].findIndex(c => c.query == 'update_pwd_btn')
@@ -1117,10 +1268,11 @@ class WalletHandleMethod {
                 await ctx.editMessageText(html, new ButtonUtils().createCallbackBtn(keybordsArr))
             }
         } catch (err) {
-            ctx.reply(WalletMessage.ERROR_CLIENT)
+            // 删除缓存
+            await redis.del('pwd_'+tgId)
+            await ctx.reply(WalletMessage.ERROR_CLIENT)
         }
     }
-
 
     /**
      * 提交密码
@@ -1134,19 +1286,19 @@ class WalletHandleMethod {
             if (cacheValue.length >= 4) {
                 var firstName: string = ctx.callbackQuery?.from?.first_name || ''
                 let userId = AESUtils.encodeUserId(tgId?.toString())
-                var password = cacheValue.substring(0, 4)
+                var password = cacheValue.substring(0, 4) || ''
                 // 开始查询密码
                 const resp = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
                 if (resp?.paymentPassword) {
                     if (resp.paymentPassword == password) {
                         // 清除计算器消息
-                        this.removeMessage(ctx)
+                        await this.removeMessage(ctx)
                         // 清空缓存
-                        this.clearCacheRelation(ctx)
+                        await this.clearCacheRelation(ctx)
                         // 发送消息
-                        ctx.replyWithHTML(WalletMessage.PASSWORD_SUCCESS_MESSAGE)
+                        await ctx.replyWithHTML(WalletMessage.PASSWORD_SUCCESS_MESSAGE)
                         // 设置登录成功的标识
-                        redis.set("login_" + tgId, "success", 'EX', 1000 * 60 * 60 * 24)
+                        await redis.set("login_" + tgId, "success", 'EX', 1000 * 60 * 60 * 24)
                         // 可以考虑进行交易的处理
                         await this.loginCallback(tgId, ctx, cbot)
                     } else {
@@ -1160,13 +1312,13 @@ class WalletHandleMethod {
                     // 设置密码消息
                     const html = WalletMessage.PASSWORD_MESSAGE(cacheValue)
                     // 清除计算器消息
-                    this.removeMessage(ctx)
+                    await this.removeMessage(ctx)
                     // 清空缓存
-                    this.clearCacheRelation(ctx)
+                    await this.clearCacheRelation(ctx)
                     // 发送消息
-                    ctx.replyWithHTML(html)
+                    await ctx.replyWithHTML(html)
                     // 设置登录成功的标识
-                    redis.set("login_" + tgId, "success", 'EX', 1000 * 60 * 60 * 24)
+                    await redis.set("login_" + tgId, "success", 'EX', 1000 * 60 * 60 * 24)
                     // 可以考虑进行交易的处理
                     await this.loginCallback(tgId, ctx, cbot)
                 }

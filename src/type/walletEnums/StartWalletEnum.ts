@@ -88,6 +88,11 @@ enum StartWalletEnum {
     UPDATEPWDBTN = 'update_pwd_btn',
 
     /**
+     * 验证密码
+     */
+    VALIDATORPWDBTN = 'validator_pwd_btn',
+
+    /**
      * 关闭密码
      */
     CLOSE_COMPUTER = 'close_computer',

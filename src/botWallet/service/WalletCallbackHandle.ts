@@ -45,6 +45,8 @@ class WalletCallbackHandle {
             WalletHandleMethod.cancelZhuanZhang(ctx)
         }else if(callbackStr.startsWith('shoukuanzk')){
             WalletHandleMethod.startZhuanzhangSK(ctx)
+        }else if(callbackStr.startsWith('vpb_')){
+            WalletHandleMethod.startValidatorPwdCallback(ctx,callbackStr)
         } else {
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
@@ -147,11 +149,10 @@ class WalletCallbackHandle {
                 case StartWalletEnum.CLOSE_COMPUTER:
                     WalletHandleMethod.removeMessage(ctx)
                     break
-                // 修改密码按钮
+                // 保存密码和验证密码
                 case StartWalletEnum.UPDATEPWDBTN:
                     WalletHandleMethod.startUpdatePwdCallback(ctx,cbot)
                     break
-
                 case StartWalletEnum.HONGBAO_CANCEL_1:
                     // 红包返回按钮类型 1、回到点击红包按钮第一页
                     return  new WalletRedPacket(ctx).addRedPacket()

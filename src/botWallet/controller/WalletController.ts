@@ -41,6 +41,31 @@ class WalletController {
     }
 
     /**
+     * 验证密码
+     */
+    public static ValidatorUserPwd = (tgId: string | undefined, msgId: string | undefined, money: string | undefined, operator: string | undefined) => {
+        return {
+            text: "✏️ 提交验证",
+            query: "vpb_"+msgId+"_"+money+"_"+operator+'_'+tgId
+        }
+    }
+
+    /**
+     * 转账的确认密码安全
+     */
+    public static createZhuanzhangPwdBtn = (tgId:string,msgId:string,money:string,operator:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '\uD83D\uDCB0验证安全密码',
+                    // url: "https://t.me/VertexPaybot?start=inline_"+inlineMessageId+"_"+op
+                    url: "https://t.me/myxukebot?start=inline_"+msgId+"_"+money+"_"+operator+"_"+tgId
+                }
+            ]
+        ])
+    }
+
+    /**
      * 保存密码
      */
     public static CompareUserPwd = {
@@ -319,20 +344,7 @@ class WalletController {
             ]
         ])
     }
-    /**
-     * 转账的确认密码安全
-     */
-    public static createZhuanzhangPwdBtn = (op:string,inlineMessageId:string) => {
-        return new ButtonUtils().createCallbackBtn([
-            [
-                {
-                    text: '\uD83D\uDCB0验证安全密码',
-                    // url: "https://t.me/VertexPaybot?start=inline_"+inlineMessageId+"_"+op
-                    url: "https://t.me/myxukebot?start=inline_"+inlineMessageId+"_"+op
-                }
-            ]
-        ])
-    }
+
 
     /**
      * 点击收款按钮
