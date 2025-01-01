@@ -1,7 +1,7 @@
 import type {Context, Telegraf} from "telegraf";
-import redis from "../../../config/redis";
+import redis from "../../../../config/redis";
 import WalletRedPacket from "./WalletRedPacket";
-import WalletHandleMethod from "./WalletHandleMethod";
+import WalletHandleMethod from "../WalletHandleMethod";
 
 
 /**

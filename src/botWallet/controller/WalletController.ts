@@ -1,7 +1,7 @@
 import ButtonUtils from "../../commons/button/ButtonUtils";
 import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
-import WalletRedPacketInner from "../service/handle/WalletRedPacketInner";
+import WalletRedPacketInner from "../service/handle/hongbao/WalletRedPacketInner";
 
 /**
  * 钱包

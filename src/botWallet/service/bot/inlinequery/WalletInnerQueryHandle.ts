@@ -1,10 +1,10 @@
 import {Context, Telegraf} from 'telegraf'
-import ButtonInnerQueryUtils from "../../commons/button/ButtonInnerQueryUtils";
-import redis from "../../config/redis";
-import WalletHandleMethod from "./handle/WalletHandleMethod";
-import WalletRedPacketInner from "./handle/WalletRedPacketInner";
-import WalletHandleZhuanzhangMethod from "./handle/WalletHandleZhuanzhangMethod";
-import WalletHandleShouKuanMethod from "./handle/WalletHandleShouKuanMethod";
+import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
+import redis from "../../../../config/redis";
+import WalletHandleMethod from "../../handle/WalletHandleMethod";
+import WalletRedPacketInner from "../../handle/hongbao/WalletRedPacketInner";
+import WalletHandleZhuanzhangMethod from "../../handle/zhuanzhaung/WalletHandleZhuanzhangMethod";
+import WalletHandleShouKuanMethod from "../../handle/shoukuan/WalletHandleShouKuanMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器

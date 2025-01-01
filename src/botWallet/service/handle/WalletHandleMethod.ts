@@ -18,16 +18,16 @@ import {addLockByTgId} from "../../../config/redislock";
 import DateFormatUtils from "../../../commons/date/DateFormatUtils";
 import PaymentTypeEnum from "../../../type/PaymentTypeEnum";
 import ButtonInnerQueryUtils from "../../../commons/button/ButtonInnerQueryUtils";
-import WalletRedPacket from "./WalletRedPacket";
+import WalletRedPacket from "./hongbao/WalletRedPacket";
 import CustomSnowflake from "../../../commons/CustomSnowflake";
 import WalletType from "../../../type/WalletType";
 import {queryRunner} from "../../../config/database";
 import BotHb from "../../../models/BotHb";
-import WalletHandleTixianMethod from "./WalletHandleTixianMethod";
-import WalletHandleZhuanzhangMethod from "./WalletHandleZhuanzhangMethod";
-import WalletHandleShouKuanMethod from "./WalletHandleShouKuanMethod";
-import WalletHandleHongBaoMethod from "./WalletHandleHongBaoMethod";
-import WalletHandleShangduiMethod from "./WalletHandleShangduiMethod";
+import WalletHandleTixianMethod from "./tixian/WalletHandleTixianMethod";
+import WalletHandleZhuanzhangMethod from "./zhuanzhaung/WalletHandleZhuanzhangMethod";
+import WalletHandleShouKuanMethod from "./shoukuan/WalletHandleShouKuanMethod";
+import WalletHandleHongBaoMethod from "./hongbao/WalletHandleHongBaoMethod";
+import WalletHandleShangduiMethod from "./shangdui/WalletHandleShangduiMethod";
 
 
 /**

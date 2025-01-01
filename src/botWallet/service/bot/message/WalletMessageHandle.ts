@@ -1,11 +1,11 @@
 import type {Context} from "telegraf";
-import WalletHandleMethod from "./handle/WalletHandleMethod";
-import redis from "../../config/redis";
-import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
+import WalletHandleMethod from "../../handle/WalletHandleMethod";
+import redis from "../../../../config/redis";
+import WalletUserCenterMethod from "../../handle/usercenter/WalletUserCenterMethod";
 import {Telegraf} from "telegraf";
-import WalletHandleHongBaoMethod from "./handle/WalletHandleHongBaoMethod";
-import WalletHandleTixianMethod from "./handle/WalletHandleTixianMethod";
-import WalletHandleShangduiMethod from "./handle/WalletHandleShangduiMethod";
+import WalletHandleHongBaoMethod from "../../handle/hongbao/WalletHandleHongBaoMethod";
+import WalletHandleTixianMethod from "../../handle/tixian/WalletHandleTixianMethod";
+import WalletHandleShangduiMethod from "../../handle/shangdui/WalletHandleShangduiMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器

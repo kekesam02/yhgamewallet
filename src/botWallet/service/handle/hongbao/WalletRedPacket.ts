@@ -2,20 +2,20 @@
  * 红包相关处理
  */
 import {Context} from "telegraf";
-import MessageUtils from "../../../commons/message/MessageUtils";
-import ButtonUtils from "../../../commons/button/ButtonUtils";
-import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
-import ButtonCommonMap from "../../../commons/button/ButtonCommonMap";
-import WalletType from "../../../type/WalletType";
-import UserModel from "../../../models/UserModel";
-import CommonEnumsIndex from "../../../type/CommonEnumsIndex";
-import {addLockByCtx} from "../../../config/redislock";
-import {queryRunner} from "../../../config/database";
-import ContextUtil from "../../../commons/ContextUtil";
-import RedPacketHtml from "../../../html/walletHtml/RedPacketHtml";
-import BotHb from "../../../models/BotHb";
-import WalletController from "../../controller/WalletController";
-import redis from "../../../config/redis";
+import MessageUtils from "../../../../commons/message/MessageUtils";
+import ButtonUtils from "../../../../commons/button/ButtonUtils";
+import StartWalletEnum from "../../../../type/walletEnums/StartWalletEnum";
+import ButtonCommonMap from "../../../../commons/button/ButtonCommonMap";
+import WalletType from "../../../../type/WalletType";
+import UserModel from "../../../../models/UserModel";
+import CommonEnumsIndex from "../../../../type/CommonEnumsIndex";
+import {addLockByCtx} from "../../../../config/redislock";
+import {queryRunner} from "../../../../config/database";
+import ContextUtil from "../../../../commons/ContextUtil";
+import RedPacketHtml from "../../../../html/walletHtml/RedPacketHtml";
+import BotHb from "../../../../models/BotHb";
+import WalletController from "../../../controller/WalletController";
+import redis from "../../../../config/redis";
 
 
 

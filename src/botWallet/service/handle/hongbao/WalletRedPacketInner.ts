@@ -1,13 +1,13 @@
-import BotHb from "../../../models/BotHb";
+import BotHb from "../../../../models/BotHb";
 import {Context} from "telegraf";
-import ButtonInnerQueryUtils from "../../../commons/button/ButtonInnerQueryUtils";
-import {getConfig} from "../../../config/config";
-import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
-import ComputeUtils from "../../../commons/compute/ComputeUtils";
-import RedPacketHtml from "../../../html/walletHtml/RedPacketHtml";
-import BotPaymentModel from "../../../models/BotPaymentModel";
-import PaymentType from "../../../type/PaymentType";
-import UserModel from "../../../models/UserModel";
+import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
+import {getConfig} from "../../../../config/config";
+import StartWalletEnum from "../../../../type/walletEnums/StartWalletEnum";
+import ComputeUtils from "../../../../commons/compute/ComputeUtils";
+import RedPacketHtml from "../../../../html/walletHtml/RedPacketHtml";
+import BotPaymentModel from "../../../../models/BotPaymentModel";
+import PaymentType from "../../../../type/PaymentType";
+import UserModel from "../../../../models/UserModel";
 
 /**
  * 红包内连消息处理

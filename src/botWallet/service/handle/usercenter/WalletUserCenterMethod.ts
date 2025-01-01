@@ -1,12 +1,12 @@
 import type {Context} from "telegraf";
-import ButtonUtils from '../../../commons/button/ButtonUtils'
-import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
-import AESUtils from "../../../commons/AESUtils";
-import UserModel from "../../../models/UserModel";
-import WalletController from "../../controller/WalletController";
-import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
-import redis from "../../../config/redis";
-import WalletHandleMethod from "./WalletHandleMethod";
+import ButtonUtils from '../../../../commons/button/ButtonUtils'
+import WalletBotHtml from '../../../../html/walletHtml/WalletBotHtml'
+import AESUtils from "../../../../commons/AESUtils";
+import UserModel from "../../../../models/UserModel";
+import WalletController from "../../../controller/WalletController";
+import BotWithdrawalAddrModel from "../../../../models/BotWithdrawalAddrModel";
+import redis from "../../../../config/redis";
+import WalletHandleMethod from "../WalletHandleMethod";
 
 /**
  * 公共方法处理

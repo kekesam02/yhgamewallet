@@ -2,11 +2,11 @@ import {Context, Telegraf} from 'telegraf'
 import {message} from 'telegraf/filters'
 import process from 'node:process'
 import {getConfig} from "../../../config/config";
-import WalletMessageHandle from '../WalletMessageHandle'
-import WalletCallbackHandle from "../WalletCallbackHandle";
+import WalletMessageHandle from './message/WalletMessageHandle'
+import WalletCallbackQueryHandle from "./callbackquery/WalletCallbackQueryHandle";
 import WalletHandleMethod from "../handle/WalletHandleMethod";
-import WalletInnerQueryHandle from "../WalletInnerQueryHandle";
-import WalletHandleZhuanzhangMethod from "../handle/WalletHandleZhuanzhangMethod";
+import WalletInnerQueryHandle from "./inlinequery/WalletInnerQueryHandle";
+import WalletHandleZhuanzhangMethod from "../handle/zhuanzhaung/WalletHandleZhuanzhangMethod";
 
 /**
  * 娱乐机器人核心代码
@@ -55,7 +55,7 @@ bot.on(message('text'), async (ctx: Context) => {
  * 监听用户点击按钮回调
  */
 bot.on('callback_query', async (ctx) => {
-    WalletCallbackHandle.listenerMessage(ctx,botWallet)
+    WalletCallbackQueryHandle.listenerMessage(ctx,botWallet)
 })
 
 bot.on('inline_query', async (ctx) => {
@@ -68,7 +68,7 @@ bot.on('inline_query', async (ctx) => {
  * 监听财务机器人按钮回调
  */
 botWallet.on('callback_query', async (ctx) => {
-    WalletCallbackHandle.cBotlistenerMessage(ctx,bot)
+    WalletCallbackQueryHandle.cBotlistenerMessage(ctx,bot)
 })
 
 bot.launch().then(() =>{

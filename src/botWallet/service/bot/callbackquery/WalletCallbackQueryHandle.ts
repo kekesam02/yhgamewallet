@@ -1,22 +1,22 @@
 import {Context, Telegraf} from "telegraf";
-import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
-import WalletHandleMethod from "./handle/WalletHandleMethod";
-import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
-import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
-import WalletRedPacket from "./handle/WalletRedPacket";
-import WalletType from "../../type/WalletType";
-import WalletHandleShouKuanMethod from "./handle/WalletHandleShouKuanMethod";
-import WalletHandleZhuanzhangMethod from "./handle/WalletHandleZhuanzhangMethod";
-import WalletHandleTixianMethod from "./handle/WalletHandleTixianMethod";
-import WalletHandleChongzhiMethod from "./handle/WalletHandleChongzhiMethod";
-import WalletHandleHongBaoMethod from "./handle/WalletHandleHongBaoMethod";
-import WalletHandleShangduiMethod from "./handle/WalletHandleShangduiMethod";
+import StartWalletEnum from "../../../../type/walletEnums/StartWalletEnum";
+import WalletHandleMethod from "../../handle/WalletHandleMethod";
+import WalletUserCenterMethod from "../../handle/usercenter/WalletUserCenterMethod";
+import WalletUserCenterEnum from "../../../../type/walletEnums/WalletUserCenterEnum";
+import WalletRedPacket from "../../handle/hongbao/WalletRedPacket";
+import WalletType from "../../../../type/WalletType";
+import WalletHandleShouKuanMethod from "../../handle/shoukuan/WalletHandleShouKuanMethod";
+import WalletHandleZhuanzhangMethod from "../../handle/zhuanzhaung/WalletHandleZhuanzhangMethod";
+import WalletHandleTixianMethod from "../../handle/tixian/WalletHandleTixianMethod";
+import WalletHandleChongzhiMethod from "../../handle/chongzhi/WalletHandleChongzhiMethod";
+import WalletHandleHongBaoMethod from "../../handle/hongbao/WalletHandleHongBaoMethod";
+import WalletHandleShangduiMethod from "../../handle/shangdui/WalletHandleShangduiMethod";
 
 
 /**
  * 钱包回调
  */
-class WalletCallbackHandle {
+class WalletCallbackQueryHandle {
 
     /**
      * 监听财务机器人
@@ -184,4 +184,4 @@ class WalletCallbackHandle {
     }
 }
 
-export default WalletCallbackHandle
+export default WalletCallbackQueryHandle
