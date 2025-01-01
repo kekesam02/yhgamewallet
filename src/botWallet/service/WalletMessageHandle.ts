@@ -24,6 +24,7 @@ class WalletMessageHandle {
         // 设置提现地址
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
+        console.log('收到的top-----', currentop)
         if (currentop) {
             // 收款
             if (currentop == 'addtxaddr') {
@@ -48,7 +49,7 @@ class WalletMessageHandle {
             }
             // 红包备注文字
             if (currentop == 'hongbaoRemark' || currentop.split('_')[0] == 'hongbaoRemark') {
-                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop.split('_')[1])
+                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop)
                 return;
             }
             // 闪兑

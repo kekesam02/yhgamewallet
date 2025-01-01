@@ -2,7 +2,7 @@ import BotOddsModel from "../models/BotOddsModel"
 import botOddsModel from "../models/BotOddsModel"
 import GameEnumsIndex from "../type/gameEnums/GameEnumsIndex"
 import GameTypeEnum from "../type/gameEnums/GameTypeEnum"
-import ComputeUtils from "../commons/ComputeUtils";
+import ComputeUtils from "../commons/compute/ComputeUtils";
 
 /**
  * 赔率表数据持久化
@@ -92,24 +92,26 @@ class BotOddsStorage {
                 return new ComputeUtils(money).multiplied(botOdds.odds).toString()
             }
 
-            // 遇13/14大/小/单/双赔 1.6
-            if (
-                botOdds.name == '单'
-                || botOdds.name == '双'
-                || botOdds.name == '大'
-                || botOdds.name == '小'
-            ) {
-                return new ComputeUtils(money).multiplied(1).toString()
-            }
+            if (sum == 13 || sum == 14) {
+                // 遇13/14大/小/单/双赔 1.6
+                if (
+                    botOdds.name == '单'
+                    || botOdds.name == '双'
+                    || botOdds.name == '大'
+                    || botOdds.name == '小'
+                ) {
+                    return new ComputeUtils(money).multiplied(1).toString()
+                }
 
-            // 遇大单、大双、小双、小单下注组合下注回本
-            if (
-                botOdds.name == '大单'
-                || botOdds.name == '大双'
-                || botOdds.name == '小双'
-                || botOdds.name == '小单'
-            ) {
-                return new ComputeUtils(money).multiplied(1).toString()
+                // 遇大单、大双、小双、小单下注组合下注回本
+                if (
+                    botOdds.name == '大单'
+                    || botOdds.name == '大双'
+                    || botOdds.name == '小双'
+                    || botOdds.name == '小单'
+                ) {
+                    return new ComputeUtils(money).multiplied(1).toString()
+                }
             }
         }
 

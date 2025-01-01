@@ -131,6 +131,9 @@ class WalletCallbackHandle {
                 // 点击红包 - 设置领取条件触发
                 case StartWalletEnum.HONGBAO_TYPE_CONDITION + callbackStr.split('_')[1]:
                     return new WalletRedPacket(ctx).setGainCondition(callbackStr.split('_')[1])
+                // 点击红包 - 确认支付触发
+                case StartWalletEnum.HONGBAO_RECEIVE:
+                    return new WalletRedPacket(ctx).receiveCallback(callbackStr.split(StartWalletEnum.HONGBAO_RECEIVE)[1])
 
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:

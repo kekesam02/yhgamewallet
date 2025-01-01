@@ -1,6 +1,7 @@
 import ButtonUtils from "../../commons/button/ButtonUtils";
 import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
+import WalletRedPacketInner from "../service/handle/WalletRedPacketInner";
 
 /**
  * 钱包
@@ -264,7 +265,7 @@ class WalletController {
                     query: StartWalletEnum.HONGBAO_CANCEL_1
                 },{
                     text: '\uD83E\uDDE7发送红包',
-                    switch_inline_query: hbId
+                    switch_inline_query: WalletRedPacketInner.InnerKey + hbId
                 }
             ], [
                 {

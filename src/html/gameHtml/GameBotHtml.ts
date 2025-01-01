@@ -10,7 +10,7 @@ import CommonEnumsIndex from "../../type/CommonEnumsIndex";
 import AESUtils from "../../commons/AESUtils";
 import BotPledgeUpModel, {PledgeUpInfoType} from "../../models/BotPledgeUpModel";
 import WinningTypeConfirm from "../../botGame/const/WinningTypeConfirm";
-import ComputeUtils from "../../commons/ComputeUtils";
+import ComputeUtils from "../../commons/compute/ComputeUtils";
 import BotGameConfig from "../../botGame/BotGameConfig";
 
 /**

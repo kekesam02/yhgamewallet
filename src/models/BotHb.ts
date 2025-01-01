@@ -4,7 +4,7 @@ import {Context} from "telegraf";
 import redis from "../config/redis";
 import MessageTipUtils from "../commons/message/MessageTipUtils";
 import UserModel from "./UserModel";
-import ComputeUtils from "../commons/ComputeUtils";
+import ComputeUtils from "../commons/compute/ComputeUtils";
 import {queryRunner} from "../config/database";
 import OrderUtils from "../commons/OrderUtils";
 import ContextUtil from "../commons/ContextUtil";
@@ -15,6 +15,7 @@ import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
 import RedisHandle from "../commons/redis/RedisHandle";
 import MessageUtils from "../commons/message/MessageUtils";
 import WalletRedPacket from "../botWallet/service/handle/WalletRedPacket";
+import RandomUtils from "../commons/compute/RandomUtils";
 
 
 /**
@@ -45,6 +46,14 @@ class BotHb extends BaseEntity {
     money: string
 
     /**
+     * 红包已领取金额
+     */
+    @Column({
+        name: 'lq_je'
+    })
+    lqMoney: string
+
+    /**
      * 货币类型
      */
     @Column({
@@ -54,13 +63,22 @@ class BotHb extends BaseEntity {
     walletType: WalletType
 
     /**
+     * 当前要领取的红包下标
+     */
+    @Column({
+        name: 'je_index',
+        default: 0
+    })
+    jeIndex: string
+
+    /**
      * 红包分化json 用于随机包
      */
     @Column({
         name: 'je_json',
         default: ''
     })
-    je_json: string
+    jeJson: string
 
     /**
      * 红包状态
@@ -192,17 +210,149 @@ class BotHb extends BaseEntity {
     }
 
     /**
-     * 更新红包对象、用户领取红包后、或者修改红包备注之类的
+     * 更新红包对象、用户生成红包后、或者修改红包备注之类的
      */
-    public setBotHb = async (botPayment?: BotPaymentModel) => {
+    public setBotHb = async () => {
         await queryRunner.startTransaction()
-        // if (!botPayment) {}
         try {
             await queryRunner.manager.save(this as BotHb)
+            await queryRunner.commitTransaction()
         } catch (err) {
             await queryRunner.rollbackTransaction()
             throw Error('出错了')
         }
+    }
+
+    /**
+     * 持久化存储
+     *      删除 redis 中保存的红包数据、将数据存到 mysql 中去
+     */
+    public saveLocalData = async (ctx: Context): Promise<BotHb | null> => {
+        let userModel = await new UserModel().getUserModel(ctx)
+        let redisData = await this.getRedisData(ctx)
+        if (!redisData) {
+            return null
+        }
+        await queryRunner.startTransaction()
+        try {
+            let hbId = new OrderUtils().createHbModelId()
+            let botHb = new BotHb()
+            botHb.tgId = ContextUtil.getUserId(ctx)
+            botHb.money = redisData.money
+            botHb.walletType = redisData.walletType
+            botHb.status = 1
+            botHb.num = redisData.num
+            botHb.hbId = hbId
+            botHb.createJson()
+
+            let payment = new BotPaymentModel()
+            let paymentType = PaymentType.FHB
+            payment.tgId = userModel.tgId
+            payment.username = userModel.userName
+            payment.nickname = userModel.nickName
+            payment.paymentType = paymentType
+            payment.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
+            payment.balanceBefore = userModel.getBalance(this.walletType)
+            payment.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
+                ? new ComputeUtils(userModel.getBalance(this.walletType)).add(this.money).toString()
+                : new ComputeUtils(userModel.getBalance(this.walletType)).minus(this.money).toString()
+            payment.paymentTypeNumber = hbId
+            payment.paymentAmount = this.money
+            payment.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
+            payment.walletType = this.walletType
+            payment.gameType = GameTypeEnum.MEPTY
+
+            let user = await queryRunner.manager.findOne(UserModel, {
+                where: {
+                    tgId: ContextUtil.getUserId(ctx)
+                }
+            }) as UserModel
+            user.updateUserMoney(this.walletType, this.money, false)
+
+            await queryRunner.manager.save(user)
+            await queryRunner.manager.save(botHb)
+            await queryRunner.manager.save(payment)
+            await queryRunner.commitTransaction()
+
+            // 删除redis 数据
+            redis.del(this.getRedisKey(ctx))
+            return botHb
+        } catch (err) {
+            console.log('红包回滚了', err)
+            await queryRunner.rollbackTransaction()
+            return null
+        }
+    }
+
+    /**
+     * 用户领取红包触发
+     */
+    public receiveHb = async (ctx: Context) => {
+        await queryRunner.startTransaction()
+        try {
+            let oldPayment = await queryRunner.manager.findOne(BotPaymentModel, {
+                where: {
+                    paymentTypeNumber: this.hbId
+                }
+            }) as BotPaymentModel
+            if (oldPayment) {
+                return new MessageUtils().sendPopMessage(ctx, '已经领过啦')
+            }
+
+            // 获取到当前领取红包的用户
+            let user = await queryRunner.manager.findOne(UserModel, {
+                where: {
+                    tgId: ContextUtil.getUserId(ctx)
+                }
+            }) as UserModel
+            // 领取次数加一
+            this.receiveNum++
+            user.updateUserMoney(this.walletType, this.money)
+
+            let newPayment = new BotPaymentModel()
+            let paymentType = PaymentType.LHB
+            newPayment.tgId = user.tgId
+            newPayment.username = user.userName
+            newPayment.nickname = user.nickName
+            newPayment.paymentType = paymentType
+            newPayment.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
+            newPayment.balanceBefore = user.getBalance(this.walletType)
+            newPayment.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
+                ? new ComputeUtils(user.getBalance(this.walletType)).add(this.money).toString()
+                : new ComputeUtils(user.getBalance(this.walletType)).minus(this.money).toString()
+            newPayment.paymentTypeNumber = this.hbId
+            newPayment.paymentAmount = this.money
+            newPayment.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
+            newPayment.walletType = this.walletType
+            newPayment.gameType = GameTypeEnum.MEPTY
+
+            await queryRunner.manager.save(user)
+            await queryRunner.manager.save(newPayment)
+            await queryRunner.manager.save(this as BotHb)
+            await queryRunner.commitTransaction()
+            return true
+        } catch (err) {
+            await queryRunner.rollbackTransaction()
+            return false
+        }
+    }
+
+
+    // 一些常用的计算方法
+    /**
+     * 根据红包金额和红包类型生成分化json
+     */
+    public createJson = () => {
+        if (this.hbType == 0) {
+            // 均分包处理
+            this.jeJson = new RandomUtils().averageAllocate(Number(this.money), this.num).toString()
+            console.log('均分包结果', this.jeJson)
+        } else {
+            // 随机包处理
+            this.jeJson = new RandomUtils().randomAllocate(Number(this.money), this.num).toString()
+            console.log('随机包结果', this.jeJson)
+        }
+
     }
 
 
@@ -379,58 +529,6 @@ class BotHb extends BaseEntity {
         this.hbType = json['type'] ?? 0
         this.money = json['money'] ?? '0'
         this.num = json['num'] ?? 0
-    }
-
-    /**
-     * 持久化存储
-     *      删除 redis 中保存的红包数据、将数据存到 mysql 中去
-     */
-    public saveLocalData = async (ctx: Context): Promise<BotHb | null> => {
-        let userModel = await new UserModel().getUserModel(ctx)
-        let redisData = await this.getRedisData(ctx)
-        if (!redisData) {
-            return null
-        }
-        await queryRunner.startTransaction()
-        try {
-            let hbId = new OrderUtils().createHbModelId()
-            let botHb = new BotHb()
-            botHb.tgId = ContextUtil.getUserId(ctx)
-            botHb.money = redisData.money
-            botHb.walletType = redisData.walletType
-            botHb.status = 1
-            botHb.num = redisData.num
-            botHb.hbId = hbId
-
-            let payment = new BotPaymentModel()
-            let paymentType = PaymentType.FHB
-            payment.tgId = userModel.tgId
-            payment.username = userModel.userName
-            payment.nickname = userModel.nickName
-            payment.paymentType = paymentType
-            payment.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
-            payment.balanceBefore = userModel.getBalance(this.walletType)
-            payment.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
-                ? new ComputeUtils(userModel.getBalance(this.walletType)).add(this.money).toString()
-                : new ComputeUtils(userModel.getBalance(this.walletType)).minus(this.money).toString()
-            payment.paymentTypeNumber = hbId
-            payment.paymentAmount = this.money
-            payment.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
-            payment.walletType = this.walletType
-            payment.gameType = GameTypeEnum.MEPTY
-
-            await queryRunner.manager.save(botHb)
-            await queryRunner.manager.save(payment)
-            await queryRunner.commitTransaction()
-
-            // 删除redis 数据
-            redis.del(this.getRedisKey(ctx))
-            return botHb
-        } catch (err) {
-            console.log('红包回滚了', err)
-            await queryRunner.rollbackTransaction()
-            return null
-        }
     }
 
 

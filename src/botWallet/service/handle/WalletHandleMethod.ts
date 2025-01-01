@@ -991,7 +991,7 @@ class WalletHandleMethod {
         }
         if (currentop.indexOf('hongbaoRemark') > -1) {
             // 红包数量处理
-            return new WalletRedPacket(ctx).setRemark(text, currentop)
+            return new WalletRedPacket(ctx).setRemark(text, currentop.split('_')[1])
         }
     }
 

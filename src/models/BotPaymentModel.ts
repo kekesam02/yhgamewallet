@@ -6,7 +6,7 @@ import {Context} from "telegraf";
 import ContextUtil from "../commons/ContextUtil";
 import BotGameModel from "./BotGameModel";
 import BotExchangeModel from "./BotExchangeModel";
-import ComputeUtils from "../commons/ComputeUtils";
+import ComputeUtils from "../commons/compute/ComputeUtils";
 import TimeUtils from "../commons/date/TimeUtils";
 import PaymentType from "../type/PaymentType";
 import UserModel from "./UserModel";
@@ -329,6 +329,20 @@ class BotPaymentModel extends BaseEntity {
                 return waterData.add(new ComputeUtils(item.paymentAmount))
             }
         )
+    }
+
+    /**
+     * 根据 paymentNumber 获取红包订单
+     * @param paymentNumber
+     */
+    public getPaymentByHB = async (paymentNumber: string) => {
+        return await BotPaymentModel
+            .createQueryBuilder()
+            .where('payment_type_number = :paymentNumber', {
+                paymentNumber: paymentNumber
+            })
+            .andWhere()
+            .getMany()
     }
 
     /**

@@ -3,6 +3,7 @@ import ButtonInnerQueryUtils from "../../commons/button/ButtonInnerQueryUtils";
 import {InlineQueryResult} from "@telegraf/types/inline";
 import redis from "../../config/redis";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
+import WalletRedPacketInner from "./handle/WalletRedPacketInner";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -98,8 +99,12 @@ class WalletInnerQueryHandle {
                     return;
                 }
             }else{
-                ctx.reply("会话已失效，请重新点击面板进行操作!")
+                await ctx.reply("会话已失效，请重新点击面板进行操作!")
                 WalletHandleMethod.startCommandCallback(ctx).then()
+            }
+            if (query.indexOf(WalletRedPacketInner.InnerKey) == 0) {
+                // 红包连消息处理
+                return new WalletRedPacketInner().innerMessageHandle(ctx,queryId, query)
             }
         } catch (error) {
             // 尝试发送一个简单的响应

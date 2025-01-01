@@ -4,7 +4,7 @@ import moment from "moment";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
 import WinningTypeConfirm from "../botGame/const/WinningTypeConfirm";
 import BotGameConfig from "../botGame/BotGameConfig";
-import ComputeUtils from "../commons/ComputeUtils";
+import ComputeUtils from "../commons/compute/ComputeUtils";
 
 
 @Entity({

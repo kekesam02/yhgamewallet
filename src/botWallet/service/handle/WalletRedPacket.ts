@@ -10,8 +10,8 @@ import ButtonCommonMap from "../../../commons/button/ButtonCommonMap";
 import WalletType from "../../../type/WalletType";
 import UserModel from "../../../models/UserModel";
 import MessageTipUtils from "../../../commons/message/MessageTipUtils";
-import computeUtils from "../../../commons/ComputeUtils";
-import ComputeUtils from "../../../commons/ComputeUtils";
+import computeUtils from "../../../commons/compute/ComputeUtils";
+import ComputeUtils from "../../../commons/compute/ComputeUtils";
 import {clearTimeout} from "timers";
 import CommandController from "../../../botGame/gameController/CommandController";
 import CommonEnumsIndex from "../../../type/CommonEnumsIndex";
@@ -212,7 +212,6 @@ class WalletRedPacket {
                 if (!redPacket) {
                     return false
                 }
-                // 判定是否需要输入密码
                 // 密码验证通过、红包进行持久化存储
                 let botHb = await new BotHb().saveLocalData(this.ctx)
                 if (!botHb) {
@@ -252,9 +251,18 @@ class WalletRedPacket {
         if (!botHb) {
             return
         }
+        await queryRunner.startTransaction()
+        let user = await queryRunner.manager.findOne(UserModel, {
+            where: {
+                tgId: ContextUtil.getUserId(this.ctx)
+            }
+        }) as UserModel
+        await queryRunner.commitTransaction()
         try {
             botHb.remark = text
             await botHb.setBotHb()
+            let html = new RedPacketHtml().getSuccessHtml(user, botHb)
+            await new MessageUtils().botSendTextToBot(this.ctx, html, WalletController.createSendHbBtn(botHb.hbId).reply_markup)
         } catch (err) {
 
         }
@@ -265,6 +273,29 @@ class WalletRedPacket {
      */
     public setGainCondition = (hbId: string) => {
 
+    }
+
+
+    // -------------- 下面是领取红包之类的
+    /**
+     * 点击领取红包回掉
+     * @param hbId: 红包id
+     */
+    public receiveCallback = async (hbId: string) => {
+        let botHb = await new BotHb().getBotHb(hbId)
+
+        // 当前红包已经领完了
+        if (!botHb || botHb.receiveNum - botHb.num <= 0) {
+            return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
+        }
+
+        let result = await botHb.receiveHb(this.ctx)
+        if (result) {
+            // 领取成功处理
+
+        } else {
+            return new MessageUtils().sendPopMessage(this.ctx, '领取失败')
+        }
     }
 
 }

@@ -73,6 +73,11 @@ enum StartWalletEnum {
     HONGBAO_TYPE_CONDITION = 'hongbaoWalletTypeCondition_',
 
     /**
+     * 领取红包回调
+     */
+    HONGBAO_RECEIVE = 'hongbaoReceive_',
+
+    /**
      * 闪兑
      */
     SHANGDUI = 'shandui_btn',
