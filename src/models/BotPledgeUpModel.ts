@@ -13,7 +13,7 @@ import GameController from "../botGame/gameController/GameController";
 import BotOddsModel from "./BotOddsModel";
 import OrderUtils from "../commons/OrderUtils";
 import BotGameModel from "./BotGameModel";
-import ComputeUtils from "../commons/ComputeUtils";
+import ComputeUtils from "../commons/compute/ComputeUtils";
 import {queryRunner} from "../config/database";
 import BotPaymentModel from "./BotPaymentModel";
 import PaymentType from "../type/PaymentType";

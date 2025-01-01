@@ -17,7 +17,7 @@ import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import WinningTypeConfirm from "../const/WinningTypeConfirm";
 import BotOddsStorage from "../../storage/BotOddsStorage";
 import StringUtils from "../../commons/StringUtils";
-import ComputeUtils from "../../commons/ComputeUtils";
+import ComputeUtils from "../../commons/compute/ComputeUtils";
 import GameCommandHtml from "../../html/gameHtml/GameCommandHtml";
 import UserModel from "../../models/UserModel";
 import {queryRunner} from "../../config/database";

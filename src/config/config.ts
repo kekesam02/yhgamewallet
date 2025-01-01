@@ -22,7 +22,9 @@ interface Config {
     // 钱包token
     WalletToken: string
     // 钱包token--财务测试
-    WalletTokenTest: string
+    WalletTokenTest: string,
+    // 钱包机器人跳转地址
+    WalletUrl: string
   }
   jwt_secret: string;
   cors: CorsConfig;

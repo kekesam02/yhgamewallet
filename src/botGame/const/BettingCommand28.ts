@@ -3,7 +3,7 @@ import {Context} from "telegraf";
 import BotOddsModel from "../../models/BotOddsModel";
 import BotPledgeUpModel, {PledgeUpInfoType} from "../../models/BotPledgeUpModel";
 import StringUtils from "../../commons/StringUtils";
-import ComputeUtils from "../../commons/ComputeUtils";
+import ComputeUtils from "../../commons/compute/ComputeUtils";
 import ScheduleHandle from "../../commons/ScheduleHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import {addLockByCtx} from "../../config/redislock";

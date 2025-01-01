@@ -28,6 +28,13 @@ class ComputeUtils {
     }
 
     /**
+     * 获取计算后的结果
+     */
+    public getNumber = (): number => {
+        return Number(this.num1.valueOf())
+    }
+
+    /**
      * 除法获取余数
      */
     public getRemain = () => {

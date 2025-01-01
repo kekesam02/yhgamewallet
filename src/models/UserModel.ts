@@ -2,7 +2,7 @@ import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import {Context} from "telegraf";
 import AESUtils from "../commons/AESUtils";
 import WalletType from "../type/WalletType";
-import ComputeUtils from "../commons/ComputeUtils";
+import ComputeUtils from "../commons/compute/ComputeUtils";
 
 
 /**
