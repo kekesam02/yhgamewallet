@@ -232,10 +232,10 @@ class WalletHandleZhuanzhangMethod {
         var money = qrjs.split("_")[1] || ""
         var operator = qrjs.split("_")[2] || ""
         var sendTgId = qrjs.split("_")[3] || ""
-        if (sendTgId != tgId.toString()) {
-            await ctx.telegram.editMessageText('',undefined,inlineMessageId,'提示：请等待对方验证')
-            return
-        }
+        // if (sendTgId != tgId.toString()) {
+        //     await ctx.telegram.editMessageText('',undefined,inlineMessageId,'提示：请等待对方验证')
+        //     return
+        // }
         // 开始生成输入密码确认
         await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", true, {
             tgId: tgId.toString(),
