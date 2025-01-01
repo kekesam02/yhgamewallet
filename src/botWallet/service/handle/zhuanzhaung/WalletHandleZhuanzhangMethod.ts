@@ -258,8 +258,6 @@ class WalletHandleZhuanzhangMethod {
         // 如果验证通过了，就开始转账
         let userId = AESUtils.encodeUserId(tgId?.toString())
         const botUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
-        var nickname: string = ctx.callbackQuery?.from?.first_name || ''
-        var username: string = ctx.callbackQuery?.from?.username || ''
         var sendTgId = cacheInlineMessaeData.split("_")[0]|| "";
         var money = cacheInlineMessaeData.split("_")[1]|| "";
         let inlineMessageId = cacheInlineMessaeData?.split("_")[2] || ""
@@ -347,6 +345,9 @@ class WalletHandleZhuanzhangMethod {
                         await WalletHandleMethod.removeMessage(ctx)
                         // 清空缓存
                         await WalletHandleMethod.clearCacheRelation(ctx)
+                        // 发送消息
+                        await ctx.replyWithHTML("你已成功解锁该笔转账!")
+
                         // 同时改变按钮的状态为收款
                         await this.startZhuanZhangPwdUnLock(ctx,tgId + '_' + money + '_' + inlineMessageId)
                     } else {
@@ -361,6 +362,8 @@ class WalletHandleZhuanzhangMethod {
                     await WalletHandleMethod.removeMessage(ctx)
                     // 清空缓存
                     await WalletHandleMethod.clearCacheRelation(ctx)
+                    // 发送消息
+                    await ctx.replyWithHTML("你已成功解锁该笔转账!")
                     // 同时改变按钮的状态为收款
                     await this.startZhuanZhangPwdUnLock(ctx,tgId + '_' + money + '_' + inlineMessageId)
                 }
