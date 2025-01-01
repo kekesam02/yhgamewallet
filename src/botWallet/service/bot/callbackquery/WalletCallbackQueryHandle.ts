@@ -156,7 +156,7 @@ class WalletCallbackQueryHandle {
                     break
                 // 返回按钮
                 case StartWalletEnum.CLOSE_COMPUTER:
-                    WalletHandleMethod.removeMessage(ctx)
+                    WalletHandleMethod.startButtonBack(ctx)
                     break
                 // 保存密码和验证密码
                 case StartWalletEnum.UPDATEPWDBTN:
