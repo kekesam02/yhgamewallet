@@ -134,14 +134,14 @@ class WalletCallbackQueryHandle {
                 case StartWalletEnum.HONGBAO_TYPE_PAY:
                     return new WalletRedPacket(ctx).startPay()
                 // 点击红包 - 设置备注触发
-                case StartWalletEnum.HONGBAO_TYPE_REMARK + callbackStr.split('_')[1]:
-                    return new WalletRedPacket(ctx).sendRemarkIpt(callbackStr.split('_')[1])
+                case StartWalletEnum.HONGBAO_TYPE_REMARK + callbackStr.replaceAll(StartWalletEnum.HONGBAO_TYPE_REMARK, ''):
+                    return new WalletRedPacket(ctx).sendRemarkIpt(callbackStr.replaceAll(StartWalletEnum.HONGBAO_TYPE_REMARK, ''))
                 // 点击红包 - 设置领取条件触发
-                case StartWalletEnum.HONGBAO_TYPE_CONDITION + callbackStr.split('_')[1]:
-                    return new WalletRedPacket(ctx).setGainCondition(callbackStr.split('_')[1])
-                // 点击红包 - 确认支付触发
-                case StartWalletEnum.HONGBAO_RECEIVE:
-                    return new WalletRedPacket(ctx).receiveCallback(callbackStr.split(StartWalletEnum.HONGBAO_RECEIVE)[1])
+                case StartWalletEnum.HONGBAO_TYPE_CONDITION + callbackStr.replaceAll(StartWalletEnum.HONGBAO_TYPE_CONDITION, ''):
+                    return new WalletRedPacket(ctx).setGainCondition(callbackStr.replaceAll(StartWalletEnum.HONGBAO_TYPE_CONDITION, ''))
+                // 点击领取红包按钮触发
+                case StartWalletEnum.HONGBAO_RECEIVE + callbackStr.replaceAll(StartWalletEnum.HONGBAO_RECEIVE, ''):
+                    return new WalletRedPacket(ctx).receiveCallback(callbackStr.replaceAll(StartWalletEnum.HONGBAO_RECEIVE, ''))
 
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:

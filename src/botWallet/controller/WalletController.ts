@@ -3,6 +3,7 @@ import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 import WalletRedPacketInner from "../service/handle/hongbao/WalletRedPacketInner";
 import WalletConfig from "../WalletConfig";
+import {getConfig} from "../../config/config";
 
 /**
  * 钱包
@@ -305,9 +306,27 @@ class WalletController {
     }
 
     /**
+     * 领取红包底部的俩个按钮
+     */
+    public static receiveHbBtn = (hbId: string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '🧧 领取红包',
+                    query: StartWalletEnum.HONGBAO_RECEIVE + hbId
+                },{
+                    text: '\uD83D\uDCB0 钱包',
+                    url: getConfig().botConfig.WalletUrl
+                }
+            ]
+        ])
+    }
+
+
+    /**
      * 创建审核通过
      */
-    public static createSuccessBtn = (username: string) => {
+    public static createSuccessBtn = (username:string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
@@ -350,7 +369,7 @@ class WalletController {
     /**
      * 点击收款按钮
      */
-    public static createZhuanzhangSureBtn = (username: string) => {
+    public static createZhuanzhangSureBtn = (username:string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {

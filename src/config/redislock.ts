@@ -18,7 +18,7 @@ const redlock = new Redlock([redis as Redlock.CompatibleRedisClient])
  * @param lockTTL
  */
 const addLockByTgId = async (tgList: Array<string>, fn: () => Promise<any>, efn: () => Promise<any>, lockTTL = 1000 * 30) => {
-    return addLock(tgList, fn, lockTTL,efn)
+    return addLock(tgList, fn, efn, lockTTL)
 }
 
 /**
@@ -27,10 +27,10 @@ const addLockByTgId = async (tgList: Array<string>, fn: () => Promise<any>, efn:
 const addLockByCtx = async (ctx: Context, fn: () => Promise<any>, efn: () => Promise<any>, lockTTL = 1000 * 30) => {
     // 分布式锁的key
     let lockKey = [ContextUtil.getUserId(ctx)]
-    return addLock(lockKey, fn, lockTTL,efn)
+    return addLock(lockKey, fn, efn, lockTTL)
 }
 
-const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>, lockTTL = 1000  * 30, efn: () => Promise<any>) => {
+const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>, efn: () => Promise<any>, lockTTL = 1000  * 30) => {
     try {
         let lock = await redlock.lock(lockKeyList, lockTTL)
         try {
@@ -48,5 +48,6 @@ const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>, lockT
 
 export {
     addLockByCtx,
-    addLockByTgId
+    addLockByTgId,
+    addLock
 }

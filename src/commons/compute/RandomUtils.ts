@@ -34,7 +34,7 @@ class RandomUtils {
         let goodIndex = this.getRandomInt(0, count)
         let moneyList = []
         for (let i = 0; i < count; i++) {
-            moneyList[i] = new ComputeUtils(computeUtils).add(computeUtils.getNumber()).getNumber()
+            moneyList[i] = computeUtils.getNumber()
             if (goodIndex == i) {
                 moneyList[i] = new ComputeUtils(moneyList[i]).add(computeUtils.getRemain()).getNumber()
             }
@@ -82,20 +82,30 @@ class RandomUtils {
         }
 
         // 由于前面的分配可能存在微小差异，最后进行微调以确保总金额一致
-        let totalDistributed = amounts.reduce((a, b) => a + b, 0);
-        let difference = totalMoney - totalDistributed;
+        let totalDistributed = amounts.reduce((prev, curr) => {
+            console.log('h昂----', prev, curr)
+            return new ComputeUtils(prev).add(curr).getNumber()
+        }, 0);
+        console.log('计算出来的总和', totalDistributed)
+        let difference = new ComputeUtils(totalMoney).minus(totalDistributed).getNumber()
 
-        // 如果总金额有差异，则平均分配到每个人上（考虑四舍五入）
+        console.log('余额', difference)
+        // 如果总金额有差异，余额大于1 金额最少的添加金额、小于1反之
         if (difference !== 0) {
-            // 剩余金额平局值
-            let diffAver = new ComputeUtils(difference).dividedBy(count, 2)
-            // 剩余金额随机加到一个人身上、幸运儿
-            let goodIndex = this.getRandomInt(0, count)
+            let maxIndex = 0
+            let minIndex = 0
             for (let i = 0; i < amounts.length; i++) {
-                amounts[i] = new ComputeUtils(amounts[i]).add(diffAver.getNumber())
-                if (goodIndex == i) {
-                    amounts[i] = new ComputeUtils(amounts[i]).add(diffAver.getRemain())
+                if (amounts[i] > amounts[maxIndex]) {
+                    maxIndex = i
                 }
+                if (amounts[i] < amounts[minIndex]) {
+                    minIndex = i
+                }
+            }
+            if (difference > 0) {
+                amounts[minIndex] = new ComputeUtils(amounts[minIndex]).add(difference).getNumber()
+            } else {
+                amounts[maxIndex] = new ComputeUtils(amounts[maxIndex]).add(difference).getNumber()
             }
         }
 

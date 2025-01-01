@@ -341,7 +341,6 @@ class BotPaymentModel extends BaseEntity {
             .where('payment_type_number = :paymentNumber', {
                 paymentNumber: paymentNumber
             })
-            .andWhere()
             .getMany()
     }
 

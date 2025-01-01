@@ -146,6 +146,22 @@ class MessageUtils {
     }
 
     /**
+     * 编辑消息
+     * @param ctx
+     * @param html
+     * @param replyMarkup
+     */
+    public editedMessage(
+        ctx: Context,
+        html: string,
+        replyMarkup: InlineKeyboardMarkup
+    ) {
+        return  ctx.editMessageText(html, {
+            reply_markup: replyMarkup
+        })
+    }
+
+    /**
      * 删除当前消息
      */
     public removeMessage = (ctx: Context) =>{

@@ -49,7 +49,8 @@ class BotHb extends BaseEntity {
      * 红包已领取金额
      */
     @Column({
-        name: 'lq_je'
+        name: 'lq_je',
+        default: ''
     })
     lqMoney: string
 
@@ -143,7 +144,7 @@ class BotHb extends BaseEntity {
      */
     @Column({
         name: 'hb_type',
-        default: 0
+        default: '0'
     })
     hbType: number
 
@@ -243,6 +244,8 @@ class BotHb extends BaseEntity {
             botHb.status = 1
             botHb.num = redisData.num
             botHb.hbId = hbId
+            botHb.receiveNum = 0
+            botHb.hbType = redisData.hbType
             botHb.createJson()
 
             let payment = new BotPaymentModel()
@@ -292,9 +295,12 @@ class BotHb extends BaseEntity {
         try {
             let oldPayment = await queryRunner.manager.findOne(BotPaymentModel, {
                 where: {
-                    paymentTypeNumber: this.hbId
+                    paymentTypeNumber: this.hbId,
+                    tgId: ContextUtil.getUserId(ctx),
+                    paymentType: PaymentType.LHB
                 }
             }) as BotPaymentModel
+            console.log('查询到的旧数据', oldPayment)
             if (oldPayment) {
                 return new MessageUtils().sendPopMessage(ctx, '已经领过啦')
             }
@@ -326,12 +332,16 @@ class BotHb extends BaseEntity {
             newPayment.walletType = this.walletType
             newPayment.gameType = GameTypeEnum.MEPTY
 
+            console.log('提交之前')
             await queryRunner.manager.save(user)
             await queryRunner.manager.save(newPayment)
             await queryRunner.manager.save(this as BotHb)
+            console.log('开始提交')
             await queryRunner.commitTransaction()
+            console.log('提价完成---')
             return true
         } catch (err) {
+            console.log('消息回滚了')
             await queryRunner.rollbackTransaction()
             return false
         }

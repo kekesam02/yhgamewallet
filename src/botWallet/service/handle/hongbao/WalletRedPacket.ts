@@ -276,20 +276,35 @@ class WalletRedPacket {
      * @param hbId: 红包id
      */
     public receiveCallback = async (hbId: string) => {
-        let botHb = await new BotHb().getBotHb(hbId)
+        console.log('点击领取红包按钮了', hbId)
 
-        // 当前红包已经领完了
-        if (!botHb || botHb.receiveNum - botHb.num <= 0) {
+        await addLock([hbId],  async () => {
+            let botHb = await new BotHb().getBotHb(hbId)
+            // 当前红包已经领完了
+            if (!botHb || botHb.receiveNum - botHb.num >= 0) {
+                return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
+            }
+
+            let result = await botHb.receiveHb(this.ctx)
+            if (result) {
+                // 领取成功处理
+                let paymentList = await new BotPaymentModel().getPaymentByHB(hbId)
+                paymentList = paymentList.filter(item => item.paymentType == PaymentType.LHB)
+                console.log('获取到的订单列白哦', paymentList)
+                let user = await new UserModel().getUserModelById(botHb.tgId)
+                if (!user) {
+                    return
+                }
+                let html = new RedPacketHtml().getSendHtml(user, botHb, paymentList)
+                console.log('开始更新消息')
+                await new MessageUtils().editedMessage(this.ctx, html, WalletController.receiveHbBtn(botHb.hbId).reply_markup)
+                console.log('更新消息结束')
+            } else {
+                return new MessageUtils().sendPopMessage(this.ctx, '领取失败')
+            }
+        }, () => {
             return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
-        }
-
-        let result = await botHb.receiveHb(this.ctx)
-        if (result) {
-            // 领取成功处理
-
-        } else {
-            return new MessageUtils().sendPopMessage(this.ctx, '领取失败')
-        }
+        })
     }
 
 }
