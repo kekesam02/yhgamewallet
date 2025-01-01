@@ -28,20 +28,20 @@ class WalletInnerQueryHandle {
                 if (currentop == 'zhuanzhang') {
                     var text = ""
                     var flag:boolean = false
-                    var price = parseFloat(query || "0")
-                    if(!query || isNaN(price)){
+                    if(!query || isNaN(Number(query))){
                         flag = true
                         text="请输入数字,并且大于0"
                     }
-                    if(query && price <= 0){
+                    var price = parseFloat(query || "0")
+                    if(price <= 0){
                         flag = true
                         text="转账金额必须是正整数,并且大于0"
                     }
                     if(flag){
                         await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                             id: queryId,
-                            title: '⚠️温馨提示！' + text,
-                            description: '',
+                            title: '⚠️温馨提示！' ,
+                            description: text,
                             input_message_content: {
                                 message_text: '\uD83D\uDC47 \n'
                             },
@@ -65,20 +65,20 @@ class WalletInnerQueryHandle {
                 if (currentop == 'shoukuan') {
                     var text = ""
                     var flag:boolean = false
-                    var price = parseFloat(query || "0")
-                    if(!query || isNaN(price)){
+                    if(!query || isNaN(Number(query))){
                         flag = true
-                        text="请输入数字,并且小于0"
+                        text="请输入数字,并且大于0"
                     }
-                    if(query && price >= 0){
+                    var price = parseFloat(query || "0")
+                    if(price <= 0){
                         flag = true
-                        text="收款金额必须是负数,并且小于0"
+                        text="转账金额必须是正整数,并且大于0"
                     }
                     if(flag){
                         await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                             id: queryId,
-                            title: '⚠️温馨提示！' + text,
-                            description: '',
+                            title: '⚠️温馨提示！' ,
+                            description: text,
                             input_message_content: {
                                 message_text: '\uD83D\uDC47 \n'
                             },

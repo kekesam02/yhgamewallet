@@ -623,14 +623,6 @@ class WalletHandleMethod {
 
     // 转账具体逻辑
     public static startZhuangzhangHandle = async (query: string, queryId: string, tgId: number, ctx: Context) => {
-        // 1：密码确认
-        const flag: boolean = await this.isLogin(tgId, ctx)
-        // 如果密码为空就开始设置密码
-        if (!flag) {
-            var mark = await redis.get('mark_' + tgId) || '0'
-            await this.sendPasswordSetupMessage(ctx, "", mark != '1')
-            return
-        }
 
         // const sid = ctx.botInfo.id
         // const snickname = ctx.botInfo.first_name
