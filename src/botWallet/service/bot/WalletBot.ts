@@ -36,10 +36,10 @@ bot.telegram.setMyCommands([
 bot.command('start', async (ctx) => {
     // 用于监听转账，红包，收款的密码监听
     var payload = ctx.payload
-    if (payload) {
-        return WalletHandleZhuanzhangMethod.startCommandInputPassword(ctx,payload)
+    if (payload && payload.startsWith('inline_')) {
+         WalletHandleZhuanzhangMethod.startCommandInputPassword(ctx,payload)
     } else {
-        return WalletHandleMethod.startCommandCallback(ctx)
+         WalletHandleMethod.startCommandCallback(ctx)
     }
 })
 

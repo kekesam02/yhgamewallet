@@ -26,7 +26,6 @@ class WalletMessageHandle {
         // 设置提现地址
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
-        console.log('收到的top-----', currentop)
         if (currentop) {
             // 收款
             if (currentop == 'addtxaddr') {

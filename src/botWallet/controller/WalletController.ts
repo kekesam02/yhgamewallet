@@ -389,7 +389,7 @@ class WalletController {
             [
                 {
                     text: '↩️ 返回',
-                    url: WalletConfig.walltPayBotURL
+                    url: WalletConfig.walltPayBotLoginURL
                 }
             ]
         ])
