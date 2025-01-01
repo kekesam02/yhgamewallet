@@ -12,6 +12,7 @@ import CustomSnowflake from "../../../../commons/CustomSnowflake";
 import WalletType from "../../../../type/WalletType";
 import {queryRunner} from "../../../../config/database";
 import WalletHandleMethod from "../WalletHandleMethod";
+import WalletConfig from "../../../WalletConfig";
 
 
 /**
@@ -51,11 +52,6 @@ class WalletHandleZhuanzhangMethod {
 
     // 转账具体逻辑
     public static startZhuangzhangHandle = async (query: string, queryId: string, tgId: number, ctx: Context) => {
-        // const sid = ctx.botInfo.id
-        // const snickname = ctx.botInfo.first_name
-        // const susername = ctx.botInfo.username
-        // const fid = ctx.inlineQuery?.from.id
-        // const fnickname = ctx.inlineQuery?.from.first_name
         const inlineMessageId = ctx.inlineMessageId
         const fusername = ctx.inlineQuery?.from.username
         // 查询用户余额
@@ -98,7 +94,7 @@ class WalletHandleZhuanzhangMethod {
                             [{
                                 text: '\uD83D\uDCB0一号公馆钱包',
                                 callback_data: 'qwe123',
-                                url: 'http://t.me/VertexPaybot'
+                                url: WalletConfig.walltPayBotURL
                             }]
                         ]
                     }
@@ -118,8 +114,6 @@ class WalletHandleZhuanzhangMethod {
         let callbackStr: string = update.callback_query?.data
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
-        var nickname: string = ctx.callbackQuery?.from?.first_name || ''
-        var username: string = ctx.callbackQuery?.from?.username || ''
         let inlineMessageId = ctx.callbackQuery?.inline_message_id || ""
         // 转账金额
         var money = callbackStr.replaceAll("qrjs", "").split(",")[0];

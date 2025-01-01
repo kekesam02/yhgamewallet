@@ -2,6 +2,7 @@ import ButtonUtils from "../../commons/button/ButtonUtils";
 import StartWalletEnum from "../../type/walletEnums/StartWalletEnum";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 import WalletRedPacketInner from "../service/handle/hongbao/WalletRedPacketInner";
+import WalletConfig from "../WalletConfig";
 
 /**
  * 钱包
@@ -47,20 +48,19 @@ class WalletController {
     public static ValidatorUserPwd = (tgId: string | undefined, msgId: string | undefined, money: string | undefined, operator: string | undefined) => {
         return {
             text: "✏️ 提交验证",
-            query: "vpb_"+msgId+"_"+money+"_"+operator+'_'+tgId
+            query: "vpb_" + msgId + "_" + money + "_" + operator + '_' + tgId
         }
     }
 
     /**
      * 转账的确认密码安全
      */
-    public static createZhuanzhangPwdBtn = (tgId:string,msgId:string,money:string,operator:string) => {
+    public static createZhuanzhangPwdBtn = (tgId: string, msgId: string, money: string, operator: string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
                     text: '\uD83D\uDCB0验证安全密码',
-                    // url: "https://t.me/VertexPaybot?start=inline_"+inlineMessageId+"_"+op
-                    url: "https://t.me/myxukebot?start=inline_"+msgId+"_"+money+"_"+operator+"_"+tgId
+                    url: WalletConfig.walltPayBotInlineURL + msgId + "_" + money + "_" + operator + "_" + tgId
                 }
             ]
         ])
@@ -178,7 +178,7 @@ class WalletController {
                 text: '🏘️ 主菜单',
                 query: WalletUserCenterEnum.HOME,
             }
-        ],[
+        ], [
             {
                 text: '🏘️ 测试',
                 url: 'https://t.me/VertexPaybot?start=withdraw'
@@ -204,13 +204,13 @@ class WalletController {
     /**
      * 返回和财务
      */
-    public static createBackClientBtn = (username:string='xukefeifeibot') => {
+    public static createBackClientBtn = (username: string = 'xukefeifeibot') => {
         return new ButtonUtils().createCallbackBtn([
             [
                 WalletController.BackHome,
                 {
                     text: '🛄 客服财务',
-                    url: 'https://t.me/'+username
+                    url: 'https://t.me/' + username
                 }
             ]
         ])
@@ -219,16 +219,16 @@ class WalletController {
     /**
      * 财务审核按钮
      */
-    public static createMarkClientBtn = (botPaymentId:string) => {
+    public static createMarkClientBtn = (botPaymentId: string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
                     text: '✅标记已打款',
-                    query: 'bjydk'+botPaymentId
+                    query: 'bjydk' + botPaymentId
                 },
                 {
                     text: '\uD83D\uDEAB异常退回',
-                    query: 'txycth'+botPaymentId
+                    query: 'txycth' + botPaymentId
                 }
             ]
         ])
@@ -248,7 +248,7 @@ class WalletController {
     /**
      * 创建转账返回按钮
      */
-    public static createZhuanzhangSwitchBtn = (query:string) => {
+    public static createZhuanzhangSwitchBtn = (query: string) => {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 {
@@ -265,7 +265,7 @@ class WalletController {
     /**
      * 创建收款按钮
      */
-    public static createShouKuanSwitchBtn = (query:string) => {
+    public static createShouKuanSwitchBtn = (query: string) => {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 {
@@ -288,15 +288,15 @@ class WalletController {
                 {
                     text: '\uD83D\uDC49再发一个',
                     query: StartWalletEnum.HONGBAO_CANCEL_1
-                },{
-                    text: '\uD83E\uDDE7发送红包',
-                    switch_inline_query: WalletRedPacketInner.InnerKey + hbId
-                }
+                }, {
+                text: '\uD83E\uDDE7发送红包',
+                switch_inline_query: WalletRedPacketInner.InnerKey + hbId
+            }
             ], [
                 {
                     text: '✏️设置备注',
                     query: StartWalletEnum.HONGBAO_TYPE_REMARK + hbId
-                },{
+                }, {
                     text: '⚙️设置条件',
                     query: StartWalletEnum.HONGBAO_TYPE_CONDITION + hbId
                 }
@@ -307,12 +307,12 @@ class WalletController {
     /**
      * 创建审核通过
      */
-    public static createSuccessBtn = (username:string) => {
+    public static createSuccessBtn = (username: string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
                     text: '✅ 操作成功，点击联系用户',
-                    url: 'https://t.me/'+username
+                    url: WalletConfig.MEURL + username
                 }
             ]
         ])
@@ -321,12 +321,12 @@ class WalletController {
     /**
      * 创建拒绝
      */
-    public static createFailBtn = (username:string) => {
+    public static createFailBtn = (username: string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
                     text: '⚠️ 已拒绝，点击联系用户',
-                    url: 'https://t.me/'+username
+                    url: WalletConfig.MEURL + username
                 }
             ]
         ])
@@ -335,12 +335,12 @@ class WalletController {
     /**
      * 转账的点击按钮
      */
-    public static createZhuanzhangSKBtn = (botPaymentId:string) => {
+    public static createZhuanzhangSKBtn = (botPaymentId: string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
                     text: '\uD83D\uDCB0收款',
-                    query: "shoukuanzk"+botPaymentId
+                    query: "shoukuanzk" + botPaymentId
                 }
             ]
         ])
@@ -350,12 +350,12 @@ class WalletController {
     /**
      * 点击收款按钮
      */
-    public static createZhuanzhangSureBtn = (username:string) => {
+    public static createZhuanzhangSureBtn = (username: string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
                     text: '✅ 已收款成功',
-                    url: 'https://t.me/'+username
+                    url: WalletConfig.MEURL + username
                 }
             ]
         ])
@@ -366,8 +366,7 @@ class WalletController {
      */
     public static createEmptyBtn = () => {
         return new ButtonUtils().createCallbackBtn([
-            [
-            ]
+            []
         ])
     }
 
