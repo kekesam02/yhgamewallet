@@ -57,14 +57,38 @@ class WalletHandleZhuanzhangMethod {
         let userId = AESUtils.encodeUserId(tgId?.toString())
         let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
         if (botUser) {
-            if (parseFloat(botUser.USDT) > 0) {
+            const userUsdt = parseFloat(botUser.USDT)
+            const zhuanMoney = parseFloat(query)
+            if (userUsdt > 0) {
+                // 这里判断余额是否充足
+                if (userUsdt < zhuanMoney) {
+                    // 创建一个可分享的结果
+                    await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
+                        id: queryId,
+                        title: '⚠️温馨提示：操作失败，余额不足！',
+                        description: '提示：余额不足，当前余额：【' + userUsdt + '】 不足以转出【' + zhuanMoney + '】!',
+                        input_message_content: {
+                            message_text: '\uD83D\uDC47 \n'
+                        },
+                        reply_markup: {
+                            inline_keyboard: [
+                                [{
+                                    text: '\uD83D\uDCB0一号公馆钱包',
+                                    callback_data: 'qwe123',
+                                    url: WalletConfig.walltPayBotURL
+                                }]
+                            ]
+                        }
+                    }))
+                    return
+                }
                 // 创建一个可分享的结果
                 await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                     id: queryId,
                     title: "转款金额【" + query + "】USDT",
                     description: "\uD83D\uDCB0您正在向用户【@" + fusername + "】发起转账，点击【确定转账】并立即生效",
                     input_message_content: {
-                        message_text: "\uD83D\uDD30为了您的资金安全，请验证密码来解锁此笔转账",
+                        message_text: "\uD83D\uDD30为了您的资金安全，请验证密码来解锁此笔转账，请耐心等待！",
                         parse_mode: "HTML"
                     },
                     reply_markup: {
@@ -181,6 +205,12 @@ class WalletHandleZhuanzhangMethod {
                     await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
                 }
             } else {
+                const cacheLogin = await redis.get("zk_input_lock_"+tgId)
+                if(cacheLogin == "success"){
+                    // 同时改变按钮的状态为收款
+                    await this.startZhuanZhangPwdUnLock(ctx,tgId + '_' + money + '_' + inlineMessageId)
+                    return
+                }
                 // 缓存用于用户输入完密码。获取对应的信息，inlineMessageId是用来修改按钮状态的
                 await ctx.editMessageText("⌛️ 请等待对方验证密码", {parse_mode: 'HTML'})
                 await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPwdBtn(tgId + '', inlineMessageId, money, "zhza").reply_markup)
@@ -282,6 +312,8 @@ class WalletHandleZhuanzhangMethod {
             )
             // 提交事务
             await queryRunner.commitTransaction()
+            // 写入缓存，这样就可以避免下次大额在输入密码
+            await redis.set("zk_input_lock_"+tgId,"success",'EX',60 * 60)
             // 删除密码验证------------------------------如果想续期不输入密码就注释掉
         } catch (e) {
             await queryRunner.rollbackTransaction()
@@ -358,7 +390,7 @@ class WalletHandleZhuanzhangMethod {
         }
         // 删除此消息
         ctx.editMessageText("提示：对方已取消转账!")
-        ctx.editMessageReplyMarkup(WalletController.createEmptyBtn().reply_markup)
+        ctx.editMessageReplyMarkup(WalletController.createCallbackCancleBtn().reply_markup)
     }
 
     /**
@@ -431,7 +463,7 @@ class WalletHandleZhuanzhangMethod {
                 //5：保存收款记录
                 var orderId: string = CustomSnowflake.snowflake()
                 let inlineMessageId = ctx.callbackQuery?.inline_message_id
-                // 开始存收款订单
+                //6：开始存收款订单
                 await queryRunner.manager.save(BotPaymentModel, {
                     tgId: encodeUserId,
                     uid: newbotUser?.id,
@@ -454,8 +486,8 @@ class WalletHandleZhuanzhangMethod {
                     status: 1,
                     chatId: inlineMessageId
                 })
-                // 提示收款完成
-                ctx.editMessageText("于【"+applyTime+"】【"+nickname+"】已完成收款!")
+                //7：提示收款完成
+                ctx.editMessageText("于【"+applyTime+"】"+nickname+"已完成收款!")
                 ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username || '').reply_markup)
                 await queryRunner.commitTransaction()
             } catch (e) {

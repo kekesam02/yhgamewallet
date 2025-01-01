@@ -5,6 +5,7 @@ import WalletHandleMethod from "../../handle/WalletHandleMethod";
 import WalletRedPacketInner from "../../handle/hongbao/WalletRedPacketInner";
 import WalletHandleZhuanzhangMethod from "../../handle/zhuanzhaung/WalletHandleZhuanzhangMethod";
 import WalletHandleShouKuanMethod from "../../handle/shoukuan/WalletHandleShouKuanMethod";
+import WalletController from "../../../controller/WalletController";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -24,8 +25,9 @@ class WalletInnerQueryHandle {
         try {
             // 设置提现地址
             var tgId: number = from?.id || 0
+            const loginFlag = await redis.get("login_" + tgId)
             const currentop: string = await redis.get("currentop" + tgId) || ""
-            if (currentop) {
+            if (loginFlag == "success" && currentop) {
                 // 转账
                 if (currentop == 'zhuanzhang') {
                     var text = ""
@@ -62,7 +64,6 @@ class WalletInnerQueryHandle {
                     WalletHandleZhuanzhangMethod.startZhuangzhangHandle(query,queryId, tgId, ctx)
                     return;
                 }
-
                 // 收款
                 if (currentop == 'shoukuan') {
                     var text = ""
@@ -99,13 +100,26 @@ class WalletInnerQueryHandle {
                     WalletHandleShouKuanMethod.startShouKuanHandle(query,queryId, tgId, ctx)
                     return;
                 }
+                // 红包
+                if(currentop == 'hongbao' && query.indexOf(WalletRedPacketInner.InnerKey) == 0){
+                    // 红包连消息处理
+                    return new WalletRedPacketInner().innerMessageHandle(ctx,queryId, query)
+                }
             }else{
-                await ctx.reply("会话已失效，请重新点击面板进行操作!")
-                WalletHandleMethod.startCommandCallback(ctx).then()
-            }
-            if (query.indexOf(WalletRedPacketInner.InnerKey) == 0) {
-                // 红包连消息处理
-                return new WalletRedPacketInner().innerMessageHandle(ctx,queryId, query)
+                // 尝试发送一个简单的响应
+                try {
+                    await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
+                        id:queryId,
+                        title: '会话失效了',
+                        description: '操作失败，会话已失效请点击返回重新操作',
+                        input_message_content: {
+                            message_text: '操作失败，会话已失效请点击【返回】重新操作!'
+                        },
+                        reply_markup:WalletController.createCallbackCancleBtn().reply_markup
+                    }))
+                } catch (e) {
+                    console.error('发送错误响应失败:', e)
+                }
             }
         } catch (error) {
             // 尝试发送一个简单的响应
@@ -115,8 +129,9 @@ class WalletInnerQueryHandle {
                     title: '出错了',
                     description: '请重试',
                     input_message_content: {
-                        message_text: '操作失败，请重试'
-                    }
+                        message_text: '操作失败，会话已失效请点击返回重新操作!'
+                    },
+                    reply_markup:WalletController.createCallbackCancleBtn().reply_markup
                 }))
             } catch (e) {
                 console.error('发送错误响应失败:', e)

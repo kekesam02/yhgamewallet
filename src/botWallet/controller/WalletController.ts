@@ -380,6 +380,22 @@ class WalletController {
         ])
     }
 
+
+    /**
+     * 取消转账
+     */
+    public static createCallbackCancleBtn = (username: string = '') => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '↩️ 返回',
+                    url: WalletConfig.walltPayBotURL
+                }
+            ]
+        ])
+    }
+
+
     /**
      * 创建空按钮
      */

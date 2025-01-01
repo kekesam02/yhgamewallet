@@ -29,7 +29,6 @@ import WalletHandleShouKuanMethod from "./shoukuan/WalletHandleShouKuanMethod";
 import WalletHandleHongBaoMethod from "./hongbao/WalletHandleHongBaoMethod";
 import WalletHandleShangduiMethod from "./shangdui/WalletHandleShangduiMethod";
 
-
 /**
  * 公共方法处理
  * npm install @img/sharp-darwin-arm64 @img/sharp-libvips-darwin-arm64 @img/sharp-libvips-linux-x64 @img/sharp-libvips-linuxmusl-x64 @img/sharp-linux-x64 @img/sharp-linuxmusl-x64 --force
@@ -364,9 +363,6 @@ class WalletHandleMethod {
         const loginFlag = await redis.get("login_" + tgId)
         return loginFlag == "success"
     }
-
-
 }
-
 
 export default WalletHandleMethod

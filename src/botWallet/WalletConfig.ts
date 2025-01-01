@@ -3,7 +3,8 @@
  */
 class WalletConfig {
     // 钱包机器人
-    static walltPayBotURL:string = 'http://t.me/VertexPaybot'
+    // static walltPayBotURL:string = 'http://t.me/VertexPaybot'
+    static walltPayBotURL:string = 'http://t.me/myxukebot'
     // 转账使用
     //static  walltPayBotInlineURL:string = 'https://t.me/VertexPaybot?start=inline_'
     static walltPayBotInlineURL:string = 'https://t.me/myxukebot?start=inline_'
