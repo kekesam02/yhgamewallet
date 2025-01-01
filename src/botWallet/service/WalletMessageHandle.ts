@@ -20,9 +20,7 @@ class WalletMessageHandle {
         if (!text || text.length <= 0 || text == '') {
             return
         }
-
         text = text.trim()
-
         // 设置提现地址
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
