@@ -9,13 +9,15 @@ import ButtonCommonMap from "../../../../commons/button/ButtonCommonMap";
 import WalletType from "../../../../type/WalletType";
 import UserModel from "../../../../models/UserModel";
 import CommonEnumsIndex from "../../../../type/CommonEnumsIndex";
-import {addLockByCtx} from "../../../../config/redislock";
+import {addLock, addLockByCtx} from "../../../../config/redislock";
 import {queryRunner} from "../../../../config/database";
 import ContextUtil from "../../../../commons/ContextUtil";
 import RedPacketHtml from "../../../../html/walletHtml/RedPacketHtml";
 import BotHb from "../../../../models/BotHb";
 import WalletController from "../../../controller/WalletController";
 import redis from "../../../../config/redis";
+import BotPaymentModel from "../../../../models/BotPaymentModel";
+import PaymentType from "../../../../type/PaymentType";
 
 
 

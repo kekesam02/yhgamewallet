@@ -8,6 +8,8 @@ import RedPacketHtml from "../../../../html/walletHtml/RedPacketHtml";
 import BotPaymentModel from "../../../../models/BotPaymentModel";
 import PaymentType from "../../../../type/PaymentType";
 import UserModel from "../../../../models/UserModel";
+import WalletController from "../../../controller/WalletController";
+import CommonEnumsIndex from "../../../../type/CommonEnumsIndex";
 
 /**
  * 红包内连消息处理

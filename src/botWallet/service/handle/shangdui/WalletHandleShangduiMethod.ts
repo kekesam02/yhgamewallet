@@ -1,20 +1,6 @@
 import type {Context, Telegraf} from "telegraf";
-import ButtonUtils from '../../../../commons/button/ButtonUtils'
-import WalletBotHtml from '../../../../html/walletHtml/WalletBotHtml'
-import BotTronAddrModel from "../../../../models/BotTronAddrModel";
-import AESUtils from "../../../../commons/AESUtils";
-import UserModel from "../../../../models/UserModel";
-import MCoinRechargeAddrPoolModel from "../../../../models/MCoinRechargeAddrPoolModel";
-import WalletController from "../../../controller/WalletController";
-import messageUtils from "../../../../commons/message/MessageUtils";
-import QRCodeUtils from "../../../../commons/qrcode/QRCodeUtils";
-import {ButtonCallbackType} from "../../../../commons/button/ButtonCallbackType";
-import WalletMessage from "../../../const/WalletMessage";
-import BotWithdrawalAddrModel from "../../../../models/BotWithdrawalAddrModel";
 import redis from "../../../../config/redis";
-import BotPaymentModel from "../../../../models/BotPaymentModel";
 import {addLockByTgId} from "../../../../config/redislock";
-import WalletRedPacket from "../hongbao/WalletRedPacket";
 import WalletHandleMethod from "../WalletHandleMethod";
 
 

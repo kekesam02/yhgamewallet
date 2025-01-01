@@ -52,7 +52,6 @@ class WalletHandleZhuanzhangMethod {
 
     // 转账具体逻辑
     public static startZhuangzhangHandle = async (query: string, queryId: string, tgId: number, ctx: Context) => {
-        const inlineMessageId = ctx.inlineMessageId
         const fusername = ctx.inlineQuery?.from.username
         // 查询用户余额
         let userId = AESUtils.encodeUserId(tgId?.toString())
@@ -130,19 +129,16 @@ class WalletHandleZhuanzhangMethod {
             let userUsdt = parseFloat(botUser.USDT || "0")
             let zhuanMoney = parseFloat(money)
             let walletFreeLimit = parseFloat(botUser.withdrawalLimit || "100")
-
             // 余额不足
             if (userUsdt <= 0) {
                 await ctx.answerCbQuery('提示：余额不足，当前余额是0', {show_alert: true})
                 return
             }
-
             // 余额不够
             if (userUsdt < zhuanMoney) {
                 await ctx.answerCbQuery('提示：余额不足，当前余额：【' + userUsdt + '】 不足以转出【' + zhuanMoney + '】!', {show_alert: true})
                 return
             }
-
             // 开始验证免密额度 --- 直接转账
             if (zhuanMoney <= walletFreeLimit) {
                 // 扣除用户余额、用户余额递减
