@@ -772,7 +772,7 @@ class WalletHandleMethod {
             } else {
                 console.log(ctx?.chat?.id)
                 redis.set("zk_inlineMessageId" + tgId, inlineMessageId, 'EX', 1000 * 60 * 60 * 6);
-                await ctx.editMessageText("请点击下方按钮验证", {parse_mode: 'HTML'})
+                await ctx.editMessageText("⌛️ 请等待对方点击下方按钮验证", {parse_mode: 'HTML'})
                 await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPwdBtn(inlineMessageId,"zhuanzhang").reply_markup)
             }
         }
@@ -787,8 +787,6 @@ class WalletHandleMethod {
         var qrjs = payload.replaceAll("inline_", "");
 
         var inlineMessageId = qrjs.split("_")[1]
-
-
         await ctx.telegram.editMessageText('',undefined,inlineMessageId,
             "\uD83D\uDCB0 xxx转账给你 10 USDT",
             {parse_mode: 'HTML'}
@@ -797,7 +795,6 @@ class WalletHandleMethod {
         await  ctx.telegram.editMessageReplyMarkup('',undefined,inlineMessageId,
             WalletController.createZhuanzhangSKBtn('11').reply_markup
         )
-
         // 可以考虑清除原来的密码
         // 开始生成输入密码确认
         await this.sendPasswordSetupMessage(ctx,"",true)
