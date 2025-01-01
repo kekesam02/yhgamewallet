@@ -6,6 +6,7 @@ import WalletMessageHandle from '../WalletMessageHandle'
 import WalletCallbackHandle from "../WalletCallbackHandle";
 import WalletHandleMethod from "../handle/WalletHandleMethod";
 import WalletInnerQueryHandle from "../WalletInnerQueryHandle";
+import WalletHandleZhuanzhangMethod from "../handle/WalletHandleZhuanzhangMethod";
 
 /**
  * 娱乐机器人核心代码
@@ -36,7 +37,7 @@ bot.command('start', async (ctx) => {
     // 用于监听转账，红包，收款的密码监听
     var payload = ctx.payload
     if (payload) {
-        return WalletHandleMethod.startCommandInputPassword(ctx,payload)
+        return WalletHandleZhuanzhangMethod.startCommandInputPassword(ctx,payload)
     } else {
         return WalletHandleMethod.startCommandCallback(ctx)
     }

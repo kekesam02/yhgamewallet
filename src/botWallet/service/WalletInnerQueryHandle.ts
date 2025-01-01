@@ -1,9 +1,10 @@
 import {Context, Telegraf} from 'telegraf'
 import ButtonInnerQueryUtils from "../../commons/button/ButtonInnerQueryUtils";
-import {InlineQueryResult} from "@telegraf/types/inline";
 import redis from "../../config/redis";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
 import WalletRedPacketInner from "./handle/WalletRedPacketInner";
+import WalletHandleZhuanzhangMethod from "./handle/WalletHandleZhuanzhangMethod";
+import WalletHandleShouKuanMethod from "./handle/WalletHandleShouKuanMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -58,7 +59,7 @@ class WalletInnerQueryHandle {
                         }))
                         return
                     }
-                    WalletHandleMethod.startZhuangzhangHandle(query,queryId, tgId, ctx)
+                    WalletHandleZhuanzhangMethod.startZhuangzhangHandle(query,queryId, tgId, ctx)
                     return;
                 }
 
@@ -95,7 +96,7 @@ class WalletInnerQueryHandle {
                         }))
                         return
                     }
-                    WalletHandleMethod.startShouKuanHandle(query,queryId, tgId, ctx)
+                    WalletHandleShouKuanMethod.startShouKuanHandle(query,queryId, tgId, ctx)
                     return;
                 }
             }else{

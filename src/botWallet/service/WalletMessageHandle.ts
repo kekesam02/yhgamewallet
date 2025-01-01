@@ -1,9 +1,11 @@
 import type {Context} from "telegraf";
-import WalletCommand from "../const/WalletCommand";
 import WalletHandleMethod from "./handle/WalletHandleMethod";
 import redis from "../../config/redis";
 import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
 import {Telegraf} from "telegraf";
+import WalletHandleHongBaoMethod from "./handle/WalletHandleHongBaoMethod";
+import WalletHandleTixianMethod from "./handle/WalletHandleTixianMethod";
+import WalletHandleShangduiMethod from "./handle/WalletHandleShangduiMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -33,28 +35,28 @@ class WalletMessageHandle {
             }
             // 提现
             if (currentop == 'tx') {
-                WalletHandleMethod.startTxHandle(text, tgId, ctx, cbot)
+                WalletHandleTixianMethod.startTxHandle(text, tgId, ctx, cbot)
                 return;
             }
 
             // 红包金额
             if (currentop == 'hongbaoMoney') {
-                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop)
+                WalletHandleHongBaoMethod.startHongBaoHandle(text, tgId, ctx, currentop)
                 return;
             }
             // 红包数量
             if (currentop == 'hongbaoLength') {
-                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop)
+                WalletHandleHongBaoMethod.startHongBaoHandle(text, tgId, ctx, currentop)
                 return;
             }
             // 红包备注文字
             if (currentop == 'hongbaoRemark' || currentop.split('_')[0] == 'hongbaoRemark') {
-                WalletHandleMethod.startHongBaoHandle(text, tgId, ctx, currentop)
+                WalletHandleHongBaoMethod.startHongBaoHandle(text, tgId, ctx, currentop)
                 return;
             }
             // 闪兑
             if (currentop == 'shangdui') {
-                WalletHandleMethod.startShangduiHandle(text, tgId, ctx)
+                WalletHandleShangduiMethod.startShangduiHandle(text, tgId, ctx)
                 return;
             }
         }else{

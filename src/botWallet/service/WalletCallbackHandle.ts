@@ -5,6 +5,12 @@ import WalletUserCenterMethod from "./handle/WalletUserCenterMethod";
 import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 import WalletRedPacket from "./handle/WalletRedPacket";
 import WalletType from "../../type/WalletType";
+import WalletHandleShouKuanMethod from "./handle/WalletHandleShouKuanMethod";
+import WalletHandleZhuanzhangMethod from "./handle/WalletHandleZhuanzhangMethod";
+import WalletHandleTixianMethod from "./handle/WalletHandleTixianMethod";
+import WalletHandleChongzhiMethod from "./handle/WalletHandleChongzhiMethod";
+import WalletHandleHongBaoMethod from "./handle/WalletHandleHongBaoMethod";
+import WalletHandleShangduiMethod from "./handle/WalletHandleShangduiMethod";
 
 
 /**
@@ -25,10 +31,10 @@ class WalletCallbackHandle {
         var tgId: string = ctx.callbackQuery?.from?.id + '' || "0"
         if(callbackStr.startsWith('bjydk')){
             // 标记打款
-            WalletHandleMethod.startMarkTixian(tgId,callbackStr,ctx,ubot)
+            WalletHandleTixianMethod.startMarkTixian(tgId,callbackStr,ctx,ubot)
         } else if(callbackStr.startsWith('txycth')){
             // 异常驳回
-            WalletHandleMethod.startRefuseTixian(tgId,callbackStr,ctx,ubot)
+            WalletHandleTixianMethod.startRefuseTixian(tgId,callbackStr,ctx,ubot)
         }
     }
 
@@ -40,13 +46,13 @@ class WalletCallbackHandle {
         if (callbackStr.startsWith('num_') || callbackStr === 'delete' || callbackStr === 'clear') {
             WalletHandleMethod.startInputPassword(ctx)
         }else if(callbackStr.startsWith('qrjs')){
-            WalletHandleMethod.startZhuanZhangUnLock(ctx)
+            WalletHandleZhuanzhangMethod.startZhuanZhangUnLock(ctx)
         }else if(callbackStr.startsWith('quxiaozz')){
-            WalletHandleMethod.cancelZhuanZhang(ctx)
+            WalletHandleZhuanzhangMethod.cancelZhuanZhang(ctx)
         }else if(callbackStr.startsWith('shoukuanzk')){
-            WalletHandleMethod.startZhuanzhangSK(ctx)
+            WalletHandleZhuanzhangMethod.startZhuanzhangSK(ctx)
         }else if(callbackStr.startsWith('vpb_')){
-            WalletHandleMethod.startValidatorPwdCallback(ctx,callbackStr)
+            WalletHandleZhuanzhangMethod.startValidatorPwdCallback(ctx,callbackStr)
         } else {
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
@@ -89,26 +95,26 @@ class WalletCallbackHandle {
                 // ===============================按钮组2：用户充值、提现===========================
                 // 充值
                 case StartWalletEnum.CHONGZHI:
-                    WalletHandleMethod.startChongZhi(ctx)
+                    WalletHandleChongzhiMethod.startChongZhi(ctx)
                     break
                 // 提现
                 case StartWalletEnum.TIXIAN:
-                    WalletHandleMethod.startTiXian(ctx,cbot)
+                    WalletHandleTixianMethod.startTiXian(ctx,cbot)
                     break
                 // 转账
                 case StartWalletEnum.ZHUANZHANG:
                     WalletHandleMethod.removeMessage(ctx)
-                    WalletHandleMethod.startZhuanZhang(ctx,cbot)
+                    WalletHandleZhuanzhangMethod.startZhuanZhang(ctx,cbot)
                     break
                 // 收款
                 case StartWalletEnum.SHOUKUANG:
                     WalletHandleMethod.removeMessage(ctx)
-                    WalletHandleMethod.startShouKuan(ctx,cbot)
+                    WalletHandleShouKuanMethod.startShouKuan(ctx,cbot)
                     break
 
                 // 红包
                 case StartWalletEnum.HONGBAO:
-                    return WalletHandleMethod.startHongBao(ctx,cbot)
+                    return WalletHandleHongBaoMethod.startHongBao(ctx,cbot)
                 // 点击添加红包按钮回调
                 case StartWalletEnum.HONGBAO_ADD:
                     return new WalletRedPacket(ctx).selectWallType()
@@ -139,7 +145,7 @@ class WalletCallbackHandle {
 
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:
-                    return  WalletHandleMethod.startShanDui(ctx,cbot)
+                    return  WalletHandleShangduiMethod.startShanDui(ctx,cbot)
                 case StartWalletEnum.USERCENTER:
                     WalletUserCenterMethod.startUserCenterCallback(ctx).then()
                     break

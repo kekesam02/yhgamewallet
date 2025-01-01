@@ -2,18 +2,12 @@
  * 红包相关处理
  */
 import {Context} from "telegraf";
-import messageUtils from "../../../commons/message/MessageUtils";
 import MessageUtils from "../../../commons/message/MessageUtils";
 import ButtonUtils from "../../../commons/button/ButtonUtils";
 import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
 import ButtonCommonMap from "../../../commons/button/ButtonCommonMap";
 import WalletType from "../../../type/WalletType";
 import UserModel from "../../../models/UserModel";
-import MessageTipUtils from "../../../commons/message/MessageTipUtils";
-import computeUtils from "../../../commons/compute/ComputeUtils";
-import ComputeUtils from "../../../commons/compute/ComputeUtils";
-import {clearTimeout} from "timers";
-import CommandController from "../../../botGame/gameController/CommandController";
 import CommonEnumsIndex from "../../../type/CommonEnumsIndex";
 import {addLockByCtx} from "../../../config/redislock";
 import {queryRunner} from "../../../config/database";
