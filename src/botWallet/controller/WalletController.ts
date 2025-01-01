@@ -205,13 +205,13 @@ class WalletController {
     /**
      * 返回和财务
      */
-    public static createBackClientBtn = (username: string = 'xukefeifeibot') => {
+    public static createBackClientBtn = (username: string = '') => {
         return new ButtonUtils().createCallbackBtn([
             [
                 WalletController.BackHome,
                 {
                     text: '🛄 客服财务',
-                    url: 'https://t.me/' + username
+                    url: WalletConfig.MEURL + username
                 }
             ]
         ])
