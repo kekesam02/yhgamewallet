@@ -114,12 +114,17 @@ class BotOddsStorage {
         }
 
         if (form != '杂子') {
+
+            // 极大极小正常计算赔率
+            if (botOdds.name == '极大' || botOdds.name == '极小') {
+                return new ComputeUtils(money).multiplied(botOdds.odds).toString()
+            }
+
+            // 不是对子顺子豹子的话赔率为1
             if (
                 botOdds.name != '对子'
                 && botOdds.name != '顺子'
                 && botOdds.name != '豹子'
-                && botOdds.name != '极大'
-                && botOdds.name != '极小'
             ) {
                 return new ComputeUtils(money).multiplied(1).toString()
             }
