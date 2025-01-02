@@ -24,7 +24,6 @@ class WalletCallbackQueryHandle {
      * @param bot
      */
     public static cBotlistenerMessage = async (ctx: Context,ubot:Telegraf<Context>) => {
-        console.log('cbot_callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
         // 1：获取telegram的tgId

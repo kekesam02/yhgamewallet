@@ -7,6 +7,7 @@ import WalletCallbackQueryHandle from "./callbackquery/WalletCallbackQueryHandle
 import WalletHandleMethod from "../handle/WalletHandleMethod";
 import WalletInnerQueryHandle from "./inlinequery/WalletInnerQueryHandle";
 import WalletHandleZhuanzhangMethod from "../handle/zhuanzhaung/WalletHandleZhuanzhangMethod";
+import WalletHandleShouKuanMethod from "../handle/shoukuan/WalletHandleShouKuanMethod";
 
 /**
  * 娱乐机器人核心代码
@@ -36,8 +37,13 @@ bot.telegram.setMyCommands([
 bot.command('start', async (ctx) => {
     // 用于监听转账，红包，收款的密码监听
     var payload = ctx.payload
-    if (payload && payload.startsWith('inline_')) {
-         WalletHandleZhuanzhangMethod.startCommandInputPassword(ctx,payload)
+    if (payload) {
+        if ( payload.startsWith('inline_')) {
+            WalletHandleZhuanzhangMethod.startCommandInputPassword(ctx, payload)
+        }
+        if (payload && payload.startsWith('shoukuan_')) {
+            WalletHandleShouKuanMethod.startShouKuanPayCommand(ctx, payload, bot)
+        }
     } else {
          WalletHandleMethod.startCommandCallback(ctx)
     }

@@ -244,6 +244,24 @@ class WalletController {
     }
 
     /**
+     * 财务审核按钮
+     */
+    public static createPayBotButton = (tgId: string,payTgId:string,money:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '✅确认支付',
+                    query: 'skqrzf' + tgId+","+money+","+payTgId
+                },
+                {
+                    text: '\uD83D\uDEAB取消支付',
+                    query: 'skqxzf'
+                }
+            ]
+        ])
+    }
+
+    /**
      * 创建返回按钮
      */
     public static createBackBtn = () => {

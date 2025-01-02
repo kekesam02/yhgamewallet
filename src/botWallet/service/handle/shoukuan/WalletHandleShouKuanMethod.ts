@@ -4,6 +4,10 @@ import redis from "../../../../config/redis";
 import {addLockByTgId} from "../../../../config/redislock";
 import walletHandleMethod from "../WalletHandleMethod";
 import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
+import WalletHandleMethod from "../WalletHandleMethod";
+import WalletConfig from "../../../WalletConfig";
+import UserModel from "../../../../models/UserModel";
+import AESUtils from "../../../../commons/AESUtils";
 
 
 /**
@@ -38,7 +42,7 @@ class WalletHandleShouKuanMethod {
         }
         // 发送消息
         const html = "\uD83D\uDC47 点击下方按钮选择付款人";
-        return ctx.replyWithHTML(html, WalletController.createShouKuanSwitchBtn("-1"))
+        await ctx.replyWithHTML(html, WalletController.createShouKuanSwitchBtn("-1"))
     }
 
     // 收款具体逻辑
@@ -58,17 +62,17 @@ class WalletHandleShouKuanMethod {
             // 创建一个可分享的结果
             await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                 id: queryId,
-                title: "你正发起收款操作，收款金额" + money + "USDT",
+                title: "你正发起收款操作，收款金额【" + money + "】USDT",
                 description: "",
                 input_message_content: {
-                    message_text: "\uD83D\uDCB0【@"+fusername+"】向你发起收款，收款金额：【"+money+"】USDT",
+                    message_text: "\uD83D\uDCB0【@"+fusername+"】向你发起收款，收款金额【"+money+"】USDT。",
                     parse_mode: "HTML"
                 },
                 reply_markup: {
                     inline_keyboard: [
                         [{
-                            text: '\uD83D\uDCB8立即支付',
-                            callback_data: "shoukuan" +id+','+ query + "," + tgId
+                            text: '\uD83D\uDCB8 立即支付',
+                            url: WalletConfig.walltPayBotSKInlineURL +id+'_'+ money
                         }]
                     ]
                 }
@@ -78,6 +82,57 @@ class WalletHandleShouKuanMethod {
         })
     }
 
+    /**
+     * 立即开始支付
+     * @param ctx
+     */
+    public static startShouKuanPayCommand = async (ctx:Context,payload:string,bot:Telegraf<Context>)=>{
+        let update: any = ctx?.update
+        // 1：获取telegram的tgId
+        var payTgId: string = update?.message?.from?.id+'' || ''
+        var payUsername: string = update?.message?.from?.username+'' || ''
+        var payNickname: string = update?.message?.from?.first_name+'' || ''
+        // 获取收款人信息
+        var s = payload.replaceAll("shoukuan_", "");
+        var split = s.split("_");
+        var tgIdvalue = split[0] || '' // 收款人
+        var value = split[1] // 收款金额
+
+        if (payTgId == tgIdvalue) {
+            bot.telegram.sendMessage(payTgId,"⚠️ 不可以转账给自己")
+            return
+        }
+
+        // 如果付款人没注册，就注册
+        var payUserId = AESUtils.encodeUserId(payTgId);
+        let payBotUser: UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: payUserId}).getOne()
+        // 2：如果没有注册就先注册
+        if (!payBotUser) {
+            await UserModel.createQueryBuilder().insert().into(UserModel).values({
+                tgId: payUserId,
+                nickName: payNickname,
+                userName: payUsername,
+                vip: 0,
+                USDT: "0",
+                promotionLink: '',
+                rechargeLink: ''
+            }).execute()
+        }
+
+        // 查询转账人信息
+        const botUser = await UserModel.createQueryBuilder().where("tg_id=:tgId",{tgId:tgIdvalue}).getOne()
+        var html = "\uD83D\uDCB8 你正在付款给" + botUser?.nickName + "\n" +
+            "\n" +
+            "用户ID : " + tgIdvalue + "\n" +
+            "名称 : " + botUser?.userName + "\n" +
+            "\n" +
+            "支付金额 : " + value + " USDT\n" +
+            "\n" +
+            "提示: 本次转账即时完成, 无法追回!";
+
+        // 发送消息
+        await bot.telegram.sendMessage(payTgId,html,{parse_mode:"HTML",reply_markup:WalletController.createPayBotButton(payTgId,tgIdvalue,value).reply_markup})
+    }
 }
 
 

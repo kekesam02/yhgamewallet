@@ -37,7 +37,6 @@ class WalletMessageHandle {
                 WalletHandleTixianMethod.startTxHandle(text, tgId, ctx, cbot)
                 return;
             }
-
             // 红包金额
             if (currentop == 'hongbaoMoney') {
                 WalletHandleHongBaoMethod.startHongBaoHandle(text, tgId, ctx, currentop)
