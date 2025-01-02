@@ -11,6 +11,7 @@ import userModel from "../../../../../models/UserModel";
 import walletUserCenterController from "../../../../controller/WalletUserCenterController";
 import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
 import WalletUserCenterMethod from "../WalletUserCenterMethod";
+import {addLockByTgId} from "../../../../../config/redislock";
 
 /**
  * 公共方法处理
@@ -60,29 +61,33 @@ class WalletLimitMethod {
      * @param ctx
      */
     public static updateUserLimiter = async(text: string, tgId: number, ctx: Context)=>{
-        if(!/^[1-9]\d*(\.\d+)?$/.test(text)){
-            await ctx.replyWithHTML("⚠️ 限额必须是数字，并且大于0")
-            return
-        }
-        // 限额的上线
-        if(parseFloat(text) > 1000000){
-            await ctx.replyWithHTML("⚠️ 最大上限为100W")
-            return
-        }
-        const botUser = await new UserModel().getUserModelByIdNumber(tgId)
-        if(botUser) {
-            await UserModel.createQueryBuilder().update().set({
-                withdrawalLimit: text
-            }).where({
-                id: botUser.id
-            }).execute()
-            // 修改成功
-            await ctx.replyWithHTML("✅ 修改成功，免密额度修改为："+text)
-            // 返回个人中心
-            await WalletHandleMethod.startCommandCallback(ctx)
-        }else{
-            await ctx.replyWithHTML("⚠️ 没有该用户信息")
-        }
+        addLockByTgId(['xemm_lock_'+tgId],async()=>{
+            if(!/^[1-9]\d*(\.\d+)?$/.test(text)){
+                await ctx.replyWithHTML("⚠️ 限额必须是数字，并且大于0")
+                return
+            }
+            // 限额的上线
+            if(parseFloat(text) > 1000000){
+                await ctx.replyWithHTML("⚠️ 最大上限为100W")
+                return
+            }
+            const botUser = await new UserModel().getUserModelByIdNumber(tgId)
+            if(botUser) {
+                await UserModel.createQueryBuilder().update().set({
+                    withdrawalLimit: text
+                }).where({
+                    id: botUser.id
+                }).execute()
+                // 修改成功
+                await ctx.replyWithHTML("✅ 修改成功，免密额度修改为："+text)
+                // 返回个人中心
+                await WalletHandleMethod.startCommandCallback(ctx)
+            }else{
+                await ctx.replyWithHTML("⚠️ 没有该用户信息")
+            }
+        }, async () => {
+            await ctx.reply('亲，操作慢点，休息一会在操作!')
+        })
     }
 
 

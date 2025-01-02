@@ -85,7 +85,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.message?.from?.id || 0
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
-        redis.del("currentop" + tgId)
+        redis.del("currentop" + tgId)// 删除操作
         await this.removeMessage(ctx)
         await this.clearCacheRelation(ctx)
         await this.startCommand(ctx, tgId, username, firstName)

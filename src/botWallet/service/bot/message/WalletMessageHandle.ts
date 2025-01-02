@@ -69,8 +69,13 @@ class WalletMessageHandle {
                 return;
             }
         }else{
-            ctx.reply("会话已失效，请重新点击面板进行操作!")
-            WalletHandleMethod.startCommandCallback(ctx).then()
+            // 防止恶意输入无限的弹窗和显示
+            const opvoer = await redis.get("op_over_"+tgId)
+            if(!opvoer) {
+                ctx.replyWithHTML("操作已失效，请重新点击面板进行操作!")
+                WalletHandleMethod.startCommandCallback(ctx).then()
+                await redis.set("op_over_"+tgId,"success","EX",60*60)
+            }
         }
     }
 }
