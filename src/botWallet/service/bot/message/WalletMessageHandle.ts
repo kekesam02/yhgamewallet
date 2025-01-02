@@ -7,6 +7,7 @@ import WalletHandleHongBaoMethod from "../../handle/hongbao/WalletHandleHongBaoM
 import WalletHandleTixianMethod from "../../handle/tixian/WalletHandleTixianMethod";
 import WalletHandleShangduiMethod from "../../handle/shangdui/WalletHandleShangduiMethod";
 import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/WalletTixianAddressMethod";
+import WalletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -18,7 +19,6 @@ import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/Wal
  */
 class WalletMessageHandle {
     public listenerMessage = async (ctx: Context,cbot:Telegraf<Context>) => {
-        console.log('传入的用户消息', ctx)
         let text = ctx.text
         if (!text || text.length <= 0 || text == '') {
             return
@@ -27,7 +27,6 @@ class WalletMessageHandle {
         // 设置提现地址
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
-        console.log('要设置的数据', currentop)
         if (currentop) {
             // 收款
             if (currentop == 'addtxaddr') {
@@ -62,6 +61,11 @@ class WalletMessageHandle {
             // 闪兑
             if (currentop == 'shangdui') {
                 WalletHandleShangduiMethod.startShangduiHandle(text, tgId, ctx)
+                return;
+            }
+            // 小额免密
+            if (currentop == 'xemm') {
+                WalletLimitMethod.updateUserLimiter(text, tgId, ctx)
                 return;
             }
         }else{

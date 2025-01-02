@@ -298,7 +298,7 @@ class WalletController {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 {
-                    text: '⚠️ ⚠️ 点我充值',
+                    text: '⚠️ 点我充值',
                     url: WalletConfig.walltPayBotChongZhiURL
                 }
             ]

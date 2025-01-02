@@ -19,6 +19,7 @@ import WalletShouchongFanLiMethod from "../../handle/usercenter/shouchongfanli/W
 import WalletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
 import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/WalletTixianAddressMethod";
 import WalletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
+import walletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
 
 
 /**
@@ -64,7 +65,9 @@ class WalletCallbackQueryHandle {
             WalletHandleShouKuanMethod.startPayCallback(ctx,bot,callbackStr)
         }else if(callbackStr.startsWith('skqxzf')){ // 收款-取消支付
             WalletHandleShouKuanMethod.startCancelPayCallback(ctx,bot,callbackStr)
-        } else {
+        } else if(callbackStr.startsWith('smNoPasswordChange')){ // 修改免密额度
+           walletLimitMethod.startUpdateUserLimiter(ctx)
+        }else {
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
                 // 我的账单

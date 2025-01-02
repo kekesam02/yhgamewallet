@@ -11,7 +11,7 @@ import ComputeUtils from "../commons/compute/ComputeUtils";
 @Entity({
     name: 'bot_user'
 })
-class UserModel extends BaseEntity{
+class UserModel extends BaseEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -300,18 +300,28 @@ class UserModel extends BaseEntity{
     }
 
     /**
-     * 获取用户信息根据 tgId
-     * @param tgId
+     * 获取用户信息根据 加密tgId
+     * @param aestgId
      */
-    public getUserModelById = async (tgId: string): Promise<UserModel | null> => {
+    public getUserModelById = async (aestgId: string): Promise<UserModel | null> => {
         let user = UserModel
             .createQueryBuilder()
             .where('tg_id = :tgId', {
-                tgId: tgId
+                tgId: aestgId
             })
             .getOne()
         return user!
     }
+
+    /**
+     * 获取用户信息根据 无加密tgId
+     * @param tgId
+     */
+    public getUserModelByIdNumber = async (tgId: number): Promise<UserModel | null> => {
+        let userId = AESUtils.encodeUserId(tgId.toString())
+        return this.getUserModelById(userId)
+    }
+
 
     /**
      * 更新用户金额信息、指定金额类型

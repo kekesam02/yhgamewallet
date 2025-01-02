@@ -7,6 +7,10 @@ import WalletController from "../../../../controller/WalletController";
 import BotWithdrawalAddrModel from "../../../../../models/BotWithdrawalAddrModel";
 import redis from "../../../../../config/redis";
 import WalletHandleMethod from "../../WalletHandleMethod";
+import userModel from "../../../../../models/UserModel";
+import walletUserCenterController from "../../../../controller/WalletUserCenterController";
+import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
+import WalletUserCenterMethod from "../WalletUserCenterMethod";
 
 /**
  * 公共方法处理
@@ -24,8 +28,64 @@ class WalletLimitMethod {
      * @param ctx
      */
     public static startXemm = async (ctx: Context) => {
-        return Promise.resolve()
+        // 获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 查询用户信息
+        var botUser = await new UserModel().getUserModelByIdNumber(tgId)
+        // 设置操作
+        redis.set("currentop" + tgId, "xemm", 'EX', 60 * 60)
+        // 返回模板
+        const html = "您当前额度是：" + botUser?.withdrawalLimit + "\n" + "\n" +
+            "1、设置额度是为了资金安全" + "\n" +
+            "2、每日消费超过此额度就需要验证安全密码" + "\n" +
+            "3、为了您的资金安全官方建议额度不要太大"
+        await WalletUserCenterMethod.removeMessage(ctx)
+        await ctx.replyWithHTML(html,walletUserCenterController.createXiaoerMianMiBtn())
     }
+
+    /**
+     * 确认密码
+     * 代号：smNoPasswordChange
+     * @param ctx
+     */
+    public static startUpdateUserLimiter = async(ctx:Context)=>{
+        const html = "请输入你要调整的额度(数字) ";
+        await WalletUserCenterMethod.removeMessage(ctx)
+        await ctx.replyWithHTML(html,walletUserCenterController.createUserCenterBackBtn())
+    }
+
+    /**
+     * 调整额度
+     * 代号：smNoPasswordChange
+     * @param ctx
+     */
+    public static updateUserLimiter = async(text: string, tgId: number, ctx: Context)=>{
+        if(!/^[1-9]\d*(\.\d+)?$/.test(text)){
+            await ctx.replyWithHTML("⚠️ 限额必须是数字，并且大于0")
+            return
+        }
+        // 限额的上线
+        if(parseFloat(text) > 1000000){
+            await ctx.replyWithHTML("⚠️ 最大上限为100W")
+            return
+        }
+        const botUser = await new UserModel().getUserModelByIdNumber(tgId)
+        if(botUser) {
+            await UserModel.createQueryBuilder().update().set({
+                withdrawalLimit: text
+            }).where({
+                id: botUser.id
+            }).execute()
+            // 修改成功
+            await ctx.replyWithHTML("✅ 修改成功，免密额度修改为："+text)
+            // 返回个人中心
+            await WalletUserCenterMethod.startUserCenterCallback(ctx)
+        }else{
+            await ctx.replyWithHTML("⚠️ 没有该用户信息")
+        }
+    }
+
+
 }
 
 
