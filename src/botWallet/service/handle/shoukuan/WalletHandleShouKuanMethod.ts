@@ -151,6 +151,60 @@ class WalletHandleShouKuanMethod {
         var money = callbackData[1]
         // 收款人
         var callbackSkTgId = callbackData[2]
+
+        // 查询付款人信息
+        // 查询收款人信息
+            // 如果付款人余额不足，
+                // 就发送消息提示--点击去充值
+            // 如果充足就开始进入到订单保存
+                // 保存成功，开始确认通知
+
+        // if (bigDecimal.compareTo(bigDecimal1) < 0) {
+        //     botEncapsulation.delSend(callbackQueryId, this);
+        //     botEncapsulation.deleteMessage(chatId, messageId, this);
+        //     //余额不足
+        //     InlineKeyboardButton jstz = InlineKeyboardButton
+        //         .builder()
+        //         .text("⚠️ ⚠️ 点我充值")
+        //         .url(botUrl + "?start=deposit")
+        //         .build();
+        //     ArrayList<InlineKeyboardButton> objects7 = new ArrayList<>();
+        //     objects7.add(jstz);
+        //     InlineKeyboardMarkup keyboardM1 = InlineKeyboardMarkup.builder()
+        //         .keyboardRow(objects7).build();
+        //     botEncapsulation.sendMenu(tgId, "余额不足", keyboardM1, this);
+        // } else {
+        //     //余额足够
+        //     BigDecimal subtract = bigDecimal.subtract(bigDecimal1);
+        //     botUserService.modifyBalance(subtract, AESUtil.jieAESUserId(userById.getTgId()), BetCurrencyTypeEnum.USDT);
+        //
+        //     botPaymentService.savePayment(AESUtil.jieAESUserId(userById.getTgId()), bigDecimal1,
+        //         BetPaymentTypeEnum.YHZZ, CommonEnums.ZERO, null
+        //         , BetCurrencyTypeEnum.USDT, null);
+        //
+        //     BotUser userById1 = botUserService.getUserById(Long.parseLong(to));
+        //     BigDecimal subtract2 = new BigDecimal(userById1.getUsdt()).add(bigDecimal1);
+        //     botUserService.modifyBalance(subtract2, AESUtil.jieAESUserId(userById1.getTgId()), BetCurrencyTypeEnum.USDT);
+        //
+        //     botPaymentService.savePayment(AESUtil.jieAESUserId(userById1.getTgId()), bigDecimal1,
+        //         BetPaymentTypeEnum.YYSK, CommonEnums.ONE, null
+        //         , BetCurrencyTypeEnum.USDT, null);
+        //     botEncapsulation.delSend(callbackQueryId, this);
+        //     botEncapsulation.deleteMessage(chatId, messageId, this);
+        //
+        //     String html = "成功转账给 " + createAHtml(toUser.getUserName(), toUser.getUserName()) +
+        //         "\n" +
+        //         "用户ID : " + AESUtil.jieAESUserId(toUser.getTgId()) + "\n" +
+        //         "名称 : " + toUser.getUserName() + "\n" +
+        //         "用户名 : " + toUser.getNickName() + "\n" +
+        //         "支付金额 : " + bigDecimal1 + "USDT" +
+        //         "\n" +
+        //         "\n" +
+        //         "提示 : 您可以将次支付凭证转发给收款人";
+        //     botEncapsulation.sendMenu(tgId, html, this);
+        //     String html2 = "收到 " + createAHtml(userById.getUserName(), userById.getUserName()) + " 付款 : " + bigDecimal1 + " USTD" +
+        //         "\n";
+        //     botEncapsulation.sendMenu(to, html2, this);
     }
 
     /**
