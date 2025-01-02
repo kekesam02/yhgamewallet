@@ -196,7 +196,7 @@ class WalletHandleShouKuanMethod {
                         USDT: shoukuanAfterMoney + ''
                     })
                     // 开始新增收款人订单 --- 收入
-                    const botPayment1 = await queryRunner.manager.save(BotPaymentModel, {
+                   await queryRunner.manager.save(BotPaymentModel, {
                         tgId: shouKuanBotUser?.tgId,
                         uid: shouKuanBotUser?.id,
                         username: shouKuanBotUser?.userName,
@@ -218,8 +218,6 @@ class WalletHandleShouKuanMethod {
                         status:1,
                         chatId: chatId
                     })
-
-
                     // 付款人余额减少
                     await queryRunner.manager.update(UserModel, {
                         id: payBotUser?.id
@@ -227,7 +225,7 @@ class WalletHandleShouKuanMethod {
                         USDT: fukuanAfterMoney + ''
                     })
                     // 开始保存付款人订单 --- 支出
-                    const botPayment2 = await queryRunner.manager.save(BotPaymentModel, {
+                    await queryRunner.manager.save(BotPaymentModel, {
                         tgId: payBotUser.tgId,
                         uid: payBotUser.id,
                         username: payBotUser.userName,
@@ -249,9 +247,8 @@ class WalletHandleShouKuanMethod {
                         status:1,
                         chatId: chatId
                     })
-
                     // 付款人信息
-                    var html = "成功转账给 " + shouKuanBotUser?.userName +
+                    var html = "🥯 成功转账给 " + shouKuanBotUser?.userName +
                         "\n" +
                         "用户ID : " + currentTgId+ "\n" +
                         "名称 : " + shouKuanBotUser?.userName + "\n" +
@@ -261,11 +258,10 @@ class WalletHandleShouKuanMethod {
                         "\n" +
                         "提示 : 您可以将次支付凭证转发给收款人";
                     await ctx.telegram.sendMessage(currentTgId,html,{parse_mode:"HTML"})
-
                     // 收款人消息
-                    var html2 = "收到来自用户"+payBotUser.userName+ "的付款 : " + money + " USTD信息。请注意查收！"
+                    var html2 = "✅ 收到来自用户@"+payBotUser.userName+ "的付款 :【" + money + " 】USTD信息，请注意查收！"
                     await ctx.telegram.sendMessage(callbackSkTgId,html2,{parse_mode:"HTML"})
-
+                    // 提交事务
                     await queryRunner.commitTransaction()
                 }catch (e) {
                     await queryRunner.rollbackTransaction()
