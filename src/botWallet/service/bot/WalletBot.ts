@@ -61,7 +61,7 @@ bot.on(message('text'), async (ctx: Context) => {
  * 监听用户点击按钮回调
  */
 bot.on('callback_query', async (ctx) => {
-    WalletCallbackQueryHandle.listenerMessage(ctx,botWallet)
+    WalletCallbackQueryHandle.listenerMessage(ctx,bot,botWallet)
 })
 
 bot.on('inline_query', async (ctx) => {

@@ -119,12 +119,13 @@ class WalletHandleShouKuanMethod {
             }).execute()
         }
 
+        var tgIdvaluePwd = AESUtils.encodeUserId(tgIdvalue);
         // 查询转账人信息
-        const botUser = await UserModel.createQueryBuilder().where("tg_id=:tgId",{tgId:tgIdvalue}).getOne()
+        const botUser = await UserModel.createQueryBuilder().where("tg_id=:tgId",{tgId:tgIdvaluePwd}).getOne()
         var html = "\uD83D\uDCB8 你正在付款给" + botUser?.nickName + "\n" +
             "\n" +
-            "用户ID : " + tgIdvalue + "\n" +
-            "名称 : " + botUser?.userName + "\n" +
+            "收款人用户ID : " + tgIdvalue + "\n" +
+            "收款人名称 : " + botUser?.userName + "\n" +
             "\n" +
             "支付金额 : " + value + " USDT\n" +
             "\n" +
@@ -132,6 +133,52 @@ class WalletHandleShouKuanMethod {
 
         // 发送消息
         await bot.telegram.sendMessage(payTgId,html,{parse_mode:"HTML",reply_markup:WalletController.createPayBotButton(payTgId,tgIdvalue,value).reply_markup})
+    }
+
+    /**
+     * 确认支付
+     * @param ctx
+     */
+    public static startPayCallback = async(ctx:Context,bot:Telegraf<Context>,callbackText:string)=>{
+        // 删除消息
+        var messageId = ctx?.callbackQuery?.message?.message_id || 0
+        var callbackQueryId= ctx?.callbackQuery?.id + ''
+        var currentTgId= ctx?.callbackQuery?.from?.id + ''
+        var callbackData = callbackText.replaceAll('skqxzf','')?.split(',') || []
+        // 付款人
+        var callbackPayTgId = callbackData[0]
+        // 收款金额
+        var money = callbackData[1]
+        // 收款人
+        var callbackSkTgId = callbackData[2]
+    }
+
+    /**
+     * 取消支付
+     * @param ctx
+     */
+    public static startCancelPayCallback = async(ctx:Context,bot:Telegraf<Context>,callbackText:string)=>{
+        // 删除消息
+        var messageId = ctx?.callbackQuery?.message?.message_id || 0
+        var callbackQueryId= ctx?.callbackQuery?.id + ''
+        var currentTgId= ctx?.callbackQuery?.from?.id + ''
+        var callbackData = callbackText.replaceAll('skqxzf','')?.split(',') || []
+        // 付款人
+        var callbackPayTgId = callbackData[0]
+        // 收款金额
+        var money = callbackData[1]
+        // 收款人
+        var callbackSkTgId = callbackData[2]
+        // 如果付款人是同一个人
+        if (currentTgId == callbackPayTgId) {
+            // 修改收款的信息
+            await ctx.telegram.answerCbQuery(callbackQueryId,"操作成功",{show_alert:false})
+            await ctx.deleteMessage(messageId)
+            await ctx.reply("已取消")
+        }else{
+            await bot.telegram.sendMessage(currentTgId,"⚠️ 自己不能删除自己的操作")
+        }
+
     }
 }
 

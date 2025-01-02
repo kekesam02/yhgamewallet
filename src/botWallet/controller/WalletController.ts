@@ -246,16 +246,16 @@ class WalletController {
     /**
      * 财务审核按钮
      */
-    public static createPayBotButton = (tgId: string,payTgId:string,money:string) => {
+    public static createPayBotButton = (payTgId: string,tgId:string,money:string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
                     text: '✅确认支付',
-                    query: 'skqrzf' + tgId+","+money+","+payTgId
+                    query: 'skqrzf' + payTgId+","+money+","+tgId
                 },
                 {
                     text: '\uD83D\uDEAB取消支付',
-                    query: 'skqxzf'
+                    query: 'skqxzf' + payTgId+","+money+","+tgId
                 }
             ]
         ])

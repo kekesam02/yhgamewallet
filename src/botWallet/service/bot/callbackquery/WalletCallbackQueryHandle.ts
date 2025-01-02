@@ -37,7 +37,7 @@ class WalletCallbackQueryHandle {
         }
     }
 
-    public static listenerMessage = async (ctx: Context,cbot:Telegraf<Context>) => {
+    public static listenerMessage = async (ctx: Context,bot:Telegraf<Context>,cbot:Telegraf<Context>) => {
         console.log('callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
@@ -50,8 +50,12 @@ class WalletCallbackQueryHandle {
             WalletHandleZhuanzhangMethod.cancelZhuanZhang(ctx)
         }else if(callbackStr.startsWith('shoukuanzk')){
             WalletHandleZhuanzhangMethod.startZhuanzhangSK(ctx)
-        }else if(callbackStr.startsWith('vpb_')){
+        }else if(callbackStr.startsWith('vpb_')){ // 转账确认密码解锁
             WalletHandleZhuanzhangMethod.startValidatorPwdCallback(ctx,callbackStr)
+        }else if(callbackStr.startsWith('skqrzf')){ // 收款-确认支付
+            WalletHandleShouKuanMethod.startPayCallback(ctx,bot,callbackStr)
+        }else if(callbackStr.startsWith('skqxzf')){ // 收款-取消支付
+            WalletHandleShouKuanMethod.startCancelPayCallback(ctx,bot,callbackStr)
         } else {
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
