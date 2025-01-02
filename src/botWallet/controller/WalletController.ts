@@ -291,6 +291,20 @@ class WalletController {
     }
 
     /**
+     * 创建收款余额不足的充值按钮
+     */
+    public static createSkChongzhiBtn = () => {
+        return new ButtonUtils().createInlineKeySwitchBoard([
+            [
+                {
+                    text: '⚠️ ⚠️ 点我充值',
+                    url: WalletConfig.walltPayBotChongZhiURL
+                }
+            ]
+        ])
+    }
+
+    /**
      * 创建收款按钮
      */
     public static createShouKuanSwitchBtn = (query: string) => {

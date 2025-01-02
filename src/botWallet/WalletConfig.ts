@@ -8,6 +8,8 @@ class WalletConfig {
     //static  walltPayBotInlineURL:string = 'https://t.me/VertexPaybot?start=inline_'
     // 收款使用
     //static walltPayBotSKInlineURL:string = 'https://t.me/VertexPaybot?start=shoukuan_'
+    // 点击收款余额不足的充值返回
+    //static walltPayBotChongZhiURL:string = 'https://t.me/VertexPaybot?start=deposit'
     // 个人跳转
     //static  walltPayBotInlineURL:string = 'https://t.me/VertexPaybot?start=inline_'
 
@@ -17,6 +19,8 @@ class WalletConfig {
     static walltPayBotInlineURL:string = 'https://t.me/myxukebot?start=inline_'
     // 收款使用
     static walltPayBotSKInlineURL:string = 'https://t.me/myxukebot?start=shoukuan_'
+    // 点击收款余额不足的充值返回
+    static walltPayBotChongZhiURL:string = 'https://t.me/myxukebot?start=deposit'
     // 登陆使用
     static walltPayBotLoginURL:string = 'https://t.me/myxukebot?start=login_'
     // 个人跳转
