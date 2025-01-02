@@ -42,6 +42,15 @@ class WalletUserCenterMethod {
         var username: string = ctx.callbackQuery?.from?.username || ''
         // 查询用户信息
         let userId = AESUtils.encodeUserId(tgId?.toString())
+        // 1：密码确认
+        const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
+        // 如果密码为空就开始设置密码
+        if (!flag) {
+            var mark = await redis.get('mark_' + tgId) || '0'
+            await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
+            return
+        }
+
         // 根据tgId查询用户是否存在。
         let user = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
         // 1：如果不存在就添加

@@ -2,7 +2,6 @@ import type {Context, Telegraf} from "telegraf";
 import WalletController from "../../../controller/WalletController";
 import redis from "../../../../config/redis";
 import {addLockByTgId} from "../../../../config/redislock";
-import walletHandleMethod from "../WalletHandleMethod";
 import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
 import WalletHandleMethod from "../WalletHandleMethod";
 import WalletConfig from "../../../WalletConfig";
@@ -39,11 +38,11 @@ class WalletHandleShouKuanMethod {
         // 2：设置操作
         redis.set("currentop" + tgId, "shoukuan", 'EX', 60 * 60)
         // 3：判断是否登录
-        const flag: boolean = await walletHandleMethod.isLogin(tgId, ctx)
+        const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
         // 4: 如果没有登录就输入密码登录
         if (!flag) {
             var mark = await redis.get('mark_' + tgId) || '0'
-            await walletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
+            await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
         // 发送消息
@@ -57,11 +56,11 @@ class WalletHandleShouKuanMethod {
             const fusername = ctx.inlineQuery?.from.username
             const id = ctx.inlineQuery?.from.id
             // 1：密码确认
-            const flag: boolean = await walletHandleMethod.isLogin(tgId, ctx)
+            const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
             // 如果密码为空就开始设置密码
             if (!flag) {
                 var mark = await redis.get('mark_' + tgId) || '0'
-                await walletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
+                await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
                 return
             }
             var money = query.replaceAll('-', '')

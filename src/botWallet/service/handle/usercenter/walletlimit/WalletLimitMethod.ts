@@ -79,7 +79,7 @@ class WalletLimitMethod {
             // 修改成功
             await ctx.replyWithHTML("✅ 修改成功，免密额度修改为："+text)
             // 返回个人中心
-            await WalletUserCenterMethod.startUserCenterCallback(ctx)
+            await WalletHandleMethod.startCommandCallback(ctx)
         }else{
             await ctx.replyWithHTML("⚠️ 没有该用户信息")
         }

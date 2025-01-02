@@ -11,7 +11,7 @@ import DateFormatUtils from "../../../../commons/date/DateFormatUtils";
 import PaymentTypeEnum from "../../../../type/PaymentTypeEnum";
 import WalletType from "../../../../type/WalletType";
 import {queryRunner} from "../../../../config/database";
-import walletHandleMethod from "../WalletHandleMethod";
+import WalletHandleMethod from "../WalletHandleMethod";
 
 
 /**
@@ -42,17 +42,17 @@ class WalletHandleTixianMethod {
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
         if (!botWithdrawalAddrModel?.addr) {
-            walletHandleMethod.removeMessage(ctx)
+            WalletHandleMethod.removeMessage(ctx)
             ctx.replyWithHTML("⚠️ 尚未设置提现地址请前往个人中心设置",
                 WalletController.createBackDoubleBtn())
             return;
         }
         // 2：密码确认
-        const flag: boolean = await walletHandleMethod.isLogin(tgId, ctx)
+        const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
             var mark = await redis.get('mark_' + tgId) || '0'
-            await walletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
+            await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
         return ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
@@ -62,11 +62,11 @@ class WalletHandleTixianMethod {
     public static startTxHandle = async (text: string, tgId: number, ctx: Context, cbot: Telegraf<Context>) => {
         await addLockByTgId(['tx_lock_' + tgId + ''], async () => {
             // 1：密码确认
-            const flag: boolean = await walletHandleMethod.isLogin(tgId, ctx)
+            const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
             // 如果密码为空就开始设置密码
             if (!flag) {
                 var mark = await redis.get('mark_' + tgId) || '0'
-                await walletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
+                await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
                 return
             }
 

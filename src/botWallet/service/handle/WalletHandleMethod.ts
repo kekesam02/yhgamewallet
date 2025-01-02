@@ -13,6 +13,7 @@ import WalletHandleZhuanzhangMethod from "./zhuanzhaung/WalletHandleZhuanzhangMe
 import WalletHandleShouKuanMethod from "./shoukuan/WalletHandleShouKuanMethod";
 import WalletHandleHongBaoMethod from "./hongbao/WalletHandleHongBaoMethod";
 import WalletHandleShangduiMethod from "./shangdui/WalletHandleShangduiMethod";
+import walletUserCenterMethod from "./usercenter/WalletUserCenterMethod";
 
 /**
  * 公共方法处理
@@ -326,6 +327,10 @@ class WalletHandleMethod {
             WalletHandleHongBaoMethod.startHongBao(ctx, cbot)
         } else if (currentOp == 'shandui') {
             WalletHandleShangduiMethod.startShanDui(ctx, cbot)
+        }else if (currentOp == 'xemm') {
+            walletUserCenterMethod.startUserCenterCallback(ctx)
+        }else{
+            this.startButtonBack(ctx)
         }
     }
 

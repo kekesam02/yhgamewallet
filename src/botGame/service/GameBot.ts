@@ -45,7 +45,6 @@ bot.on('callback_query', async (ctx) => {
 })
 
 bot.on('inline_query', async (ctx) => {
-    console.log('内连按钮回调--------------', ctx)
     try {
         const query = ctx.inlineQuery.query
 

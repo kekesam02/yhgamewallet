@@ -41,15 +41,15 @@ class WalletBotHtml {
         }
         var add = '';
         if (addr) {
-            add = "\n🧾提现地址：<code>" + AESUtils.decodeAddr(model.rechargeLink) + "</code>\n";
+            add = "\n🧾 提现地址：<code>" + AESUtils.decodeAddr(model.rechargeLink) + "</code>\n";
         } else {
-            add = "\n👐暂无提现地址请前往个人中心绑定👐\n";
+            add = "\n👐 暂无提现地址请前往个人中心绑定👐\n";
         }
         return vipHtml + "\n🆔 账户ID：" + tgId +
             "\n\n🥯 USDT：" + model.USDT +
             "\n🥯 TRX：" + model.TRX +
-            "\n💵 彩u：" + model.CUSDT +
-            "\n💵 彩t：" + model.CTRX +
+            "\n🥯 彩u：" + model.CUSDT +
+            "\n🥯 彩t：" + model.CTRX +
             "\n🥯 免密额度：" + model.withdrawalLimit + add +
             "\n\uD83C\uDFAE 游戏官方频道:@OnePalace " +
             "\uD83C\uDFAA\uD83C\uDFB2\uD83C\uDFB0";
