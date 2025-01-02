@@ -35,24 +35,21 @@ class WalletBotHtml {
      * 生成开始游戏的html字符串
      */
     static getBotStartHtml = (tgId: number,addr:string, model: UserModel): string => {
-        var vipHtml = '';
+        var vipHtml = "💎尊敬的<code>【"+model.nickName+"】</code>欢迎使用一号公馆钱包!";
         if (model.vip && model.vip < 10) {
             vipHtml = "💎尊贵的VIP" + model.vip + "💎\n";
         }
         var add = '';
         if (addr) {
-            add = "\n🧾提现地址：" + AESUtils.decodeAddr(model.rechargeLink) + "\n";
+            add = "\n🧾提现地址：<code>" + AESUtils.decodeAddr(model.rechargeLink) + "</code>\n";
         } else {
             add = "\n👐暂无提现地址请前往个人中心绑定👐\n";
         }
         return vipHtml + "\n🆔 账户ID：" + tgId +
-            "\n👼 用户昵称：<code>" + model.nickName + "</code>\n" +
             "\n💰️ USDT：" + model.USDT +
             "\n💰️ TRX：" + model.TRX +
             "\n💵 彩u：" + model.CUSDT +
-            "\n💵 彩t：" + model.CTRX + "\n" +
-            add +
-            "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
+            "\n💵 彩t：" + model.CTRX + add +
             "\uD83C\uDFAE 游戏官方频道:@OnePalace " +
             "\uD83C\uDFAA\uD83C\uDFB2\uD83C\uDFB0";
     }

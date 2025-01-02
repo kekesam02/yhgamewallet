@@ -3,6 +3,7 @@ import WalletController from "../../../controller/WalletController";
 import redis from "../../../../config/redis";
 import {addLockByTgId} from "../../../../config/redislock";
 import walletHandleMethod from "../WalletHandleMethod";
+import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
 
 
 /**
@@ -37,12 +38,14 @@ class WalletHandleShouKuanMethod {
         }
         // 发送消息
         const html = "\uD83D\uDC47 点击下方按钮选择付款人";
-        return ctx.replyWithHTML(html, WalletController.createShouKuanSwitchBtn("1"))
+        return ctx.replyWithHTML(html, WalletController.createShouKuanSwitchBtn("-1"))
     }
 
     // 收款具体逻辑
     public static startShouKuanHandle = async (query: string, queryId: string, tgId: number, ctx: Context) => {
         await addLockByTgId(['shoukuan_lock_' + tgId + ''], async () => {
+            const fusername = ctx.inlineQuery?.from.username
+            const id = ctx.inlineQuery?.from.id
             // 1：密码确认
             const flag: boolean = await walletHandleMethod.isLogin(tgId, ctx)
             // 如果密码为空就开始设置密码
@@ -51,8 +54,27 @@ class WalletHandleShouKuanMethod {
                 await walletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
                 return
             }
+            var money = query.replaceAll('-','')
+            // 创建一个可分享的结果
+            await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
+                id: queryId,
+                title: "你正发起收款操作，收款金额" + money + "USDT",
+                description: "",
+                input_message_content: {
+                    message_text: "\uD83D\uDCB0【@"+fusername+"】向你发起收款，收款金额：【"+money+"】USDT",
+                    parse_mode: "HTML"
+                },
+                reply_markup: {
+                    inline_keyboard: [
+                        [{
+                            text: '\uD83D\uDCB8立即支付',
+                            callback_data: "shoukuan" +id+','+ query + "," + tgId
+                        }]
+                    ]
+                }
+            }))
         }, async () => {
-            await ctx.reply('亲，操作慢点，休息一会在操作!')
+            await ctx.answerCbQuery('亲，操作慢点，休息一会在操作!')
         })
     }
 

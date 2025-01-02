@@ -70,9 +70,9 @@ class WalletHandleMethod {
         var firstName: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
         redis.del("currentop" + tgId)
-        this.removeMessage(ctx)
-        this.clearCacheRelation(ctx)
-        this.startCommand(ctx, tgId, username, firstName)
+        await this.removeMessage(ctx)
+        await this.clearCacheRelation(ctx)
+        await this.startCommand(ctx, tgId, username, firstName)
     }
 
     /**
@@ -85,9 +85,9 @@ class WalletHandleMethod {
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
         redis.del("currentop" + tgId)
-        this.removeMessage(ctx)
-        this.clearCacheRelation(ctx)
-        this.startCommand(ctx, tgId, username, firstName)
+        await this.removeMessage(ctx)
+        await this.clearCacheRelation(ctx)
+        await this.startCommand(ctx, tgId, username, firstName)
     }
 
     /**
@@ -142,7 +142,7 @@ class WalletHandleMethod {
             // 4: 机器人回复，显示信息和按钮相关
             await ctx.replyWithHTML(html, new ButtonUtils().createCallbackBtn(WalletController.HomeBtns))
         } catch (err) {
-            ctx.reply(WalletMessage.ERROR_CLIENT)
+            await ctx.reply(WalletMessage.ERROR_CLIENT)
         }
     }
 

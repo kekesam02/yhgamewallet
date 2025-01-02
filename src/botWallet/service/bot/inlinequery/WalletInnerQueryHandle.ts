@@ -6,6 +6,7 @@ import WalletRedPacketInner from "../../handle/hongbao/WalletRedPacketInner";
 import WalletHandleZhuanzhangMethod from "../../handle/zhuanzhaung/WalletHandleZhuanzhangMethod";
 import WalletHandleShouKuanMethod from "../../handle/shoukuan/WalletHandleShouKuanMethod";
 import WalletController from "../../../controller/WalletController";
+import WalletConfig from "../../../WalletConfig";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -54,7 +55,7 @@ class WalletInnerQueryHandle {
                                     [{
                                         text: '\uD83D\uDCB0一号公馆钱包',
                                         callback_data: 'qwe123',
-                                        url: 'http://t.me/VertexPaybot'
+                                        url: WalletConfig.walltPayBotURL
                                     }]
                                 ]
                             }
@@ -70,12 +71,12 @@ class WalletInnerQueryHandle {
                     var flag:boolean = false
                     if(!query || isNaN(Number(query))){
                         flag = true
-                        text="请输入数字,并且大于0"
+                        text="请输入数字,并且小于0"
                     }
                     var price = parseFloat(query || "0")
-                    if(price <= 0){
+                    if(price >= 0){
                         flag = true
-                        text="转账金额必须是正整数,并且大于0"
+                        text="转账金额必须是正整数,并且小于0"
                     }
                     if(flag){
                         await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({

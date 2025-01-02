@@ -111,9 +111,9 @@ class WalletCallbackQueryHandle {
                     WalletHandleMethod.removeMessage(ctx)
                     WalletHandleShouKuanMethod.startShouKuan(ctx,cbot)
                     break
-
                 // 红包
                 case StartWalletEnum.HONGBAO:
+                    WalletHandleMethod.removeMessage(ctx)
                     return WalletHandleHongBaoMethod.startHongBao(ctx,cbot)
                 // 点击添加红包按钮回调
                 case StartWalletEnum.HONGBAO_ADD:

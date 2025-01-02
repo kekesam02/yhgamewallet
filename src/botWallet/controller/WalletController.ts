@@ -28,6 +28,14 @@ class WalletController {
     }
 
     /**
+     * 取消
+     */
+    public static CancelAndBackHome = {
+        text: '\uD83D\uDEAB 取消',
+        query: 'backhome'
+    }
+
+    /**
      * 关闭计算器
      */
     public static CloseComputer = {
@@ -253,12 +261,12 @@ class WalletController {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 {
-                    text: '选择转账对象',
+                    text: '选择收款人',
                     switch_inline_query: query
                 }
             ],
             [
-                WalletController.BackHome
+                WalletController.CancelAndBackHome
             ]
         ])
     }
@@ -270,12 +278,12 @@ class WalletController {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 {
-                    text: '选择付款对象',
+                    text: '选择付款人',
                     switch_inline_query: query
                 }
             ],
             [
-                WalletController.BackHome
+                WalletController.CancelAndBackHome
             ]
         ])
     }
