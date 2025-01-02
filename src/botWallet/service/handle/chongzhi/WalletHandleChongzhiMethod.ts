@@ -69,19 +69,16 @@ class WalletHandleChongzhiMethod {
         } else {
             // 如果用户存在，交易地址不存在，就分配一个交易地址给用户
             if (!botUser.rechargeLink) {
-                let botTronAddrModel = await BotTronAddrModel.createQueryBuilder()
-                    .where("uses = :uses", {uses: 0}).getOne()
-                link = botTronAddrModel?.addr;
-
+                let botTronAddrModels = await BotTronAddrModel.createQueryBuilder()
+                    .where("uses = :uses", {uses: 0}).getMany()
+                link = botTronAddrModels[0]?.addr;
                 // 修改用户交易地址
                 await UserModel.createQueryBuilder().update(UserModel).set({
                     nickName: firstName,
                     rechargeLink: link
                 }).where('id = :id', {id: botUser.id}).execute()
-
                 // 标识交易地址为使用
-                await BotTronAddrModel.createQueryBuilder().update().set({uses: 1}).where("id=:id", {'id': botTronAddrModel?.id}).execute()
-
+                await BotTronAddrModel.createQueryBuilder().update().set({uses: 1}).where("id=:id", {'id': botTronAddrModels[0]?.id}).execute()
                 // 加入到监听池中
                 await MCoinRechargeAddrPoolModel.createQueryBuilder()
                     .insert().into(MCoinRechargeAddrPoolModel)

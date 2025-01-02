@@ -11,6 +11,14 @@ import WalletHandleTixianMethod from "../../handle/tixian/WalletHandleTixianMeth
 import WalletHandleChongzhiMethod from "../../handle/chongzhi/WalletHandleChongzhiMethod";
 import WalletHandleHongBaoMethod from "../../handle/hongbao/WalletHandleHongBaoMethod";
 import WalletHandleShangduiMethod from "../../handle/shangdui/WalletHandleShangduiMethod";
+import WalletMyAccountMethod from "../../handle/usercenter/myaccount/WalletMyAccountMethod";
+import WalletTiBiHistoryMethod from "../../handle/usercenter/history/WalletTiBiHistoryMethod";
+import WalletCaiJinTransferMethod from "../../handle/usercenter/caijintransfer/WalletCaiJinTransferMethod";
+import WalletYaoqingFanLiMethod from "../../handle/usercenter/yaoqingfanli/WalletYaoqingFanLiMethod";
+import WalletShouchongFanLiMethod from "../../handle/usercenter/shouchongfanli/WalletShouchongFanLiMethod";
+import WalletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
+import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/WalletTixianAddressMethod";
+import WalletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
 
 
 /**
@@ -61,35 +69,35 @@ class WalletCallbackQueryHandle {
                 // ===========================按钮组1：用户中心===========================
                 // 我的账单
                 case WalletUserCenterEnum.BACCOUNT:
-                    WalletUserCenterMethod.startBAccount(ctx)
+                    WalletMyAccountMethod.startBAccount(ctx)
                     break
                 // 提币历史
                 case WalletUserCenterEnum.TBLS:
-                    WalletUserCenterMethod.startTbls(ctx)
+                    WalletTiBiHistoryMethod.startTbls(ctx)
                     break
                 // 彩金转化
                 case WalletUserCenterEnum.CTRXZH:
-                    WalletUserCenterMethod.startCtrxzh(ctx)
+                    WalletCaiJinTransferMethod.startCtrxzh(ctx)
                     break
                 // 领取邀请返利
                 case WalletUserCenterEnum.YQFL:
-                    WalletUserCenterMethod.startYqfl(ctx)
+                    WalletYaoqingFanLiMethod.startYqfl(ctx)
                     break
                 // 首充返利
                 case WalletUserCenterEnum.SCFL:
-                    WalletUserCenterMethod.startScfl(ctx)
+                    WalletShouchongFanLiMethod.startScfl(ctx)
                     break
                 // 小额免密
                 case WalletUserCenterEnum.XEMM:
-                    WalletUserCenterMethod.startXemm(ctx)
+                    WalletLimitMethod.startXemm(ctx)
                     break
                 // 邀请好友
                 case WalletUserCenterEnum.YQHY:
-                    WalletUserCenterMethod.startYqhy(ctx)
+                    WalletYaoqingHaoyouMethod.startYqhy(ctx)
                     break
                 // 设置提现地址
                 case WalletUserCenterEnum.SZTXDZ:
-                    WalletUserCenterMethod.startTxdz(ctx)
+                    WalletTixianAddressMethod.startTxdz(ctx)
                     break
                 // 主菜单
                 case WalletUserCenterEnum.HOME:

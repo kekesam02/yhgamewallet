@@ -6,6 +6,7 @@ import {Telegraf} from "telegraf";
 import WalletHandleHongBaoMethod from "../../handle/hongbao/WalletHandleHongBaoMethod";
 import WalletHandleTixianMethod from "../../handle/tixian/WalletHandleTixianMethod";
 import WalletHandleShangduiMethod from "../../handle/shangdui/WalletHandleShangduiMethod";
+import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/WalletTixianAddressMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -30,7 +31,7 @@ class WalletMessageHandle {
         if (currentop) {
             // 收款
             if (currentop == 'addtxaddr') {
-                WalletUserCenterMethod.addtxaddrtx(text, tgId, ctx)
+                WalletTixianAddressMethod.addtxaddrtx(text, tgId, ctx)
                 return;
             }
             // 提现
