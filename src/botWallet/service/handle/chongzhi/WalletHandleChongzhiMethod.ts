@@ -38,7 +38,7 @@ class WalletHandleChongzhiMethod {
         //获取专属充值连接，先查询是否有充值连接，没有的话就拿充值链接并且赋值
         if (!botUser) {
             let botTronAddrModel = await BotTronAddrModel.createQueryBuilder()
-                .where("uses = :uses", {uses: 0}).limit(0).offset(1).getOne()
+                .where("uses = :uses", {uses: 0}).limit(0).getOne()
             link = botTronAddrModel?.addr;
             // 如果用户不存在就添加用户，把交易地址赋值给他
             await UserModel.createQueryBuilder().insert().into(UserModel).values({

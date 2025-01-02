@@ -8,6 +8,7 @@ import WalletHandleMethod from "../handle/WalletHandleMethod";
 import WalletInnerQueryHandle from "./inlinequery/WalletInnerQueryHandle";
 import WalletHandleZhuanzhangMethod from "../handle/zhuanzhaung/WalletHandleZhuanzhangMethod";
 import WalletHandleShouKuanMethod from "../handle/shoukuan/WalletHandleShouKuanMethod";
+import walletHandleChongzhiMethod from "../handle/chongzhi/WalletHandleChongzhiMethod";
 
 /**
  * 娱乐机器人核心代码
@@ -38,11 +39,17 @@ bot.command('start', async (ctx) => {
     // 用于监听转账，红包，收款的密码监听
     var payload = ctx.payload
     if (payload) {
+        // 转账
         if ( payload.startsWith('inline_')) {
             WalletHandleZhuanzhangMethod.startCommandInputPassword(ctx, payload)
         }
+        // 收款
         if (payload && payload.startsWith('shoukuan_')) {
             WalletHandleShouKuanMethod.startShouKuanPayCommand(ctx, payload, bot)
+        }
+        // 充值
+        if (payload && payload.startsWith('deposit')) {
+            walletHandleChongzhiMethod.startChongZhi(ctx)
         }
     } else {
          WalletHandleMethod.startCommandCallback(ctx)

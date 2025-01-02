@@ -149,11 +149,11 @@ class WalletHandleShouKuanMethod {
      */
     public static startPayCallback = async (ctx: Context, bot: Telegraf<Context>, callbackText: string) => {
         // 删除消息
-        var messageId = ctx?.callbackQuery?.message?.message_id || 0
-        var callbackQueryId = ctx?.callbackQuery?.id + ''
+        //var messageId = ctx?.callbackQuery?.message?.message_id || 0
+        //var callbackQueryId = ctx?.callbackQuery?.id + ''
         var chatId = ctx?.chat?.id + ''
         var currentTgId = ctx?.callbackQuery?.from?.id + ''
-        var callbackData = callbackText.replaceAll('skqxzf', '')?.split(',') || []
+        var callbackData = callbackText.replaceAll('skqrzf', '')?.split(',') || []
         // 付款人
         var callbackPayTgId = callbackData[0]
         // 收款金额
