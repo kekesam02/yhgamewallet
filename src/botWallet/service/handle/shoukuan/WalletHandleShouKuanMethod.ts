@@ -205,12 +205,17 @@ class WalletHandleShouKuanMethod {
                         balanceAfter: shoukuanAfterMoney + '',
                         paymentType: PaymentTypeEnum.YHSK.value,
                         paymentTypeName: PaymentTypeEnum.YHSK.name,
-                        operateType: 1,
+                        operateType: 1, // 收入
                         paymentTypeNumber: 'zk' + orderId,
                         paymentAmount: money + '',
                         paymentRealAmount: money + '',
                         walletType: WalletType.USDT,
                         applyTime: applyTime,
+                        passTime: applyTime,
+                        passTgid: payBotUser.tgId,
+                        passUsername: payBotUser.userName,
+                        passNickname: payBotUser.nickName,
+                        status:1,
                         chatId: chatId
                     })
 
@@ -231,12 +236,17 @@ class WalletHandleShouKuanMethod {
                         balanceAfter: fukuanAfterMoney + '',
                         paymentType: PaymentTypeEnum.YHZZ.value,
                         paymentTypeName: PaymentTypeEnum.YHZZ.name,
-                        operateType: 1,
+                        operateType: 0,// 支出
                         paymentTypeNumber: 'zk' + orderId,
                         paymentAmount: money + '',
                         paymentRealAmount: money + '',
                         walletType: WalletType.USDT,
                         applyTime: applyTime,
+                        passTime: applyTime,
+                        passTgid: shouKuanBotUser?.tgId,
+                        passUsername: shouKuanBotUser?.userName,
+                        passNickname: shouKuanBotUser?.nickName,
+                        status:1,
                         chatId: chatId
                     })
 

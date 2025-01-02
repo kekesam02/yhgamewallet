@@ -163,10 +163,10 @@ class WalletController {
                 text: '🥯 领取邀请返利',
                 query: WalletUserCenterEnum.YQFL
             },
-            {
-                text: '🥯 首充返利',
-                query: WalletUserCenterEnum.SCFL
-            }
+            // {
+            //     text: '🥯 首充返利',
+            //     query: WalletUserCenterEnum.SCFL
+            // }
         ],
         [
             {
@@ -188,12 +188,13 @@ class WalletController {
                 text: '🏘️ 主菜单',
                 query: WalletUserCenterEnum.HOME,
             }
-        ], [
-            {
-                text: '🏘️ 测试',
-                url: 'https://t.me/VertexPaybot?start=withdraw'
-            }
         ]
+        // , [
+        //     {
+        //         text: '🏘️ 测试',
+        //         url: 'https://t.me/VertexPaybot?start=withdraw'
+        //     }
+        // ]
     ]
 
     /**
