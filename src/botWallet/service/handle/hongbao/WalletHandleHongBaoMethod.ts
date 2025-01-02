@@ -51,6 +51,10 @@ class WalletHandleHongBaoMethod {
             // 红包数量处理
             return new WalletRedPacket(ctx).setRemark(text, currentop.split('_')[1])
         }
+        if (currentop.indexOf('hongbaoWaterMoney_') > -1) {
+            // 红包流水金额处理
+            return new WalletRedPacket(ctx).setWaterMoney(text, currentop.split('_')[1])
+        }
     }
 }
 

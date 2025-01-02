@@ -26,6 +26,7 @@ class WalletMessageHandle {
         // 设置提现地址
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
+        console.log('要设置的数据', currentop)
         if (currentop) {
             // 收款
             if (currentop == 'addtxaddr') {
@@ -49,6 +50,11 @@ class WalletMessageHandle {
             }
             // 红包备注文字
             if (currentop == 'hongbaoRemark' || currentop.split('_')[0] == 'hongbaoRemark') {
+                WalletHandleHongBaoMethod.startHongBaoHandle(text, tgId, ctx, currentop)
+                return;
+            }
+            // 领取红包的流水金额
+            if (currentop == 'hongbaoWaterMoney_' || currentop.split('_')[0] == 'hongbaoWaterMoney') {
                 WalletHandleHongBaoMethod.startHongBaoHandle(text, tgId, ctx, currentop)
                 return;
             }

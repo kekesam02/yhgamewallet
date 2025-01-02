@@ -33,12 +33,15 @@ class TimeUtils {
 
     /**
      * 获取今日开始时间和结束时间
+     * @param start_time: 重新设置开始时间
      */
-    public getDayTime = () => {
+    public getDayTime = (start_time?: string) => {
         // 今日开始时间
         let start = moment().format('YYYY-MM-DD 00:00:00')
         // 今日结束时间
-        let end = moment().format('YYYY-MM-DD 23:59:59')
+        let end = start_time
+            ? moment().format('YYYY-MM-DD 23:59:59')
+            : moment(start_time).add(24, 'hours').format('YYYY-MM-DD 23:59:59')
         return {
             startTime: start,
             endTime: end

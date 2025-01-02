@@ -28,6 +28,7 @@ class WalletInnerQueryHandle {
             var tgId: number = from?.id || 0
             const loginFlag = await redis.get("login_" + tgId)
             const currentop: string = await redis.get("currentop" + tgId) || ""
+            console.log('传入的参数', currentop)
             if (loginFlag == "success" && currentop) {
                 // 转账
                 if (currentop == 'zhuanzhang') {
@@ -102,7 +103,7 @@ class WalletInnerQueryHandle {
                     return;
                 }
                 // 红包
-                if(currentop == 'hongbao' && query.indexOf(WalletRedPacketInner.InnerKey) == 0){
+                if(currentop == 'hongbao' || query.indexOf(WalletRedPacketInner.InnerKey) == 0){
                     // 红包连消息处理
                     return new WalletRedPacketInner().innerMessageHandle(ctx,queryId, query)
                 }

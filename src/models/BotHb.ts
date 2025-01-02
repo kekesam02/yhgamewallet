@@ -16,6 +16,8 @@ import RedisHandle from "../commons/redis/RedisHandle";
 import MessageUtils from "../commons/message/MessageUtils";
 import WalletRedPacket from "../botWallet/service/handle/hongbao/WalletRedPacket";
 import RandomUtils from "../commons/compute/RandomUtils";
+import {RedPackConditionJsonType} from "../type/WalletType/RedPackType";
+import TimeUtils from "../commons/date/TimeUtils";
 
 
 /**
@@ -64,13 +66,13 @@ class BotHb extends BaseEntity {
     walletType: WalletType
 
     /**
-     * 当前要领取的红包下标
+     * 当前要领取的红包下标、每一个用户领完之后加1
      */
     @Column({
         name: 'je_index',
         default: 0
     })
-    jeIndex: string
+    jeIndex: number
 
     /**
      * 红包分化json 用于随机包
@@ -123,7 +125,7 @@ class BotHb extends BaseEntity {
      */
     @Column({
         name: 'conditonsyzm',
-        default: ''
+        default: 0
     })
     conditonsyzm: number
 
@@ -135,7 +137,7 @@ class BotHb extends BaseEntity {
         name: 'conditions_json',
         default: ''
     })
-    conditions_json: string
+    conditionsJson: string
 
     /**
      * 红包类型
@@ -211,6 +213,19 @@ class BotHb extends BaseEntity {
     }
 
     /**
+     * 根据当前用户id 可用红包列表
+     */
+    public getBotHbList = (tgId: string) => {
+        let timeUtils = new TimeUtils().getDayTime(this.createTime)
+        return BotHb.createQueryBuilder()
+            .where('tg_id = :tgId', {
+                tgId: tgId
+            })
+            .whereTime(timeUtils.startTime, timeUtils.endTime)
+            .getMany()
+    }
+
+    /**
      * 更新红包对象、用户生成红包后、或者修改红包备注之类的
      */
     public setBotHb = async () => {
@@ -246,6 +261,7 @@ class BotHb extends BaseEntity {
             botHb.hbId = hbId
             botHb.receiveNum = 0
             botHb.hbType = redisData.hbType
+            botHb.jeIndex = 0
             botHb.createJson()
 
             let payment = new BotPaymentModel()
@@ -300,9 +316,9 @@ class BotHb extends BaseEntity {
                     paymentType: PaymentType.LHB
                 }
             }) as BotPaymentModel
-            console.log('查询到的旧数据', oldPayment)
             if (oldPayment) {
-                return new MessageUtils().sendPopMessage(ctx, '已经领过啦')
+                await new MessageUtils().sendPopMessage(ctx, '已经领过啦')
+                return false
             }
 
             // 获取到当前领取红包的用户
@@ -313,7 +329,7 @@ class BotHb extends BaseEntity {
             }) as UserModel
             // 领取次数加一
             this.receiveNum++
-            user.updateUserMoney(this.walletType, this.money)
+            user.updateUserMoney(this.walletType, this.getReceiveMoney())
 
             let newPayment = new BotPaymentModel()
             let paymentType = PaymentType.LHB
@@ -327,18 +343,17 @@ class BotHb extends BaseEntity {
                 ? new ComputeUtils(user.getBalance(this.walletType)).add(this.money).toString()
                 : new ComputeUtils(user.getBalance(this.walletType)).minus(this.money).toString()
             newPayment.paymentTypeNumber = this.hbId
-            newPayment.paymentAmount = this.money
+            newPayment.paymentAmount = this.getReceiveMoney()
             newPayment.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
             newPayment.walletType = this.walletType
             newPayment.gameType = GameTypeEnum.MEPTY
 
-            console.log('提交之前')
+            this.lqMoney = new ComputeUtils(this.money).minus(this.getReceiveMoney()).toString()
+            this.jeIndex++
             await queryRunner.manager.save(user)
             await queryRunner.manager.save(newPayment)
             await queryRunner.manager.save(this as BotHb)
-            console.log('开始提交')
             await queryRunner.commitTransaction()
-            console.log('提价完成---')
             return true
         } catch (err) {
             console.log('消息回滚了')
@@ -362,7 +377,42 @@ class BotHb extends BaseEntity {
             this.jeJson = new RandomUtils().randomAllocate(Number(this.money), this.num).toString()
             console.log('随机包结果', this.jeJson)
         }
+    }
 
+    /**
+     * 获取当前要领取的红包金额
+     */
+    public getReceiveMoney = () => {
+        console.log(this.jeIndex)
+        let arr = this.jeJson.split(',')
+        console.log(arr)
+        return arr[this.jeIndex]
+    }
+
+    /**
+     * 设置红包流水的领取条件
+     */
+    public setWaterJson = (json: RedPackConditionJsonType) => {
+        this.conditionsJson = JSON.stringify(json)
+    }
+
+    /**
+     * 获取红包流水的领取条件
+     */
+    public getConditionJson = (): RedPackConditionJsonType | null => {
+        if (this.conditonsls == 1) {
+            let result: RedPackConditionJsonType = {
+                time: 0,
+                money: ''
+            }
+            console.log('获取到的护具', this.conditionsJson)
+            let json = JSON.parse(this.conditionsJson)
+            result.time = json['time']
+            result.money = json['money']
+            console.log('返回结果 ', result)
+            return result
+        }
+        return null
     }
 
 

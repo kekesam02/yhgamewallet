@@ -33,6 +33,11 @@ enum StartWalletEnum {
     HONGBAO = 'hongbao_btn',
 
     /**
+     * 红包
+     */
+    HONGBAO_INFO = 'hongbao_look_info_',
+
+    /**
      * 点击添加红包按钮回掉参数
      */
     HONGBAO_ADD = 'hongbaoStart',
@@ -76,6 +81,30 @@ enum StartWalletEnum {
      * 领取红包回调
      */
     HONGBAO_RECEIVE = 'hongbaoReceive_',
+
+    /**
+     * 红包 - 设置 开启/关闭 会员红包功能
+     *      _hbId_0 关闭
+     *      _hbId_1 开启
+     */
+    HONGBAO_VIP_ = 'hongbaoVip_',
+
+    /**
+     * 红包 - 设置验证码红包 开启/关闭 验证码验证功能
+     *      _hbId_0 关闭
+     *      _hbId_1 开启
+     */
+    HONGBAO_VERIFI = 'hongbaoVerifi_',
+
+    /**
+     * 红包 - 流水红包 开启/关闭 流水红包功能
+     *      _hbId_0 关闭
+     *      _hbId_1 开启
+     */
+    HONGBAO_WATER = 'hongbaoWater_',
+
+    // 流水红包时间类型
+    HONGBAO_WATER_TIME = 'hongbaoWaterTime_',
 
     /**
      * 闪兑

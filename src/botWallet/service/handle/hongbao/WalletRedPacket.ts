@@ -18,6 +18,8 @@ import WalletController from "../../../controller/WalletController";
 import redis from "../../../../config/redis";
 import BotPaymentModel from "../../../../models/BotPaymentModel";
 import PaymentType from "../../../../type/PaymentType";
+import MessageTipUtils from "../../../../commons/message/MessageTipUtils";
+import moment from "moment";
 
 
 
@@ -34,26 +36,58 @@ class WalletRedPacket {
      */
     public addRedPacket = async () => {
         await new MessageUtils().removeMessage(this.ctx)
-        await new MessageUtils().sendTextReply(
-            this.ctx,
-            '请在下面按钮操作您的红包：',
-            new ButtonUtils().createCallbackBtn([
-                [
+        let buttonList =  new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: ButtonCommonMap.addBtnContent,
+                    query: StartWalletEnum.HONGBAO_ADD
+                }
+            ],
+            [
+                {
+                    text: ButtonCommonMap.backBtnContent,
+                    query: StartWalletEnum.CLOSE_COMPUTER
+                }
+            ]
+        ])
+        let botHbList = await new BotHb().getBotHbList(ContextUtil.getUserId(this.ctx))
+        if (botHbList.length > 0) {
+            botHbList.forEach(item => {
+                buttonList.reply_markup.inline_keyboard.push([
                     {
-                        text: ButtonCommonMap.addBtnContent,
-                        query: StartWalletEnum.HONGBAO_ADD
+                        text: `\uD83E\uDDE7 [${moment(item.createTime).format('MM-DD HH:mm')}] ${item.receiveNum ?? item.num}/${item.num} - ${new CommonEnumsIndex().getWalletTypeStr(item.walletType)}`,
+                        callback_data: StartWalletEnum.HONGBAO_INFO + item.hbId,
+                        url: ''
                     }
-                ],
-                [
-                    {
-                        text: ButtonCommonMap.backBtnContent,
-                        query: StartWalletEnum.CLOSE_COMPUTER
-                    }
-                ]
-            ]).reply_markup.inline_keyboard
-        )
+                ])
+            })
+            await new MessageUtils().sendTextReply(
+                this.ctx,
+                '从下面的列表中选择一个红包',
+                buttonList.reply_markup.inline_keyboard
+            )
+        } else {
+            await new MessageUtils().sendTextReply(
+                this.ctx,
+                '请在下面按钮操作您的红包：',
+                buttonList.reply_markup.inline_keyboard
+            )
+        }
         await new BotHb().init(this.ctx)
         return true
+    }
+
+    /**
+     * 查看红包详情触发
+     */
+    public lookRedPacketInfo = async (hbId: string) => {
+        let user = await new UserModel().getUserModel(this.ctx)
+        let botHb = await new BotHb().getBotHb(hbId)
+        if (!botHb || !user) {
+            return new MessageTipUtils().handleErr(this.ctx)
+        }
+        let html = new RedPacketHtml().getSuccessHtml(user, botHb)
+        await new MessageUtils().botSendTextToBot(this.ctx, html, WalletController.createSendHbBtn(botHb.hbId).reply_markup)
     }
 
     /**
@@ -241,8 +275,6 @@ class WalletRedPacket {
      * 设置备注文字
      */
     public setRemark = async (text: string, hbId: string) => {
-        console.log('传入的红包id-----', hbId)
-        console.log('备注文字------', text)
         let botHb = await new BotHb().getBotHb(hbId)
         if (!botHb) {
             return
@@ -267,8 +299,128 @@ class WalletRedPacket {
     /**
      * 设置红包领取条件
      */
-    public setGainCondition = (hbId: string) => {
+    public setGainCondition = async (hbId: string) => {
+        console.log('设置领取红包条件')
+        let user = await new UserModel().getUserModel(this.ctx)
+        let botHb = await new BotHb().getBotHb(hbId)
+        if (!botHb || !user) {
+            return new MessageTipUtils().handleErr(this.ctx)
+        }
+        await this.updateCondition(user, botHb, true)
+    }
 
+    /**
+     * 设置会员验证功能
+     */
+    public setVipVeri = async (text: string) => {
+        let hbId = text.split('_')[0]
+        let condition = text.split('_')[1]
+        console.log('设置会员验证功能', text)
+        let botHb = await new BotHb().getBotHb(hbId)
+        let user = await new UserModel().getUserModel(this.ctx)
+        if (!botHb || !user) {
+            return new MessageTipUtils().handleErr(this.ctx)
+        }
+        botHb.conditonshy = Number(condition)
+        await botHb.setBotHb()
+        await this.updateCondition(user, botHb, false)
+    }
+
+    /**
+     * 设置验证码验证功能
+     */
+    public setCodeVeri = async (text: string) => {
+        let hbId = text.split('_')[0]
+        let condition = text.split('_')[1]
+        console.log('设置验证码', text)
+        let botHb = await new BotHb().getBotHb(hbId)
+        let user = await new UserModel().getUserModel(this.ctx)
+        if (!botHb || !user) {
+            return new MessageTipUtils().handleErr(this.ctx)
+        }
+        botHb.conditonsyzm = Number(condition)
+        await botHb.setBotHb()
+        await this.updateCondition(user, botHb, false)
+    }
+
+    /**
+     * 开启流水红包验证
+     */
+    public startWaterVeri = async (text: string) => {
+        let hbId = text.split('_')[0]
+        await new MessageUtils().botSendTextToBot(
+            this.ctx,
+            '\uD83D\uDCA6 请选择流水红包时间',
+            WalletController.waterHBTimeBtn(hbId).reply_markup
+        )
+    }
+
+    /**
+     * 选择红包流水时间触发
+     */
+    public selectWaterTime = async (text: string) => {
+        let hbId = text.split('_')[0]
+        let timeType = text.split('_')[1]
+        let botHb = await new BotHb().getBotHb(hbId)
+        if (!botHb) {
+            return new MessageTipUtils().handleErr(this.ctx)
+        }
+        botHb.setWaterJson({
+            time: Number(timeType),
+            money: '0'
+        })
+        botHb.conditonsls = 1
+        await botHb.setBotHb()
+        await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), `hongbaoWaterMoney_${hbId}`)
+        let html = new RedPacketHtml().createRedWaterMoney()
+        await new MessageUtils().sendTextReply(
+            this.ctx,
+            html
+        )
+    }
+
+    /**
+     * 设置红包流水金额
+     */
+    public setWaterMoney = async (text: string, hbId: string) => {
+        if (isNaN(Number(text))) {
+            return new MessageTipUtils().handleErr(this.ctx)
+        }
+        let botHb = await new BotHb().getBotHb(hbId)
+        if (!botHb) {
+            return new MessageTipUtils().handleErr(this.ctx)
+        }
+        let json = botHb.getConditionJson()
+        if (!json) {
+            return new MessageTipUtils().handleErr(this.ctx)
+        }
+        botHb.setWaterJson({
+            time: json.time,
+            money: text
+        })
+        await botHb.setBotHb()
+        let user = await new UserModel().getUserModel(this.ctx)
+        await this.updateCondition(user, botHb, true, false)
+    }
+
+    /**
+     * 更新/设置 红包领取条件文案
+     * @param user
+     * @param botHb
+     * @param isAdd: true: 新增 false: 更新
+     * @param isRemove: 是否删除之前的消息
+     */
+    public updateCondition = async (user: UserModel, botHb: BotHb, isAdd = true, isRemove = true) => {
+        let button = WalletController.createConditionBtn(botHb)
+        let html = new RedPacketHtml().getConditionHtml(user, botHb)
+        if (isAdd) {
+            if (isRemove) {
+                await new MessageUtils().removeMessage(this.ctx)
+            }
+            await new MessageUtils().botSendTextToBot(this.ctx, html, button.reply_markup)
+        } else {
+            await new MessageUtils().editedMessage(this.ctx, html, button.reply_markup)
+        }
     }
 
 
@@ -278,35 +430,42 @@ class WalletRedPacket {
      * @param hbId: 红包id
      */
     public receiveCallback = async (hbId: string) => {
-        console.log('点击领取红包按钮了', hbId)
-
         await addLock([hbId],  async () => {
             let botHb = await new BotHb().getBotHb(hbId)
             // 当前红包已经领完了
-            if (!botHb || botHb.receiveNum - botHb.num >= 0) {
+            if (!botHb) {
+                return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
+            }
+            if (botHb.receiveNum - botHb.num >= 0){
+                await this.updateReceiveHtml(hbId, botHb)
                 return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
             }
 
+            // 开始领取红包
             let result = await botHb.receiveHb(this.ctx)
             if (result) {
-                // 领取成功处理
-                let paymentList = await new BotPaymentModel().getPaymentByHB(hbId)
-                paymentList = paymentList.filter(item => item.paymentType == PaymentType.LHB)
-                console.log('获取到的订单列白哦', paymentList)
-                let user = await new UserModel().getUserModelById(botHb.tgId)
-                if (!user) {
-                    return
-                }
-                let html = new RedPacketHtml().getSendHtml(user, botHb, paymentList)
-                console.log('开始更新消息')
-                await new MessageUtils().editedMessage(this.ctx, html, WalletController.receiveHbBtn(botHb.hbId).reply_markup)
-                console.log('更新消息结束')
+                await this.updateReceiveHtml(hbId, botHb)
             } else {
                 return new MessageUtils().sendPopMessage(this.ctx, '领取失败')
             }
         }, () => {
             return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
         })
+    }
+
+    /**
+     * 点击红包不管能否领取都要尝试更新红包信息
+     */
+    public updateReceiveHtml = async (hbId: string, botHb: BotHb) => {
+        // 领取成功处理
+        let paymentList = await new BotPaymentModel().getPaymentByHB(hbId)
+        paymentList = paymentList.filter(item => item.paymentType == PaymentType.LHB)
+        let user = await new UserModel().getUserModelById(botHb.tgId)
+        if (!user) {
+            return
+        }
+        let html = new RedPacketHtml().getSendHtml(user, botHb, paymentList)
+        await new MessageUtils().editedMessage(this.ctx, html, WalletController.receiveHbBtn(botHb.hbId).reply_markup)
     }
 
 }

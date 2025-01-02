@@ -4,6 +4,7 @@ import WalletUserCenterEnum from "../../type/walletEnums/WalletUserCenterEnum";
 import WalletRedPacketInner from "../service/handle/hongbao/WalletRedPacketInner";
 import WalletConfig from "../WalletConfig";
 import {getConfig} from "../../config/config";
+import BotHb from "../../models/BotHb";
 
 /**
  * 钱包
@@ -343,6 +344,83 @@ class WalletController {
                 },{
                     text: '\uD83D\uDCB0 钱包',
                     url: getConfig().botConfig.WalletUrl
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 生成设置红包领取条件按钮
+     */
+    public static createConditionBtn = (botHb: BotHb) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '\uD83D\uDD10验证码',
+                    query: botHb.conditonsyzm == 1
+                        ? StartWalletEnum.HONGBAO_VERIFI + botHb.hbId + '_0'
+                        : StartWalletEnum.HONGBAO_VERIFI + botHb.hbId + '_1'
+                }, {
+                    text: botHb.conditonsyzm == 1? '\uD83D\uDFE2已开启': '⚪️未开启',
+                    query: botHb.conditonsyzm == 1
+                        ? StartWalletEnum.HONGBAO_VERIFI + botHb.hbId + '_0'
+                        : StartWalletEnum.HONGBAO_VERIFI + botHb.hbId + '_1'
+                }
+            ], [
+                {
+                    text: '\uD83D\uDC8E会员红包',
+                    query: botHb.conditonshy == 1
+                        ? StartWalletEnum.HONGBAO_VIP_ + botHb.hbId + '_0'
+                        : StartWalletEnum.HONGBAO_VIP_ + botHb.hbId + '_1'
+                }, {
+                    text: botHb.conditonshy == 1? '\uD83D\uDFE2已开启': '⚪️未开启',
+                    query: botHb.conditonshy == 1
+                        ? StartWalletEnum.HONGBAO_VIP_ + botHb.hbId + '_0'
+                        : StartWalletEnum.HONGBAO_VIP_ + botHb.hbId + '_1'
+                }
+            ], [
+                {
+                    text: '\uD83D\uDCA6流水红包',
+                    query: botHb.conditonsls == 1
+                        ? StartWalletEnum.HONGBAO_WATER + botHb.hbId + '_0'
+                        : StartWalletEnum.HONGBAO_WATER + botHb.hbId + '_1'
+                }, {
+                    text: botHb.conditonsls == 1? '\uD83D\uDFE2已开启': '⚪️未开启',
+                    query: botHb.conditonsls == 1
+                        ? StartWalletEnum.HONGBAO_WATER + botHb.hbId + '_0'
+                        : StartWalletEnum.HONGBAO_WATER + botHb.hbId + '_1'
+                }
+            ],
+            [
+                {
+                    text: "\uD83D\uDEAB取消",
+                    query: StartWalletEnum.HONGBAO_CANCEL_1
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 流水红包时间选择
+     */
+    public static waterHBTimeBtn = (hbId: string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '今日',
+                    query: StartWalletEnum.HONGBAO_WATER_TIME + hbId + '_' + 0
+                }, {
+                    text: '近七天',
+                    query: StartWalletEnum.HONGBAO_WATER_TIME + hbId + '_' + 1
+                }, {
+                    text: '近30天',
+                    query: StartWalletEnum.HONGBAO_WATER_TIME + hbId + '_' + 2
+                }, {
+                    text: '本月',
+                    query: StartWalletEnum.HONGBAO_WATER_TIME + hbId + '_' + 3
+                }, {
+                    text: '总流水',
+                    query: StartWalletEnum.HONGBAO_WATER_TIME + hbId + '_' + 4
                 }
             ]
         ])

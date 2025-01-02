@@ -121,6 +121,9 @@ class WalletCallbackQueryHandle {
                 // 点击添加红包按钮回调
                 case StartWalletEnum.HONGBAO_ADD:
                     return new WalletRedPacket(ctx).selectWallType()
+                // 查看已发送红包详情触发
+                case StartWalletEnum.HONGBAO_INFO + callbackStr.replaceAll(StartWalletEnum.HONGBAO_INFO, ''):
+                    return new WalletRedPacket(ctx).lookRedPacketInfo(callbackStr.replaceAll(StartWalletEnum.HONGBAO_INFO, ''))
                 // 点击选择红包金额类型回掉
                 case StartWalletEnum.HONGBAO_WALLET_USDT:
                     return new WalletRedPacket(ctx).selectRedPacketType(WalletType.USDT)
@@ -145,6 +148,18 @@ class WalletCallbackQueryHandle {
                 // 点击领取红包按钮触发
                 case StartWalletEnum.HONGBAO_RECEIVE + callbackStr.replaceAll(StartWalletEnum.HONGBAO_RECEIVE, ''):
                     return new WalletRedPacket(ctx).receiveCallback(callbackStr.replaceAll(StartWalletEnum.HONGBAO_RECEIVE, ''))
+                // 红包 - 开启/关闭会员红包功能
+                case StartWalletEnum.HONGBAO_VIP_ + callbackStr.replaceAll(StartWalletEnum.HONGBAO_VIP_, ''):
+                    return new WalletRedPacket(ctx).setVipVeri(callbackStr.replaceAll(StartWalletEnum.HONGBAO_VIP_, ''))
+                // 红包 - 开启/关闭 验证码验证功能
+                case StartWalletEnum.HONGBAO_VERIFI + callbackStr.replaceAll(StartWalletEnum.HONGBAO_VERIFI, ''):
+                    return new WalletRedPacket(ctx).setCodeVeri(callbackStr.replaceAll(StartWalletEnum.HONGBAO_VERIFI, ''))
+                // 红包 - 开启/关闭 流水验证功能
+                case StartWalletEnum.HONGBAO_WATER + callbackStr.replaceAll(StartWalletEnum.HONGBAO_WATER, ''):
+                    return new WalletRedPacket(ctx).startWaterVeri(callbackStr.replaceAll(StartWalletEnum.HONGBAO_WATER, ''))
+                // 红包 - 选择流水时间触发
+                case StartWalletEnum.HONGBAO_WATER_TIME + callbackStr.replaceAll(StartWalletEnum.HONGBAO_WATER_TIME, ''):
+                    return new WalletRedPacket(ctx).selectWaterTime(callbackStr.replaceAll(StartWalletEnum.HONGBAO_WATER_TIME, ''))
 
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:

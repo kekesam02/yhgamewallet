@@ -46,7 +46,7 @@ class WalletRedPacketInner {
                     message_text: new RedPacketHtml().getSendHtml(user, botHb, paymentList)
                 },
                 reply_markup: {
-                    inline_keyboard: WalletController.receiveHbBtn(botHb.hbId)
+                    inline_keyboard: WalletController.receiveHbBtn(botHb.hbId).reply_markup.inline_keyboard
                 }
             })
         )
