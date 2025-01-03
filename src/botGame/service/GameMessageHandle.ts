@@ -6,7 +6,7 @@ import PC28Controller from "../gameController/PC28Controller";
 import CommandController from "../gameController/CommandController";
 import BettingController from "../gameController/BettingController";
 import moment from "moment";
-import ScheduleHandle from "../../commons/ScheduleHandle";
+import ScheduleHandle from "../../commons/scheduleHandle/ScheduleHandle";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import MessageUtils from "../../commons/message/MessageUtils";

@@ -16,7 +16,7 @@ import {DefectListType} from "../type/BotGameType/BotGameType";
 import GameDefectHtml from "../html/gameHtml/GameDefectHtml";
 import MessageUtils from "../commons/message/MessageUtils";
 import {queryRunner} from "../config/database";
-import ScheduleHandle from "../commons/ScheduleHandle";
+import ScheduleHandle from "../commons/scheduleHandle/ScheduleHandle";
 import AESUtils from "../commons/AESUtils";
 
 /**

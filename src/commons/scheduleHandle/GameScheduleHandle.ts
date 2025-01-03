@@ -1,27 +1,14 @@
-import schedule, {Job} from "node-schedule";
-import PC28Controller from "../botGame/gameController/PC28Controller";
 import {Context, Telegraf} from "telegraf";
+import schedule from "node-schedule";
 import moment from "moment-timezone";
-import BotGameConfig from "../botGame/BotGameConfig";
-import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
-import TimeUtils from "./date/TimeUtils";
+import TimeUtils from "../date/TimeUtils";
+import PC28Controller from "../../botGame/gameController/PC28Controller";
+import BotGameConfig from "../../botGame/BotGameConfig";
+import {Pc28LotteryJsonType} from "../../type/gameEnums/LooteryJsonType";
+import ScheduleHandle from "./ScheduleHandle";
 
-/**
- * 定时任务控制器
- */
-class ScheduleHandle {
 
-    /**
-     * 正在工作的定时器列表、运行结束需要关闭
-     */
-    public static currJobList: Array<Job> = []
-
-    /**
-     * 游戏是否已经开始
-     *      true: 已经开始游戏、定时器正在执行
-     *      false: 游戏还没有开始运行
-     */
-    public static isStartPC28 = false
+class GameScheduleHandle {
 
     public static pc28Config = {
         // 是否是测试
@@ -101,8 +88,8 @@ class ScheduleHandle {
      */
     public static startPC28 = (bot: Telegraf<Context>) => {
         // pc28游戏还没有开始、打开计时器开始运行游戏
-        if (!this.isStartPC28) {
-            this.isStartPC28 = true
+        if (!ScheduleHandle.isStartPC28) {
+            ScheduleHandle.isStartPC28 = true
             // let pc28Controller = new PC28Controller()
             // pc28Controller.startPCLow(bot).then((val) => {})
             console.log('进来222任务调度了')
@@ -160,14 +147,14 @@ class ScheduleHandle {
                         if (moment(nextTime).isAfter(moment())) {
                             // 可以继续下注、发送开始下注信息到群组
                             await new PC28Controller().startPCLow(bot, json)
-                            ScheduleHandle.checkNextPC28(json)
+                            GameScheduleHandle.checkNextPC28(json)
                         } else {
                             let next_time = moment(json.data[0].next_time).subtract(210, 'seconds').format('YYYY-MM-DD HH:mm:ss')
                             let next_roundId = json.data[0].next_expect + 1
                             json.data[0].next_time = next_time
                             json.data[0].next_expect = next_roundId
                             // 等到下一期在加入游戏中
-                            ScheduleHandle.checkNextPC28(json)
+                            GameScheduleHandle.checkNextPC28(json)
                         }
                     } catch (err) {
                         console.log('记录日志', err)
@@ -278,7 +265,7 @@ class ScheduleHandle {
                         console.log('保存55结果')
                         await pc28Controller.startPCLow(bot, openJson)
                         console.log('保存66结果')
-                        ScheduleHandle.checkNextPC28(openJson)
+                        GameScheduleHandle.checkNextPC28(openJson)
                     } catch (err) {
                         console.log('设置开奖信息保存了', err)
                         ScheduleHandle.pc28Config.isOpenLottery = false
@@ -286,7 +273,7 @@ class ScheduleHandle {
                     return
                 }
             })
-            this.currJobList.push(job)
+            ScheduleHandle.currJobList.push(job)
         }
     }
 
@@ -309,17 +296,8 @@ class ScheduleHandle {
         ScheduleHandle.pc28Config.closeTipsTime =
             moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
     }
-
-    /**
-     * 进程结束需要关闭正在工作的定时器
-     */
-    public static closeJobs = () => {
-        this.currJobList.forEach(item => {
-            item.cancel()
-        })
-    }
 }
 
 
 
-export default ScheduleHandle
+export default GameScheduleHandle
