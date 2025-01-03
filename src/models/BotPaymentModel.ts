@@ -17,6 +17,7 @@ import GameDefectHtml from "../html/gameHtml/GameDefectHtml";
 import MessageUtils from "../commons/message/MessageUtils";
 import {queryRunner} from "../config/database";
 import ScheduleHandle from "../commons/ScheduleHandle";
+import AESUtils from "../commons/AESUtils";
 
 /**
  * 用户流水表
@@ -33,7 +34,7 @@ class BotPaymentModel extends BaseEntity {
      */
     @Column({
         name: 'user_id',
-        default:''
+        default: ''
     })
     tgId: string
 
@@ -260,7 +261,7 @@ class BotPaymentModel extends BaseEntity {
         wallType: WalletType,
         money: string,
         linkAddr: string = ScheduleHandle.pc28Config.roundId ?? new OrderUtils().createPaymentModelId()
-    ) =>{
+    ) => {
         this.tgId = userModel.tgId
         this.username = userModel.userName
         this.nickname = userModel.nickName
@@ -426,14 +427,14 @@ class BotPaymentModel extends BaseEntity {
             })
             .andWhere('del = 0')
             .whereTime(
-                near? near.createTime: '',
+                near ? near.createTime : '',
                 ''
             )
             .getMany()
 
         // 没有需要反水的订单
         if (paymentList.length <= 0) {
-            return  this.sendFSTOGroup(ctx, [], near)
+            return this.sendFSTOGroup(ctx, [], near)
         }
 
         // 需要反水的数据列表
@@ -442,7 +443,7 @@ class BotPaymentModel extends BaseEntity {
 
         // 没有需要反水的订单
         if (paymentList.length <= 0) {
-            return  this.sendFSTOGroup(ctx, [], near)
+            return this.sendFSTOGroup(ctx, [], near)
         }
 
         needList.forEach(item => {
@@ -458,7 +459,7 @@ class BotPaymentModel extends BaseEntity {
         try {
             await queryRunner.manager.save(saveList)
             await queryRunner.manager.save(userModel)
-            let html = new GameDefectHtml().createDefectHtml(needList, near? near.createTime: '')
+            let html = new GameDefectHtml().createDefectHtml(needList, near ? near.createTime : '')
             await new MessageUtils().sendTextReply(ctx, html)
             await queryRunner.commitTransaction()
         } catch (err) {
@@ -471,8 +472,8 @@ class BotPaymentModel extends BaseEntity {
      * @param roundId
      */
     public getPaymentModelList = ({
-        roundId
-    }: {
+                                      roundId
+                                  }: {
         roundId: string
     }) => {
         return BotPaymentModel
@@ -485,6 +486,53 @@ class BotPaymentModel extends BaseEntity {
     }
 
 
+    /**
+     * 获取用户账单信息
+     * @param tgId 用户tgId
+     * @param ptype 1 USDT 2 TRX
+     * @param pageNo
+     * @param pageSize
+     */
+    public static findPaymentByTgIdPage = async (tgId: number, ptype: number, pageNo: number, pageSize: number) => {
+        const aesTgId = AESUtils.encodeUserId(tgId.toString())
+        var selectQueryBuilder = BotPaymentModel.createQueryBuilder()
+            .where('user_id = :tgId and del = 0', {
+                tgId: aesTgId
+            });
+
+        var countSelectQueryBuilder = BotPaymentModel.createQueryBuilder()
+            .where('user_id = :tgId and del = 0', {
+                tgId: aesTgId
+            });
+
+        // 钱包类型 1usdt 2 trx
+        if (ptype > 0) {
+            selectQueryBuilder.andWhere('wallet_type = :wtype', {'wtype': ptype})
+            countSelectQueryBuilder.andWhere('wallet_type = :wtype', {'wtype': ptype})
+        }
+        // 求总数
+        const {total} = await countSelectQueryBuilder.select("count(1)", "total").getRawOne()
+        // 总记录数
+        const dataList = await selectQueryBuilder
+            .orderBy('create_time', 'DESC')
+            .skip((pageNo - 1) * pageSize)
+            .take(pageSize)
+            .getMany()
+        // 分页数
+        let pages = 0;
+        if (total % pageSize == 0){
+            pages = Math.floor(total / pageSize)
+        }else{
+            pages = Math.floor(total / pageSize) + 1
+        }
+        return {
+            pageNo:pageNo,
+            pageSize:pageSize,
+            pages:pages,
+            total: total,
+            records: dataList
+        }
+    }
 
 
     // ------------- 下面主要上当前对象的一些私有方法
@@ -591,7 +639,7 @@ class BotPaymentModel extends BaseEntity {
      * 发送反水消息到群组
      */
     private sendFSTOGroup = async (ctx, needList: DefectListType, near: BotPaymentModel | null) => {
-        let html = new GameDefectHtml().createDefectHtml(needList, near? near.createTime: '')
+        let html = new GameDefectHtml().createDefectHtml(needList, near ? near.createTime : '')
         await new MessageUtils().sendTextReply(ctx, html)
     }
 
@@ -617,11 +665,11 @@ class BotPaymentModel extends BaseEntity {
      */
     private defectResultHandle = (paymentList: Array<BotPaymentModel>, user: UserModel): DefectListType => {
         let result = [
-            { wallType: WalletType.USDT, waterMoney: '0', backMoney: '0' },
-            { wallType: WalletType.CUSDT, waterMoney: '0', backMoney: '0'  },
-            { wallType: WalletType.TRX, waterMoney: '0', backMoney: '0'  },
-            { wallType: WalletType.CTRX, waterMoney: '0', backMoney: '0'  },
-            { wallType: WalletType.JIFEN, waterMoney: '0', backMoney: '0'  },
+            {wallType: WalletType.USDT, waterMoney: '0', backMoney: '0'},
+            {wallType: WalletType.CUSDT, waterMoney: '0', backMoney: '0'},
+            {wallType: WalletType.TRX, waterMoney: '0', backMoney: '0'},
+            {wallType: WalletType.CTRX, waterMoney: '0', backMoney: '0'},
+            {wallType: WalletType.JIFEN, waterMoney: '0', backMoney: '0'},
         ]
         paymentList.forEach(item => {
             switch (item.walletType) {

@@ -65,7 +65,7 @@ class WalletUserCenterController {
     /**
      * 我的账单
      */
-    public static createUserAccountListBtn = (pageNo:number,type:string) => {
+    public static createUserAccountListBtn = (pageNo:number,type:number) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {

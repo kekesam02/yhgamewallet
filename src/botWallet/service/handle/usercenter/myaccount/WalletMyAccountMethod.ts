@@ -10,6 +10,8 @@ import WalletHandleMethod from "../../WalletHandleMethod";
 import walletUserCenterController from "../../../../controller/WalletUserCenterController";
 import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
 import {ALL} from "node:dns";
+import botPaymentModel from "../../../../../models/BotPaymentModel";
+import BotPaymentModel from "../../../../../models/BotPaymentModel";
 
 /**
  * 公共方法处理
@@ -31,17 +33,30 @@ class WalletMyAccountMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 查询用户信息
         let username = ctx.callbackQuery?.from?.username || 0
-        var pageNo:number = 1
-        var searchType:string = "all"
-        var html = "欢迎使用一号公馆钱包\n" +
-            "当前操作是：我的账单\n" +
-            "操作用户是：<code>"+username+"</code>，ID是：<code>"+tgId+"</code>\n"
-
+        let nickname = ctx.callbackQuery?.from?.first_name || 0
+        var pageNo: number = 1
+        var pageSize: number = 5
+        var searchType: number = 0
+        var html = "🏘️ 欢迎使用一号公馆钱包\n" +
+            "👜 当前操作是：我的账单\n" +
+            "🚩 操作用户是：<a href='tg://user?id=" + tgId + "'>" + nickname + "</a>，ID是：<a href='tg://user?id=" + tgId + "'>" + tgId + "</a>\n"
         // 开始根据用户查询账单
-
-        await ctx.replyWithHTML(html,WalletUserCenterController.createUserAccountListBtn(pageNo,searchType))
+        const botPaymentModelPage = await BotPaymentModel.findPaymentByTgIdPage(tgId,searchType,pageNo, pageSize)
+        var botPaymentModels = botPaymentModelPage.records;
+        html += "\n➖➖➖➖➖总成交"+botPaymentModelPage.total+"笔➖➖➖➖➖"
+        for (let i = 0; i < botPaymentModels.length; i++) {
+            html +="\n类型：" + (botPaymentModels[i].operateType==1?"收入":"支出")
+            html +="\n备注：" + botPaymentModels[i].paymentTypeName
+            html +="\n金额：" + botPaymentModels[i].paymentAmount
+            html +="\n货币：" + botPaymentModels[i].walletType == '1'?'USDT':'TRX'
+            html +="\n变动后余额：" + botPaymentModels[i].balanceAfter
+            html +="\n操作日期：" + botPaymentModels[i].createTime
+            html +="----------------------------------"
+        }
+        await ctx.replyWithHTML(html, WalletUserCenterController.createUserAccountListBtn(pageNo, searchType))
     }
 }
 
 
 export default WalletMyAccountMethod
+
