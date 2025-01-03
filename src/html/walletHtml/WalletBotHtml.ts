@@ -41,7 +41,7 @@ class WalletBotHtml {
         }
         var add = '';
         if (addr) {
-            add = "\n🧾 提现地址：<code>" + AESUtils.decodeAddr(model.rechargeLink) + "</code>\n";
+            add = "\n🧾 提现地址：<code>" + AESUtils.decodeAddr(addr) + "</code>\n";
         } else {
             add = "\n👐 暂无提现地址请前往个人中心绑定👐\n";
         }

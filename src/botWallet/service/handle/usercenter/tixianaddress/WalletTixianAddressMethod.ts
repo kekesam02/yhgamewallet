@@ -1,15 +1,13 @@
 import type {Context} from "telegraf";
-import ButtonUtils from '../../../../../commons/button/ButtonUtils'
-import WalletBotHtml from '../../../../../html/walletHtml/WalletBotHtml'
 import AESUtils from "../../../../../commons/AESUtils";
 import UserModel from "../../../../../models/UserModel";
-import WalletController from "../../../../controller/WalletController";
 import BotWithdrawalAddrModel from "../../../../../models/BotWithdrawalAddrModel";
 import redis from "../../../../../config/redis";
 import WalletHandleMethod from "../../WalletHandleMethod";
 import walletUserCenterMethod from "../WalletUserCenterMethod";
 import walletUserCenterController from "../../../../controller/WalletUserCenterController";
 import {addLockByTgId} from "../../../../../config/redislock";
+import WalletUserCenterMethod from "../WalletUserCenterMethod";
 
 /**
  * 公共方法处理
@@ -42,7 +40,7 @@ class WalletTixianAddressMethod {
         // 删除上一次的消息
         await walletUserCenterMethod.removeMessage(ctx)
         // 提示当前的信息
-        await ctx.replyWithHTML("👜 您的提现地址是：\n<code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"</code>（点击可复制）",walletUserCenterController.createUpdateTxAddrBtn())
+        await ctx.replyWithHTML("👜 您的提现地址是：\n<code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"（点击可复制）</code>",walletUserCenterController.createUpdateTxAddrBtn())
     }
 
 
@@ -67,7 +65,7 @@ class WalletTixianAddressMethod {
            var nickname = ctx.message?.from?.first_name || ''
            if (!this.isValidTronAddress(text)) {
                //更换提现地址
-               var html = "\uD83D\uDCA6 请填写填写的波场提现地址";
+               var html = "\uD83D\uDCA6 请填写正确的波场提现地址";
                ctx.replyWithHTML(html);
                return;
            }
@@ -103,9 +101,9 @@ class WalletTixianAddressMethod {
                    }).execute()
                }
                // 发送机器人消息
-               ctx.replyWithHTML("✅ 设置成功\n👜 您当前的提现地址是：<code>" + text+"</code>")
+               await ctx.replyWithHTML("✅ 设置成功\n👜 您当前的提现地址是：<code>" + text+"</code>")
                // 进入到主页
-               WalletHandleMethod.startButtonBack(ctx)
+               await WalletUserCenterMethod.startUserCenterMessageCallback(ctx)
            }else{
                await ctx.reply('用户不存在！')
            }

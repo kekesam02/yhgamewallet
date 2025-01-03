@@ -135,7 +135,7 @@ class WalletHandleMethod {
         }
         // 3：查询用户是否存在交易地址
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
-            .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
+            .where('tg_id = :tgId', {tgId: userId}).getOne()
         // 4：发送带有分享按钮的消息
         var addr = botWithdrawalAddrModel?.addr || '';
         var html = WalletBotHtml.getBotStartHtml(tgId, addr, user!)
