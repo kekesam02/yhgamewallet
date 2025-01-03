@@ -232,6 +232,9 @@ class GameBotHtml {
         pledgeUpList.forEach(item => {
             // 上注的内容纯文字
             let contentText = item.content.replaceAll(item.amountMoney, '')
+            if (item.content.indexOf('杀') > -1) {
+                contentText = item.content.split('杀')[0] + '杀'
+            }
             // 倍率
             let rate = new ComputeUtils(item.winningAmount).dividedBy(item.amountMoney, 2).toString()
             html += `${item.userName} ${contentText} 中 ${item.winningAmount}(${rate})倍率${this.N}`

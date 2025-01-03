@@ -12,8 +12,6 @@ import MessageUtils from "../../commons/message/MessageUtils";
 import GameBettingTips from "../../html/gameHtml/GameBettingTips";
 import UserModel from "../../models/UserModel";
 import WalletType from "../../type/WalletType";
-import {queryRunner} from "../../config/database";
-import AESUtils from "../../commons/AESUtils";
 
 
 /**
@@ -141,8 +139,7 @@ class BettingCommand28 {
         let text = this.ctx.text!
         let  parseList =  this.parseCommand(text)
         if (parseList.list.length <= 0) {
-            console.log('指令不存在直接退出')
-            return
+            return new MessageUtils().sendTextReply(this.ctx, '请输入正确的下注指令')
         }
 
         // // 判断是否是USDT下注、如果是USDT下注没有下注限制
@@ -176,13 +173,9 @@ class BettingCommand28 {
 
             // 下注规则判定返回值
             let ruleNum = await this.ruleJudge(parseList, text)
+            console.log('下注规则判定', ruleNum)
             // USDT 下注没有限制
             if (!isJudge) {
-                // 用户下注金额超过最大限制
-                if (ruleNum == 1) {
-                    console.log('用户对押')
-                    return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().limitMaxMoney())
-                }
                 // 用户对押
                 if (ruleNum == 2) {
                     console.log('用户对押')
@@ -200,6 +193,11 @@ class BettingCommand28 {
                 if (ruleNum == 5) {
                     return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().twoWayHtml())
                 }
+            }
+            // 用户下注金额超过最大限制
+            if (ruleNum == 1) {
+                console.log('用户对押')
+                return new MessageUtils().sendTextReply(this.ctx, new GameBettingTips().limitMaxMoney())
             }
             // 点杀限制
             if (ruleNum == 6) {
@@ -230,6 +228,9 @@ class BettingCommand28 {
         }
         for (let i = 0; i < arr.length; i++) {
             let itemText = arr[i]
+            if (new StringUtils().isNum(itemText)) {
+                break
+            }
             // 当前下注金额
             let money = '0'
             // 当前是几杀
@@ -292,6 +293,7 @@ class BettingCommand28 {
                     || money == '0'
                     || money == ''
                     || isNaN(Number(money))
+                    || money.split('.').length > 2
                 )
             ) {
                 console.log('解析不到金额指令')
@@ -376,7 +378,8 @@ class BettingCommand28 {
                 GameTypeEnum.PC28DI
             ],
             [
-                WalletType.CUSDT
+                WalletType.CUSDT,
+                WalletType.USDT
             ]
         )
 
@@ -485,6 +488,30 @@ class BettingCommand28 {
                 killNum: 0
             }
         }
+
+        // 点杀 0和27 下注金额限制为500
+        let shaSpecialMoney = new ComputeUtils(0)
+        info.list.forEach(item => {
+            console.log(item.money)
+            if (item.command.indexOf('杀') > -1) {
+                let key = item.content.split('杀')[0]
+                if (
+                    new ComputeUtils(key).comparedTo(0) == 0
+                    || new ComputeUtils(key).comparedTo(27) == 0
+                ) {
+                    shaSpecialMoney = shaSpecialMoney.add(item.money)
+                }
+            }
+        })
+        console.log('当前点杀下注金额', shaSpecialMoney.getNumber())
+        if (shaSpecialMoney.comparedTo(new BotGameConfig().shaSpecialMoney) > 0) {
+            errIndex = 1
+            return {
+                errIndex: errIndex,
+                killNum: 0
+            }
+        }
+
         // 双向下注数据列表
         let ruleList = [
             // 大小对押限制

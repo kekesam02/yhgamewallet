@@ -17,6 +17,11 @@ class BotGameConfig {
      * pc28最大下注金额
      */
     public maxMoney28: number = 1000
+
+    /**
+     * pc28 点杀数字0和27 最大金额为500
+     */
+    public shaSpecialMoney: number = 500
 }
 
 
