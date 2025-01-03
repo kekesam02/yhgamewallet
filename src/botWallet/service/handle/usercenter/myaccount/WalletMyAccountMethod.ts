@@ -55,10 +55,6 @@ class WalletMyAccountMethod {
             const opPages = Number(splitData[3])
             var pageSize: number = 5
             var searchType: number = Number(opPtype)
-            if(opPages > 0 && pageNo >= opPages){
-                await ctx.replyWithHTML("没有更多了...")
-                return;
-            }
             var html = "🏘️ 欢迎使用一号公馆钱包\n" +
                 "👜 当前操作是：我的账单\n" +
                 "🚩 操作用户是：<a href='tg://user?id=" + tgId + "'>" + nickname + "</a>，ID是：<a href='tg://user?id=" + tgId + "'>" + tgId + "</a>\n"
@@ -73,7 +69,7 @@ class WalletMyAccountMethod {
             html+=searchStr
             if(botPaymentModelPage.total > 0) {
                 for (let i = 0; i < botPaymentModels.length; i++) {
-                    html += "\n(" + (botPaymentModels[i].operateType == 1 ? "➕收入" : "➖支出") + ")➖➖➖第" + ((pageNo - 1) * pageSize + i + 1) + "笔➖➖➖"
+                    html += "\n(" + (botPaymentModels[i].operateType == 1 ? "➕收入" : "➖支出") + ")➖➖第" + ((pageNo - 1) * pageSize + i + 1) + "笔➖➖"
                     html += "\n货币类型：" + (botPaymentModels[i].walletType == WalletType.USDT ? 'USDT' : 'TRX')
                     html += "\n操作类型：" + botPaymentModels[i].paymentTypeName
                     if (botPaymentModels[i].paymentType == PaymentType.TX_DKJL) {
