@@ -5,6 +5,7 @@ import WalletRedPacketInner from "../service/handle/hongbao/WalletRedPacketInner
 import WalletConfig from "../WalletConfig";
 import {getConfig} from "../../config/config";
 import BotHb from "../../models/BotHb";
+import walletController from "./WalletController";
 
 /**
  * 用户中心
@@ -56,6 +57,46 @@ class WalletUserCenterController {
                     text: '✏️ 修改提现地址',
                     query: 'update_txaddr_btn'
                 }
+            ]
+        ])
+    }
+
+
+    /**
+     * 我的账单
+     */
+    public static createUserAccountListBtn = (pageNo:number,type:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text:'\uD83D\uDFE2 全部',
+                    query:"myaccount_all"
+                },
+                {
+                    text:'USDT',
+                    query:"myaccount_all_usdt"
+                },
+                {
+                    text:'TRX',
+                    query:"myaccount_all_trx"
+                }
+            ],
+            [
+                {
+                    text: '🏘️ 主菜单',
+                    query: WalletUserCenterEnum.HOME,
+                },
+                {
+                    text:'⬅️',
+                    query:"myaccount_prev_"+(pageNo-1)+"_"+type
+                },
+                {
+                    text:'➡️',
+                    query:"myaccount_next_"+(pageNo+1)+"_"+type
+                }
+            ],
+            [
+                this.BackUserHome
             ]
         ])
     }

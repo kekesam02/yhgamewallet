@@ -7,6 +7,9 @@ import WalletController from "../../../../controller/WalletController";
 import BotWithdrawalAddrModel from "../../../../../models/BotWithdrawalAddrModel";
 import redis from "../../../../../config/redis";
 import WalletHandleMethod from "../../WalletHandleMethod";
+import walletUserCenterController from "../../../../controller/WalletUserCenterController";
+import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
+import {ALL} from "node:dns";
 
 /**
  * 公共方法处理
@@ -24,7 +27,19 @@ class WalletMyAccountMethod {
      * @param ctx
      */
     public static startBAccount = async (ctx: Context) => {
-        return Promise.resolve()
+        // 获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 查询用户信息
+        let username = ctx.callbackQuery?.from?.username || 0
+        var pageNo:number = 1
+        var searchType:string = "all"
+        var html = "欢迎使用一号公馆钱包\n" +
+            "当前操作是：我的账单\n" +
+            "操作用户是：<code>"+username+"</code>，ID是：<code>"+tgId+"</code>\n"
+
+        // 开始根据用户查询账单
+
+        await ctx.replyWithHTML(html,WalletUserCenterController.createUserAccountListBtn(pageNo,searchType))
     }
 }
 
