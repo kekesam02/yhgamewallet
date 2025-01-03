@@ -63,11 +63,11 @@ class CommonEnumsIndex {
             case PaymentType.CJTX:
                 return '彩金提现'
             case PaymentType.TX_DKJL:
-                return '提现打款记录'
+                return '提现打款'
             case PaymentType.TK_DKJL:
-                return '提现退款记录'
+                return '提现退款'
             case PaymentType.CJ_DKJL:
-                return '彩金打款记录'
+                return '彩金打款'
             case PaymentType.YHZZ:
                 return '用户转账'
             case PaymentType.YHSK:

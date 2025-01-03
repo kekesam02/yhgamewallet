@@ -50,9 +50,10 @@ class WalletMyAccountMethod {
         for (let i = 0; i < botPaymentModels.length; i++) {
             html +="\n➖➖➖➖➖➖"+((pageNo-1)*pageSize+i + 1)+"➖➖➖➖➖➖➖"
             html +="\n类型：" + botPaymentModels[i].paymentTypeName
-            html +="\n金额：" + (botPaymentModels[i].operateType==1?"收入":"支出")+botPaymentModels[i].paymentAmount+' '+botPaymentModels[i].walletType == WalletType.USDT?'USDT':'TRX'
+            html +="\n金额：" + (botPaymentModels[i].operateType==1?"➕收入":"➖支出")+' '+botPaymentModels[i].paymentAmount+' '+(botPaymentModels[i].walletType == WalletType.USDT?'USDT':'TRX')
             html +="\n"+(botPaymentModels[i].operateType==1?"收入":"支出")+"之前余额：" + botPaymentModels[i].balanceBefore
             html +="\n"+(botPaymentModels[i].operateType==1?"收入":"支出")+"之后余额：" + botPaymentModels[i].balanceAfter
+            html +="\n操作时间：" + moment(botPaymentModels[i].createTime).format('yyyy-MM-DD HH:mm')
             html +="\n申请时间：" + moment(botPaymentModels[i].applyTime).format('yyyy-MM-DD HH:mm')
             html +="\n通过日期：" + moment(botPaymentModels[i].passTime).format('yyyy-MM-DD HH:mm')
         }
