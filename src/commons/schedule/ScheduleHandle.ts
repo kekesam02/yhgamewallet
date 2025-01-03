@@ -1,10 +1,5 @@
-import schedule, {Job} from "node-schedule";
-import PC28Controller from "../../botGame/gameController/PC28Controller";
+import {Job} from "node-schedule";
 import {Context, Telegraf} from "telegraf";
-import moment from "moment-timezone";
-import BotGameConfig from "../../botGame/BotGameConfig";
-import {Pc28LotteryJsonType} from "../../type/gameEnums/LooteryJsonType";
-import TimeUtils from "../date/TimeUtils";
 import GameScheduleHandle from "./GameScheduleHandle";
 
 /**
@@ -43,7 +38,5 @@ class ScheduleHandle {
         })
     }
 }
-
-
 
 export default ScheduleHandle

@@ -4,7 +4,7 @@ import BotOddsModel from "../../models/BotOddsModel";
 import BotPledgeUpModel, {PledgeUpInfoType} from "../../models/BotPledgeUpModel";
 import StringUtils from "../../commons/StringUtils";
 import ComputeUtils from "../../commons/compute/ComputeUtils";
-import ScheduleHandle from "../../commons/scheduleHandle/ScheduleHandle";
+import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import {addLockByCtx} from "../../config/redislock";
 import BotGameConfig from "../BotGameConfig";

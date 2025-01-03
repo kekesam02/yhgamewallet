@@ -1,31 +1,21 @@
+import { getConfig } from "../config/config";
+
 /**
  * 钱包配置
  */
 class WalletConfig {
     // 钱包机器人
-    //static walltPayBotURL:string = 'http://t.me/VertexPaybot'
+    static walltPayBotURL:string = getConfig().botConfig.WalletUrl
     // 转账使用
-    //static  walltPayBotInlineURL:string = 'https://t.me/VertexPaybot?start=inline_'
+    static walltPayBotInlineURL:string = getConfig().botConfig.WalletUrl+'?start=inline_'
     // 收款使用
-    //static walltPayBotSKInlineURL:string = 'https://t.me/VertexPaybot?start=shoukuan_'
+    static walltPayBotSKInlineURL:string = getConfig().botConfig.WalletUrl+'?start=shoukuan_'
     // 点击收款余额不足的充值返回
-    //static walltPayBotChongZhiURL:string = 'https://t.me/VertexPaybot?start=deposit'
-    // 个人跳转
-    //static  walltPayBotInlineURL:string = 'https://t.me/VertexPaybot?start=inline_'
-
-    // 钱包机器人
-    static walltPayBotURL:string = 'http://t.me/myxukebot'
-    // 转账使用
-    static walltPayBotInlineURL:string = 'https://t.me/myxukebot?start=inline_'
-    // 收款使用
-    static walltPayBotSKInlineURL:string = 'https://t.me/myxukebot?start=shoukuan_'
-    // 点击收款余额不足的充值返回
-    static walltPayBotChongZhiURL:string = 'https://t.me/myxukebot?start=deposit'
+    static walltPayBotChongZhiURL:string = getConfig().botConfig.WalletUrl+'?start=deposit'
     // 登陆使用
-    static walltPayBotLoginURL:string = 'https://t.me/myxukebot?start=login_'
+    static walltPayBotLoginURL:string = getConfig().botConfig.WalletUrl+'?start=login_'
     // 个人跳转
     static MEURL:string = 'https://t.me/'
-
 }
 
 

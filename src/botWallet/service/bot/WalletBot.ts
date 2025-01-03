@@ -6,9 +6,9 @@ import WalletMessageHandle from './message/WalletMessageHandle'
 import WalletCallbackQueryHandle from "./callbackquery/WalletCallbackQueryHandle";
 import WalletHandleMethod from "../handle/WalletHandleMethod";
 import WalletInnerQueryHandle from "./inlinequery/WalletInnerQueryHandle";
-import WalletHandleZhuanzhangMethod from "../handle/zhuanzhaung/WalletHandleZhuanzhangMethod";
-import WalletHandleShouKuanMethod from "../handle/shoukuan/WalletHandleShouKuanMethod";
-import walletHandleChongzhiMethod from "../handle/chongzhi/WalletHandleChongzhiMethod";
+import WalletHandleZhuanzhangMethod from "../handle/dashbord/zhuanzhaung/WalletHandleZhuanzhangMethod";
+import WalletHandleShouKuanMethod from "../handle/dashbord/shoukuan/WalletHandleShouKuanMethod";
+import walletHandleChongzhiMethod from "../handle/dashbord/chongzhi/WalletHandleChongzhiMethod";
 
 /**
  * 娱乐机器人核心代码

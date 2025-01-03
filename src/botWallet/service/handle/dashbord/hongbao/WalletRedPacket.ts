@@ -2,29 +2,29 @@
  * 红包相关处理
  */
 import {Context} from "telegraf";
-import MessageUtils from "../../../../commons/message/MessageUtils";
-import ButtonUtils from "../../../../commons/button/ButtonUtils";
-import StartWalletEnum from "../../../../type/walletEnums/StartWalletEnum";
-import ButtonCommonMap from "../../../../commons/button/ButtonCommonMap";
-import WalletType from "../../../../type/WalletType";
-import UserModel from "../../../../models/UserModel";
-import CommonEnumsIndex from "../../../../type/CommonEnumsIndex";
-import {addLock, addLockByCtx} from "../../../../config/redislock";
-import {queryRunner} from "../../../../config/database";
-import ContextUtil from "../../../../commons/ContextUtil";
-import RedPacketHtml from "../../../../html/walletHtml/RedPacketHtml";
-import BotHb from "../../../../models/BotHb";
-import WalletController from "../../../controller/WalletController";
-import redis from "../../../../config/redis";
-import BotPaymentModel from "../../../../models/BotPaymentModel";
-import PaymentType from "../../../../type/PaymentType";
-import MessageTipUtils from "../../../../commons/message/MessageTipUtils";
+import MessageUtils from "../../../../../commons/message/MessageUtils";
+import ButtonUtils from "../../../../../commons/button/ButtonUtils";
+import StartWalletEnum from "../../../../../type/walletEnums/StartWalletEnum";
+import ButtonCommonMap from "../../../../../commons/button/ButtonCommonMap";
+import WalletType from "../../../../../type/WalletType";
+import UserModel from "../../../../../models/UserModel";
+import CommonEnumsIndex from "../../../../../type/CommonEnumsIndex";
+import {addLock, addLockByCtx} from "../../../../../config/redislock";
+import {queryRunner} from "../../../../../config/database";
+import ContextUtil from "../../../../../commons/ContextUtil";
+import RedPacketHtml from "../../../../../html/walletHtml/RedPacketHtml";
+import BotHb from "../../../../../models/BotHb";
+import WalletController from "../../../../controller/WalletController";
+import redis from "../../../../../config/redis";
+import BotPaymentModel from "../../../../../models/BotPaymentModel";
+import PaymentType from "../../../../../type/PaymentType";
+import MessageTipUtils from "../../../../../commons/message/MessageTipUtils";
 import moment from "moment";
-import botPaymentModel from "../../../../models/BotPaymentModel";
-import ComputeUtils from "../../../../commons/compute/ComputeUtils";
-import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
-import RandomUtils from "../../../../commons/compute/RandomUtils";
-import {ButtonCallbackType} from "../../../../commons/button/ButtonCallbackType";
+import botPaymentModel from "../../../../../models/BotPaymentModel";
+import ComputeUtils from "../../../../../commons/compute/ComputeUtils";
+import ButtonInnerQueryUtils from "../../../../../commons/button/ButtonInnerQueryUtils";
+import RandomUtils from "../../../../../commons/compute/RandomUtils";
+import {ButtonCallbackType} from "../../../../../commons/button/ButtonCallbackType";
 
 
 

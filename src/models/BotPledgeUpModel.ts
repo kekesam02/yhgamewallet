@@ -17,7 +17,7 @@ import ComputeUtils from "../commons/compute/ComputeUtils";
 import {queryRunner} from "../config/database";
 import BotPaymentModel from "./BotPaymentModel";
 import PaymentType from "../type/PaymentType";
-import ScheduleHandle from "../commons/scheduleHandle/ScheduleHandle";
+import ScheduleHandle from "../commons/schedule/ScheduleHandle";
 import AESUtils from "../commons/AESUtils";
 
 

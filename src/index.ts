@@ -1,15 +1,15 @@
 import process from "node:process";
-import ScheduleHandle from "./commons/ScheduleHandle";
-import LocalCache from "./commons/cache/LocalCache";
+import ScheduleHandle from "./commons/schedule/ScheduleHandle";
 const moment = require('moment-timezone')
 
 require('./commons/expand/ExpandSelectQueryBuilder')
 if (process.env.RUNNING_ENV == 'dev' || process.env.RUNNING_ENV == 'zs') {
     require('./botGame/GameServe')
 }
-if (process.env.RUNNING_ENV != 'zs') {
+if (process.env.RUNNING_ENV == 'fg' ) {
     require('./botWallet/WalletServe')
 }
+
 
 moment.tz?.setDefault('Asia/Shanghai')
 

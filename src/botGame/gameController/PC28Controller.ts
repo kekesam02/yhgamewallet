@@ -22,9 +22,7 @@ import GameCommandHtml from "../../html/gameHtml/GameCommandHtml";
 import UserModel from "../../models/UserModel";
 import {queryRunner} from "../../config/database";
 import {addLockByTgId} from "../../config/redislock";
-import ScheduleHandle from "../../commons/scheduleHandle/ScheduleHandle";
-
-const schedule = require('node-schedule')
+import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
 
 type PC28LotteryType = {
 

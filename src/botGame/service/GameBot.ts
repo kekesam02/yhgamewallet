@@ -4,7 +4,7 @@ import process from 'node:process'
 import {getConfig} from "../../config/config";
 import GameMessageHandle from './GameMessageHandle'
 import GameCallbackHandle from "./GameCallbackHandle";
-import ScheduleHandle from "../../commons/scheduleHandle/ScheduleHandle";
+import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
 
 
 /**

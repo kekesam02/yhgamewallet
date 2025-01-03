@@ -8,11 +8,11 @@ import {ButtonCallbackType} from "../../../commons/button/ButtonCallbackType";
 import WalletMessage from "../../const/WalletMessage";
 import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
 import redis from "../../../config/redis";
-import WalletHandleTixianMethod from "./tixian/WalletHandleTixianMethod";
-import WalletHandleZhuanzhangMethod from "./zhuanzhaung/WalletHandleZhuanzhangMethod";
-import WalletHandleShouKuanMethod from "./shoukuan/WalletHandleShouKuanMethod";
-import WalletHandleHongBaoMethod from "./hongbao/WalletHandleHongBaoMethod";
-import WalletHandleShangduiMethod from "./shangdui/WalletHandleShangduiMethod";
+import WalletHandleTixianMethod from "./dashbord/tixian/WalletHandleTixianMethod";
+import WalletHandleZhuanzhangMethod from "./dashbord/zhuanzhaung/WalletHandleZhuanzhangMethod";
+import WalletHandleShouKuanMethod from "./dashbord/shoukuan/WalletHandleShouKuanMethod";
+import WalletHandleHongBaoMethod from "./dashbord/hongbao/WalletHandleHongBaoMethod";
+import WalletHandleShangduiMethod from "./dashbord/shangdui/WalletHandleShangduiMethod";
 import walletUserCenterMethod from "./usercenter/WalletUserCenterMethod";
 
 /**

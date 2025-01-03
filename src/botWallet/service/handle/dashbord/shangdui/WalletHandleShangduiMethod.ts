@@ -1,7 +1,7 @@
 import type {Context, Telegraf} from "telegraf";
-import redis from "../../../../config/redis";
-import {addLockByTgId} from "../../../../config/redislock";
-import WalletHandleMethod from "../WalletHandleMethod";
+import redis from "../../../../../config/redis";
+import {addLockByTgId} from "../../../../../config/redislock";
+import WalletHandleMethod from "../../WalletHandleMethod";
 
 
 /**

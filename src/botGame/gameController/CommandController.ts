@@ -10,7 +10,7 @@ import GameUserHtml from "../../html/userHtml/GameUserHtml";
 import GameFindController from "./GameFindController";
 import BotPaymentModel from "../../models/BotPaymentModel";
 import userModel from "../../models/UserModel";
-import ScheduleHandle from "../../commons/scheduleHandle/ScheduleHandle";
+import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
 import GamePledgeUpHtml from "../../html/gameHtml/GamePledgeUpHtml";
 import {addLockByCtx} from "../../config/redislock";
 

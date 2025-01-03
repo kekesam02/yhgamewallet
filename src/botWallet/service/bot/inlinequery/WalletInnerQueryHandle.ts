@@ -2,9 +2,9 @@ import {Context, Telegraf} from 'telegraf'
 import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
 import redis from "../../../../config/redis";
 import WalletHandleMethod from "../../handle/WalletHandleMethod";
-import WalletRedPacketInner from "../../handle/hongbao/WalletRedPacketInner";
-import WalletHandleZhuanzhangMethod from "../../handle/zhuanzhaung/WalletHandleZhuanzhangMethod";
-import WalletHandleShouKuanMethod from "../../handle/shoukuan/WalletHandleShouKuanMethod";
+import WalletRedPacketInner from "../../handle/dashbord/hongbao/WalletRedPacketInner";
+import WalletHandleZhuanzhangMethod from "../../handle/dashbord/zhuanzhaung/WalletHandleZhuanzhangMethod";
+import WalletHandleShouKuanMethod from "../../handle/dashbord/shoukuan/WalletHandleShouKuanMethod";
 import WalletController from "../../../controller/WalletController";
 import WalletConfig from "../../../WalletConfig";
 

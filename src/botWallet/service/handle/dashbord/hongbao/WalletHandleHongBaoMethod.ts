@@ -1,13 +1,13 @@
 import type {Context, Telegraf} from "telegraf";
-import redis from "../../../../config/redis";
+import redis from "../../../../../config/redis";
 import WalletRedPacket from "./WalletRedPacket";
-import WalletHandleMethod from "../WalletHandleMethod";
-import UserModel from "../../../../models/UserModel";
-import MessageUtils from "../../../../commons/message/MessageUtils";
-import RandomUtils from "../../../../commons/compute/RandomUtils";
-import WalletType from "../../../../type/WalletType";
-import BotHb from "../../../../models/BotHb";
-import RedPacketHtml from "../../../../html/walletHtml/RedPacketHtml";
+import WalletHandleMethod from "../../WalletHandleMethod";
+import UserModel from "../../../../../models/UserModel";
+import MessageUtils from "../../../../../commons/message/MessageUtils";
+import RandomUtils from "../../../../../commons/compute/RandomUtils";
+import WalletType from "../../../../../type/WalletType";
+import BotHb from "../../../../../models/BotHb";
+import RedPacketHtml from "../../../../../html/walletHtml/RedPacketHtml";
 
 
 /**

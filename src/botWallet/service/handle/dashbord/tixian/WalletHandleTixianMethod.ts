@@ -1,17 +1,17 @@
 import type {Context, Telegraf} from "telegraf";
-import WalletBotHtml from '../../../../html/walletHtml/WalletBotHtml'
-import AESUtils from "../../../../commons/AESUtils";
-import UserModel from "../../../../models/UserModel";
-import WalletController from "../../../controller/WalletController";
-import BotWithdrawalAddrModel from "../../../../models/BotWithdrawalAddrModel";
-import redis from "../../../../config/redis";
-import BotPaymentModel from "../../../../models/BotPaymentModel";
-import {addLockByTgId} from "../../../../config/redislock";
-import DateFormatUtils from "../../../../commons/date/DateFormatUtils";
-import PaymentTypeEnum from "../../../../type/PaymentTypeEnum";
-import WalletType from "../../../../type/WalletType";
-import {queryRunner} from "../../../../config/database";
-import WalletHandleMethod from "../WalletHandleMethod";
+import WalletBotHtml from '../../../../../html/walletHtml/WalletBotHtml'
+import AESUtils from "../../../../../commons/AESUtils";
+import UserModel from "../../../../../models/UserModel";
+import WalletController from "../../../../controller/WalletController";
+import BotWithdrawalAddrModel from "../../../../../models/BotWithdrawalAddrModel";
+import redis from "../../../../../config/redis";
+import BotPaymentModel from "../../../../../models/BotPaymentModel";
+import {addLockByTgId} from "../../../../../config/redislock";
+import DateFormatUtils from "../../../../../commons/date/DateFormatUtils";
+import PaymentTypeEnum from "../../../../../type/PaymentTypeEnum";
+import WalletType from "../../../../../type/WalletType";
+import {queryRunner} from "../../../../../config/database";
+import WalletHandleMethod from "../../WalletHandleMethod";
 
 
 /**
@@ -270,7 +270,7 @@ class WalletHandleTixianMethod {
                         passNickname: ctx.botInfo.first_name,
                         passTime: passTime,
                         status:1,// 已完成
-                        description:"提现一笔金额【"+botPayment.paymentAmount+"】已完成，审核人：<a href='tg://user?id="+ctx.botInfo.id+"'>"+ctx.botInfo.username+"</a>"
+                        description:"提现一笔金额【"+botPayment.paymentAmount+"】已完成"
                     })
                     .where("id=:id", {id: botPayment.id})
                     .execute()
@@ -340,7 +340,7 @@ class WalletHandleTixianMethod {
                         passNickname: ctx.botInfo.first_name,
                         passTime: refuseTime,
                         status:2,// 被拒绝
-                        description:"提现一笔金额【"+botPayment.paymentAmount+"】被拒，审核人：<a href='tg://user?id="+ctx.botInfo.id+"'>"+ctx.botInfo.username+"</a>"
+                        description:"提现一笔金额【"+botPayment.paymentAmount+"】被拒"
                     })
 
                     const addr = AESUtils.decodeAddr(botPayment.paymentTypeNumber) || ''

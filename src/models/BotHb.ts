@@ -14,7 +14,7 @@ import CommonEnumsIndex from "../type/CommonEnumsIndex";
 import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
 import RedisHandle from "../commons/redis/RedisHandle";
 import MessageUtils from "../commons/message/MessageUtils";
-import WalletRedPacket from "../botWallet/service/handle/hongbao/WalletRedPacket";
+import WalletRedPacket from "../botWallet/service/handle/dashbord/hongbao/WalletRedPacket";
 import RandomUtils from "../commons/compute/RandomUtils";
 import {RedPackConditionJsonType} from "../type/WalletType/RedPackType";
 import TimeUtils from "../commons/date/TimeUtils";

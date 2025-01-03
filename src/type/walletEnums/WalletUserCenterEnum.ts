@@ -6,7 +6,7 @@ enum WalletUserCenterEnum {
     /**
      * 我的账单
      */
-    BACCOUNT = 'baccount_btn',
+    BACCOUNT = 'myaccount_all_1_0_0',
 
     /**
      * 提币历史
