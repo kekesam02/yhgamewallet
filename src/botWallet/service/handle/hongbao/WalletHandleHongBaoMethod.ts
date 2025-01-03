@@ -2,6 +2,9 @@ import type {Context, Telegraf} from "telegraf";
 import redis from "../../../../config/redis";
 import WalletRedPacket from "./WalletRedPacket";
 import WalletHandleMethod from "../WalletHandleMethod";
+import UserModel from "../../../../models/UserModel";
+import MessageUtils from "../../../../commons/message/MessageUtils";
+import RandomUtils from "../../../../commons/compute/RandomUtils";
 
 
 /**
@@ -55,6 +58,79 @@ class WalletHandleHongBaoMethod {
             // 红包流水金额处理
             return new WalletRedPacket(ctx).setWaterMoney(text, currentop.split('_')[1])
         }
+    }
+
+    /**
+     * 输入文字快速的发放红包
+     *      true: 快速发放红包命令判定成功
+     *      false: 快速发放红包命令判定失败
+     */
+    public static quickSendPacket = async (text: string, tgId: number, ctx: Context) => {
+        if (text.indexOf('hb') < 0) {
+            return false
+        }
+        new RandomUtils().randomAllocate(10, 10)
+        return true
+        // try {
+        //     let arr = text.split(' ')
+        //     if (arr[1] != 'hb') {
+        //         return false
+        //     }
+        //
+        //     /**
+        //      * 指定用户领取红包
+        //      * 指令为 @大在签约 hb 2
+        //      * 表示 给用户 大在签约 发放了一个金额为2USDT的红包
+        //      */
+        //     if (arr[0].startsWith('@')) {
+        //         let userName = arr[0].replaceAll('@', '')
+        //         if (arr.length > 3) {
+        //             return false
+        //         }
+        //         if (arr[1] != 'hb') {
+        //             return false
+        //         }
+        //         // 红包金额
+        //         let money = arr[2]
+        //         // 红包数量
+        //         let num = 1
+        //         if (isNaN(Number(money))) {
+        //             return false
+        //         }
+        //         let user = UserModel
+        //             .createQueryBuilder()
+        //             .where('user_name = :userName', {
+        //                 userName: userName
+        //             })
+        //             .getOne()
+        //         if (!user) {
+        //             await new MessageUtils().sendTextReply(ctx, '未找到该用户')
+        //             return true
+        //         }
+        //
+        //         // 开始发放指定用户红包
+        //
+        //     }
+        //
+        //
+        //     if (arr[0] != 'hb') {
+        //         if (arr.length > 3) {
+        //             return false
+        //         }
+        //         // 红包金额
+        //         let money = arr[1]
+        //         // 红包数量
+        //         let num = arr[2]? arr[2]: 1
+        //         if (isNaN(Number(money))) {
+        //             return false
+        //         }
+        //
+        //         // 开始发放红包、
+        //     }
+        //     return false
+        // } catch (err) {
+        //     return false
+        // }
     }
 }
 

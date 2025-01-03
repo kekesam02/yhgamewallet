@@ -186,6 +186,16 @@ class BotHb extends BaseEntity {
     conditonsyzmJson: string
 
     /**
+     * 指定用户领取红包
+     *      当指定用户之后红包数量肯定为1的
+     *      一次领取所有红包
+     */
+    @Column({
+        name: 'specify_user'
+    })
+    specifyUser: string
+
+    /**
      * 创建时间
      */
     @Column({
