@@ -14,6 +14,7 @@ import botPaymentModel from "../../../../../models/BotPaymentModel";
 import BotPaymentModel from "../../../../../models/BotPaymentModel";
 import DateFormatUtils from "../../../../../commons/date/DateFormatUtils";
 import moment from "moment/moment";
+import WalletType from "../../../../../type/WalletType";
 
 /**
  * 公共方法处理
@@ -47,10 +48,10 @@ class WalletMyAccountMethod {
         var botPaymentModels = botPaymentModelPage.records;
         html += "🚩 总成交"+botPaymentModelPage.total+"笔\n"
         for (let i = 0; i < botPaymentModels.length; i++) {
-            html +="➖➖➖➖➖➖"+((pageNo-1)*pageSize+i + 1)+"➖➖➖➖➖➖➖"
+            html +="\n➖➖➖➖➖➖"+((pageNo-1)*pageSize+i + 1)+"➖➖➖➖➖➖➖"
             html +="\n类型：" + botPaymentModels[i].paymentTypeName
-            html +="\n金额：" + (botPaymentModels[i].operateType==1?"收入":"支出")+botPaymentModels[i].paymentAmount+' '+botPaymentModels[i].walletType.toString() == '1'?'USDT':'TRX'
-            html +="\n"+(botPaymentModels[i].operateType==1?"收入":"支出")+"之前余额：" + botPaymentModels[i].balanceAfter
+            html +="\n金额：" + (botPaymentModels[i].operateType==1?"收入":"支出")+botPaymentModels[i].paymentAmount+' '+botPaymentModels[i].walletType == WalletType.USDT?'USDT':'TRX'
+            html +="\n"+(botPaymentModels[i].operateType==1?"收入":"支出")+"之前余额：" + botPaymentModels[i].balanceBefore
             html +="\n"+(botPaymentModels[i].operateType==1?"收入":"支出")+"之后余额：" + botPaymentModels[i].balanceAfter
             html +="\n申请时间：" + moment(botPaymentModels[i].applyTime).format('yyyy-MM-DD HH:mm')
             html +="\n通过日期：" + moment(botPaymentModels[i].passTime).format('yyyy-MM-DD HH:mm')

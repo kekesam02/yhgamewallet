@@ -182,7 +182,7 @@ class WalletHandleZhuanzhangMethod {
                         balanceAfter: realMoney + '',
                         paymentType: PaymentTypeEnum.YHZZ.value,
                         paymentTypeName: PaymentTypeEnum.YHZZ.name,
-                        operateType: 1,
+                        operateType: 0, // 支出
                         paymentTypeNumber: 'zk' + orderId,
                         paymentAmount: zhuanMoney + '',
                         paymentRealAmount: zhuanMoney + '',
@@ -285,7 +285,7 @@ class WalletHandleZhuanzhangMethod {
                 balanceAfter: realMoney + '',
                 paymentType: PaymentTypeEnum.YHZZ.value,
                 paymentTypeName: PaymentTypeEnum.YHZZ.name,
-                operateType: 1,
+                operateType: 0, // 支出
                 paymentTypeNumber: 'zk' + orderId,
                 paymentAmount: money+ '' ,
                 paymentRealAmount: money+ '',
@@ -347,7 +347,6 @@ class WalletHandleZhuanzhangMethod {
                         await WalletHandleMethod.clearCacheRelation(ctx)
                         // 发送消息
                         await ctx.replyWithHTML("你已成功解锁该笔转账!")
-
                         // 同时改变按钮的状态为收款
                         await this.startZhuanZhangPwdUnLock(ctx,tgId + '_' + money + '_' + inlineMessageId)
                     } else {
@@ -476,7 +475,7 @@ class WalletHandleZhuanzhangMethod {
                     balanceAfter: afterAmount + '',
                     paymentType: PaymentTypeEnum.YHSK.value,
                     paymentTypeName: PaymentTypeEnum.YHSK.name,
-                    operateType: 1,
+                    operateType: 1, // 收入
                     paymentTypeNumber: 'zk' + orderId,
                     paymentAmount: zhuanMoney + '',
                     paymentRealAmount: zhuanMoney + '',
