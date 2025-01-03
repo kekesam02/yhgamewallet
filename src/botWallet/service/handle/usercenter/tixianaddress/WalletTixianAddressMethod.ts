@@ -40,7 +40,7 @@ class WalletTixianAddressMethod {
         // 删除上一次的消息
         await walletUserCenterMethod.removeMessage(ctx)
         // 提示当前的信息
-        await ctx.replyWithHTML("👜 您的提现地址是：\n<code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"（点击可复制）</code>",walletUserCenterController.createUpdateTxAddrBtn())
+        await ctx.replyWithHTML("👜 您的提现地址是：\n<code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"</code>（点击可复制）",walletUserCenterController.createUpdateTxAddrBtn())
     }
 
 
@@ -58,7 +58,7 @@ class WalletTixianAddressMethod {
      * @param ctx
      */
     public static addtxaddrtx = async (text: string, tgId: number, ctx: Context) => {
-       addLockByTgId(['addtxaddr_lock_'+tgId],async ()=>{
+       await addLockByTgId(['addtxaddr_lock_'+tgId+''],async ()=>{
            // 查询用户信息
            let userId = AESUtils.encodeUserId(tgId?.toString())
            var username = ctx.message?.from?.username || ''

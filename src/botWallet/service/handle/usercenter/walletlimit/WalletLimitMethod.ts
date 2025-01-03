@@ -61,7 +61,7 @@ class WalletLimitMethod {
      * @param ctx
      */
     public static updateUserLimiter = async(text: string, tgId: number, ctx: Context)=>{
-        addLockByTgId(['xemm_lock_'+tgId],async()=>{
+        await addLockByTgId(['xemm_lock_'+tgId+''],async()=>{
             if(!/^[1-9]\d*(\.\d+)?$/.test(text)){
                 await ctx.replyWithHTML("⚠️ 限额必须是数字，并且大于0")
                 return

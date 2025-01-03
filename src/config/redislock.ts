@@ -41,7 +41,6 @@ const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>, efn: 
             await redlock.unlock(lock)
         }
     } catch (e){
-        console.log('锁出错了----->', e)
         await efn()
     }
 }

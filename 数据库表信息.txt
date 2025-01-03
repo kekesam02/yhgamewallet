@@ -1,0 +1,63 @@
+
+spinach_robot_dice：8085
+spinach_robot_pay：8086
+spinach_robot_ruoyi：8087
+spinach_robot_wallet：8089
+spinach_robot_zong：8088
+ruoyi-admin：8080
+ruoyi-ui：1024
+
+OnePalace_Gamebot
+7924047798:AAFl1FZDK-irPQK25tbng9M1NeC1jw_6LIo
+
+
+
+项目交接
+	bot_exchange：闪兑
+		id: 用于闪兑、
+	
+	bot_game：	正在进行的游戏表
+		game_state：
+			1: 	机器人会往对应群里发送信息
+			0: 	不会往群里发送消息
+		game_type: 	
+			游戏类型
+	bot_hb:	红包表
+		在钱包机器人发送红包会用到这个表
+	bot_hblq： 红包领取表
+	bot_invite_link:	邀请链接表
+	bot_invite_user： 邀请表
+	bot_key: 这个表现在没用、多半不会用到
+	bot_kyhuodong:	开业活动、开业豪礼、首充返利这些信息
+	bot_log:	若依管理日志表
+	bot_monitor_user：	
+		查询U机器人的用户地址
+	bot_odds:
+		赔率和反水比例表
+		odds: 赔率
+		zd：最小下注金额
+		zg：最大下注限制
+	bot_pledge_up:
+		 上押表、用户下注记录、谁下了哪一期
+	bot_round： 回和表
+	bot_sensitive_words: 群管机器人敏感词添加
+	bot_transfer_accounts:	转账表（一直都没用到、没啥用）
+	bot_tron_addr:	所有的充值地址
+		add：加密后的波场地址
+		uses: 
+			1: 已经有用户使用了
+			0: 没有用户使用
+	bot_user: 用户表
+		ya_num：邀请返利比例、默认返回的是0.2%
+		choubashu_time、choubashu_num：暂时没用
+	bot_withdrawal_addr: 用户提现地址、和钱包那边对应
+
+	m  	开头的四个表和扫块对应
+	m_coin_recharge
+		amount	to_address  from_address
+		如果充值成功通知用户、添加用户余额
+
+	m_addr: 暂时没用
+	m_coin_recharge_addr_poll：扫块就是扫的这里面的地址、查U机器人
+	m_currency_block:	块高
+		每次扫块的时候会更新 current_height
