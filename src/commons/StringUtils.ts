@@ -11,6 +11,15 @@ class StringUtils {
     public isStartWithNum = (numStr: string): boolean => {
         return /^\d/.test(numStr)
     }
+
+    /**
+     * 判断 numStr 是否是纯数字
+     * @param numStr
+     * @return true: 纯数字
+     */
+    public isNum = (numStr: string): boolean => {
+        return /^\d+$/.test(numStr)
+    }
 }
 
 
