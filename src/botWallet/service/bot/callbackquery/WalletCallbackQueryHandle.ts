@@ -70,6 +70,8 @@ class WalletCallbackQueryHandle {
             WalletTixianAddressMethod.updateTxAddress(ctx)
         }else if (callbackStr.startsWith("myaccount_")){// 我的账单搜索和分页
             WalletMyAccountMethod.searchFilterAccount(ctx,callbackStr)
+        }else if (callbackStr.startsWith("mytb_")){// 我的账单搜索和分页
+            WalletTiBiHistoryMethod.searchFilterTb(ctx,callbackStr)
         } else{
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
@@ -79,7 +81,7 @@ class WalletCallbackQueryHandle {
                     break
                 // 提币历史
                 case WalletUserCenterEnum.TBLS:
-                    WalletTiBiHistoryMethod.startTbls(ctx)
+                    WalletTiBiHistoryMethod.startTbls(ctx,callbackStr)
                     break
                 // 彩金转化
                 case WalletUserCenterEnum.CTRXZH:
