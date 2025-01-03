@@ -3,6 +3,7 @@ import ButtonCommonMap from "../button/ButtonCommonMap";
 import buttonUtils from "../button/ButtonUtils";
 import WalletController from "../../botWallet/controller/WalletController";
 import ButtonUtils from "../button/ButtonUtils";
+import MessageUtils from "./MessageUtils";
 
 /**
  * 常用的一些 message 提示
@@ -30,6 +31,14 @@ class MessageTipUtils {
      */
     public timeOut = (ctx: Context) => {
         return ctx.reply('亲，操作慢点，休息一会在操作!')
+    }
+
+    /**
+     * 当前用户未找到
+     * @param ctx
+     */
+    public userNotTips = (ctx: Context) => {
+        return new MessageUtils().sendPopMessage(ctx, '该用户未找到')
     }
 
     /**
@@ -72,6 +81,14 @@ class MessageTipUtils {
      */
     public maxLengthTip = (ctx: Context, descTitle: string = '红包', maxLength = 999) => {
         return ctx.replyWithHTML(`⚠️温馨提示：${descTitle}最大数量为${maxLength}！`)
+    }
+
+    /**
+     * 红包失效提示
+     * @param ctx
+     */
+    public redPacketExpired = (ctx: Context) => {
+        return new MessageUtils().sendPopMessage(ctx, '来晚一步，当前红包已过期')
     }
 }
 

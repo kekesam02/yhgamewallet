@@ -25,6 +25,15 @@ class TimeUtils {
     /**
      * 判断当前日期是否是本月
      */
+    public getIsDay30 = (time: string) => {
+        let curr = moment(time)
+        let { startTime, endTime } = this.getDay30Time()
+        return curr.isAfter(startTime) && curr.isBefore(endTime);
+    }
+
+    /**
+     * 判断当前日期是否是本月
+     */
     public getIsMonth = (time: string) => {
         let curr = moment(time)
         let { startTime, endTime } = this.getMonthTime()
@@ -65,10 +74,23 @@ class TimeUtils {
     /**
      * 获取一个月内的开始时间和结束时间
      */
-    public getMonthTime = () => {
+    public getDay30Time = () => {
         let start = moment().subtract(29, 'days').format('YYYY-MM-DD 00:00:00')
         // 今日结束日期
         let end = moment().format('YYYY-MM-DD 23:59:59')
+        return {
+            startTime: start,
+            endTime: end
+        }
+    }
+
+    /**
+     * 获取一个月内的开始时间和结束时间
+     */
+    public getMonthTime = () => {
+        let start = moment().startOf("month").format('YYYY-MM-DD 00:00:00')
+        // 本月结束日期
+        let end = moment().endOf("month")
         return {
             startTime: start,
             endTime: end

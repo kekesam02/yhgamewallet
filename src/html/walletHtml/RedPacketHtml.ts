@@ -43,7 +43,12 @@ class RedPacketHtml {
         if (payment.length > 0) {
             html = `🧧 ${user.userName} 发送了一个红包${this.N
             }💵 总金额: ${botHb.lqMoney}/${botHb.money} ${walletStr}${this.N
-            }💰 剩余: ${botHb.num - botHb.receiveNum}/${botHb.num}${this.N}`
+            }💰 剩余: ${botHb.num - botHb.receiveNum}/${botHb.num}`
+            html += this.createReceiveConditionHtml(botHb)
+
+            if (payment.length > 0) {
+                html += this.N
+            }
             payment.forEach(item => {
                 html += `${this.N}-- ${item.username} 已领取 ${item.paymentAmount} ${walletStr}`
             })
@@ -51,9 +56,8 @@ class RedPacketHtml {
             html = `🧧 ${user.userName} 发送了一个红包${this.N
             }💵 总金额: ${botHb.money} ${new CommonEnumsIndex().getWalletTypeStr(botHb.walletType)}${this.N
             }💰 剩余: ${botHb.num}/${botHb.num}`
+            html += this.createReceiveConditionHtml(botHb)
         }
-
-        html += this.createReceiveConditionHtml(botHb)
         if (botHb.remark && botHb.remark != '' &&  botHb.remark.trim() != '') {
             html += `${this.N}${this.N}备注: ${botHb.remark}`
         }
@@ -92,15 +96,16 @@ class RedPacketHtml {
      */
     private createReceiveConditionHtml = (botHb: BotHb) => {
         let html = ``
+        console.log('会员信息 ', botHb)
         // 会员红包
         if (botHb.conditonshy == 1) {
             html = `${this.N}\uD83D\uDCB0 仅限 Premium会员领取`
         }
         // 流水红包
         if (botHb.conditonsls == 1 && botHb.getConditionJson()) {
-            html = `${this.N}\uD83D\uDCA6 流水要求${this.N
+            html += `${this.N}\uD83D\uDCA6 流水要求${this.N
             }流水时间: ${this.getWaterTime(botHb)}${this.N
-            }流水金额: ${botHb.getConditionJson()?.money}`
+            }流水金额: ${botHb.getConditionJson()?.money} ${new CommonEnumsIndex().getWalletTypeStr(botHb.walletType)}`
         }
         return html
     }

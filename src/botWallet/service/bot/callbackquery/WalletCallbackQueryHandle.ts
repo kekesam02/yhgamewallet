@@ -50,6 +50,7 @@ class WalletCallbackQueryHandle {
         console.log('callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
+        console.log('回掉数据', callbackStr)
         // 计算器callback
         if (callbackStr.startsWith('num_') || callbackStr === 'delete' || callbackStr === 'clear') {
             WalletHandleMethod.startInputPassword(ctx)
@@ -162,9 +163,12 @@ class WalletCallbackQueryHandle {
                 // 红包 - 开启/关闭会员红包功能
                 case StartWalletEnum.HONGBAO_VIP_ + callbackStr.replaceAll(StartWalletEnum.HONGBAO_VIP_, ''):
                     return new WalletRedPacket(ctx).setVipVeri(callbackStr.replaceAll(StartWalletEnum.HONGBAO_VIP_, ''))
+                // 红包 - 点击验证码数字触发
+                case StartWalletEnum.HONGBAO_VERIFY_BTN + callbackStr.replaceAll(StartWalletEnum.HONGBAO_VERIFY_BTN, ''):
+                    return new WalletRedPacket(ctx).verifyCode(callbackStr.replaceAll(StartWalletEnum.HONGBAO_VERIFY_BTN, ''))
                 // 红包 - 开启/关闭 验证码验证功能
-                case StartWalletEnum.HONGBAO_VERIFI + callbackStr.replaceAll(StartWalletEnum.HONGBAO_VERIFI, ''):
-                    return new WalletRedPacket(ctx).setCodeVeri(callbackStr.replaceAll(StartWalletEnum.HONGBAO_VERIFI, ''))
+                case StartWalletEnum.HONGBAO_VERIFY + callbackStr.replaceAll(StartWalletEnum.HONGBAO_VERIFY, ''):
+                    return new WalletRedPacket(ctx).setCodeVeri(callbackStr.replaceAll(StartWalletEnum.HONGBAO_VERIFY, ''))
                 // 红包 - 开启/关闭 流水验证功能
                 case StartWalletEnum.HONGBAO_WATER + callbackStr.replaceAll(StartWalletEnum.HONGBAO_WATER, ''):
                     return new WalletRedPacket(ctx).startWaterVeri(callbackStr.replaceAll(StartWalletEnum.HONGBAO_WATER, ''))

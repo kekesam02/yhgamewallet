@@ -10,14 +10,12 @@ import ComputeUtils from "../commons/compute/ComputeUtils";
 import TimeUtils from "../commons/date/TimeUtils";
 import PaymentType from "../type/PaymentType";
 import UserModel from "./UserModel";
-import userModel from "./UserModel";
 import CommonEnumsIndex from "../type/CommonEnumsIndex";
 import OrderUtils from "../commons/OrderUtils";
 import {DefectListType} from "../type/BotGameType/BotGameType";
 import GameDefectHtml from "../html/gameHtml/GameDefectHtml";
 import MessageUtils from "../commons/message/MessageUtils";
-import BotPledgeUpModel from "./BotPledgeUpModel";
-import database, {queryRunner} from "../config/database";
+import {queryRunner} from "../config/database";
 import ScheduleHandle from "../commons/ScheduleHandle";
 
 /**
@@ -282,7 +280,7 @@ class BotPaymentModel extends BaseEntity {
 
     /**
      * 获取用户流水分类列表
-     *      周流水、日流水、总流水之类的
+     *      周流水、日流水、月流水、总流水之类的
      */
     public getUserWaterClass = async (ctx: Context) => {
         // trx 当前汇率
@@ -291,7 +289,7 @@ class BotPaymentModel extends BaseEntity {
             PaymentType.SZ
         ])
         return this.tidyPaymentList(
-            gameType,
+            gameType ?? GameTypeEnum.PC28DI,
             resultList,
             (waterData: ComputeUtils, item: BotPaymentModel) => {
                 if (item.walletType === WalletType.TRX) {
@@ -369,7 +367,7 @@ class BotPaymentModel extends BaseEntity {
         ],
         pageSize: number = 0
     ): Promise<{
-        gameType: GameTypeEnum,
+        gameType?: GameTypeEnum,
         resultList: Array<BotPaymentModel>
     }> => {
         let groupId = ContextUtil.getGroupId(ctx)
@@ -403,7 +401,7 @@ class BotPaymentModel extends BaseEntity {
         }
         let result = await query.getMany()
         return {
-            gameType: gameModel!.gameType,
+            gameType: gameModel?.gameType,
             resultList: result
         }
     }
@@ -508,6 +506,14 @@ class BotPaymentModel extends BaseEntity {
         let totalWater = new ComputeUtils(0)
         // 总支付列表
         let totalList: Array<BotPaymentModel> = []
+        // 近30天流水
+        let day30Water = new ComputeUtils(0)
+        // 近30天 数据列表
+        let day30List: Array<BotPaymentModel> = []
+        // 月流水
+        let monthWater = new ComputeUtils(0)
+        // 月 数据列表
+        let monthList: Array<BotPaymentModel> = []
         // 周流水
         let weekWater = new ComputeUtils(0)
         // 一周内支付数据列表
@@ -528,6 +534,12 @@ class BotPaymentModel extends BaseEntity {
                     if (timeUtils.getIsDay(item.createTime)) {
                         dayWater = wrap(weekWater, item)
                     }
+                    if (timeUtils.getIsMonth(item.createTime)) {
+                        monthWater = wrap(monthWater, item)
+                    }
+                    if (timeUtils.getIsDay30(item.createTime)) {
+                        day30Water = wrap(day30Water, item)
+                    }
                 }
             } else {
                 if (new ComputeUtils(item.paymentAmount).comparedTo(0) > 0) {
@@ -538,6 +550,12 @@ class BotPaymentModel extends BaseEntity {
                     if (timeUtils.getIsDay(item.createTime)) {
                         dayWater = wrap(dayWater, item)
                     }
+                    if (timeUtils.getIsMonth(item.createTime)) {
+                        monthWater = wrap(monthWater, item)
+                    }
+                    if (timeUtils.getIsDay30(item.createTime)) {
+                        day30Water = wrap(day30Water, item)
+                    }
                 }
             }
             totalList.push(item)
@@ -547,11 +565,21 @@ class BotPaymentModel extends BaseEntity {
             if (timeUtils.getIsDay(item.createTime)) {
                 dayList.push(item)
             }
+            if (timeUtils.getIsMonth(item.createTime)) {
+                monthList.push(item)
+            }
+            if (timeUtils.getIsDay30(item.createTime)) {
+                day30List.push(item)
+            }
         })
         return {
             gameType: gameType,
             totalWater: totalWater,
             totalList: totalList,
+            day30Water: day30Water,
+            day30List: day30List,
+            monthWater: monthWater,
+            monthList: monthList,
             weekWater: weekWater,
             weekList: weekList,
             dayWater: dayWater,

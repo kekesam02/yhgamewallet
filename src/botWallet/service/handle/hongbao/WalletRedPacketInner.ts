@@ -1,6 +1,7 @@
 import BotHb from "../../../../models/BotHb";
 import {Context} from "telegraf";
 import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
+import StartWalletEnum from "../../../../type/walletEnums/StartWalletEnum";
 import ComputeUtils from "../../../../commons/compute/ComputeUtils";
 import RedPacketHtml from "../../../../html/walletHtml/RedPacketHtml";
 import BotPaymentModel from "../../../../models/BotPaymentModel";
@@ -8,6 +9,9 @@ import PaymentType from "../../../../type/PaymentType";
 import UserModel from "../../../../models/UserModel";
 import WalletController from "../../../controller/WalletController";
 import CommonEnumsIndex from "../../../../type/CommonEnumsIndex";
+import ButtonUtils from "../../../../commons/button/ButtonUtils";
+import RandomUtils from "../../../../commons/compute/RandomUtils";
+import {ButtonCallbackType} from "../../../../commons/button/ButtonCallbackType";
 
 /**
  * 红包内连消息处理
@@ -31,10 +35,6 @@ class WalletRedPacketInner {
         if (!user) {
             return
         }
-        console.log('当前红包类型', botHb.hbType)
-        botHb.createJson()
-        botHb.hbType = 1
-        botHb.createJson()
         await ctx.answerInlineQuery(
             ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                 id: queryId,
@@ -44,11 +44,42 @@ class WalletRedPacketInner {
                     message_text: new RedPacketHtml().getSendHtml(user, botHb, paymentList)
                 },
                 reply_markup: {
-                    inline_keyboard: WalletController.receiveHbBtn(botHb.hbId).reply_markup.inline_keyboard
+                    inline_keyboard: botHb.conditonsyzm == 1
+                        ? this.createVerifyMessage(hbId, botHb).reply_markup.inline_keyboard
+                        : WalletController.receiveHbBtn(botHb.hbId).reply_markup.inline_keyboard
                 }
             })
         )
     }
+
+    /**
+     * 随机生成5个验证码按钮
+     */
+    public createVerifyMessage = (hbId: string, botHb: BotHb) => {
+        let index = new RandomUtils().getRandomInt(0, 5)
+        let arr: Array<Array<ButtonCallbackType>> = [[], []]
+        let numList = new RandomUtils().getRandomIntList(0, 5, 6)
+        for (let i = 0; i < numList.length; i++) {
+            let item = numList[i]
+            if (i == index) {
+                if (i < 3) {
+                    arr[0].push({ text: `${botHb.getVerifyCodeData().sum}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + hbId + '_' + botHb.getVerifyCodeData().sum})
+                } else {
+                    arr[1].push({ text: `${botHb.getVerifyCodeData().sum}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + hbId + '_' + botHb.getVerifyCodeData().sum})
+                }
+                continue
+            }
+            console.log('进入', i)
+            if (i < 3) {
+                arr[0].push({ text: `${item}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + hbId + '_' + item})
+            } else {
+                arr[1].push({ text: `${item}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + hbId + '_' + item})
+            }
+        }
+        return new ButtonUtils().createCallbackBtn(arr)
+    }
+
+
 }
 
 

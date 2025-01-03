@@ -25,6 +25,18 @@ class RandomUtils {
     }
 
     /**
+     * 随机生成不重复的数组
+     */
+    public getRandomIntList = (min: number, max: number, count: number) => {
+        let arr = new Set()
+        while (arr.size < count) {
+            const num = Math.floor(Math.random() * (max - min + 1)) + min
+            arr.add(num)
+        }
+        return Array.from(arr)
+    }
+
+    /**
      * 将 金额(money) 平均分给 count 个人
      */
     public averageAllocate = (totalMoney: number, count: number): Array<number> => {

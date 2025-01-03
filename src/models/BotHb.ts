@@ -183,7 +183,7 @@ class BotHb extends BaseEntity {
         name: 'conditonsyzm_json',
         default: ''
     })
-    conditonsyzm_json: string
+    conditonsyzmJson: string
 
     /**
      * 创建时间
@@ -364,6 +364,30 @@ class BotHb extends BaseEntity {
 
 
     // 一些常用的计算方法
+
+    /**
+     * 生成验证码验证的json数据
+     */
+    public createVerifyCodeData = () => {
+        let a = new RandomUtils().getRandomInt(1, 9)
+        let b = new RandomUtils().getRandomInt(1, 9)
+        let sum = a + b
+        console.log('生成的验证', a, b, sum)
+        this.conditonsyzmJson = `${a},${b},${sum}`
+    }
+
+    /**
+     * 获取红包验证码数字
+     */
+    public getVerifyCodeData = () => {
+        let json = this.conditonsyzmJson.split(',')
+        return {
+            a: json[0],
+            b: json[1],
+            sum: json[2]
+        }
+    }
+
     /**
      * 根据红包金额和红包类型生成分化json
      */
@@ -400,17 +424,19 @@ class BotHb extends BaseEntity {
      * 获取红包流水的领取条件
      */
     public getConditionJson = (): RedPackConditionJsonType | null => {
-        if (this.conditonsls == 1) {
-            let result: RedPackConditionJsonType = {
-                time: 0,
-                money: ''
+        try {
+            if (this.conditonsls == 1) {
+                let result: RedPackConditionJsonType = {
+                    time: 0,
+                    money: ''
+                }
+                let json = JSON.parse(this.conditionsJson)
+                result.time = json['time']
+                result.money = json['money']
+                return result
             }
-            console.log('获取到的护具', this.conditionsJson)
-            let json = JSON.parse(this.conditionsJson)
-            result.time = json['time']
-            result.money = json['money']
-            console.log('返回结果 ', result)
-            return result
+        } catch (err) {
+            return null
         }
         return null
     }

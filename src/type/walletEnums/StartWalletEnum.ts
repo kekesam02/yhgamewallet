@@ -94,7 +94,7 @@ enum StartWalletEnum {
      *      _hbId_0 关闭
      *      _hbId_1 开启
      */
-    HONGBAO_VERIFI = 'hongbaoVerifi_',
+    HONGBAO_VERIFY = 'hongbaoVerify_',
 
     /**
      * 红包 - 流水红包 开启/关闭 流水红包功能
@@ -105,6 +105,13 @@ enum StartWalletEnum {
 
     // 流水红包时间类型
     HONGBAO_WATER_TIME = 'hongbaoWaterTime_',
+
+    /**
+     * 红包 - 点击验证码btn触发
+     *      _hbId_0 关闭
+     *      _hbId_1 开启
+     */
+    HONGBAO_VERIFY_BTN = 'hongbaoVerifyBtn_',
 
     /**
      * 闪兑

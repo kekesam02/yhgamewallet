@@ -83,6 +83,31 @@ class BotOddsStorage {
                     return new ComputeUtils(money).multiplied(1).toString()
                 }
             }
+
+            if (form != '杂子') {
+                // 极大极小正常计算赔率
+                if (botOdds.name == '极大' || botOdds.name == '极小') {
+                    return new ComputeUtils(money).multiplied(1.6).toString()
+                }
+
+                // 不是对子顺子豹子的话赔率为1
+                if (
+                    botOdds.name != '对子'
+                    && botOdds.name != '顺子'
+                    && botOdds.name != '豹子'
+                ) {
+                    // 遇13/14大/小/单/双赔 1.6
+                    if (
+                        botOdds.name == '单'
+                        || botOdds.name == '双'
+                        || botOdds.name == '大'
+                        || botOdds.name == '小'
+                    ) {
+                        return new ComputeUtils(money).multiplied(1.6).toString()
+                    }
+                    return new ComputeUtils(money).multiplied(1).toString()
+                }
+            }
         }
 
         // pc28高倍特殊处理
@@ -113,22 +138,21 @@ class BotOddsStorage {
                     return new ComputeUtils(money).multiplied(1).toString()
                 }
             }
-        }
 
-        if (form != '杂子') {
+            if (form != '杂子') {
+                // 极大极小正常计算赔率
+                if (botOdds.name == '极大' || botOdds.name == '极小') {
+                    return new ComputeUtils(money).multiplied(botOdds.odds).toString()
+                }
 
-            // 极大极小正常计算赔率
-            if (botOdds.name == '极大' || botOdds.name == '极小') {
-                return new ComputeUtils(money).multiplied(botOdds.odds).toString()
-            }
-
-            // 不是对子顺子豹子的话赔率为1
-            if (
-                botOdds.name != '对子'
-                && botOdds.name != '顺子'
-                && botOdds.name != '豹子'
-            ) {
-                return new ComputeUtils(money).multiplied(1).toString()
+                // 不是对子顺子豹子的话赔率为1
+                if (
+                    botOdds.name != '对子'
+                    && botOdds.name != '顺子'
+                    && botOdds.name != '豹子'
+                ) {
+                    return new ComputeUtils(money).multiplied(1).toString()
+                }
             }
         }
 

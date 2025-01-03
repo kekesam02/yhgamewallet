@@ -332,9 +332,9 @@ class WalletController {
                     text: '\uD83D\uDC49再发一个',
                     query: StartWalletEnum.HONGBAO_CANCEL_1
                 }, {
-                text: '\uD83E\uDDE7发送红包',
-                switch_inline_query: WalletRedPacketInner.InnerKey + hbId
-            }
+                    text: '\uD83E\uDDE7发送红包',
+                    switch_inline_query: WalletRedPacketInner.InnerKey + hbId
+                }
             ], [
                 {
                     text: '✏️设置备注',
@@ -373,13 +373,13 @@ class WalletController {
                 {
                     text: '\uD83D\uDD10验证码',
                     query: botHb.conditonsyzm == 1
-                        ? StartWalletEnum.HONGBAO_VERIFI + botHb.hbId + '_0'
-                        : StartWalletEnum.HONGBAO_VERIFI + botHb.hbId + '_1'
+                        ? StartWalletEnum.HONGBAO_VERIFY + botHb.hbId + '_0'
+                        : StartWalletEnum.HONGBAO_VERIFY + botHb.hbId + '_1'
                 }, {
                     text: botHb.conditonsyzm == 1? '\uD83D\uDFE2已开启': '⚪️未开启',
                     query: botHb.conditonsyzm == 1
-                        ? StartWalletEnum.HONGBAO_VERIFI + botHb.hbId + '_0'
-                        : StartWalletEnum.HONGBAO_VERIFI + botHb.hbId + '_1'
+                        ? StartWalletEnum.HONGBAO_VERIFY + botHb.hbId + '_0'
+                        : StartWalletEnum.HONGBAO_VERIFY + botHb.hbId + '_1'
                 }
             ], [
                 {

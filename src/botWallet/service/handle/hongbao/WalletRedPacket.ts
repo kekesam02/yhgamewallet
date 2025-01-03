@@ -20,6 +20,9 @@ import BotPaymentModel from "../../../../models/BotPaymentModel";
 import PaymentType from "../../../../type/PaymentType";
 import MessageTipUtils from "../../../../commons/message/MessageTipUtils";
 import moment from "moment";
+import botPaymentModel from "../../../../models/BotPaymentModel";
+import ComputeUtils from "../../../../commons/compute/ComputeUtils";
+import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
 
 
 
@@ -35,21 +38,23 @@ class WalletRedPacket {
      * 点击红包按钮触发 - 跳转到添加红包页面
      */
     public addRedPacket = async () => {
-        await new MessageUtils().removeMessage(this.ctx)
-        let buttonList =  new ButtonUtils().createCallbackBtn([
-            [
+        let buttonList =  new ButtonUtils().createCallbackBtn([])
+        let addBtnList = () => {
+            buttonList.reply_markup.inline_keyboard.push([
                 {
                     text: ButtonCommonMap.addBtnContent,
-                    query: StartWalletEnum.HONGBAO_ADD
+                    callback_data: StartWalletEnum.HONGBAO_ADD,
+                    url: ''
                 }
-            ],
-            [
+            ])
+            buttonList.reply_markup.inline_keyboard.push([
                 {
                     text: ButtonCommonMap.backBtnContent,
-                    query: StartWalletEnum.CLOSE_COMPUTER
+                    callback_data: StartWalletEnum.HONGBAO,
+                    url: ''
                 }
-            ]
-        ])
+            ])
+        }
         let botHbList = await new BotHb().getBotHbList(ContextUtil.getUserId(this.ctx))
         if (botHbList.length > 0) {
             botHbList.forEach(item => {
@@ -61,12 +66,14 @@ class WalletRedPacket {
                     }
                 ])
             })
+            addBtnList()
             await new MessageUtils().sendTextReply(
                 this.ctx,
                 '从下面的列表中选择一个红包',
                 buttonList.reply_markup.inline_keyboard
             )
         } else {
+            addBtnList()
             await new MessageUtils().sendTextReply(
                 this.ctx,
                 '请在下面按钮操作您的红包：',
@@ -87,6 +94,7 @@ class WalletRedPacket {
             return new MessageTipUtils().handleErr(this.ctx)
         }
         let html = new RedPacketHtml().getSuccessHtml(user, botHb)
+        await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), `hongbaoWaterMoney_${hbId}`)
         await new MessageUtils().botSendTextToBot(this.ctx, html, WalletController.createSendHbBtn(botHb.hbId).reply_markup)
     }
 
@@ -202,6 +210,7 @@ class WalletRedPacket {
         }
         let result = await new BotHb().getRedisData(this.ctx)
         if (result) {
+            await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), ``)
             await new MessageUtils().botSendTextToBot(
                 this.ctx,
                 `\uD83D\uDCA1 发送${result.num}个红包\n支付金额${result.money}${result.hbType == 0? '随机': '均分'}${new CommonEnumsIndex().getWalletTypeStr(result.walletType)}`,
@@ -248,6 +257,7 @@ class WalletRedPacket {
                     return false
                 }
                 let html = new RedPacketHtml().getSuccessHtml(user, botHb)
+                await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), `hongbaoWaterMoney_${botHb.hbId}`)
                 await new MessageUtils().botSendTextToBot(this.ctx, html, WalletController.createSendHbBtn(botHb.hbId).reply_markup)
             }
             return false
@@ -290,6 +300,7 @@ class WalletRedPacket {
             botHb.remark = text
             await botHb.setBotHb()
             let html = new RedPacketHtml().getSuccessHtml(user, botHb)
+            await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), `hongbaoWaterMoney_${hbId}`)
             await new MessageUtils().botSendTextToBot(this.ctx, html, WalletController.createSendHbBtn(botHb.hbId).reply_markup)
         } catch (err) {
 
@@ -339,6 +350,7 @@ class WalletRedPacket {
             return new MessageTipUtils().handleErr(this.ctx)
         }
         botHb.conditonsyzm = Number(condition)
+        botHb.createVerifyCodeData()
         await botHb.setBotHb()
         await this.updateCondition(user, botHb, false)
     }
@@ -400,6 +412,7 @@ class WalletRedPacket {
         })
         await botHb.setBotHb()
         let user = await new UserModel().getUserModel(this.ctx)
+        await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), ``)
         await this.updateCondition(user, botHb, true, false)
     }
 
@@ -426,12 +439,37 @@ class WalletRedPacket {
 
     // -------------- 下面是领取红包之类的
     /**
+     * 验证红包验证码是否正确
+     */
+    public verifyCode = async (text: string) => {
+        let hbId = text.split('_')[0]
+        let code = text.split('_')[1]
+        let botHb = await new BotHb().getBotHb(hbId)
+        if (!botHb) {
+            return new MessageTipUtils().redPacketExpired(this.ctx)
+        }
+        let user = await new UserModel().getUserModelById(botHb.tgId)
+        if (!user) {
+            return new MessageTipUtils().userNotTips(this.ctx)
+        }
+        let paymentList = await new BotPaymentModel().getPaymentByHB(hbId)
+        paymentList = paymentList.filter(item => item.paymentType == PaymentType.LHB)
+        if (code == botHb.getVerifyCodeData().sum) {
+            let html = new RedPacketHtml().getSendHtml(user, botHb, paymentList)
+            return  await new MessageUtils().editedMessage(this.ctx, html, WalletController.receiveHbBtn(botHb.hbId).reply_markup)
+        } else {
+            return await new MessageUtils().sendPopMessage(this.ctx, '请选择正确的验证码')
+        }
+    }
+
+    /**
      * 点击领取红包回掉
      * @param hbId: 红包id
      */
     public receiveCallback = async (hbId: string) => {
         await addLock([hbId],  async () => {
             let botHb = await new BotHb().getBotHb(hbId)
+
             // 当前红包已经领完了
             if (!botHb) {
                 return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
@@ -439,6 +477,12 @@ class WalletRedPacket {
             if (botHb.receiveNum - botHb.num >= 0){
                 await this.updateReceiveHtml(hbId, botHb)
                 return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
+            }
+
+            // 验证用户是否有领取红包的资格
+            let isPermission = await this.verifyReceivePermission(this.ctx, botHb)
+            if (!isPermission) {
+                return false
             }
 
             // 开始领取红包
@@ -466,6 +510,71 @@ class WalletRedPacket {
         }
         let html = new RedPacketHtml().getSendHtml(user, botHb, paymentList)
         await new MessageUtils().editedMessage(this.ctx, html, WalletController.receiveHbBtn(botHb.hbId).reply_markup)
+    }
+
+    /**
+     *  验证用户是否有资格领取红包
+     */
+    public verifyReceivePermission = async (ctx: Context, botHb: BotHb): Promise<boolean> => {
+        let verify1 = this.verifyVip(ctx, botHb)
+        if (!verify1) {
+            await new MessageUtils().sendPopMessage(ctx, '仅限 Premium会员领取')
+            return false
+        }
+        let verify2 = await this.verifyWater(ctx, botHb)
+        if (!verify2) {
+            await new MessageUtils().sendPopMessage(ctx, '亲！流水还未达标哦')
+            return false
+        }
+        return false
+    }
+
+    /**
+     * 验证用户是否是 tg 会员
+     */
+    public verifyVip = (ctx: Context, botHb: BotHb): boolean => {
+        if (botHb.conditonshy == 1) {
+            if (ctx.callbackQuery && ctx.callbackQuery.from.is_premium) {
+                return true
+            }
+            return false
+        }
+        console.log('跳过会员验证')
+        return true
+    }
+
+    /**
+     * 验证用户的流水是否达标
+     */
+    public verifyWater = async (ctx: Context, botHb: BotHb): Promise<boolean> => {
+        if (botHb.conditonsls == 1) {
+            let result = await new botPaymentModel().getUserWaterClass(ctx)
+            let json = botHb.getConditionJson()
+            if (!json) {
+                return true
+            }
+            switch (json.time) {
+                case 0:
+                    // 日流水金额
+                    return new ComputeUtils(result.dayWater).comparedTo(json.money) >= 0;
+                case 1:
+                    // 近七天流水金额
+                    return new ComputeUtils(result.weekWater).comparedTo(json.money) >= 0;
+                case 2:
+                    // 近30天流水金额
+                    return new ComputeUtils(result.day30Water).comparedTo(json.money) >= 0;
+                case 3:
+                    // 本月流水金额
+                    return new ComputeUtils(result.monthWater).comparedTo(json.money) >= 0;
+                case 4:
+                    // 总流水金额
+                    return new ComputeUtils(result.totalWater).comparedTo(json.money) >= 0;
+                default:
+                    return true
+            }
+        }
+        console.log('跳过验证')
+        return true
     }
 
 }
