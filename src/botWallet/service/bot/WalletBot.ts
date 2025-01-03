@@ -32,6 +32,19 @@ bot.telegram.setMyCommands([
 }) .catch((err) => {
     console.error("设置命令时出错", err);
 })
+
+/**
+ * 中间件拦截器
+ */
+bot.use(async (ctx, next) => {
+    console.log("---------------------中间件拦截器--------------")
+    // if(ctx.from?.id !== 753861233) {
+    //     await ctx.reply("你没有权限操作")
+    //     return
+    // }
+    await next()
+})
+
 /**
  * 监听/start命令
  */

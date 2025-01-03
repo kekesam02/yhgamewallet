@@ -20,7 +20,7 @@ import WalletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMe
 class WalletMessageHandle {
     public listenerMessage = async (ctx: Context,cbot:Telegraf<Context>) => {
         let text = ctx.text
-        if (!text || text.length <= 0 || text == '') {
+        if (!text || text.length <= 0 || text?.trim() == '') {
             return
         }
         text = text.trim()
@@ -28,11 +28,12 @@ class WalletMessageHandle {
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
         if (currentop) {
-            // 收款
-            if (currentop == 'addtxaddr') {
+            // 添加提现地址
+            if (currentop == 'addtxaddr' || currentop == 'updatetxaddr') {
                 WalletTixianAddressMethod.addtxaddrtx(text, tgId, ctx)
                 return;
             }
+
             // 提现
             if (currentop == 'tx') {
                 WalletHandleTixianMethod.startTxHandle(text, tgId, ctx, cbot)

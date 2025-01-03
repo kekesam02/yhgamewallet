@@ -18,12 +18,36 @@ class BotWithdrawalAddrModel extends BaseEntity{
 
 
     /**
-     * 货币对应地址
+     * 拥有者
      */
     @Column({
         name: 'tg_id'
     })
     tgId: string
+
+    /**
+     * 用户ID
+     */
+    @Column({
+        name: 'user_id'
+    })
+    userId: number
+
+    /**
+     * 拥有者
+     */
+    @Column({
+        name: 'nickname'
+    })
+    nickname: string
+
+    /**
+     * 用户名
+     */
+    @Column({
+        name: 'username'
+    })
+    username: string
 
 
     /**

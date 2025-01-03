@@ -46,6 +46,21 @@ class WalletUserCenterController {
     }
 
     /**
+     * 更改提现地址
+     */
+    public static createUpdateTxAddrBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                this.BackUserHome,
+                {
+                    text: '✏️ 修改提现地址',
+                    query: 'update_txaddr_btn'
+                }
+            ]
+        ])
+    }
+
+    /**
      * 返回个人中心
      */
     public static createUserCenterBackBtn = () => {

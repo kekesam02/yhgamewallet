@@ -154,7 +154,7 @@ class WalletHandleTixianMethod {
 
                         // 统计相关
                         var sumPriceArr = await BotPaymentModel.createQueryBuilder("t1")
-                            .select(['t1.payment_type as ptype', 't1.payment_type_name as pname', 'SUM(t1.payment_amount) as num'])
+                            .select(['t1.payment_type as ptype',  'SUM(t1.payment_amount) as num'])
                             .where('t1.user_id = :tgId and t1.del = 0 and t1.wallet_type = 1', {tgId: botUser.tgId})
                             .groupBy("t1.payment_type").execute()
 

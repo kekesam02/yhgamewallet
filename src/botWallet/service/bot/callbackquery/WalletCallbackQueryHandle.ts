@@ -19,7 +19,6 @@ import WalletShouchongFanLiMethod from "../../handle/usercenter/shouchongfanli/W
 import WalletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
 import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/WalletTixianAddressMethod";
 import WalletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
-import walletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
 
 
 /**
@@ -51,14 +50,13 @@ class WalletCallbackQueryHandle {
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
         console.log('回掉数据', callbackStr)
-        // 计算器callback
-        if (callbackStr.startsWith('num_') || callbackStr === 'delete' || callbackStr === 'clear') {
+        if (callbackStr.startsWith('num_') || callbackStr === 'delete' || callbackStr === 'clear') {// 计算器callback
             WalletHandleMethod.startInputPassword(ctx)
-        }else if(callbackStr.startsWith('qrjs')){
+        }else if(callbackStr.startsWith('qrjs')){// 确认提现
             WalletHandleZhuanzhangMethod.startZhuanZhangUnLock(ctx)
-        }else if(callbackStr.startsWith('quxiaozz')){
+        }else if(callbackStr.startsWith('quxiaozz')){//取消提现
             WalletHandleZhuanzhangMethod.cancelZhuanZhang(ctx)
-        }else if(callbackStr.startsWith('shoukuanzk')){
+        }else if(callbackStr.startsWith('shoukuanzk')){//转账的收款
             WalletHandleZhuanzhangMethod.startZhuanzhangSK(ctx)
         }else if(callbackStr.startsWith('vpb_')){ // 转账确认密码解锁
             WalletHandleZhuanzhangMethod.startValidatorPwdCallback(ctx,callbackStr)
@@ -67,8 +65,10 @@ class WalletCallbackQueryHandle {
         }else if(callbackStr.startsWith('skqxzf')){ // 收款-取消支付
             WalletHandleShouKuanMethod.startCancelPayCallback(ctx,bot,callbackStr)
         } else if(callbackStr.startsWith('smNoPasswordChange')){ // 修改免密额度
-           walletLimitMethod.startUpdateUserLimiter(ctx)
-        }else {
+           WalletLimitMethod.startUpdateUserLimiter(ctx)
+        }else if (callbackStr.startsWith("update_txaddr_btn")){// 修改提现地址
+            WalletTixianAddressMethod.updateTxAddress(ctx)
+        } else{
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
                 // 我的账单

@@ -7,6 +7,9 @@ import WalletController from "../../../../controller/WalletController";
 import BotWithdrawalAddrModel from "../../../../../models/BotWithdrawalAddrModel";
 import redis from "../../../../../config/redis";
 import WalletHandleMethod from "../../WalletHandleMethod";
+import walletUserCenterMethod from "../WalletUserCenterMethod";
+import walletUserCenterController from "../../../../controller/WalletUserCenterController";
+import {addLockByTgId} from "../../../../../config/redislock";
 
 /**
  * 公共方法处理
@@ -36,7 +39,10 @@ class WalletTixianAddressMethod {
             ctx.replyWithHTML("👜 请在消息框填写您的提现地址")
             return;
         }
-        ctx.replyWithHTML("👜 您的提现地址是：" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || ''))
+        // 删除上一次的消息
+        await walletUserCenterMethod.removeMessage(ctx)
+        // 提示当前的信息
+        await ctx.replyWithHTML("👜 您的提现地址是：\n<code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"</code>（点击可复制）",walletUserCenterController.createUpdateTxAddrBtn())
     }
 
 
@@ -47,30 +53,78 @@ class WalletTixianAddressMethod {
         return address != null && address.length == 34 && address.charAt(0) == 'T' && /^[A-Za-z0-9]+$/.test(address);
     }
 
+    /**
+     * 添加/修改提现地址
+     * @param text
+     * @param tgId
+     * @param ctx
+     */
     public static addtxaddrtx = async (text: string, tgId: number, ctx: Context) => {
-        // 查询用户信息
-        let userId = AESUtils.encodeUserId(tgId?.toString())
-        if (!this.isValidTronAddress(text)) {
-            //更换提现地址
-            var html = "\uD83D\uDCA6 请输入正确的波场提现地址";
-            ctx.replyWithHTML(html);
-            return;
-        }
-
-        // 保存提现地址
-        await BotWithdrawalAddrModel.createQueryBuilder().insert().into(BotWithdrawalAddrModel).values({
-            tgId: userId,
-            del:0,
-            addr: AESUtils.encodeAddr(text)
-        }).execute();
-
-        redis.set("addtxaddrvalue" + tgId, text, 'EX', 60 * 60 * 6)
-        // 发送机器人消息
-        ctx.replyWithHTML("✅ 设置成功\n👜 提现地址是：" + text)
-        // 进入到主页
-        WalletHandleMethod.startButtonBack(ctx)
+       addLockByTgId(['addtxaddr_lock_'+tgId],async ()=>{
+           // 查询用户信息
+           let userId = AESUtils.encodeUserId(tgId?.toString())
+           var username = ctx.message?.from?.username || ''
+           var nickname = ctx.message?.from?.first_name || ''
+           if (!this.isValidTronAddress(text)) {
+               //更换提现地址
+               var html = "\uD83D\uDCA6 请填写填写的波场提现地址";
+               ctx.replyWithHTML(html);
+               return;
+           }
+           // 波长地址
+           var encodeAddr = AESUtils.encodeAddr(text);
+           // 判断用户是否存在
+           var botUser = await new UserModel().getUserModelById(userId);
+           if(botUser) {
+               // 查询用户是否已经存在提现地址
+               const botUserAddr = await BotWithdrawalAddrModel.createQueryBuilder().select().where("tg_id=:tgId", {tgId: userId})
+                   .getOne()
+               if (botUserAddr) {
+                   if(botUserAddr.addr == encodeAddr){
+                       ctx.replyWithHTML("⚠️ 当前地址和旧地址一致，无须修改..")
+                       return
+                   }
+                   // 修改提现地址
+                   await BotWithdrawalAddrModel.createQueryBuilder().update().set({
+                       userId:botUser.id,
+                       username: username,
+                       nickname: nickname,
+                       addr: encodeAddr
+                   }).where("id=:id",{id:botUserAddr.id}).execute()
+               } else {
+                   // 保存提现地址
+                   await BotWithdrawalAddrModel.createQueryBuilder().insert().into(BotWithdrawalAddrModel).values({
+                       del: 0,
+                       tgId: userId,
+                       userId:botUser.id,
+                       username: username,
+                       nickname: nickname,
+                       addr: encodeAddr
+                   }).execute()
+               }
+               // 发送机器人消息
+               ctx.replyWithHTML("✅ 设置成功\n👜 您当前的提现地址是：<code>" + text+"</code>")
+               // 进入到主页
+               WalletHandleMethod.startButtonBack(ctx)
+           }else{
+               await ctx.reply('用户不存在！')
+           }
+       },async ()=>{
+           await ctx.reply('亲，操作慢点，休息一会在操作!')
+       })
     }
 
+    /**
+     * 修改提现地址
+     * @param ctx
+     */
+    public static updateTxAddress = async (ctx:Context)=>{
+        // 1：获取telegram的tgId
+        var tgId: string = ctx.callbackQuery?.from?.id + '' || "0"
+        await redis.set("currentop" + tgId, "updatetxaddr", 'EX', 60 * 60)
+        var html = "👜 请在消息框填写您的提现地址";
+        ctx.replyWithHTML(html);
+    }
 }
 
 
