@@ -65,20 +65,30 @@ class WalletUserCenterController {
     /**
      * 我的账单
      */
-    public static createUserAccountListBtn = (pageNo:number,type:number) => {
+    public static createUserAccountListBtn = (pageNo:number,ptype:number) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
-                    text:'\uD83D\uDFE2 全部',
-                    query:"myaccount_all"
+                    text:'⬅️',
+                    query:"myaccount_prev_"+(pageNo-1)+"_"+ptype
                 },
                 {
-                    text:'USDT',
-                    query:"myaccount_all_usdt"
+                    text:'➡️',
+                    query:"myaccount_next_"+(pageNo+1)+"_"+ptype
+                }
+            ],
+            [
+                {
+                    text: ptype==0?'\uD83D\uDFE2 全部':'全部',
+                    query:"myaccount_all_0_0"
                 },
                 {
-                    text:'TRX',
-                    query:"myaccount_all_trx"
+                    text: ptype==1? '\uD83D\uDFE2 USDT':"USDT",
+                    query:"myaccount_usdt_0_1"
+                },
+                {
+                    text: ptype==2? '\uD83D\uDFE2 TRX':"TRX",
+                    query:"myaccount_trx_0_2"
                 }
             ],
             [
@@ -86,16 +96,6 @@ class WalletUserCenterController {
                     text: '🏘️ 主菜单',
                     query: WalletUserCenterEnum.HOME,
                 },
-                {
-                    text:'⬅️',
-                    query:"myaccount_prev_"+(pageNo-1)+"_"+type
-                },
-                {
-                    text:'➡️',
-                    query:"myaccount_next_"+(pageNo+1)+"_"+type
-                }
-            ],
-            [
                 this.BackUserHome
             ]
         ])

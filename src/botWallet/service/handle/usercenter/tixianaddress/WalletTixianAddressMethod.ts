@@ -29,11 +29,11 @@ class WalletTixianAddressMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 查询用户信息
         let userId = AESUtils.encodeUserId(tgId?.toString())
+        await redis.set("currentop" + tgId, "addtxaddr", 'EX', 60 * 60)
         // 查询用户是否存在交易地址
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
         if (!botWithdrawalAddrModel?.addr) {
-            redis.set("currentop" + tgId, "addtxaddr", 'EX', 60 * 60)
             ctx.replyWithHTML("👜 请在消息框填写您的提现地址")
             return;
         }

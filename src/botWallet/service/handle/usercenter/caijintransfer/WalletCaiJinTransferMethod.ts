@@ -25,6 +25,10 @@ class WalletCaiJinTransferMethod {
      * @param ctx
      */
     public static startCtrxzh = async (ctx: Context) => {
+        // 获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 设置操作
+        await redis.set("currentop" + tgId, "caijinzhuanghua", 'EX', 60 * 60)
         return Promise.resolve()
     }
 }

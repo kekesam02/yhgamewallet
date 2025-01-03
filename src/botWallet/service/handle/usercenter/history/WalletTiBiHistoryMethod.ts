@@ -25,6 +25,10 @@ class WalletTiBiHistoryMethod {
      * @param ctx
      */
     public static startTbls = async (ctx: Context) => {
+        // 获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 设置操作
+        await redis.set("currentop" + tgId, "tibilishi", 'EX', 60 * 60)
         return Promise.resolve()
     }
 }

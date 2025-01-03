@@ -24,7 +24,11 @@ class WalletShouchongFanLiMethod {
      * @param ctx
      */
     public static startScfl = async (ctx: Context) => {
-        return Promise.resolve()
+        // 获取telegram的tgId
+        var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 设置操作
+        await redis.set("currentop" + tgId, "shouchongfanli", 'EX', 60 * 60)
+
     }
 }
 

@@ -327,7 +327,14 @@ class WalletHandleMethod {
             WalletHandleHongBaoMethod.startHongBao(ctx, cbot)
         } else if (currentOp == 'shandui') {
             WalletHandleShangduiMethod.startShanDui(ctx, cbot)
-        }else if (currentOp == 'xemm') {
+        }else if (currentOp == 'xemm'
+            || currentOp == 'addtxaddr'
+            || currentOp == 'tibilishi'
+            || currentOp == 'yaoqinghaoyou'
+            || currentOp == 'yaoqingfanli'
+            || currentOp == 'shouchongfanli'
+            || currentOp == 'caijinzhuanghua'
+            || currentOp == 'myaccount') {
             walletUserCenterMethod.startUserCenterCallback(ctx)
         }else{
             this.startButtonBack(ctx)
