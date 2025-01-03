@@ -151,14 +151,18 @@ class MessageUtils {
      * @param html
      * @param replyMarkup
      */
-    public editedMessage(
+    public async editedMessage(
         ctx: Context,
         html: string,
         replyMarkup: InlineKeyboardMarkup
     ) {
-        return  ctx.editMessageText(html, {
-            reply_markup: replyMarkup
-        })
+        try {
+            await ctx.editMessageText(html, {
+                reply_markup: replyMarkup
+            })
+        } catch (err) {
+            console.log('编辑消息出错了', err)
+        }
     }
 
     /**

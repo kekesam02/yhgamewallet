@@ -23,6 +23,8 @@ import moment from "moment";
 import botPaymentModel from "../../../../models/BotPaymentModel";
 import ComputeUtils from "../../../../commons/compute/ComputeUtils";
 import ButtonInnerQueryUtils from "../../../../commons/button/ButtonInnerQueryUtils";
+import RandomUtils from "../../../../commons/compute/RandomUtils";
+import {ButtonCallbackType} from "../../../../commons/button/ButtonCallbackType";
 
 
 
@@ -94,6 +96,7 @@ class WalletRedPacket {
             return new MessageTipUtils().handleErr(this.ctx)
         }
         let html = new RedPacketHtml().getSuccessHtml(user, botHb)
+        await new MessageUtils().removeMessage(this.ctx)
         await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), `hongbaoWaterMoney_${hbId}`)
         await new MessageUtils().botSendTextToBot(this.ctx, html, WalletController.createSendHbBtn(botHb.hbId).reply_markup)
     }
@@ -326,7 +329,6 @@ class WalletRedPacket {
     public setVipVeri = async (text: string) => {
         let hbId = text.split('_')[0]
         let condition = text.split('_')[1]
-        console.log('设置会员验证功能', text)
         let botHb = await new BotHb().getBotHb(hbId)
         let user = await new UserModel().getUserModel(this.ctx)
         if (!botHb || !user) {
@@ -425,7 +427,7 @@ class WalletRedPacket {
      */
     public updateCondition = async (user: UserModel, botHb: BotHb, isAdd = true, isRemove = true) => {
         let button = WalletController.createConditionBtn(botHb)
-        let html = new RedPacketHtml().getConditionHtml(user, botHb)
+        let html = new RedPacketHtml().getSendHtml(user, botHb, [])
         if (isAdd) {
             if (isRemove) {
                 await new MessageUtils().removeMessage(this.ctx)
@@ -456,7 +458,14 @@ class WalletRedPacket {
         paymentList = paymentList.filter(item => item.paymentType == PaymentType.LHB)
         if (code == botHb.getVerifyCodeData().sum) {
             let html = new RedPacketHtml().getSendHtml(user, botHb, paymentList)
-            return  await new MessageUtils().editedMessage(this.ctx, html, WalletController.receiveHbBtn(botHb.hbId).reply_markup)
+            botHb.setUserVerify(user.tgId)
+            let inlineKeyBoard = await this.createVerifyMessage(botHb, true)
+            await new MessageUtils().editedMessage(
+                this.ctx,
+                html,
+                inlineKeyBoard.reply_markup
+            )
+            await new MessageUtils().sendPopMessage(this.ctx, '验证成功!')
         } else {
             return await new MessageUtils().sendPopMessage(this.ctx, '请选择正确的验证码')
         }
@@ -509,7 +518,12 @@ class WalletRedPacket {
             return
         }
         let html = new RedPacketHtml().getSendHtml(user, botHb, paymentList)
-        await new MessageUtils().editedMessage(this.ctx, html, WalletController.receiveHbBtn(botHb.hbId).reply_markup)
+        let inlineKeyBoard = await this.createVerifyMessage(botHb)
+        return await new MessageUtils().editedMessage(
+            this.ctx,
+            html,
+            inlineKeyBoard.reply_markup
+        )
     }
 
     /**
@@ -526,7 +540,18 @@ class WalletRedPacket {
             await new MessageUtils().sendPopMessage(ctx, '亲！流水还未达标哦')
             return false
         }
-        return false
+        if (!botHb.getUserIsVerify(ctx)) {
+            await new MessageUtils().sendPopMessage(ctx, '请先选择正确的验证码')
+            return false
+        }
+        if (botHb.specifyUser && botHb.specifyUser != '') {
+            let user = await new UserModel().getUserModel(ctx)
+            if (user.userName != botHb.specifyUser) {
+                await new MessageUtils().sendPopMessage(ctx, `亲! 只有用户${botHb.specifyUser}才能领取`)
+                return false
+            }
+        }
+        return true
     }
 
     /**
@@ -573,8 +598,106 @@ class WalletRedPacket {
                     return true
             }
         }
-        console.log('跳过验证')
         return true
+    }
+
+
+    /**
+     * 生成红包底部按钮
+     *      需要输入验证的话：包括验证码 和 领取红包
+     *      不需要: 只生成领取红包按钮
+     * @param botHb
+     * @param update: 是否需要更新红包对象数据
+     */
+    public createVerifyMessage = async (botHb: BotHb, update: boolean = false): Promise<{
+        reply_markup: {
+            inline_keyboard: Array<Array<{
+                text: string,
+                callback_data: string,
+                url: string
+            }>>
+        }
+    }> => {
+        let index = new RandomUtils().getRandomInt(0, 5)
+        let arr: Array<Array<ButtonCallbackType>> = [[], []]
+        // 随机出一个验证码的正确位置
+        let numList = new RandomUtils().getRandomIntList(0, 5, 6)
+        let localArr = []
+        // 是否需要更新
+        let isUpdate = false
+        // 生成验证码按钮
+        if (botHb.conditonsyzm == 1) {
+            if (botHb.getVerifyBtnList().length < 1) {
+                // 数据库中没有按钮数据的话随机生成红包按钮列表
+                for (let i = 0; i < numList.length; i++) {
+                    let item = numList[i]
+                    if (i == index) {
+                        if (i < 3) {
+                            arr[0].push({ text: `${botHb.getVerifyCodeData().sum}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + botHb.hbId + '_' + botHb.getVerifyCodeData().sum})
+                            localArr.push(botHb.getVerifyCodeData().sum)
+                        } else {
+                            arr[1].push({ text: `${botHb.getVerifyCodeData().sum}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + botHb.hbId + '_' + botHb.getVerifyCodeData().sum})
+                            localArr.push(botHb.getVerifyCodeData().sum)
+                        }
+                        continue
+                    }
+                    if (i < 3) {
+                        arr[0].push({ text: `${item}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + botHb.hbId + '_' + item})
+                        localArr.push(item)
+                    } else {
+                        arr[1].push({ text: `${item}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + botHb.hbId + '_' + item})
+                        localArr.push(item)
+                    }
+                }
+                isUpdate = true
+            } else {
+                botHb.getVerifyBtnList().forEach((item, index) => {
+                    if (index < 3) {
+                        arr[0].push({
+                            text: item,
+                            query: StartWalletEnum.HONGBAO_VERIFY_BTN + botHb.hbId + '_' + item
+                        })
+                    } else {
+                        arr[1].push({
+                            text: item,
+                            query: StartWalletEnum.HONGBAO_VERIFY_BTN + botHb.hbId + '_' + item
+                        })
+                    }
+                })
+            }
+        }
+
+        // 生成领取红包按钮
+        WalletController.receiveHbBtn(botHb.hbId).reply_markup.inline_keyboard.forEach(item => {
+            arr.push([
+                ...item.map(item2 => {
+                    return {
+                        text: item2.text,
+                        query: item2.callback_data,
+                        url: item2.url
+                    }
+                })
+            ])
+        })
+
+        if (isUpdate || update) {
+            await addLock([botHb.hbId], async () => {
+                await queryRunner.startTransaction()
+                try {
+                    botHb.verifyBtn = localArr.join(',')
+                    await queryRunner.manager.save(botHb)
+                    await queryRunner.commitTransaction()
+                    return new ButtonUtils().createCallbackBtn(arr)
+                } catch (err) {
+                    console.log('回滚了-------', err)
+                    await queryRunner.rollbackTransaction()
+                    return null
+                }
+            }, async () => {
+
+            })
+        }
+        return new ButtonUtils().createCallbackBtn(arr)
     }
 
 }

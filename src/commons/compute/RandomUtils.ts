@@ -105,7 +105,11 @@ class RandomUtils {
                 moneyList[maxIndex] = new ComputeUtils(moneyList[maxIndex]).add(diff).getNumber()
             }
         }
-        return moneyList
+        let sum2 = moneyList.reduce((prev, curr) => prev + curr)
+        console.log('随机数列表', sum2, moneyList)
+        return moneyList.map(item => {
+            return new ComputeUtils(item).dividedBy(100, 2).getNumber()
+        })
     }
 }
 

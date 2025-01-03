@@ -3,6 +3,7 @@ import {Context} from "telegraf";
 import AESUtils from "../commons/AESUtils";
 import WalletType from "../type/WalletType";
 import ComputeUtils from "../commons/compute/ComputeUtils";
+import ContextUtil from "../commons/ContextUtil";
 
 
 /**
@@ -274,19 +275,13 @@ class UserModel extends BaseEntity {
     }
 
     /**
-     * 更新用户金额信息
-     * @param user
-     */
-    public updateUser = async (): Promise<UserModel> => {
-        return UserModel.save(this)
-    }
-
-    /**
      * 获取用户信息
      * @param ctx
      */
     public getUserModel = async (ctx: Context): Promise<UserModel> => {
-        let userId = AESUtils.encodeUserId(ctx?.from?.id.toString())
+        let userId = ContextUtil.getUserId(ctx)
+        let userName = ContextUtil.getUserName(ctx)
+        let nickName = ContextUtil.getNickName(ctx)
         let user = await UserModel
             .createQueryBuilder()
             .where('tg_id = :tgId', {
@@ -295,6 +290,11 @@ class UserModel extends BaseEntity {
             .getOne()
         if (!user) {
             user = await new UserModel().createNewUser(ctx)
+        }
+        if (user.userName != userName || user.nickName != nickName) {
+            user.userName = userName
+            user.nickName = nickName
+            await UserModel.save(user)
         }
         return user
     }

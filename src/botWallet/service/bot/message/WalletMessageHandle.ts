@@ -28,11 +28,7 @@ class WalletMessageHandle {
         // 设置提现地址
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
-        console.log('监听到的命令', ctx)
-        let str = ctx.botInfo
-        console.log('分开了----------------')
-        console.log(str)
-        console.log('用户id', ContextUtil.getUserId(ctx, false))
+        console.log(currentop)
 
         // 判定是否是快速发放红包命令
         let isQuickRedPacket = await WalletHandleHongBaoMethod.quickSendPacket(text, tgId, ctx)

@@ -5,6 +5,9 @@ import WalletHandleMethod from "../WalletHandleMethod";
 import UserModel from "../../../../models/UserModel";
 import MessageUtils from "../../../../commons/message/MessageUtils";
 import RandomUtils from "../../../../commons/compute/RandomUtils";
+import WalletType from "../../../../type/WalletType";
+import BotHb from "../../../../models/BotHb";
+import RedPacketHtml from "../../../../html/walletHtml/RedPacketHtml";
 
 
 /**
@@ -70,67 +73,112 @@ class WalletHandleHongBaoMethod {
             return false
         }
         new RandomUtils().randomAllocate(10, 10)
-        return true
-        // try {
-        //     let arr = text.split(' ')
-        //     if (arr[1] != 'hb') {
-        //         return false
-        //     }
-        //
-        //     /**
-        //      * 指定用户领取红包
-        //      * 指令为 @大在签约 hb 2
-        //      * 表示 给用户 大在签约 发放了一个金额为2USDT的红包
-        //      */
-        //     if (arr[0].startsWith('@')) {
-        //         let userName = arr[0].replaceAll('@', '')
-        //         if (arr.length > 3) {
-        //             return false
-        //         }
-        //         if (arr[1] != 'hb') {
-        //             return false
-        //         }
-        //         // 红包金额
-        //         let money = arr[2]
-        //         // 红包数量
-        //         let num = 1
-        //         if (isNaN(Number(money))) {
-        //             return false
-        //         }
-        //         let user = UserModel
-        //             .createQueryBuilder()
-        //             .where('user_name = :userName', {
-        //                 userName: userName
-        //             })
-        //             .getOne()
-        //         if (!user) {
-        //             await new MessageUtils().sendTextReply(ctx, '未找到该用户')
-        //             return true
-        //         }
-        //
-        //         // 开始发放指定用户红包
-        //
-        //     }
-        //
-        //
-        //     if (arr[0] != 'hb') {
-        //         if (arr.length > 3) {
-        //             return false
-        //         }
-        //         // 红包金额
-        //         let money = arr[1]
-        //         // 红包数量
-        //         let num = arr[2]? arr[2]: 1
-        //         if (isNaN(Number(money))) {
-        //             return false
-        //         }
-        //
-        //         // 开始发放红包、
-        //     }
-        //     return false
-        // } catch (err) {
-        //     return false
-        // }
+        try {
+            let arr = text.split(' ')
+            if (arr[1] != 'hb' && arr[0] != 'hb') {
+                return false
+            }
+
+            /**
+             * 指定用户领取红包
+             * 指令为 @大在签约 hb 2
+             * 表示 给用户 大在签约 发放了一个金额为2USDT的红包
+             */
+            if (arr[0].startsWith('@')) {
+                let userName = arr[0].replaceAll('@', '')
+                if (arr.length > 3) {
+                    return false
+                }
+                if (arr[1] != 'hb') {
+                    return false
+                }
+                // 红包金额
+                let money = arr[2]
+                // 红包数量
+                let num = 1
+                if (isNaN(Number(money))) {
+                    return false
+                }
+                let user = await new UserModel().getUserModel(ctx)
+                let specifyUser = UserModel
+                    .createQueryBuilder()
+                    .where('user_name = :userName', {
+                        userName: userName
+                    })
+                    .getOne()
+                if (!specifyUser) {
+                    await new MessageUtils().sendTextReply(ctx, '未找到该用户')
+                    return true
+                }
+                // 开始发放红包
+                let botHb = new BotHb()
+                botHb.process = 5
+                botHb.walletType = WalletType.USDT
+                botHb.hbType = 1
+                botHb.money = money
+                botHb.num = Number(num)
+                botHb.specifyUser = userName
+                if (!user) {
+                    return
+                }
+                let result = await botHb.saveLocalData(ctx, botHb)
+                if (!result) {
+                    return
+                }
+                let html = new RedPacketHtml().getSendHtml(user, result, [])
+                let inlineKeyBoard = await new WalletRedPacket(ctx).createVerifyMessage(result)
+                await new MessageUtils().botSendTextToBot(
+                    ctx,
+                    html,
+                    inlineKeyBoard.reply_markup
+                )
+                return true
+            }
+
+
+            /**
+             * 不指定用户红包
+             * 格式为 hb 金额 数量
+             */
+            if (arr[0] == 'hb') {
+                if (arr.length > 3) {
+                    return false
+                }
+                // 红包金额
+                let money = arr[1]
+                // 红包数量
+                let num = arr[2]? arr[2]: 1
+                if (isNaN(Number(money))) {
+                    return false
+                }
+                // 开始发放红包
+                let botHb = new BotHb()
+                botHb.process = 5
+                botHb.walletType = WalletType.USDT
+                botHb.hbType = 1
+                botHb.money = money
+                botHb.num = Number(num)
+                let user = await new UserModel().getUserModel(ctx)
+                if (!user) {
+                    return
+                }
+                let result = await botHb.saveLocalData(ctx, botHb)
+                if (!result) {
+                    return
+                }
+                let html = new RedPacketHtml().getSendHtml(user, result, [])
+                let inlineKeyBoard = await new WalletRedPacket(ctx).createVerifyMessage(result)
+                await new MessageUtils().botSendTextToBot(
+                    ctx,
+                    html,
+                    inlineKeyBoard.reply_markup
+                )
+                return true
+            }
+            return false
+        } catch (err) {
+            return false
+        }
     }
 }
 

@@ -409,7 +409,7 @@ class WalletController {
             [
                 {
                     text: "\uD83D\uDEAB取消",
-                    query: StartWalletEnum.HONGBAO_CANCEL_1
+                    query: StartWalletEnum.HONGBAO_INFO + botHb.hbId
                 }
             ]
         ])

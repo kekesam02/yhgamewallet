@@ -12,6 +12,9 @@ import CommonEnumsIndex from "../../../../type/CommonEnumsIndex";
 import ButtonUtils from "../../../../commons/button/ButtonUtils";
 import RandomUtils from "../../../../commons/compute/RandomUtils";
 import {ButtonCallbackType} from "../../../../commons/button/ButtonCallbackType";
+import WalletRedPacket from "./WalletRedPacket";
+import {addLock} from "../../../../config/redislock";
+import MessageUtils from "../../../../commons/message/MessageUtils";
 
 /**
  * 红包内连消息处理
@@ -35,6 +38,7 @@ class WalletRedPacketInner {
         if (!user) {
             return
         }
+        let inlineKeyBoard = await new WalletRedPacket(ctx).createVerifyMessage(botHb)
         await ctx.answerInlineQuery(
             ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                 id: queryId,
@@ -43,40 +47,9 @@ class WalletRedPacketInner {
                 input_message_content: {
                     message_text: new RedPacketHtml().getSendHtml(user, botHb, paymentList)
                 },
-                reply_markup: {
-                    inline_keyboard: botHb.conditonsyzm == 1
-                        ? this.createVerifyMessage(hbId, botHb).reply_markup.inline_keyboard
-                        : WalletController.receiveHbBtn(botHb.hbId).reply_markup.inline_keyboard
-                }
+                reply_markup: inlineKeyBoard.reply_markup
             })
         )
-    }
-
-    /**
-     * 随机生成5个验证码按钮
-     */
-    public createVerifyMessage = (hbId: string, botHb: BotHb) => {
-        let index = new RandomUtils().getRandomInt(0, 5)
-        let arr: Array<Array<ButtonCallbackType>> = [[], []]
-        let numList = new RandomUtils().getRandomIntList(0, 5, 6)
-        for (let i = 0; i < numList.length; i++) {
-            let item = numList[i]
-            if (i == index) {
-                if (i < 3) {
-                    arr[0].push({ text: `${botHb.getVerifyCodeData().sum}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + hbId + '_' + botHb.getVerifyCodeData().sum})
-                } else {
-                    arr[1].push({ text: `${botHb.getVerifyCodeData().sum}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + hbId + '_' + botHb.getVerifyCodeData().sum})
-                }
-                continue
-            }
-            console.log('进入', i)
-            if (i < 3) {
-                arr[0].push({ text: `${item}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + hbId + '_' + item})
-            } else {
-                arr[1].push({ text: `${item}`, query: StartWalletEnum.HONGBAO_VERIFY_BTN + hbId + '_' + item})
-            }
-        }
-        return new ButtonUtils().createCallbackBtn(arr)
     }
 
 

@@ -35,7 +35,7 @@ const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>, efn: 
         let lock = await redlock.lock(lockKeyList, lockTTL)
         try {
             // 执行异步操作
-            await fn()
+            return  fn()
         }finally {
             // 释放锁
             await redlock.unlock(lock)

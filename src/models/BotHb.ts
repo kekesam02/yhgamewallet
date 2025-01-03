@@ -185,6 +185,18 @@ class BotHb extends BaseEntity {
     })
     conditonsyzmJson: string
 
+    @Column({
+        name: 'verify_user',
+        default: ''
+    })
+    verifyUser: string
+
+    @Column({
+        name: 'verify_btn',
+        default: ''
+    })
+    verifyBtn: string
+
     /**
      * 指定用户领取红包
      *      当指定用户之后红包数量肯定为1的
@@ -253,9 +265,9 @@ class BotHb extends BaseEntity {
      * 持久化存储
      *      删除 redis 中保存的红包数据、将数据存到 mysql 中去
      */
-    public saveLocalData = async (ctx: Context): Promise<BotHb | null> => {
+    public saveLocalData = async (ctx: Context, newBotHb?: BotHb): Promise<BotHb | null> => {
         let userModel = await new UserModel().getUserModel(ctx)
-        let redisData = await this.getRedisData(ctx)
+        let redisData = newBotHb? newBotHb: await this.getRedisData(ctx)
         if (!redisData) {
             return null
         }
@@ -272,6 +284,7 @@ class BotHb extends BaseEntity {
             botHb.receiveNum = 0
             botHb.hbType = redisData.hbType
             botHb.jeIndex = 0
+            botHb.specifyUser = redisData.specifyUser ?? null
             botHb.createJson()
 
             let payment = new BotPaymentModel()
@@ -366,7 +379,7 @@ class BotHb extends BaseEntity {
             await queryRunner.commitTransaction()
             return true
         } catch (err) {
-            console.log('消息回滚了')
+            console.log('消息回滚了', err)
             await queryRunner.rollbackTransaction()
             return false
         }
@@ -382,7 +395,6 @@ class BotHb extends BaseEntity {
         let a = new RandomUtils().getRandomInt(1, 9)
         let b = new RandomUtils().getRandomInt(1, 9)
         let sum = a + b
-        console.log('生成的验证', a, b, sum)
         this.conditonsyzmJson = `${a},${b},${sum}`
     }
 
@@ -396,6 +408,50 @@ class BotHb extends BaseEntity {
             b: json[1],
             sum: json[2]
         }
+    }
+
+    /**
+     * 设置用户已经点击验证码验证过了
+     */
+    public setUserVerify = (tgId: string) => {
+        if (!this.verifyUser || this.verifyUser == '') {
+            this.verifyUser = tgId
+            return
+        }
+        if (this.verifyUser.indexOf(tgId) < 0) {
+            this.verifyUser = `${this.verifyUser},${tgId}`
+        }
+    }
+
+    /**
+     * 判断当前用户是否已经完成验证码的验证
+     */
+    public getUserIsVerify = (ctx: Context) => {
+        let tgId = ContextUtil.getUserId(ctx)
+        if (this.conditonsyzm == 0) {
+            // 不需要进行验证码验证
+            return true
+        }
+        if (!this.verifyUser || this.verifyUser == '') {
+            return false
+        }
+        let arr = this.verifyUser.split(',')
+        // 用户已经验证成功了可以正常领取红包
+        return arr.indexOf(tgId) > -1;
+    }
+
+    /**
+     * 获取验证码红包随机生成的验证码列表
+     */
+    public getVerifyBtnList = (): Array<string> => {
+        if (!this.verifyBtn || this.verifyBtn == '') {
+            return []
+        }
+        let arr: string[] = this.verifyBtn.split(',')
+        if (arr.length < 1) {
+            return []
+        }
+        return arr
     }
 
     /**
@@ -417,9 +473,7 @@ class BotHb extends BaseEntity {
      * 获取当前要领取的红包金额
      */
     public getReceiveMoney = () => {
-        console.log(this.jeIndex)
         let arr = this.jeJson.split(',')
-        console.log(arr)
         return arr[this.jeIndex]
     }
 
@@ -504,7 +558,6 @@ class BotHb extends BaseEntity {
             await this.errHandle(ctx)
             return false
         }
-
         botHb.process = 3
         botHb.hbType = type
         await redis.set(this.getRedisKey(ctx), JSON.stringify(botHb))
@@ -622,7 +675,7 @@ class BotHb extends BaseEntity {
         let json = JSON.parse(jsonStr)
         this.process = json['process'] ?? 0
         this.walletType = json['walletType'] ?? WalletType.USDT
-        this.hbType = json['type'] ?? 0
+        this.hbType = json['hbType'] ?? 0
         this.money = json['money'] ?? '0'
         this.num = json['num'] ?? 0
     }
@@ -646,7 +699,6 @@ class BotHb extends BaseEntity {
         let exists = await redis.exists(this.getRedisKey(ctx))
         if (exists == 1) {
             let json = await redis.get(this.getRedisKey(ctx))
-            console.log('获取到的数据---------------', json)
             if (!json) {
                 return null
             }

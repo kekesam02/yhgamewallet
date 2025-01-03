@@ -30,11 +30,23 @@ class ContextUtil{
     /**
      * 获取用户名称
      */
-    // public static getUserName = (ctx: Context): string => {
-    //     return {
-    //         ctx.callbackQuery?.from.id
-    //     }
-    // }
+    public static getUserName = (ctx: Context): string => {
+        if (ctx.callbackQuery?.from && ctx.callbackQuery.from?.username) {
+            return `${ctx.callbackQuery.from.username}`
+        }
+        return `${ctx?.from?.username}`
+    }
+
+    /**
+     * 获取用户别名
+     * @param ctx
+     */
+    public static getNickName = (ctx: Context): string => {
+        if (ctx.callbackQuery?.from && ctx.callbackQuery.from.first_name) {
+            return `${ctx.callbackQuery.from.first_name}${ctx.callbackQuery.from.last_name}`
+        }
+        return `${ctx.from?.first_name}${ctx.from?.last_name}`
+    }
 
     /**
      * 获取群组id
