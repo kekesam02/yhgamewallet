@@ -1,9 +1,10 @@
 import type {Context} from "telegraf";
-import redis from "../../../../../config/redis";
-import BotPaymentModel from "../../../../../models/BotPaymentModel";
-import PaymentType from "../../../../../type/PaymentType";
-import WalletType from "../../../../../type/WalletType";
 import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
+import BotPaymentModel from "../../../../../models/BotPaymentModel";
+import moment from "moment/moment";
+import WalletType from "../../../../../type/WalletType";
+import PaymentType from "../../../../../type/PaymentType";
+import redis from "../../../../../config/redis";
 import {addLockByTgId} from "../../../../../config/redislock";
 /**
  * 公共方法处理
@@ -22,7 +23,7 @@ class WalletTiBiHistoryMethod {
      * @param ctx
      */
     public static startTbls = async (ctx: Context,callbackData:string) => {
-        this.loadData(ctx,callbackData,true)
+        this.loadDataTiBi(ctx,callbackData,true)
     }
 
     /**
@@ -31,7 +32,7 @@ class WalletTiBiHistoryMethod {
      * @param callbackData
      */
     public static searchFilterTb = async (ctx:Context,callbackData:string)=>{
-        this.loadData(ctx,callbackData,false)
+        this.loadDataTiBi(ctx,callbackData,false)
     }
 
     /**
@@ -40,13 +41,13 @@ class WalletTiBiHistoryMethod {
      * @param callbackData
      * @param mark
      */
-    private static loadData = async (ctx:Context,callbackData:string,mark:boolean)=>{
+    private static loadDataTiBi = async (ctx:Context,callbackData:string,mark:boolean)=>{
         // 获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
-        await addLockByTgId(['account_lock_'+tgId],async()=>{
+        await addLockByTgId(['tibilis_lock_'+tgId],async()=>{
             // 查询用户信息
             let nickname = ctx.callbackQuery?.from?.first_name || 0
-            var accountCallbackData = callbackData?.replaceAll('myaccount_','') ||''
+            var accountCallbackData = callbackData?.replaceAll('tbls_','') ||''
             var splitData = accountCallbackData?.split("_") || ['all',1,0]
             const pageNo = Number(splitData[1])
             const opPtype = splitData[2]

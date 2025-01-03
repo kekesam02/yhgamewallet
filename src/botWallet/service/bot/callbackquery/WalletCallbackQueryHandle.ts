@@ -19,7 +19,6 @@ import WalletShouchongFanLiMethod from "../../handle/usercenter/shouchongfanli/W
 import WalletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
 import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/WalletTixianAddressMethod";
 import WalletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
-import WalletUserCenterController from "../../../controller/WalletUserCenterController";
 
 
 /**
@@ -70,7 +69,7 @@ class WalletCallbackQueryHandle {
             WalletTixianAddressMethod.updateTxAddress(ctx)
         }else if (callbackStr.startsWith("myaccount_")){// 我的账单搜索和分页
             WalletMyAccountMethod.searchFilterAccount(ctx,callbackStr)
-        }else if (callbackStr.startsWith("mytb_")){// 我的账单搜索和分页
+        }else if (callbackStr.startsWith("tbls_")){// 我的账单搜索和分页
             WalletTiBiHistoryMethod.searchFilterTb(ctx,callbackStr)
         } else{
             switch (callbackStr) {
