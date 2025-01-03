@@ -137,7 +137,9 @@ class WalletHandleTixianMethod {
                             paymentRealAmount: price + '',
                             walletType: WalletType.USDT,
                             applyTime: applyTime,
-                            chatId: chatId
+                            chatId: chatId,
+                            status:0,// 申请中
+                            description:"正在发起提现操作，提现金额是【"+price+"】等待审核中..."
                         })
                         //判断是否为异常用户 ----------------这里要思考
                         var userByLinks = await UserModel.createQueryBuilder()
@@ -267,6 +269,8 @@ class WalletHandleTixianMethod {
                         passUsername: ctx.botInfo.username,
                         passNickname: ctx.botInfo.first_name,
                         passTime: passTime,
+                        status:1,// 已完成
+                        description:"提现一笔金额【"+botPayment.paymentAmount+"】已完成，审核人：<a href='tg://user?id="+ctx.botInfo.id+"'>"+ctx.botInfo.username+"</a>"
                     })
                     .where("id=:id", {id: botPayment.id})
                     .execute()
@@ -334,7 +338,9 @@ class WalletHandleTixianMethod {
                         passTgid: ctx.botInfo.id + '',
                         passUsername: ctx.botInfo.username,
                         passNickname: ctx.botInfo.first_name,
-                        passTime: refuseTime
+                        passTime: refuseTime,
+                        status:2,// 被拒绝
+                        description:"提现一笔金额【"+botPayment.paymentAmount+"】被拒，审核人：<a href='tg://user?id="+ctx.botInfo.id+"'>"+ctx.botInfo.username+"</a>"
                     })
 
                     const addr = AESUtils.decodeAddr(botPayment.paymentTypeNumber) || ''

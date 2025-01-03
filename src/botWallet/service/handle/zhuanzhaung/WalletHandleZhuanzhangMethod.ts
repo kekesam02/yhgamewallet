@@ -286,6 +286,7 @@ class WalletHandleZhuanzhangMethod {
                 paymentType: PaymentTypeEnum.YHZZ.value,
                 paymentTypeName: PaymentTypeEnum.YHZZ.name,
                 operateType: 0, // 支出
+                status:0,
                 paymentTypeNumber: 'zk' + orderId,
                 paymentAmount: money+ '' ,
                 paymentRealAmount: money+ '',

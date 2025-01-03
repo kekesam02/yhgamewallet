@@ -44,16 +44,16 @@ class PaymentTypeEnum {
     /**
      * 提现打款记录
      */
-    static TX_DKJL = {name:"提现打款记录",value:PaymentType.TX_DKJL};
+    static TX_DKJL = {name:"提现打款",value:PaymentType.TX_DKJL};
     /**
      * 提现退款记录
      */
-    static TK_DKJL = {name:"提现退款记录",value:PaymentType.TK_DKJL};
+    static TK_DKJL = {name:"提现退款",value:PaymentType.TK_DKJL};
 
     /**
      * 彩金打款记录
      */
-    static CJ_DKJL = {name:"彩金打款记录",value:PaymentType.CJ_DKJL};
+    static CJ_DKJL = {name:"彩金打款",value:PaymentType.CJ_DKJL};
 
     /**
      * 用户转账

@@ -1,20 +1,9 @@
 import type {Context} from "telegraf";
-import ButtonUtils from '../../../../../commons/button/ButtonUtils'
-import WalletBotHtml from '../../../../../html/walletHtml/WalletBotHtml'
-import AESUtils from "../../../../../commons/AESUtils";
-import UserModel from "../../../../../models/UserModel";
-import WalletController from "../../../../controller/WalletController";
-import BotWithdrawalAddrModel from "../../../../../models/BotWithdrawalAddrModel";
-import redis from "../../../../../config/redis";
-import WalletHandleMethod from "../../WalletHandleMethod";
-import walletUserCenterController from "../../../../controller/WalletUserCenterController";
 import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
-import {ALL} from "node:dns";
-import botPaymentModel from "../../../../../models/BotPaymentModel";
 import BotPaymentModel from "../../../../../models/BotPaymentModel";
-import DateFormatUtils from "../../../../../commons/date/DateFormatUtils";
 import moment from "moment/moment";
 import WalletType from "../../../../../type/WalletType";
+import PaymentType from "../../../../../type/PaymentType";
 
 /**
  * 公共方法处理
@@ -48,14 +37,32 @@ class WalletMyAccountMethod {
         var botPaymentModels = botPaymentModelPage.records;
         html += "🚩 总成交"+botPaymentModelPage.total+"笔\n"
         for (let i = 0; i < botPaymentModels.length; i++) {
-            html +="\n➖➖➖➖➖➖"+((pageNo-1)*pageSize+i + 1)+"➖➖➖➖➖➖➖"
-            html +="\n类型：" + botPaymentModels[i].paymentTypeName
-            html +="\n金额：" + (botPaymentModels[i].operateType==1?"➕收入":"➖支出")+' '+botPaymentModels[i].paymentAmount+' '+(botPaymentModels[i].walletType == WalletType.USDT?'USDT':'TRX')
+            html +="\n("+(botPaymentModels[i].operateType==1?"➕收入":"➖支出")+")➖➖➖➖第"+((pageNo-1)*pageSize+i + 1)+"笔➖➖➖➖"
+            html +="\n货币类型：" + (botPaymentModels[i].walletType == WalletType.USDT?'USDT':'TRX')
+            html +="\n操作类型：" + botPaymentModels[i].paymentTypeName
+            html +="\n操作金额：" + botPaymentModels[i].paymentAmount
             html +="\n"+(botPaymentModels[i].operateType==1?"收入":"支出")+"之前余额：" + botPaymentModels[i].balanceBefore
             html +="\n"+(botPaymentModels[i].operateType==1?"收入":"支出")+"之后余额：" + botPaymentModels[i].balanceAfter
             html +="\n操作时间：" + moment(botPaymentModels[i].createTime).format('yyyy-MM-DD HH:mm')
-            html +="\n申请时间：" + moment(botPaymentModels[i].applyTime).format('yyyy-MM-DD HH:mm')
-            html +="\n通过日期：" + moment(botPaymentModels[i].passTime).format('yyyy-MM-DD HH:mm')
+            if(botPaymentModels[i].applyTime)html +="\n申请时间：" + moment(botPaymentModels[i].applyTime).format('yyyy-MM-DD HH:mm')
+            if(botPaymentModels[i].passTime)html +="\n通过日期：" + moment(botPaymentModels[i].passTime).format('yyyy-MM-DD HH:mm')
+            if(botPaymentModels[i].description)html +="\n备注：" + botPaymentModels[i].description
+            // 提现
+            if(botPaymentModels[i].paymentType == PaymentType.TX_DKJL){
+                if(botPaymentModels[i].status==0)html +="\n状态：等待审核"
+                if(botPaymentModels[i].status==1)html +="\n状态：已完成"
+                if(botPaymentModels[i].status==2)html +="\n状态：被拒绝"
+            }
+            // 转账
+            if(botPaymentModels[i].paymentType == PaymentType.YHZZ){
+                if(botPaymentModels[i].status==0)html +="\n状态：等待收款"
+                if(botPaymentModels[i].status==1)html +="\n状态：已完成"
+            }
+            // 收款
+            if(botPaymentModels[i].paymentType == PaymentType.YHZZ){
+                if(botPaymentModels[i].status==0)html +="\n状态：等待转账"
+                if(botPaymentModels[i].status==1)html +="\n状态：已完成"
+            }
         }
         await ctx.replyWithHTML(html, WalletUserCenterController.createUserAccountListBtn(pageNo, searchType))
     }

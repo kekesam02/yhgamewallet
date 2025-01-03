@@ -156,6 +156,10 @@ class BotPaymentModel extends BaseEntity {
      *      1: 已转账 / 已收款 -- 转账
      *      0: 初始状态 --收款
      *      1: 发起收款 / 成功收款 -- 转账
+     * ---------- 提现
+     *     0 申请中
+     *     1 已完成
+     *     2 被拒绝
      */
     @Column({
         name: 'status',
@@ -244,6 +248,15 @@ class BotPaymentModel extends BaseEntity {
         name: 'chat_id'
     })
     chatId: string
+
+    /**
+     * 备注
+     */
+    @Column({
+        name: 'description',
+        default:''
+    })
+    description: string
 
     /**
      * 保存用户订单对象
