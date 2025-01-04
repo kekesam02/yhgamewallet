@@ -115,6 +115,14 @@ class BotRoundModel extends BaseEntity{
     updateTime: string
 
     /**
+     * 操作人
+     */
+    @Column({
+        name: 'tg_id'
+    })
+    tgId: string
+
+    /**
      * 获取开奖回合数据
      */
     public getRoundList = (

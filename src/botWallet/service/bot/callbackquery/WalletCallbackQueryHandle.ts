@@ -86,7 +86,7 @@ class WalletCallbackQueryHandle {
                     break
                 // 彩金转化
                 case WalletUserCenterEnum.CTRXZH:
-                    WalletCaiJinZhuanhuaMethod.startCtrxzh(ctx)
+                    WalletCaiJinZhuanhuaMethod.startCtrxzh(ctx,callbackStr)
                     break
                 // 领取邀请返利
                 case WalletUserCenterEnum.YQFL:
