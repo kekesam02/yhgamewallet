@@ -172,11 +172,11 @@ class WalletUserCenterController {
     public static createYaoqingLingQuBtn = () => {
         return new ButtonUtils().createCallbackBtn([
             [
+                this.BackUserHome,
                 {
                     text:"✅ 确认领取",
                     query:"lqyqhyflu"
-                },
-                this.BackUserHome
+                }
             ]
         ])
     }

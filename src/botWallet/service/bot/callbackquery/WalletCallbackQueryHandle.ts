@@ -12,13 +12,13 @@ import WalletHandleChongzhiMethod from "../../handle/dashbord/chongzhi/WalletHan
 import WalletHandleHongBaoMethod from "../../handle/dashbord/hongbao/WalletHandleHongBaoMethod";
 import WalletHandleShangduiMethod from "../../handle/dashbord/shangdui/WalletHandleShangduiMethod";
 import WalletMyAccountMethod from "../../handle/usercenter/myaccount/WalletMyAccountMethod";
-import WalletTiBiHistoryMethod from "../../handle/usercenter/history/WalletTiBiHistoryMethod";
-import WalletCaiJinTransferMethod from "../../handle/usercenter/caijintransfer/WalletCaiJinTransferMethod";
+import WalletTiBiHistoryMethod from "../../handle/usercenter/tibihistory/WalletTiBiHistoryMethod";
+import WalletCaiJinZhuanhuaMethod from "../../handle/usercenter/caijinzhuanhua/WalletCaiJinZhuanhuaMethod";
 import WalletYaoqingFanLiMethod from "../../handle/usercenter/yaoqingfanli/WalletYaoqingFanLiMethod";
 import WalletShouchongFanLiMethod from "../../handle/usercenter/shouchongfanli/WalletShouchongFanLiMethod";
 import WalletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
-import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/WalletTixianAddressMethod";
-import WalletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
+import WalletTixianAddressMethod from "../../handle/usercenter/tixiandizhi/WalletTixianAddressMethod";
+import WalletXiaoeMianmiMethod from "../../handle/usercenter/xiaoemianmi/WalletXiaoeMianmiMethod";
 
 
 /**
@@ -64,7 +64,7 @@ class WalletCallbackQueryHandle {
         }else if(callbackStr.startsWith('skqxzf')){ // 收款-取消支付
             WalletHandleShouKuanMethod.startCancelPayCallback(ctx,bot,callbackStr)
         } else if(callbackStr.startsWith('smNoPasswordChange')){ // 修改免密额度
-           WalletLimitMethod.startUpdateUserLimiter(ctx)
+           WalletXiaoeMianmiMethod.startUpdateUserLimiter(ctx)
         }else if (callbackStr.startsWith("update_txaddr_btn")){// 修改提现地址
             WalletTixianAddressMethod.updateTxAddress(ctx)
         }else if (callbackStr.startsWith("myaccount_")){// 我的账单搜索和分页
@@ -86,7 +86,7 @@ class WalletCallbackQueryHandle {
                     break
                 // 彩金转化
                 case WalletUserCenterEnum.CTRXZH:
-                    WalletCaiJinTransferMethod.startCtrxzh(ctx)
+                    WalletCaiJinZhuanhuaMethod.startCtrxzh(ctx)
                     break
                 // 领取邀请返利
                 case WalletUserCenterEnum.YQFL:
@@ -98,7 +98,7 @@ class WalletCallbackQueryHandle {
                     break
                 // 小额免密
                 case WalletUserCenterEnum.XEMM:
-                    WalletLimitMethod.startXemm(ctx)
+                    WalletXiaoeMianmiMethod.startXemm(ctx)
                     break
                 // 邀请好友
                 case WalletUserCenterEnum.YQHY:

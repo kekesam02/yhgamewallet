@@ -5,8 +5,8 @@ import {Telegraf} from "telegraf";
 import WalletHandleHongBaoMethod from "../../handle/dashbord/hongbao/WalletHandleHongBaoMethod";
 import WalletHandleTixianMethod from "../../handle/dashbord/tixian/WalletHandleTixianMethod";
 import WalletHandleShangduiMethod from "../../handle/dashbord/shangdui/WalletHandleShangduiMethod";
-import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/WalletTixianAddressMethod";
-import WalletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
+import WalletTixianAddressMethod from "../../handle/usercenter/tixiandizhi/WalletTixianAddressMethod";
+import WalletXiaoeMianmiMethod from "../../handle/usercenter/xiaoemianmi/WalletXiaoeMianmiMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -73,7 +73,7 @@ class WalletMessageHandle {
             }
             // 小额免密
             if (currentop == 'xemm') {
-                WalletLimitMethod.updateUserLimiter(text, tgId, ctx)
+                WalletXiaoeMianmiMethod.updateUserLimiter(text, tgId, ctx)
                 return;
             }
         }else{

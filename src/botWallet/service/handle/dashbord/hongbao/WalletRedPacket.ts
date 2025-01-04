@@ -558,7 +558,7 @@ class WalletRedPacket {
      */
     public verifyVip = (ctx: Context, botHb: BotHb): boolean => {
         if (botHb.conditonshy == 1) {
-            if (ctx.callbackQuery && ctx.callbackQuery.from.is_premium) {
+            if (ctx.callbackQuery && ctx.callbackQuery?.from?.is_premium) {
                 return true
             }
             return false

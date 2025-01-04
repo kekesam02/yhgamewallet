@@ -15,7 +15,7 @@ import {addLockByTgId} from "../../../../../config/redislock";
  * telegraf官网： https://telegraf.js.org/classes/Context.html#replyWithHTML
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
-class WalletLimitMethod {
+class WalletXiaoeMianmiMethod {
     /**
      * 小额免密
      * 代号：xemm_btn
@@ -87,4 +87,4 @@ class WalletLimitMethod {
 }
 
 
-export default WalletLimitMethod
+export default WalletXiaoeMianmiMethod

@@ -11,7 +11,7 @@ import {addLockByTgId} from "../../../../../config/redislock";
  * telegraf官网： https://telegraf.js.org/classes/Context.html#replyWithHTML
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
-class WalletCaiJinTransferMethod {
+class WalletCaiJinZhuanhuaMethod {
 
     /**
      * 彩金转化
@@ -34,4 +34,4 @@ class WalletCaiJinTransferMethod {
 }
 
 
-export default WalletCaiJinTransferMethod
+export default WalletCaiJinZhuanhuaMethod

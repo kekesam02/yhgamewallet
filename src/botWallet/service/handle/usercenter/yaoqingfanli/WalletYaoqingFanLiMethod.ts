@@ -134,7 +134,7 @@ class WalletYaoqingFanLiMethod {
                     // 删除上一次消息
                     await WalletUserCenterMethod.removeMessage(ctx)
                     // 发送消息
-                    await ctx.replyWithHTML("领取成功",WalletUserCenterController.createUserCenterBackBtn())
+                    await ctx.replyWithHTML("✅ 领取成功",WalletUserCenterController.createUserCenterBackBtn())
                     await queryRunner.commitTransaction()
                 } catch (e){
                     await queryRunner.rollbackTransaction()
@@ -144,7 +144,6 @@ class WalletYaoqingFanLiMethod {
             await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
         })
     }
-
 }
 
 

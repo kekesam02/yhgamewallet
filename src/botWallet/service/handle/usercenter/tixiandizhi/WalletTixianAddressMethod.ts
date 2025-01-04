@@ -36,7 +36,7 @@ class WalletTixianAddressMethod {
             return;
         }
         // 删除上一次的消息
-        await WalletUserCenterController.removeMessage(ctx)
+        await WalletUserCenterMethod.removeMessage(ctx)
         // 提示当前的信息
         await ctx.replyWithHTML("👜 您的提现地址是：\n<code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"</code>（点击可复制）",WalletUserCenterController.createUpdateTxAddrBtn())
     }
