@@ -375,6 +375,7 @@ class PC28Controller {
         //     url: 'http://api.openjiang.com/api?token=230F534DE38145D7&t=jnd28&rows=5&p=json',
         //     method: 'get'
         // })
+
         let json = await request({
             url: 'https://api.8828355.com/api?token=11EB9FBB41B4D90C&t=jnd28&rows=5&p=json',
             method: 'get'
@@ -397,6 +398,32 @@ class PC28Controller {
             item.next_time = item['drawTime']
             return item
         })
+
+        // 新的开奖接口
+        // let json = await request({
+        //     url: 'https://www.8kai.cc/localapi/api.php?ac=result&lottery=jndpc28&limit=15',
+        //     method: 'get'
+        // })
+        // if (!json.data) {
+        //     throw Error(json.statusText ?? '您无权访问改ip')
+        // }
+        // console.log('请求到的数据', json.data)
+        // json.data.data = json.data.data.map((item: any) => {
+        //     item.expect = item['nu_id']
+        //     if (ScheduleHandle.pc28Config.isTest) {
+        //         item.open_code = ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex]
+        //             ? ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex]
+        //             : ScheduleHandle.pc28Config.testList[0]
+        //     } else {
+        //         item.open_code = `${item['number_1']},${item['number_2']},${item['number_3']}`
+        //     }
+        //     item.open_time = item['kai_times']
+        //     item.next_expect = item['next_nu_id']
+        //     item.next_time = item['kai_times']
+        //     return item
+        // })
+
+
         if (json.data instanceof String && json.data.indexOf('请求频率太快') > 0) {
             return {
                 "rows": 5,
