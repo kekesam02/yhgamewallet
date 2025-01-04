@@ -11,7 +11,7 @@ enum WalletUserCenterEnum {
     /**
      * 提币历史
      */
-    TBLS = 'tbls_btn_all_1_0_0',
+    TBLS = 'tbls_all_1_0_0',
 
     /**
      * 彩金转化

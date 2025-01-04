@@ -18,6 +18,7 @@ import MessageUtils from "../commons/message/MessageUtils";
 import {queryRunner} from "../config/database";
 import ScheduleHandle from "../commons/schedule/ScheduleHandle";
 import AESUtils from "../commons/AESUtils";
+import DateFormatUtils from "../commons/date/DateFormatUtils";
 
 /**
  * 用户流水表
@@ -275,9 +276,11 @@ class BotPaymentModel extends BaseEntity {
         money: string,
         linkAddr: string = ScheduleHandle.pc28Config.roundId ?? new OrderUtils().createPaymentModelId()
     ) => {
+        // 收款时间
         this.tgId = userModel.tgId
         this.username = userModel.userName
         this.nickname = userModel.nickName
+        this.uid = userModel.id
         this.paymentType = paymentType
         this.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
         this.balanceBefore = userModel.getBalance(wallType)
@@ -289,6 +292,9 @@ class BotPaymentModel extends BaseEntity {
         this.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
         this.walletType = wallType
         this.gameType = gameType
+        this.applyTime = DateFormatUtils.CurrentDateFormatString()
+        this.del = 0
+        this.status = 1
         return this
     }
 
@@ -502,11 +508,12 @@ class BotPaymentModel extends BaseEntity {
     /**
      * 获取用户账单信息
      * @param tgId 用户tgId
-     * @param ptype 1 USDT 2 TRX
+     * @param wtype 1 USDT 2 TRX
+     * @param ptype 操作类型
      * @param pageNo
      * @param pageSize
      */
-    public static findPaymentByTgIdPage = async (tgId: number, ptype: number, pageNo: number, pageSize: number) => {
+    public static findPaymentByTgIdPage = async (tgId: number, wtype: WalletType, ptype: PaymentType, pageNo: number, pageSize: number) => {
         const aesTgId = AESUtils.encodeUserId(tgId.toString())
         var selectQueryBuilder = BotPaymentModel.createQueryBuilder()
             .where('user_id = :tgId and del = 0', {
@@ -519,9 +526,14 @@ class BotPaymentModel extends BaseEntity {
             });
 
         // 钱包类型 1usdt 2 trx
-        if (ptype > 0) {
-            selectQueryBuilder.andWhere('wallet_type = :wtype', {'wtype': ptype})
-            countSelectQueryBuilder.andWhere('wallet_type = :wtype', {'wtype': ptype})
+        if (wtype > 0) {
+            selectQueryBuilder.andWhere('wallet_type = :wtype', {'wtype': wtype})
+            countSelectQueryBuilder.andWhere('wallet_type = :wtype', {'wtype': wtype})
+        }
+
+        if(ptype > 0 ){
+            selectQueryBuilder.andWhere('payment_type = :ptype', {'ptype': ptype})
+            countSelectQueryBuilder.andWhere('payment_type = :ptype', {'ptype': ptype})
         }
         // 求总数
         const {total} = await countSelectQueryBuilder.select("count(1)", "total").getRawOne()

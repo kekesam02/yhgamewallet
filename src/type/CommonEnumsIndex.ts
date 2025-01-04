@@ -90,6 +90,8 @@ class CommonEnumsIndex {
                 return '好友返利'
             case PaymentType.HYCJ:
                 return '好运彩金'
+            case PaymentType.EMPTY:
+                return '空处理'
         }
     }
 
@@ -142,6 +144,8 @@ class CommonEnumsIndex {
                 return 1
             case PaymentType.HYCJ:
                 return 1
+            case PaymentType.EMPTY:
+                return 0
         }
     }
 }
