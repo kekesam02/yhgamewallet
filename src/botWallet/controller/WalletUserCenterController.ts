@@ -167,6 +167,21 @@ class WalletUserCenterController {
     }
 
     /**
+     * 创建领取邀请返利
+     */
+    public static createYaoqingLingQuBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text:"✅ 确认领取",
+                    query:"lqyqhyflu"
+                },
+                this.BackUserHome
+            ]
+        ])
+    }
+
+    /**
      * 创建空按钮
      */
     public static createEmptyBtn = () => {

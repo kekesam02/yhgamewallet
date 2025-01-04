@@ -17,17 +17,13 @@ class WalletMessage {
     static PASSWPORD_EMPTY = '⚠️ 请输入密码'
     static C_PASSWPORD_ERROR = '⚠️ 密码输入不正确!'
     static PASSWORD_MESSAGE = (cacheValue: string) => {
-        return "✅ 密码设置成功！当前密码是：(" + cacheValue + ")\n\n⚠️ 请牢记密码，你的所有资金都和密码绑定，请注意保管您的密码。"
+        return "✅ 密码设置成功！当前密码是：(" + cacheValue + ")\n⚠️ 请牢记密码，你的所有资金都和密码绑定，请注意保管您的密码。"
     }
     static PASSWORD_SUCCESS_MESSAGE =  "✅ 验证成功！欢迎使用一号公馆钱包。"
 
     static PASSWORD_TIP = (arr: string[]) => {
         return "\uD83C\uDFE6欢迎使用一号公馆钱包\n为了您的资金安全\n✏️请输入 4 位支付密码\n\n" + arr.join("")
     }
-    static C_PASSWORD_TIP = (arr: string[]) => {
-        return "\uD83C\uDFE6欢迎使用一号公馆钱包\n为了您的资金安全\n✏请输入 4 位支付密码\n\n" + arr.join("")
-    }
-
 }
 
 
