@@ -25,11 +25,17 @@ class WalletCaiJinTransferMethod {
      * @param ctx
      */
     public static startCtrxzh = async (ctx: Context) => {
-        // 获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
-        // 设置操作
-        await redis.set("currentop" + tgId, "caijinzhuanghua", 'EX', 60 * 60)
-        return Promise.resolve()
+        await addLockByTgId(['caijinzhuanghua_lock_'+tgId],async ()=>{
+            // 设置操作
+            await redis.set("currentop" + tgId, "caijinzhuanghua", 'EX', 60 * 60)
+
+            // BotWallet.java
+            // String cjzh = callbackQueryData.replaceAll("cjzh", "");
+            // botServiceWallet.sendQiehuanHb(cjzh, tgId, userName, firstName, callbackQueryId, this);
+        },async ()=>{
+            await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
+        })
     }
 }
 

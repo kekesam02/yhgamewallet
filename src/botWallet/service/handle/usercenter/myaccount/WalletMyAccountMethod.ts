@@ -49,14 +49,15 @@ class WalletMyAccountMethod {
             try {
                 // 查询用户信息
                 let nickname = ctx.callbackQuery?.from?.first_name || 0
-                var accountCallbackData = callbackData?.replaceAll('tbls_','') ||''
-                var splitData = accountCallbackData?.split("_") || ['all',1,0]
+                var accountCallbackData = callbackData?.replaceAll('myaccount_','') ||''
+                var splitData = accountCallbackData?.split("_") || ['all',1,0,0]
                 const pageNo = Number(splitData[1])
                 const opPtype = splitData[2]
                 const opPages = Number(splitData[3])
                 var pageSize: number = 3
                 var walletType: number = Number(opPtype)
-                var searchWalletType = WalletType.USDT
+                var searchWalletType = 0
+                if(walletType == 1)searchWalletType = WalletType.USDT
                 if(walletType == 2)searchWalletType = WalletType.TRX
                 var html = "🏘️ 欢迎使用一号公馆钱包\n" +
                     "👜 操作用户是：<a href='tg://user?id=" + tgId + "'>" + nickname + "</a>，ID是：<a href='tg://user?id=" + tgId + "'>" + tgId + "</a>\n" +
@@ -68,7 +69,7 @@ class WalletMyAccountMethod {
                 var pages = botPaymentModelPage.pages
                 if(searchWalletType == 1)searchStr = "搜索：USDT"
                 if(searchWalletType == 2)searchStr = "搜索：TRX"
-                html += "🚩 总成交"+botPaymentModelPage.total+"笔\n\n"
+                html += "🚩 总成交"+botPaymentModelPage.total+"笔\n"
                 html+=searchStr
                 if(botPaymentModelPage.total > 0) {
                     for (let i = 0; i < botPaymentModels.length; i++) {
@@ -109,10 +110,10 @@ class WalletMyAccountMethod {
                 // 设置操作
                 await redis.set("currentop" + tgId, "tibilishi", 'EX', 60 * 60)
                 if(mark) {
-                    await ctx.replyWithHTML(html, WalletUserCenterController.createTiBiLishiListBtn(pageNo,pages, searchWalletType))
+                    await ctx.replyWithHTML(html, WalletUserCenterController.createUserAccountListBtn(pageNo,pages, searchWalletType))
                 }else{
                     await ctx.editMessageText(html,{parse_mode:"HTML"})
-                    await ctx.editMessageReplyMarkup(WalletUserCenterController.createTiBiLishiListBtn(pageNo,pages, searchWalletType).reply_markup)
+                    await ctx.editMessageReplyMarkup(WalletUserCenterController.createUserAccountListBtn(pageNo,pages, searchWalletType).reply_markup)
                 }
             }catch (e){
 

@@ -50,13 +50,14 @@ class WalletTiBiHistoryMethod {
                 // 查询用户信息
                 let nickname = ctx.callbackQuery?.from?.first_name || 0
                 var accountCallbackData = callbackData?.replaceAll('tbls_','') ||''
-                var splitData = accountCallbackData?.split("_") || ['all',1,0]
+                var splitData = accountCallbackData?.split("_") || ['all',1,0,0]
                 const pageNo = Number(splitData[1])
                 const opPtype = splitData[2]
                 const opPages = Number(splitData[3])
                 var pageSize: number = 3
                 var walletType: number = Number(opPtype)
-                var searchWalletType = WalletType.USDT
+                var searchWalletType = 0
+                if(walletType == 1)searchWalletType = WalletType.USDT
                 if(walletType == 2)searchWalletType = WalletType.TRX
                 var html = "🏘️ 欢迎使用一号公馆钱包\n" +
                     "👜 操作用户是：<a href='tg://user?id=" + tgId + "'>" + nickname + "</a>，ID是：<a href='tg://user?id=" + tgId + "'>" + tgId + "</a>\n" +
