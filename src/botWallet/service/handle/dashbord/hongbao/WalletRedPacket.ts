@@ -22,7 +22,6 @@ import MessageTipUtils from "../../../../../commons/message/MessageTipUtils";
 import moment from "moment";
 import botPaymentModel from "../../../../../models/BotPaymentModel";
 import ComputeUtils from "../../../../../commons/compute/ComputeUtils";
-import ButtonInnerQueryUtils from "../../../../../commons/button/ButtonInnerQueryUtils";
 import RandomUtils from "../../../../../commons/compute/RandomUtils";
 import {ButtonCallbackType} from "../../../../../commons/button/ButtonCallbackType";
 

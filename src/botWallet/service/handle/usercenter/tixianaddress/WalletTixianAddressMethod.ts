@@ -3,9 +3,7 @@ import AESUtils from "../../../../../commons/AESUtils";
 import UserModel from "../../../../../models/UserModel";
 import BotWithdrawalAddrModel from "../../../../../models/BotWithdrawalAddrModel";
 import redis from "../../../../../config/redis";
-import WalletHandleMethod from "../../WalletHandleMethod";
-import walletUserCenterMethod from "../WalletUserCenterMethod";
-import walletUserCenterController from "../../../../controller/WalletUserCenterController";
+import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
 import {addLockByTgId} from "../../../../../config/redislock";
 import WalletUserCenterMethod from "../WalletUserCenterMethod";
 
@@ -38,9 +36,9 @@ class WalletTixianAddressMethod {
             return;
         }
         // 删除上一次的消息
-        await walletUserCenterMethod.removeMessage(ctx)
+        await WalletUserCenterController.removeMessage(ctx)
         // 提示当前的信息
-        await ctx.replyWithHTML("👜 您的提现地址是：\n<code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"</code>（点击可复制）",walletUserCenterController.createUpdateTxAddrBtn())
+        await ctx.replyWithHTML("👜 您的提现地址是：\n<code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '')+"</code>（点击可复制）",WalletUserCenterController.createUpdateTxAddrBtn())
     }
 
 

@@ -1,7 +1,6 @@
 import type {Context} from "telegraf";
 import WalletHandleMethod from "../../handle/WalletHandleMethod";
 import redis from "../../../../config/redis";
-import WalletUserCenterMethod from "../../handle/usercenter/WalletUserCenterMethod";
 import {Telegraf} from "telegraf";
 import WalletHandleHongBaoMethod from "../../handle/dashbord/hongbao/WalletHandleHongBaoMethod";
 import WalletHandleTixianMethod from "../../handle/dashbord/tixian/WalletHandleTixianMethod";
