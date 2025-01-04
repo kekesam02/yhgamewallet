@@ -143,7 +143,18 @@ class WalletUserCenterController {
     /**
      * 返回个人中心
      */
-    public static createUserCenterBackBtn = (username:string,url:string) => {
+    public static createUserCenterBackBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                this.BackUserHome
+            ]
+        ])
+    }
+
+    /**
+     * 邀请好友
+     */
+    public static createUserCenterYaoqingBtn = (username:string,url:string) => {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 this.BackUserHome,

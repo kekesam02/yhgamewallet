@@ -113,7 +113,7 @@ class WalletInnerQueryHandle {
                 // 邀请好友处理
                 if (currentop == 'yaoqinghaoyou') {
                     // 红包连消息处理
-                    return WalletYaoqingHaoyouMethod.startYaoqingHaoYou(query,queryId, tgId, ctx)
+                    return WalletYaoqingHaoyouMethod.startInnerYaoqingHaoYou(query,queryId, tgId, ctx)
                 }
             }else{
                 // 尝试发送一个简单的响应

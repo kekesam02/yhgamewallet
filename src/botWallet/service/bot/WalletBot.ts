@@ -8,7 +8,9 @@ import WalletHandleMethod from "../handle/WalletHandleMethod";
 import WalletInnerQueryHandle from "./inlinequery/WalletInnerQueryHandle";
 import WalletHandleZhuanzhangMethod from "../handle/dashbord/zhuanzhaung/WalletHandleZhuanzhangMethod";
 import WalletHandleShouKuanMethod from "../handle/dashbord/shoukuan/WalletHandleShouKuanMethod";
-import walletHandleChongzhiMethod from "../handle/dashbord/chongzhi/WalletHandleChongzhiMethod";
+import WalletHandleChongzhiMethod from "../handle/dashbord/chongzhi/WalletHandleChongzhiMethod";
+import WalletYaoqingHaoyouMethod from "../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
+import WalletUserCenterMethod from "../handle/usercenter/WalletUserCenterMethod";
 
 /**
  * 娱乐机器人核心代码
@@ -16,7 +18,7 @@ import walletHandleChongzhiMethod from "../handle/dashbord/chongzhi/WalletHandle
 const bot = new Telegraf(getConfig().botConfig.WalletToken)
 const botWallet = new Telegraf(getConfig().botConfig.WalletTokenTest)
 
-bot.command('quit', async (ctx:Context) => {
+bot.command('quit', async (ctx: Context) => {
     WalletHandleMethod.clearCacheLogin(ctx)
     WalletHandleMethod.clearCacheRelation(ctx)
     ctx.reply("退出成功，谢谢你的使用！")
@@ -24,12 +26,12 @@ bot.command('quit', async (ctx:Context) => {
 })
 
 bot.telegram.setMyCommands([
-    { command: "start", description: "启动机器人" },
-    { command: "quit", description: "退出机器人" },
+    {command: "start", description: "启动机器人"},
+    {command: "quit", description: "退出机器人"},
     // 可以添加更多命令
 ]).then(() => {
     console.log("命令设置成功");
-}) .catch((err) => {
+}).catch((err) => {
     console.error("设置命令时出错", err);
 })
 
@@ -53,19 +55,33 @@ bot.command('start', async (ctx) => {
     var payload = ctx.payload
     if (payload) {
         // 转账
-        if ( payload.startsWith('inline_')) {
+        if (payload.startsWith('inline_')) {
             WalletHandleZhuanzhangMethod.startCommandInputPassword(ctx, payload)
         }
+
         // 收款
-        if (payload && payload.startsWith('shoukuan_')) {
+        if (payload.startsWith('shoukuan_')) {
             WalletHandleShouKuanMethod.startShouKuanPayCommand(ctx, payload, bot)
         }
+
         // 充值
-        if (payload && payload.startsWith('deposit')) {
-            walletHandleChongzhiMethod.startChongZhi(ctx)
+        if (payload.startsWith('deposit')) {
+            WalletHandleChongzhiMethod.startChongZhi(ctx)
         }
+
+        // 邀请好友
+        if (payload.startsWith('hy')) {
+            var inviteTgId = payload.replaceAll('hy', '')
+            if (/\d+/.test(inviteTgId)) {
+                WalletYaoqingHaoyouMethod.startYaoqingHaoYou(inviteTgId, ctx)
+            }else{
+                // 返回个人首页
+                WalletUserCenterMethod.startUserCenterCallback(ctx)
+            }
+        }
+
     } else {
-         WalletHandleMethod.startCommandCallback(ctx)
+        WalletHandleMethod.startCommandCallback(ctx)
     }
 })
 
@@ -74,19 +90,19 @@ bot.command('start', async (ctx) => {
  */
 bot.on(message('text'), async (ctx: Context) => {
     let messageHandle = new WalletMessageHandle();
-    messageHandle.listenerMessage(ctx,botWallet)
+    messageHandle.listenerMessage(ctx, botWallet)
 })
 
 /**
  * 监听用户点击按钮回调
  */
 bot.on('callback_query', async (ctx) => {
-    WalletCallbackQueryHandle.listenerMessage(ctx,bot,botWallet)
+    WalletCallbackQueryHandle.listenerMessage(ctx, bot, botWallet)
 })
 
 bot.on('inline_query', async (ctx) => {
     console.log('--------------------内连按钮回调--------------', ctx)
-    WalletInnerQueryHandle.listenerInnerQuery(ctx,botWallet)
+    WalletInnerQueryHandle.listenerInnerQuery(ctx, botWallet)
 })
 
 
@@ -94,15 +110,15 @@ bot.on('inline_query', async (ctx) => {
  * 监听财务机器人按钮回调
  */
 botWallet.on('callback_query', async (ctx) => {
-    WalletCallbackQueryHandle.cBotlistenerMessage(ctx,bot)
+    WalletCallbackQueryHandle.cBotlistenerMessage(ctx, bot)
 })
 
-bot.launch().then(() =>{
+bot.launch().then(() => {
     console.log('bot钱包walletBot已经成功启动')
 })
 
 
-botWallet.launch().then(() =>{
+botWallet.launch().then(() => {
     console.log('botWallet钱包walletBot已经成功启动')
 })
 
@@ -124,7 +140,6 @@ process.once('SIGTERM', () => {
     console.log('监听到关闭了2')
     bot.stop('SIGTERM');
 })
-
 
 
 // Enable graceful stop

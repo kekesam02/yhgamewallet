@@ -15,7 +15,7 @@ class WalletConfig {
     // 登陆使用
     static walltPayBotLoginURL:string = getConfig().botConfig.WalletUrl+'?start=login_'
     // 邀请好友
-    static walltPayBotYaoQingURL:string = getConfig().botConfig.WalletUrl+'?start='
+    static walltPayBotYaoQingURL:string = getConfig().botConfig.WalletUrl+'?start=hy'
     // 个人跳转
     static MEURL:string = 'https://t.me/'
 }

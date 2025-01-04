@@ -8,7 +8,6 @@ import WalletHandleTixianMethod from "../../handle/dashbord/tixian/WalletHandleT
 import WalletHandleShangduiMethod from "../../handle/dashbord/shangdui/WalletHandleShangduiMethod";
 import WalletTixianAddressMethod from "../../handle/usercenter/tixianaddress/WalletTixianAddressMethod";
 import WalletLimitMethod from "../../handle/usercenter/walletlimit/WalletLimitMethod";
-import ContextUtil from "../../../../commons/ContextUtil";
 
 /**
  * 钱包机器人收到的用户消息处理器

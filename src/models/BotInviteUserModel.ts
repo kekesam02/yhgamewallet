@@ -79,6 +79,7 @@ class BotInviteUserModel extends BaseEntity{
 
     /**
      * 类型
+     * 拉新类型，红包拉新和积分复活拉新，0是红包1是积分
      */
     @Column({
         name: 'type',

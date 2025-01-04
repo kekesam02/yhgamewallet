@@ -13,6 +13,8 @@ import walletConfig from "../../../../WalletConfig";
 import walletUserCenterController from "../../../../controller/WalletUserCenterController";
 import ButtonInnerQueryUtils from "../../../../../commons/button/ButtonInnerQueryUtils";
 import WalletConfig from "../../../../WalletConfig";
+import WalletUserCenterMethod from "../WalletUserCenterMethod";
+import walletHandleMethod from "../../WalletHandleMethod";
 
 /**
  * 公共方法处理
@@ -48,7 +50,7 @@ class WalletYaoqingHaoyouMethod {
                 "已邀请人数："+num+"\n" +
                 "推荐链接：\n<code>" +url+"</code>(点击复制)";
             // 发送消息
-            await ctx.replyWithHTML(html,walletUserCenterController.createUserCenterBackBtn(nickname,url))
+            await ctx.replyWithHTML(html,walletUserCenterController.createUserCenterYaoqingBtn(nickname,url))
         },async ()=>{
             await ctx.reply('亲，操作慢点，休息一会在操作!')
         })
@@ -61,7 +63,7 @@ class WalletYaoqingHaoyouMethod {
      * @param tgId
      * @param ctx
      */
-    public static startYaoqingHaoYou = async (query: string, queryId: string, tgId: number, ctx: Context) => {
+    public static startInnerYaoqingHaoYou = async (query: string, queryId: string, tgId: number, ctx: Context) => {
         await addLockByTgId(['haoyouyapqing_lock_' + tgId + ''], async () => {
             // 创建一个可分享的结果
             await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryDialog({
@@ -78,6 +80,80 @@ class WalletYaoqingHaoyouMethod {
         })
     }
 
+
+    /**
+     * 分享好友邀请
+     * @param query
+     * @param queryId
+     * @param tgId
+     * @param ctx
+     */
+    public static startYaoqingHaoYou = async ( inviteTgId: string, ctx: Context) => {
+        // 获取telegram的tgId
+        let update: any = ctx?.update
+        // 1：获取telegram的tgId
+        var tgId: string = update?.message?.from?.id + '' || ''
+        await addLockByTgId(['haoyouyapqing_start_lock_' + tgId + ''], async () => {
+            var nickname: string = update.message?.from?.first_name || ''
+            var username: string = update.message?.from?.username || ''
+            if(tgId == inviteTgId){
+                ctx.replyWithHTML("⚠️ 自己不能邀请自己!")
+                WalletHandleMethod.startButtonBack(ctx)
+                return;
+            }
+            // 查询是否被邀请过
+            const {num} = await BotInviteUserModel.createQueryBuilder().select("count(1)","num")
+                .where("quilt_tg_id = :quiltTgId",{"quiltTgId":AESUtils.encodeUserId(tgId+'')})
+                .getRawOne()
+            // 说明被邀请过了
+            if(num > 0){
+                // 返回
+                WalletHandleMethod.startButtonBack(ctx)
+                return
+            }
+
+            // 1、注册被邀请人
+            var quitTgIdAes = AESUtils.encodeUserId(tgId+'')
+            var quitTgIdUserBot = await new UserModel().getUserModelById(quitTgIdAes)
+            if(!quitTgIdUserBot){
+                // 如果用户不存在就添加用户，把交易地址赋值给他
+                await UserModel.createQueryBuilder().insert().into(UserModel).values({
+                    tgId: quitTgIdAes,
+                    nickName: nickname,
+                    userName: username,
+                    vip: 0,
+                    USDT: "0",
+                    promotionLink: '',
+                    rechargeLink: ''
+                }).execute()
+                // 查询回填ID
+                quitTgIdUserBot = await new UserModel().getUserModelById(quitTgIdAes)
+
+                // 2、查询邀请人信息
+                var inviteTgIdAes = AESUtils.encodeUserId(inviteTgId)
+                var inviterTgIdUserBot = await new UserModel().getUserModelById(inviteTgIdAes)
+                // 3、保存邀请关系
+                await BotInviteUserModel.createQueryBuilder().insert().into(BotInviteUserModel)
+                    .values({
+                        inviterTgId:inviteTgIdAes,
+                        inviterUserId:inviterTgIdUserBot?.id,
+                        inviterUsername:inviterTgIdUserBot?.nickName,
+                        inviterNickname:inviterTgIdUserBot?.userName,
+                        quiltTgId:quitTgIdAes,
+                        quiltUserId:quitTgIdUserBot?.id,
+                        quiltUsername:quitTgIdUserBot?.nickName,
+                        quiltNickname:quitTgIdUserBot?.userName,
+                        linkType: 0
+                    }).execute()
+                // 4、返回
+                await WalletHandleMethod.startButtonBack(ctx)
+            }else{
+                await WalletHandleMethod.startButtonBack(ctx)
+            }
+        }, async () => {
+            await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
+        })
+    }
 }
 
 
