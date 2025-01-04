@@ -97,7 +97,7 @@ class WalletYaoqingHaoyouMethod {
             var nickname: string = update.message?.from?.first_name || ''
             var username: string = update.message?.from?.username || ''
             if(tgId == inviteTgId){
-                ctx.replyWithHTML("⚠️ 自己不能邀请自己!")
+                ctx.replyWithHTML("⚠️  自己不能邀请自己!")
                 WalletHandleMethod.startButtonBack(ctx)
                 return;
             }
