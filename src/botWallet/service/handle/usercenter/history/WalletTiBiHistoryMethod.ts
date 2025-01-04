@@ -72,7 +72,7 @@ class WalletTiBiHistoryMethod {
                 html+=searchStr
                 if(botPaymentModelPage.total > 0) {
                     for (let i = 0; i < botPaymentModels.length; i++) {
-                        html += "\n(" + (botPaymentModels[i].operateType == 1 ? "➕收入" : "➖支出") + ")➖➖第" + ((pageNo - 1) * pageSize + i + 1) + "笔➖➖"
+                        html += "\n(" + (botPaymentModels[i].operateType == 1 ? "➕收入" : "➖支出") + ")➖➖➖➖第" + ((pageNo - 1) * pageSize + i + 1) + "笔➖➖➖"
                         html += "\n货币类型：" + (botPaymentModels[i].walletType == WalletType.USDT ? 'USDT' : 'TRX')
                         html += "\n操作类型：" + botPaymentModels[i].paymentTypeName
                         if (botPaymentModels[i].paymentType == PaymentType.TX_DKJL) {

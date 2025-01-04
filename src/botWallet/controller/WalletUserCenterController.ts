@@ -143,10 +143,14 @@ class WalletUserCenterController {
     /**
      * 返回个人中心
      */
-    public static createUserCenterBackBtn = () => {
-        return new ButtonUtils().createCallbackBtn([
+    public static createUserCenterBackBtn = (username:string,url:string) => {
+        return new ButtonUtils().createInlineKeySwitchBoard([
             [
-                this.BackUserHome
+                this.BackUserHome,
+                {
+                    text: '选择好友',
+                    switch_inline_query: '来自好友【@'+username+'】邀请你加入一号公馆，点击链接即可加入：\n' + url
+                }
             ]
         ])
     }

@@ -7,6 +7,8 @@ import WalletHandleZhuanzhangMethod from "../../handle/dashbord/zhuanzhaung/Wall
 import WalletHandleShouKuanMethod from "../../handle/dashbord/shoukuan/WalletHandleShouKuanMethod";
 import WalletController from "../../../controller/WalletController";
 import WalletConfig from "../../../WalletConfig";
+import walletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
+import WalletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -106,6 +108,12 @@ class WalletInnerQueryHandle {
                 if(currentop == 'hongbao' || query.indexOf(WalletRedPacketInner.InnerKey) == 0){
                     // 红包连消息处理
                     return new WalletRedPacketInner().innerMessageHandle(ctx,queryId, query)
+                }
+
+                // 邀请好友处理
+                if (currentop == 'yaoqinghaoyou') {
+                    // 红包连消息处理
+                    return WalletYaoqingHaoyouMethod.startYaoqingHaoYou(query,queryId, tgId, ctx)
                 }
             }else{
                 // 尝试发送一个简单的响应

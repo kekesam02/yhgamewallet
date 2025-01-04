@@ -14,6 +14,8 @@ class WalletConfig {
     static walltPayBotChongZhiURL:string = getConfig().botConfig.WalletUrl+'?start=deposit'
     // 登陆使用
     static walltPayBotLoginURL:string = getConfig().botConfig.WalletUrl+'?start=login_'
+    // 邀请好友
+    static walltPayBotYaoQingURL:string = getConfig().botConfig.WalletUrl+'?start='
     // 个人跳转
     static MEURL:string = 'https://t.me/'
 }

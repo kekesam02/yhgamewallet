@@ -67,8 +67,8 @@ class WalletLimitMethod {
                 return
             }
             // 限额的上线
-            if(parseFloat(text) > 1000000){
-                await ctx.replyWithHTML("⚠️ 最大上限为100W")
+            if(parseFloat(text) > 100000000){
+                await ctx.replyWithHTML("⚠️ 最大上限为1,0000,0000")
                 return
             }
             const botUser = await new UserModel().getUserModelByIdNumber(tgId)
