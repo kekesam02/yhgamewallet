@@ -45,7 +45,7 @@ class WalletYaoqingFanLiMethod {
             if(!botKyHongDong){
                 // usdt没有返利
                 // 发送消息
-                await ctx.answerCbQuery("⚠️ 当前暂无好友返利",{show_alert: true})
+                await ctx.answerCbQuery("⚠️ 当前暂无好友返利信息",{show_alert: true})
             }else{
                 //获取用户信息
                 var userById = await new UserModel().getUserModelByIdNumber(tgId);
@@ -134,7 +134,7 @@ class WalletYaoqingFanLiMethod {
                     // 删除上一次消息
                     await WalletUserCenterMethod.removeMessage(ctx)
                     // 发送消息
-                    await ctx.replyWithHTML("领取成功",WalletUserCenterController.createYaoqingLingQuBtn())
+                    await ctx.replyWithHTML("领取成功",WalletUserCenterController.createUserCenterBackBtn())
                     await queryRunner.commitTransaction()
                 } catch (e){
                     await queryRunner.rollbackTransaction()

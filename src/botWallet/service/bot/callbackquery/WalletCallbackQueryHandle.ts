@@ -71,8 +71,8 @@ class WalletCallbackQueryHandle {
             WalletMyAccountMethod.searchFilterAccount(ctx,callbackStr)
         }else if (callbackStr.startsWith("tbls_")){// 我的账单搜索和分页
             WalletTiBiHistoryMethod.searchFilterTb(ctx,callbackStr)
-        } else if (callbackStr.startsWith("lqyqhyfl")){// 我的账单搜索和分页
-            WalletYaoqingFanLiMethod.startLingquFanli(ctx,callbackStr)
+        } else if (callbackStr.startsWith("lqyqhyfl")){// 领取邀请返利
+            WalletYaoqingFanLiMethod.startLingquFanli(ctx)
         } else{
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================

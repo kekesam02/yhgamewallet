@@ -103,6 +103,11 @@ class WalletMyAccountMethod {
                             if (botPaymentModels[i].status == 0) html += "\n操作状态：等待转账"
                             if (botPaymentModels[i].status == 1) html += "\n操作状态：已完成"
                         }
+                        // 收款
+                        if (botPaymentModels[i].paymentType == PaymentType.HYFL) {
+                            if (botPaymentModels[i].status == 0) html += "\n操作状态：等待领取"
+                            if (botPaymentModels[i].status == 1) html += "\n操作状态：已领取"
+                        }
                     }
                 }else{
                     html += "\n\n暂无任务交易记录"
