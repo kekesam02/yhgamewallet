@@ -246,10 +246,10 @@ class BettingCommand28 {
                     let first = isStr ? itemText.split('杀')[0]: itemText.split('.')[0]
                     sha = first + '杀'
                     money = isStr
-                        ? itemText.replaceAll(first + '杀', '')
-                        : itemText.replaceAll(first + '.', '')
+                        ? itemText.replace(first + '杀', '')
+                        : itemText.replace(first + '.', '')
                     if (!isStr) {
-                        itemText = itemText.replaceAll(first + '.', first + '杀')
+                        itemText = itemText.replace(first + '.', first + '杀')
                     }
                     return item2
                 }
@@ -258,8 +258,8 @@ class BettingCommand28 {
                 let isExit = false;
                 item2.forEach((item3, index3) => {
                     if (itemText.substring(0, item3.length) == item3) {
-                        money = itemText.replaceAll(item3, '')
-                        itemText = itemText.replaceAll(item3, item2[0])
+                        money = itemText.replace(item3, '')
+                        itemText = itemText.replace(item3, item2[0])
                         isExit = true
                     }
                 })
@@ -273,6 +273,7 @@ class BettingCommand28 {
                 break
             }
 
+            console.log('当前解析到的金额---', money)
             // 如果是梭哈的话判定一下后面的指令能否对上、如果对不上直接break
             if (currCommand[0] == '梭哈') {
                 if (money == '梭哈') {
@@ -294,6 +295,7 @@ class BettingCommand28 {
                     || money == ''
                     || isNaN(Number(money))
                     || money.split('.').length > 2
+                    || money.indexOf('.') > -1
                 )
             ) {
                 console.log('解析不到金额指令')

@@ -233,7 +233,9 @@ class GameBotHtml {
             // 上注的内容纯文字
             let contentText = item.content.replaceAll(item.amountMoney, '')
             if (item.content.indexOf('杀') > -1) {
+                console.log('当前下注的内容')
                 contentText = item.content.split('杀')[0] + '杀'
+                console.log('替换后的文字', contentText)
             }
             // 倍率
             let rate = new ComputeUtils(item.winningAmount).dividedBy(item.amountMoney, 2).toString()
