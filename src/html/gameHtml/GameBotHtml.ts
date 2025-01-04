@@ -46,7 +46,7 @@ class GameBotHtml {
             content = `${content}${item.content}${this.N}`
         })
         return `
-            昵称: <a href="tg://user?id=${userId}">${user.userName}</a>${this.N
+            昵称: <a href="tg://user?id=${userId}">@${user.userName}</a>${this.N
             }ID: <code>${userId}</code>${this.N
             }期号: <code>${roundId}</code>${this.N
             }${content}${this.N

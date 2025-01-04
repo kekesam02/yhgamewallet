@@ -216,7 +216,7 @@ class WalletHandleShouKuanMethod {
                         passNickname: payBotUser.nickName,
                         status:1,
                         chatId: chatId,
-                        description:"已收到来自用户<a href='tg://user?id="+payBotUser?.tgId+"'>【"+payBotUser?.userName+"】</a>转账"
+                        description:"已收到来自用户<a href='tg://user?id="+payBotUser?.tgId+"'>【@"+payBotUser?.userName+"】</a>转账"
                     })
                     // 付款人余额减少
                     await queryRunner.manager.update(UserModel, {
@@ -246,7 +246,7 @@ class WalletHandleShouKuanMethod {
                         passNickname: shouKuanBotUser?.nickName,
                         status:1,
                         chatId: chatId,
-                        description:"已转账给用户<a href='tg://user?id="+shouKuanBotUser?.tgId+"'>【"+shouKuanBotUser?.userName+"】</a>"
+                        description:"已转账给用户<a href='tg://user?id="+shouKuanBotUser?.tgId+"'>【@"+shouKuanBotUser?.userName+"】</a>"
                     })
                     // 付款人信息
                     var html = "🥯 成功转账给 " + shouKuanBotUser?.userName +

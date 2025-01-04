@@ -191,7 +191,7 @@ class WalletHandleTixianMethod {
                         }
 
                         const tixian = "⌛️ 请等待，需要财务处理\n\n" +
-                            "用户：<a href=\"tg://user?id=" + tgId + "\">" + botUser?.nickName + "</a>\n" +
+                            "用户：<a href=\"tg://user?id=" + tgId + "\">@" + botUser?.userName + "</a>\n" +
                             "用户名 : <code>" + botUser?.userName + "</code>\n" +
                             "申请时间 : " + applyTime + "\n" +
                             "提现金额 : " + (price || 0) + "\n" +

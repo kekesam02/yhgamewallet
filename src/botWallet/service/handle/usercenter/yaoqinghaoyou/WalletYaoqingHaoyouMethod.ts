@@ -39,15 +39,22 @@ class WalletYaoqingHaoyouMethod {
             // 设置操作
             await redis.set("currentop" + tgId, "yaoqinghaoyou", 'EX', 60 * 60)
             // 统计邀请人数
-            const {num} = await BotInviteUserModel.createQueryBuilder().select("count(1)","num")
+            const inviteUserModels = await BotInviteUserModel.createQueryBuilder()
                 .where("inviter_tg_id = :inviteTgId",{"inviteTgId":AESUtils.encodeUserId(tgId+'')})
-                .getRawOne()
+                .getMany()
+
+            var arr = []
+            for (let i = 0; i < inviteUserModels.length; i++) {
+                var dtgId = AESUtils.decodeUserId(inviteUserModels[i].quiltTgId)
+                arr.push('<a href="tg://user?id='+dtgId+'">@'+inviteUserModels[i].quiltUsername+'</a>')
+            }
             // 用户点击就绑定关系
             const url= walletConfig.walltPayBotYaoQingURL+tgId;
             const html="\uD83C\uDFAA推荐您的朋友加入一号公馆\n" +
                 "\uD83D\uDD25好友完成充值投注后，您将获取好友投注金额【0.2%】的奖励\n" +
                 "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
-                "已邀请人数："+num+"\n" +
+                "已邀请人数："+inviteUserModels.length+"\n" +
+                "邀请列表是：" +arr.join(',')+"\n" +
                 "推荐链接：\n<code>" +url+"</code>(点击复制)";
             // 发送消息
             await ctx.replyWithHTML(html,walletUserCenterController.createUserCenterYaoqingBtn(nickname,url))
@@ -97,23 +104,22 @@ class WalletYaoqingHaoyouMethod {
             var nickname: string = update.message?.from?.first_name || ''
             var username: string = update.message?.from?.username || ''
             if(tgId == inviteTgId){
-                ctx.replyWithHTML("⚠️  自己不能邀请自己!")
-                WalletHandleMethod.startButtonBack(ctx)
+                await ctx.replyWithHTML("⚠️  自己不能邀请自己!")
+                await WalletHandleMethod.startCommandCallback(ctx)
                 return;
             }
+            var quitTgIdAes = AESUtils.encodeUserId(tgId)
             // 查询是否被邀请过
             const {num} = await BotInviteUserModel.createQueryBuilder().select("count(1)","num")
-                .where("quilt_tg_id = :quiltTgId",{"quiltTgId":AESUtils.encodeUserId(tgId+'')})
+                .where("quilt_tg_id = :quiltTgId",{"quiltTgId":quitTgIdAes})
                 .getRawOne()
             // 说明被邀请过了
             if(num > 0){
                 // 返回
-                WalletHandleMethod.startButtonBack(ctx)
+                WalletHandleMethod.startCommandCallback(ctx)
                 return
             }
-
             // 1、注册被邀请人
-            var quitTgIdAes = AESUtils.encodeUserId(tgId+'')
             var quitTgIdUserBot = await new UserModel().getUserModelById(quitTgIdAes)
             if(!quitTgIdUserBot){
                 // 如果用户不存在就添加用户，把交易地址赋值给他
@@ -128,7 +134,6 @@ class WalletYaoqingHaoyouMethod {
                 }).execute()
                 // 查询回填ID
                 quitTgIdUserBot = await new UserModel().getUserModelById(quitTgIdAes)
-
                 // 2、查询邀请人信息
                 var inviteTgIdAes = AESUtils.encodeUserId(inviteTgId)
                 var inviterTgIdUserBot = await new UserModel().getUserModelById(inviteTgIdAes)
@@ -146,9 +151,9 @@ class WalletYaoqingHaoyouMethod {
                         linkType: 0
                     }).execute()
                 // 4、返回
-                await WalletHandleMethod.startButtonBack(ctx)
+                await WalletHandleMethod.startCommandCallback(ctx)
             }else{
-                await WalletHandleMethod.startButtonBack(ctx)
+                await WalletHandleMethod.startCommandCallback(ctx)
             }
         }, async () => {
             await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')

@@ -127,7 +127,7 @@ class GameUserHtml {
         isHtml: boolean = false
     ) => {
         if (isHtml) {
-            return `昵称: <a href="tg://user?id=${userId}">${name}</a>${this.N
+            return `昵称: <a href="tg://user?id=${userId}">@${name}</a>${this.N
             }ID: <code>${userId}</code>`
         }
         return `昵称: ${name}${this.N
