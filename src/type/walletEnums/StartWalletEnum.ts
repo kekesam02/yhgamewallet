@@ -119,6 +119,16 @@ enum StartWalletEnum {
     SHANGDUI = 'shandui_btn',
 
     /**
+     * 闪兑 - TRX -> USDT
+     */
+    SHANGDUI_TRX_USDT = 'SHANGDUI_USDT',
+
+    /**
+     * 闪兑 - USDT -> TRX
+     */
+    SHANGDUI_USDT_TRX = 'SHANGDUI_TRX',
+
+    /**
      * 个人中心
      */
     USERCENTER = 'center_btn',

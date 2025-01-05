@@ -28,7 +28,7 @@ class CommonEnumsIndex {
     /**
      * 获取钱包类型描述文字
      */
-    public getWalletTypeStr = (walletType: WalletType): string =>{
+    public getWalletTypeStr = (walletType: WalletType): string => {
         switch (walletType) {
             case WalletType.USDT:
                 return 'usdt'
@@ -40,13 +40,15 @@ class CommonEnumsIndex {
                 return '彩T'
             case WalletType.JIFEN:
                 return '积分'
+            default:
+                return 'usdt'
         }
     }
 
     /**
      * 获取订单类型描述文字
      */
-    public getPaymentTypeStr = (paymentType: PaymentType): string =>{
+    public getPaymentTypeStr = (paymentType: PaymentType): string => {
         switch (paymentType) {
             case PaymentType.CZ:
                 return '充值'
@@ -91,6 +93,8 @@ class CommonEnumsIndex {
             case PaymentType.HYCJ:
                 return '好运彩金'
             case PaymentType.EMPTY:
+                return '空处理'
+            default:
                 return '空处理'
         }
     }
@@ -145,6 +149,8 @@ class CommonEnumsIndex {
             case PaymentType.HYCJ:
                 return 1
             case PaymentType.EMPTY:
+                return 0
+            default:
                 return 0
         }
     }

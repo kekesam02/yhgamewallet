@@ -59,8 +59,8 @@ class WalletCaiJinZhuanhuaMethod {
                     return true;
                 }
                 //获取其他游戏最新期数
-                const sfxz = await this.sfxz(tgId, botRoundModel?.roundId, walletType, GameTypeEnum.TOUZI);
-                if (sfxz) {
+                const sfxz1 = await this.sfxz(tgId, botRoundModel?.roundId, walletType, GameTypeEnum.TOUZI);
+                if (sfxz1) {
                     return true;
                 }
 

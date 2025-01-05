@@ -14,6 +14,7 @@ import WalletHandleShouKuanMethod from "./dashbord/shoukuan/WalletHandleShouKuan
 import WalletHandleHongBaoMethod from "./dashbord/hongbao/WalletHandleHongBaoMethod";
 import WalletHandleShangduiMethod from "./dashbord/shangdui/WalletHandleShangduiMethod";
 import walletUserCenterMethod from "./usercenter/WalletUserCenterMethod";
+import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
 
 /**
  * 公共方法处理
@@ -326,7 +327,7 @@ class WalletHandleMethod {
         } else if (currentOp == 'hongbao') {
             WalletHandleHongBaoMethod.startHongBao(ctx, cbot)
         } else if (currentOp == 'shandui') {
-            WalletHandleShangduiMethod.startShanDui(ctx, cbot)
+            WalletHandleShangduiMethod.startShanDui(ctx, cbot, StartWalletEnum.SHANGDUI)
         }else if (currentOp == 'xemm'
             || currentOp == 'addtxaddr'
             || currentOp == 'tibilishi'

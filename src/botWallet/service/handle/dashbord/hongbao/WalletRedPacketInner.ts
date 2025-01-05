@@ -40,7 +40,7 @@ class WalletRedPacketInner {
                 input_message_content: {
                     message_text: new RedPacketHtml().getSendHtml(user, botHb, paymentList)
                 },
-                reply_markup: inlineKeyBoard.reply_markup
+                reply_markup: inlineKeyBoard.reply_markup,
             })
         )
     }

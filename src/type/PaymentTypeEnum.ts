@@ -107,6 +107,11 @@ class PaymentTypeEnum {
     static HYFL = {name:"好友返利",value:PaymentType.HYFL};
 
     /**
+     * 闪兑
+     */
+    static SD = {name:"闪兑",value:PaymentType.SD};
+
+    /**
      * 好运彩金
      */
     static HYCJ = {name:"好运彩金",value:PaymentType.HYCJ};

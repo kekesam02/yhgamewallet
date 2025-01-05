@@ -107,6 +107,11 @@ enum PaymentType {
     JYJ = 18,
 
     /**
+     * 闪兑
+     */
+    SD = 19,
+
+    /**
      * 好友返利
      */
     HYFL = 101,

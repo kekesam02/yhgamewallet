@@ -183,7 +183,11 @@ class WalletCallbackQueryHandle {
 
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:
-                    return  WalletHandleShangduiMethod.startShanDui(ctx,cbot)
+                    return  WalletHandleShangduiMethod.startShanDui(ctx,cbot, StartWalletEnum.SHANGDUI)
+                case StartWalletEnum.SHANGDUI_TRX_USDT:
+                    return  WalletHandleShangduiMethod.startShanDui(ctx,cbot, StartWalletEnum.SHANGDUI_TRX_USDT)
+                case StartWalletEnum.SHANGDUI_USDT_TRX:
+                    return  WalletHandleShangduiMethod.startShanDui(ctx,cbot, StartWalletEnum.SHANGDUI_USDT_TRX)
                 case StartWalletEnum.USERCENTER:
                     WalletUserCenterMethod.startUserCenterCallback(ctx).then()
                     break

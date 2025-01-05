@@ -1,4 +1,6 @@
 import {Column, PrimaryGeneratedColumn, Entity, BaseEntity} from "typeorm";
+import exchangeEnum from "../type/WalletType/ExchangeEnum";
+import ExchangeEnum from "../type/WalletType/ExchangeEnum";
 
 
 /**
@@ -40,6 +42,19 @@ class BotExchangeModel extends BaseEntity {
             })
             .getOne()
         return result?.proportion ?? ''
+    }
+
+    /**
+     * 获取 TRX 转 USDT 汇率
+     */
+    public getRate = async (type: ExchangeEnum): Promise<BotExchangeModel | null> => {
+        let result = await BotExchangeModel
+            .createQueryBuilder()
+            .where('exchange_type = :exchangeType', {
+                exchangeType: type
+            })
+            .getOne()
+        return result
     }
 }
 

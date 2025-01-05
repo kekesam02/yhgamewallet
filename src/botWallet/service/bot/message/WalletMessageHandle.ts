@@ -34,6 +34,7 @@ class WalletMessageHandle {
             return
         }
 
+        console.log('当前指令--->', currentop)
         if (currentop) {
             // 添加提现地址
             if (currentop == 'addtxaddr' || currentop == 'updatetxaddr') {
@@ -69,6 +70,16 @@ class WalletMessageHandle {
             // 闪兑
             if (currentop == 'shangdui') {
                 WalletHandleShangduiMethod.startShangduiHandle(text, tgId, ctx)
+                return;
+            }
+            // 闪兑
+            if (currentop == WalletHandleShangduiMethod.TRX_USDT) {
+                WalletHandleShangduiMethod.startExchange(text, tgId, ctx, currentop)
+                return;
+            }
+            // 闪兑
+            if (currentop == WalletHandleShangduiMethod.USDT_TRX) {
+                WalletHandleShangduiMethod.startExchange(text, tgId, ctx, currentop)
                 return;
             }
             // 小额免密
