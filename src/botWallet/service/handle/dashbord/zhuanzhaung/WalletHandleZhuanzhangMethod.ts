@@ -13,6 +13,7 @@ import WalletType from "../../../../../type/WalletType";
 import {queryRunner} from "../../../../../config/database";
 import WalletHandleMethod from "../../WalletHandleMethod";
 import WalletConfig from "../../../../WalletConfig";
+import {addLockByTgId} from "../../../../../config/redislock";
 
 
 /**
@@ -35,8 +36,6 @@ class WalletHandleZhuanzhangMethod {
     public static startZhuanZhang = async (ctx: Context, cbot: Telegraf<Context>) => {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
-        // 2：设置操作
-        redis.set("currentop" + tgId, "zhuanzhang", 'EX', 60 * 60)
         // 3：判断是否登录
         const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
         // 4: 如果没有登录就输入密码登录
@@ -45,9 +44,11 @@ class WalletHandleZhuanzhangMethod {
             await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
-        // 发送消息
         const html = "\uD83D\uDC47 点击下方按钮选择收款人";
-        return ctx.replyWithHTML(html, WalletController.createZhuanzhangSwitchBtn("1"))
+        // 发送消息
+        await ctx.replyWithHTML(html, WalletController.createZhuanzhangSwitchBtn("1"))
+        // 2：设置操作
+        await redis.set("currentop" + tgId, "zhuanzhang", 'EX', 60 * 60)
     }
 
     // 转账具体逻辑
@@ -94,10 +95,10 @@ class WalletHandleZhuanzhangMethod {
                     reply_markup: {
                         inline_keyboard: [
                             [{
-                                text: '✅确认解锁',
+                                text: '✅ 确认解锁',
                                 callback_data: "qrjs" + query + "," + tgId
                             }, {
-                                text: '\uD83D\uDEAB取消转账',
+                                text: '\uD83D\uDEAB 取消转账',
                                 callback_data: "quxiaozz" + query + "," + tgId
                             }]
                         ]
@@ -200,6 +201,8 @@ class WalletHandleZhuanzhangMethod {
                     await ctx.editMessageText("\uD83D\uDCB0 【" + botPayment.username + "】转账给你 " + zhuanMoney + " USDT", {parse_mode: 'HTML'})
                     await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSKBtn(botPayment.id + '').reply_markup)
                     await queryRunner.commitTransaction()
+                    // 开始写入24小时定时过期转账
+                    await redis.set("tx_botpayment_"+tgId,botPayment.id,"EX",60 * 60 * 24)
                 } catch (e) {
                     await queryRunner.rollbackTransaction()
                     await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
@@ -247,7 +250,7 @@ class WalletHandleZhuanzhangMethod {
 
 
     /**
-     * 确认解锁
+     * 确认解锁 --- 点击确认密码
      * -- 大额密码校验确认
      * -- callback_query
      * @param ctx
@@ -314,6 +317,8 @@ class WalletHandleZhuanzhangMethod {
             // 写入缓存，这样就可以避免下次大额在输入密码
             await redis.set("zk_input_lock_"+tgId,"success",'EX',60 * 60)
             // 删除密码验证------------------------------如果想续期不输入密码就注释掉
+            // 开始写入24小时定时过期转账
+            await redis.set("tx_botpayment_"+tgId,botPayment.id,"EX",60 * 60 * 24)
         } catch (e) {
             await queryRunner.rollbackTransaction()
             await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
@@ -392,8 +397,13 @@ class WalletHandleZhuanzhangMethod {
             return
         }
         // 删除此消息
-        ctx.editMessageText("提示：对方已取消转账!")
-        ctx.editMessageReplyMarkup(WalletController.createCallbackCancleBtn().reply_markup)
+        await ctx.editMessageText("提示：对方已取消转账!")
+        // 删除缓存操作
+        await redis.del("zk_input_lock_"+tgId)
+        await redis.del("tx_botpayment_"+tgId)
+        await redis.del("currentop" + tgId)
+        // 发送消息
+        await  ctx.editMessageReplyMarkup(WalletController.createCallbackCancleBtn().reply_markup)
     }
 
     /**
@@ -405,100 +415,157 @@ class WalletHandleZhuanzhangMethod {
         let callbackStr: string = update.callback_query?.data
         // 1：获取收款人tgId
         var tgId: string = ctx.callbackQuery?.from?.id + '' || '0'
-        var nickname: string = ctx.callbackQuery?.from?.first_name + '' || '0'
-        var username: string = ctx.callbackQuery?.from?.username + '' || '0'
-        // 2: 查询转账人
-        var botPaymentId = callbackStr.replaceAll("shoukuanzk", "");
-        var botPayment: BotPaymentModel | null = await BotPaymentModel.createQueryBuilder().where("id=:id", {id: botPaymentId}).getOne()
-        // 获取转账人信息
-        if (botPayment) {
-            let encodeUserId = AESUtils.encodeUserId(tgId)
-            let botPaymentTgId = botPayment?.tgId
-            if(encodeUserId == botPaymentTgId){
-                await ctx.answerCbQuery("收款人不能是自己",{show_alert:true})
-                return;
-            }
-            try {
-                // 收款时间
-                var applyTime = DateFormatUtils.CurrentDateFormatString()
-                // 转账金额
-                var zhuanMoney = botPayment?.paymentAmount
-                // 事务开启
-                await queryRunner.startTransaction()
-                // 1：查询收款人是否注册
-                let botUser: UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
-                // 2：如果没有注册就先注册
-                if (!botUser) {
-                    await UserModel.createQueryBuilder().insert().into(UserModel).values({
-                        tgId: encodeUserId,
-                        nickName: nickname,
-                        userName: username,
-                        vip: 0,
-                        USDT: "0",
-                        promotionLink: '',
-                        rechargeLink: ''
-                    }).execute()
+        await addLockByTgId(['zhuan_sk_lock_'+tgId],async()=>{
+            var nickname: string = ctx.callbackQuery?.from?.first_name + '' || '0'
+            var username: string = ctx.callbackQuery?.from?.username + '' || '0'
+            // 2: 查询转账人
+            var botPaymentId = callbackStr.replaceAll("shoukuanzk", "");
+            var botPayment: BotPaymentModel | null = await BotPaymentModel.createQueryBuilder().where("id=:id", {id: botPaymentId}).getOne()
+            // 获取转账人信息
+            if (botPayment) {
+                let encodeUserId = AESUtils.encodeUserId(tgId)
+                let botPaymentTgId = botPayment?.tgId
+                if(encodeUserId == botPaymentTgId){
+                    await ctx.answerCbQuery("收款人不能是自己",{show_alert:true})
+                    return;
                 }
-                // 再次查询用户信息
-                const newbotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
-                const beforeAmount = newbotUser?.USDT || "0"
-                // 3：开始修改用户余额
-                await UserModel.createQueryBuilder().update(UserModel).set({
-                    USDT: () => {
-                        return "usdt + " + botPayment?.paymentAmount
+                // 该笔订单已完成
+                if(botPayment.status == 1){
+                    await ctx.editMessageText("✅ 该笔订转账已完成!")
+                    await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPeriod24HourBtn(botPayment?.username || '').reply_markup)
+                    return;
+                }
+                // 该笔订单已被退回
+                if(botPayment.status == 2){
+                    await ctx.editMessageText("⚠️ 转账超过24小时，自动取消!")
+                    await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPeriod24HourBtn(botPayment?.username || '').reply_markup)
+                    return;
+                }
+                // 开始判断订单是否超过24小时，如果超过24小时就把订单作废，余额退回
+                var mark = true
+                if(mark){
+                    try {
+                        // 收款时间
+                        var applyTime = DateFormatUtils.CurrentDateFormatString()
+                        // 1：查询收款人是否注册
+                        let botUser: UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
+                        const userUsdt = botUser?.USDT || "0"
+                        const backUserUsdt = parseFloat(botPayment.paymentAmount) + parseFloat(userUsdt)
+                        await queryRunner.startTransaction()
+                        // 修改订单信息
+                        await queryRunner.manager.update(BotPaymentModel,{
+                            id:botPayment.id
+                        },{
+                            status:2,//超时退回
+                            balanceBefore:userUsdt,//退回之余额
+                            balanceAfter:backUserUsdt.toString(),//退回之后余额
+                            description:"超时自动退回",
+                            passTime:applyTime,
+                            passTgid:'1',
+                            passUsername:"机器人退回",
+                            passNickname:"机器人退回"
+                        })
+                       // 把退回的余额加回去
+                       await queryRunner.manager.update(UserModel,{
+                           id: botUser?.id
+                       },{
+                           USDT: backUserUsdt.toString()
+                       })
+                        // 提示信息
+                        await ctx.editMessageText("⚠️ 转账超过24小时，自动取消!")
+                        await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPeriod24HourBtn(botPayment?.username || '').reply_markup)
+                        await queryRunner.commitTransaction()
+                    }catch (e){
+                        await queryRunner.rollbackTransaction()
                     }
-                }).where({
-                    id: newbotUser?.id
-                }).execute()
-                // 新增之后的余额
-                const afterAmount: number = parseFloat(beforeAmount) + parseFloat(botPayment?.paymentAmount || '0')
-                //4：修改原来的订单为为--成功
-                await queryRunner.manager.update(BotPaymentModel, {
-                    id: botPayment?.id
-                }, {
-                    status: 1,
-                    passTime: applyTime,
-                    passTgid: encodeUserId,
-                    passUsername: username,
-                    passNickname: nickname
-                })
+                    return
+                }
 
-                //5：保存收款记录
-                var orderId: string = CustomSnowflake.snowflake()
-                let inlineMessageId = ctx.callbackQuery?.inline_message_id
-                //6：开始存收款订单
-                await queryRunner.manager.save(BotPaymentModel, {
-                    tgId: encodeUserId,
-                    uid: newbotUser?.id,
-                    username: username,
-                    nickname: nickname,
-                    balanceBefore: beforeAmount + '',
-                    balanceAfter: afterAmount + '',
-                    paymentType: PaymentTypeEnum.YHSK.value,
-                    paymentTypeName: PaymentTypeEnum.YHSK.name,
-                    operateType: 1, // 收入
-                    paymentTypeNumber: 'zk' + orderId,
-                    paymentAmount: zhuanMoney + '',
-                    paymentRealAmount: zhuanMoney + '',
-                    walletType: WalletType.USDT,
-                    applyTime: applyTime,
-                    passTime: applyTime,
-                    passTgid: botPayment.tgId,
-                    passUsername: botPayment.username,
-                    passNickname: botPayment.nickname,
-                    status: 1,
-                    chatId: inlineMessageId
-                })
-                //7：提示收款完成
-                ctx.editMessageText("于【"+applyTime+"】"+nickname+"已完成收款!")
-                ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username || '').reply_markup)
-                await queryRunner.commitTransaction()
-            } catch (e) {
-                ctx.editMessageText("出错了，请稍后在试试!")
-                ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username || '').reply_markup)
-                await queryRunner.rollbackTransaction()
+                try {
+                    // 收款时间
+                    var applyTime = DateFormatUtils.CurrentDateFormatString()
+                    // 转账金额
+                    var zhuanMoney = botPayment?.paymentAmount
+                    // 事务开启
+                    await queryRunner.startTransaction()
+                    // 1：查询收款人是否注册
+                    let botUser: UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
+                    // 2：如果没有注册就先注册
+                    if (!botUser) {
+                        await UserModel.createQueryBuilder().insert().into(UserModel).values({
+                            tgId: encodeUserId,
+                            nickName: nickname,
+                            userName: username,
+                            vip: 0,
+                            USDT: "0",
+                            promotionLink: '',
+                            rechargeLink: '',
+                        }).execute()
+                    }
+                    // 再次查询用户信息
+                    const newbotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
+                    const beforeAmount = newbotUser?.USDT || "0"
+                    // 3：开始修改用户余额
+                    await UserModel.createQueryBuilder().update(UserModel).set({
+                        USDT: () => {
+                            return "usdt + " + botPayment?.paymentAmount
+                        }
+                    }).where({
+                        id: newbotUser?.id
+                    }).execute()
+                    // 新增之后的余额
+                    const afterAmount: number = parseFloat(beforeAmount) + parseFloat(botPayment?.paymentAmount || '0')
+                    //4：修改原来的订单为为--成功
+                    await queryRunner.manager.update(BotPaymentModel, {
+                        id: botPayment?.id
+                    }, {
+                        status: 1,// 已完成转账
+                        passTime: applyTime,
+                        passTgid: encodeUserId,
+                        passUsername: username,
+                        passNickname: nickname
+                    })
+
+                    //5：保存收款记录
+                    var orderId: string = CustomSnowflake.snowflake()
+                    let inlineMessageId = ctx.callbackQuery?.inline_message_id
+                    //6：开始存收款订单
+                    await queryRunner.manager.save(BotPaymentModel, {
+                        tgId: encodeUserId,
+                        uid: newbotUser?.id,
+                        username: username,
+                        nickname: nickname,
+                        balanceBefore: beforeAmount + '',
+                        balanceAfter: afterAmount + '',
+                        paymentType: PaymentTypeEnum.YHSK.value,
+                        paymentTypeName: PaymentTypeEnum.YHSK.name,
+                        operateType: 1, // 收入
+                        paymentTypeNumber: 'zk' + orderId,
+                        paymentAmount: zhuanMoney + '',
+                        paymentRealAmount: zhuanMoney + '',
+                        walletType: WalletType.USDT,
+                        applyTime: applyTime,
+                        passTime: applyTime,
+                        passTgid: botPayment.tgId,
+                        passUsername: botPayment.username,
+                        passNickname: botPayment.nickname,
+                        status: 1, // 已完成收款
+                        description:"用户【@"+username+"】完成收款。",
+                        chatId: inlineMessageId
+                    })
+                    //7：提示收款完成
+                    ctx.editMessageText("✅ 于【"+applyTime+"】"+nickname+"已完成收款!")
+                    ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username || '').reply_markup)
+                    await queryRunner.commitTransaction()
+                } catch (e) {
+                    ctx.editMessageText("出错了，请稍后在试试!")
+                    ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username || '').reply_markup)
+                    await queryRunner.rollbackTransaction()
+                }
             }
-        }
+        },async ()=>{
+
+        })
     }
 }
 

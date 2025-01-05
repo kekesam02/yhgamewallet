@@ -477,7 +477,7 @@ class WalletController {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
-                    text: '\uD83D\uDCB0收款',
+                    text: '\uD83D\uDCB0 收款',
                     query: "shoukuanzk" + botPaymentId
                 }
             ]
@@ -493,6 +493,21 @@ class WalletController {
             [
                 {
                     text: '✅ 已收款成功',
+                    url: WalletConfig.MEURL + username
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 转账超过24小时
+     */
+    public static createZhuanzhangPeriod24HourBtn = (username:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                this.BackHome,
+                {
+                    text: '联系好友',
                     url: WalletConfig.MEURL + username
                 }
             ]

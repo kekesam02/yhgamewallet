@@ -17,7 +17,6 @@ import ExchangeEnum from "../../../../../type/WalletType/ExchangeEnum";
 import BotPaymentModel from "../../../../../models/BotPaymentModel";
 import PaymentTypeEnum from "../../../../../type/PaymentTypeEnum";
 import OrderUtils from "../../../../../commons/OrderUtils";
-import walletType from "../../../../../type/WalletType";
 import CommonEnumsIndex from "../../../../../type/CommonEnumsIndex";
 
 
