@@ -11,6 +11,7 @@ import WalletHandleShouKuanMethod from "../handle/dashbord/shoukuan/WalletHandle
 import WalletHandleChongzhiMethod from "../handle/dashbord/chongzhi/WalletHandleChongzhiMethod";
 import WalletYaoqingHaoyouMethod from "../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
 import WalletUserCenterMethod from "../handle/usercenter/WalletUserCenterMethod";
+import ScheduleHandle from "../../../commons/schedule/ScheduleHandle";
 
 /**
  * 娱乐机器人核心代码
@@ -117,18 +118,24 @@ bot.launch().then(() => {
     console.log('bot钱包walletBot已经成功启动')
 })
 
-
-botWallet.launch().then(() => {
-    console.log('botWallet钱包walletBot已经成功启动')
-})
-
 /**
  * 开启默认需要运行的游戏定时器
  */
 const startJob = () => {
+    /**
+     * 运行pc28游戏定时器（放入异步中、防止配置文件没有加载完成）
+     */
+    setTimeout(() => {
+        ScheduleHandle.initWallet(bot)
+    }, 10000)
 
 }
 startJob()
+
+
+botWallet.launch().then(() => {
+    console.log('botWallet钱包walletBot已经成功启动')
+})
 
 
 // Enable graceful stop

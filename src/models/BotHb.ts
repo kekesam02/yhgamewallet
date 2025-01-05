@@ -1,3 +1,4 @@
+// @ts-nocheck
 import WalletType from "../type/WalletType";
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
 import {Context} from "telegraf";
@@ -18,6 +19,9 @@ import WalletRedPacket from "../botWallet/service/handle/dashbord/hongbao/Wallet
 import RandomUtils from "../commons/compute/RandomUtils";
 import {RedPackConditionJsonType} from "../type/WalletType/RedPackType";
 import TimeUtils from "../commons/date/TimeUtils";
+import ButtonUtils from "../commons/button/ButtonUtils";
+import ButtonCommonMap from "../commons/button/ButtonCommonMap";
+import GameController from "../botGame/gameController/GameController";
 
 
 /**
@@ -93,6 +97,17 @@ class BotHb extends BaseEntity {
         default: 1
     })
     status: number
+
+    /**
+     * 红包状态
+     *      0: 进行中
+     *      1: 已结束
+     */
+    @Column({
+        name: 'del',
+        default: 0
+    })
+    del: number
 
     /**
      * 已领取数量
@@ -269,6 +284,14 @@ class BotHb extends BaseEntity {
         let userModel = await new UserModel().getUserModel(ctx)
         let redisData = newBotHb? newBotHb: await this.getRedisData(ctx)
         if (!redisData) {
+            return null
+        }
+        if (new ComputeUtils(userModel.USDT).comparedTo(redisData.money) < 0) {
+            await new MessageUtils().sendTextReply(ctx, '⚠️温馨提示：操作失败，余额不足！', new ButtonUtils().createCallbackBtn([
+                [
+                    GameController.recharge
+                ]
+            ]).reply_markup.inline_keyboard)
             return null
         }
         await queryRunner.startTransaction()

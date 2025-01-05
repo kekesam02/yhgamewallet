@@ -301,13 +301,13 @@ class UserModel extends BaseEntity {
 
     /**
      * 获取用户信息根据 加密tgId
-     * @param aestgId
+     * @param tgId
      */
-    public getUserModelById = async (aestgId: string): Promise<UserModel | null> => {
+    public getUserModelById = async (tgId: string): Promise<UserModel | null> => {
         let user = UserModel
             .createQueryBuilder()
             .where('tg_id = :tgId', {
-                tgId: aestgId
+                tgId: tgId
             })
             .getOne()
         return user!

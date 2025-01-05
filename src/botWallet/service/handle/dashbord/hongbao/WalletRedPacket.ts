@@ -56,7 +56,7 @@ class WalletRedPacket {
                 }
             ])
         }
-        let botHbList = await new BotHb().getBotHbList(ContextUtil.getUserId(this.ctx))
+        let botHbList: Array<BotHb> = await new BotHb().getBotHbList(ContextUtil.getUserId(this.ctx))
         if (botHbList.length > 0) {
             botHbList.forEach(item => {
                 buttonList.reply_markup.inline_keyboard.push([
@@ -357,10 +357,17 @@ class WalletRedPacket {
     }
 
     /**
-     * 开启流水红包验证
+     * 开启 / 关闭 流水红包验证
      */
     public startWaterVeri = async (text: string) => {
         let hbId = text.split('_')[0]
+        let botHb = await new BotHb().getBotHb(hbId)
+        let user = await new UserModel().getUserModel(this.ctx)
+        if (botHb?.conditonsls == 1) {
+            botHb.conditonsls = 0
+            await this.updateCondition(user, botHb, false)
+            return
+        }
         await new MessageUtils().botSendTextToBot(
             this.ctx,
             '\uD83D\uDCA6 请选择流水红包时间',

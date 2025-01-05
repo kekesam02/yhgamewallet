@@ -98,9 +98,6 @@ class GameScheduleHandle {
             // pc28Controller.startPCLow(bot).then((val) => {})
             console.log('进来222任务调度了')
             let rule = new schedule.RecurrenceRule()
-            rule.second = [
-                1
-            ]
             // let text = async () => {
             //     let pc28Controller = new PC28Controller()
             //     let openJson = await pc28Controller.getLotteryJson()

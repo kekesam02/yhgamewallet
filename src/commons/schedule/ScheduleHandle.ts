@@ -1,6 +1,8 @@
-import {Job} from "node-schedule";
+import schedule, {Job} from "node-schedule";
 import {Context, Telegraf} from "telegraf";
 import GameScheduleHandle from "./GameScheduleHandle";
+import WalletScheduleHandle from "./WalletScheduleHandle";
+import AESUtils from "../AESUtils";
 
 /**
  * 定时任务控制器
@@ -27,6 +29,27 @@ class ScheduleHandle {
      */
     public static startPC28 = (bot: Telegraf<Context>) => {
         GameScheduleHandle.startPC28(bot)
+    }
+
+    public static bot: Telegraf<Context>
+
+    /**
+     * 钱包调度器
+     * @param bot
+     */
+    public static initWallet = (bot: Telegraf<Context>) => {
+        // 测试每30秒执行一次定时器
+        // let job = schedule.scheduleJob('10 * * * * *',()=>{
+        //     console.log('scheduleCronstyle:' + new Date());
+        //     this.bot = bot
+        //     WalletScheduleHandle.init(bot)
+        // })
+        // 每天凌晨执行一次定时器
+        let job = schedule.scheduleJob('0 0 * * *',()=>{
+                this.bot = bot
+                WalletScheduleHandle.init(bot)
+        })
+        this.currJobList.push(job)
     }
 
     /**

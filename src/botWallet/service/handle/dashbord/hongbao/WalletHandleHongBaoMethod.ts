@@ -119,11 +119,11 @@ class WalletHandleHongBaoMethod {
                 botHb.num = Number(num)
                 botHb.specifyUser = userName
                 if (!user) {
-                    return
+                    return true
                 }
                 let result = await botHb.saveLocalData(ctx, botHb)
                 if (!result) {
-                    return
+                    return true
                 }
                 let html = new RedPacketHtml().getSendHtml(user, result, [])
                 let inlineKeyBoard = await new WalletRedPacket(ctx).createVerifyMessage(result)
@@ -160,11 +160,11 @@ class WalletHandleHongBaoMethod {
                 botHb.num = Number(num)
                 let user = await new UserModel().getUserModel(ctx)
                 if (!user) {
-                    return
+                    return true
                 }
                 let result = await botHb.saveLocalData(ctx, botHb)
                 if (!result) {
-                    return
+                    return true
                 }
                 let html = new RedPacketHtml().getSendHtml(user, result, [])
                 let inlineKeyBoard = await new WalletRedPacket(ctx).createVerifyMessage(result)
