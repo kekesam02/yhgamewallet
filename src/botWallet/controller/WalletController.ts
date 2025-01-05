@@ -502,13 +502,12 @@ class WalletController {
     /**
      * 转账超过24小时
      */
-    public static createZhuanzhangPeriod24HourBtn = (username:string) => {
+    public static createZhuanzhangPeriod24HourBtn = () => {
         return new ButtonUtils().createCallbackBtn([
             [
-                this.BackHome,
                 {
-                    text: '联系好友',
-                    url: WalletConfig.MEURL + username
+                    text:"\uD83D\uDCB0 一号公馆钱包",
+                    url: WalletConfig.walltPayBotURL
                 }
             ]
         ])

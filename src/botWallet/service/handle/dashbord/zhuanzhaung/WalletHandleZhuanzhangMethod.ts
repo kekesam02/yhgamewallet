@@ -295,6 +295,7 @@ class WalletHandleZhuanzhangMethod {
                 paymentRealAmount: money+ '',
                 walletType: WalletType.USDT,
                 applyTime: applyTime,
+                description:"用户【@"+botUser?.userName+"】发起转账，金额：" + money,
                 chatId: inlineMessageId
             })
 
@@ -385,7 +386,7 @@ class WalletHandleZhuanzhangMethod {
      * 取消转账
      * @param ctx
      */
-    public static cancelZhuanZhang = (ctx: Context) => {
+    public static cancelZhuanZhang = async (ctx: Context) => {
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
         // 1：获取telegram的tgId
@@ -415,9 +416,9 @@ class WalletHandleZhuanzhangMethod {
         let callbackStr: string = update.callback_query?.data
         // 1：获取收款人tgId
         var tgId: string = ctx.callbackQuery?.from?.id + '' || '0'
+        var nickname: string = ctx.callbackQuery?.from?.first_name + '' || '0'
+        var username: string = ctx.callbackQuery?.from?.username + '' || '0'
         await addLockByTgId(['zhuan_sk_lock_'+tgId],async()=>{
-            var nickname: string = ctx.callbackQuery?.from?.first_name + '' || '0'
-            var username: string = ctx.callbackQuery?.from?.username + '' || '0'
             // 2: 查询转账人
             var botPaymentId = callbackStr.replaceAll("shoukuanzk", "");
             var botPayment: BotPaymentModel | null = await BotPaymentModel.createQueryBuilder().where("id=:id", {id: botPaymentId}).getOne()
@@ -426,29 +427,29 @@ class WalletHandleZhuanzhangMethod {
                 let encodeUserId = AESUtils.encodeUserId(tgId)
                 let botPaymentTgId = botPayment?.tgId
                 if(encodeUserId == botPaymentTgId){
-                    await ctx.answerCbQuery("收款人不能是自己",{show_alert:true})
+                    await ctx.answerCbQuery("⚠️ 收款人不能是自己",{show_alert:true})
                     return;
                 }
                 // 该笔订单已完成
                 if(botPayment.status == 1){
-                    await ctx.editMessageText("✅ 该笔订转账已完成!")
-                    await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPeriod24HourBtn(botPayment?.username || '').reply_markup)
+                    await ctx.editMessageText("✅ 该笔订转账已完成")
+                    await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPeriod24HourBtn().reply_markup)
                     return;
                 }
                 // 该笔订单已被退回
                 if(botPayment.status == 2){
-                    await ctx.editMessageText("⚠️ 转账超过24小时，自动取消!")
-                    await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPeriod24HourBtn(botPayment?.username || '').reply_markup)
+                    await ctx.editMessageText("⚠️ 转账超时，已被取消")
+                    await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPeriod24HourBtn().reply_markup)
                     return;
                 }
                 // 开始判断订单是否超过24小时，如果超过24小时就把订单作废，余额退回
                 var mark = true
                 if(mark){
                     try {
-                        // 收款时间
+                        // 操作时间
                         var applyTime = DateFormatUtils.CurrentDateFormatString()
                         // 1：查询收款人是否注册
-                        let botUser: UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: encodeUserId}).getOne()
+                        let botUser: UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: botPayment.tgId}).getOne()
                         const userUsdt = botUser?.USDT || "0"
                         const backUserUsdt = parseFloat(botPayment.paymentAmount) + parseFloat(userUsdt)
                         await queryRunner.startTransaction()
@@ -472,8 +473,8 @@ class WalletHandleZhuanzhangMethod {
                            USDT: backUserUsdt.toString()
                        })
                         // 提示信息
-                        await ctx.editMessageText("⚠️ 转账超过24小时，自动取消!")
-                        await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPeriod24HourBtn(botPayment?.username || '').reply_markup)
+                        await ctx.editMessageText("⚠️ 转账超时，已被取消!")
+                        await ctx.editMessageReplyMarkup(WalletController.createZhuanzhangPeriod24HourBtn().reply_markup)
                         await queryRunner.commitTransaction()
                     }catch (e){
                         await queryRunner.rollbackTransaction()
