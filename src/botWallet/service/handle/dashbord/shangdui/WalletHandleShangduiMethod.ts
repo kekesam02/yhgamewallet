@@ -62,7 +62,6 @@ class WalletHandleShangduiMethod {
             return
         }
 
-        console.log("startShanDui")
         switch (startWalletEnum) {
             case StartWalletEnum.SHANGDUI_TRX_USDT:
                 await this.sendInput(ctx, StartWalletEnum.SHANGDUI_TRX_USDT)
@@ -137,14 +136,12 @@ class WalletHandleShangduiMethod {
      * 开始转换
      */
     public static startExchange = async (text: string, tgId: number, ctx: Context, currentTop: string = '') => {
-        console.log('开始闪兑----> ', text, currentTop)
         if (isNaN(Number(text))) {
             await new MessageUtils().sendTextReply(ctx,'请输入正确的金额')
             return
         }
         let money = new ComputeUtils(text)
         if (currentTop.indexOf(this.TRX_USDT) > -1) {
-            console.log('usdt => trx')
             // trx 转 usdt
             if (money.comparedTo(10) < 0) {
                 await new MessageUtils().sendTextReply(ctx,'最小金额为 10 TRX')
@@ -153,7 +150,6 @@ class WalletHandleShangduiMethod {
             await this.updateData(ctx, money.getValue(), currentTop)
         }
         if (currentTop.indexOf(this.USDT_TRX) > -1) {
-            console.log('trx => usdt')
             // trx 转 usdt
             if (money.comparedTo(1) < 0) {
                 await new MessageUtils().sendTextReply(ctx,'最小金额为 1 USDT')
@@ -214,7 +210,6 @@ class WalletHandleShangduiMethod {
             try {
                 await queryRunner.startTransaction()
                 if (user) {
-                    console.log('更新对象', user)
                     await queryRunner.manager.save(user)
                     let orderId = new OrderUtils().createPaymentModelId()
 
