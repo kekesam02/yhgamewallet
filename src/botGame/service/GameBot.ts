@@ -110,10 +110,13 @@ const startJob = () => {
     /**
      * 运行pc28游戏定时器（放入异步中、防止配置文件没有加载完成）
      */
-    setTimeout(() => {
-        ScheduleHandle.startPC28(bot)
-    }, 10000)
-
+    try {
+        setTimeout(async () => {
+            await ScheduleHandle.startPC28(bot)
+        }, 10000)
+    } catch (err) {
+        console.log('开奖出错', err)
+    }
 }
 startJob()
 

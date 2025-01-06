@@ -27,8 +27,8 @@ class ScheduleHandle {
      * 开启pc28调度器
      * @param bot
      */
-    public static startPC28 = (bot: Telegraf<Context>) => {
-        GameScheduleHandle.startPC28(bot)
+    public static startPC28 = async (bot: Telegraf<Context>) => {
+        await GameScheduleHandle.startPC28(bot)
     }
 
     public static bot: Telegraf<Context>

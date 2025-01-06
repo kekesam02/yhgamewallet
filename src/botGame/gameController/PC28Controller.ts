@@ -23,6 +23,7 @@ import UserModel from "../../models/UserModel";
 import {queryRunner} from "../../config/database";
 import {addLockByTgId} from "../../config/redislock";
 import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
+import LotteryRequest from "../lotterRequest";
 
 type PC28LotteryType = {
 
@@ -376,28 +377,30 @@ class PC28Controller {
         //     method: 'get'
         // })
 
-        let json = await request({
-            url: 'https://api.8828355.com/api?token=11EB9FBB41B4D90C&t=jnd28&rows=5&p=json',
-            method: 'get'
-        })
-        console.log('开奖数据', json.data)
-        if (!json.data || !json.data.data) {
-            throw Error(json.statusText ?? '您无权访问改ip')
-        }
-        json.data.data = json.data.data.map((item: any) => {
-            item.expect = item['expect']
-            if (ScheduleHandle.pc28Config.isTest) {
-                item.open_code = ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex]
-                    ? ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex]
-                    : ScheduleHandle.pc28Config.testList[0]
-            } else {
-                item.open_code = item['opencode']
-            }
-            item.open_time = item['opentime']
-            item.next_expect = item['drawIssue']
-            item.next_time = item['drawTime']
-            return item
-        })
+        return new LotteryRequest().getLotteryJson()
+
+        // let json = await request({
+        //     url: 'https://api.8828355.com/api?token=11EB9FBB41B4D90C&t=jnd28&rows=5&p=json',
+        //     method: 'get'
+        // })
+        // console.log('开奖数据', json.data)
+        // if (!json.data || !json.data.data) {
+        //     throw Error(json.statusText ?? '您无权访问改ip')
+        // }
+        // json.data.data = json.data.data.map((item: any) => {
+        //     item.expect = item['expect']
+        //     if (ScheduleHandle.pc28Config.isTest) {
+        //         item.open_code = ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex]
+        //             ? ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex]
+        //             : ScheduleHandle.pc28Config.testList[0]
+        //     } else {
+        //         item.open_code = item['opencode']
+        //     }
+        //     item.open_time = item['opentime']
+        //     item.next_expect = item['drawIssue']
+        //     item.next_time = item['drawTime']
+        //     return item
+        // })
 
         // 新的开奖接口
         // let json = await request({
@@ -424,16 +427,16 @@ class PC28Controller {
         // })
 
 
-        if (json.data instanceof String && json.data.indexOf('请求频率太快') > 0) {
-            return {
-                "rows": 5,
-                "t": "jisu28",
-                "message": "请求频率太快",
-                "data": []
-            }
-        }
-        console.log('返回的结果', json.data)
-        return json.data
+        // if (json.data instanceof String && json.data.indexOf('请求频率太快') > 0) {
+        //     return {
+        //         "rows": 5,
+        //         "t": "jisu28",
+        //         "message": "请求频率太快",
+        //         "data": []
+        //     }
+        // }
+        // console.log('返回的结果', json.data)
+        // return json.data
     }
 
     /**

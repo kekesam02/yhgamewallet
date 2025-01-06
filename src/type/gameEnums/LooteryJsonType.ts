@@ -6,20 +6,6 @@
  * pc28 开奖结果类型
  */
 export type Pc28LotteryJsonType = {
-    /**
-     * 返回的开奖行数
-     */
-    rows: number
-
-    /**
-     * 游戏类型
-     */
-    t: string
-
-    /**
-     * 描述文字
-     */
-    message: string
 
     /**
      * 开奖数据

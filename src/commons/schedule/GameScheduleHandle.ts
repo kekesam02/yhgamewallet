@@ -10,9 +10,11 @@ import ScheduleHandle from "./ScheduleHandle";
 
 class GameScheduleHandle {
 
+    public static bot: Telegraf<Context>
+
     public static pc28Config = {
         // 是否是测试
-        isTest: true,
+        isTest: false,
         // 当前测试数据下标
         testIndex: 0,
         // testList: [
@@ -68,7 +70,7 @@ class GameScheduleHandle {
         openTime: '',
 
         // 当前开奖期数
-        roundId: '500025',
+        roundId: '',
 
         // 本次是否已经开奖
         isOpenLottery: false,
@@ -90,212 +92,112 @@ class GameScheduleHandle {
     /**
      * 开启PC28定时任务控制器
      */
-    public static startPC28 = (bot: Telegraf<Context>) => {
+    public static startPC28 = async (bot: Telegraf<Context>) => {
+        this.bot = bot
         // pc28游戏还没有开始、打开计时器开始运行游戏
         if (!ScheduleHandle.isStartPC28) {
             ScheduleHandle.isStartPC28 = true
-            // let pc28Controller = new PC28Controller()
-            // pc28Controller.startPCLow(bot).then((val) => {})
-            console.log('进来222任务调度了')
-            let rule = new schedule.RecurrenceRule()
-            // let text = async () => {
-            //     let pc28Controller = new PC28Controller()
-            //     let openJson = await pc28Controller.getLotteryJson()
-            //     openJson.data[0].expect = '3229165'
-            //     openJson.data[0].open_code = '2,2,2'
-            //     openJson.data[0].next_expect = '3229165'
-            //     let pledgeUpMap = await pc28Controller.getWinningUser(openJson)
-            //     await pc28Controller.getLotteryTextBot(bot, openJson, pledgeUpMap)
-            // }
-            // text().then(r => {})
-            // return
-
-            rule.second = new Array(60).fill(0, 0, 60).map((item, index) => index)
-            console.log('数组', rule.second)
-            let job = schedule.scheduleJob(rule, async () => {
-
-                console.log('开奖期期数', ScheduleHandle.pc28Config.roundId)
-                console.log('当前时间', moment().format('YYYY-MM-DD HH:mm:ss'))
-                console.log('停止上注时间', ScheduleHandle.pc28Config.stopUpTime)
-                console.log('开奖时间', ScheduleHandle.pc28Config.openTime)
-                console.log('停止上注提示时间', ScheduleHandle.pc28Config.closeTipsTime)
-                console.log('停止上注提示时间是否成功', moment().isAfter(moment(ScheduleHandle.pc28Config.closeTipsTime)))
-                console.log('是否已经提示', ScheduleHandle.pc28Config.isCloseTips)
-
-                if (new TimeUtils().isTimeBetween('20:00', '20.35')) {
-                    console.log('当前应该维护了')
-                    if (!ScheduleHandle.pc28Config.isSendProtect) {
-                        ScheduleHandle.pc28Config.isSendProtect = true
-                        await new PC28Controller().sendRepairHtml(bot)
-                    }
-                    return
-                }
-                if (ScheduleHandle.pc28Config.isSendProtect) {
-                    ScheduleHandle.pc28Config.isSendProtect = false
-                }
-
-
-                // 服务器第一次运行数据处理
-                if (!ScheduleHandle.pc28Config.isFirstStart && !ScheduleHandle.pc28Config.stopUpTime && !ScheduleHandle.pc28Config.openTime) {
-                    ScheduleHandle.pc28Config.isFirstStart = true
-                    try {
-                        console.log('服务器第一次运行-----', ScheduleHandle.pc28Config.stopUpTime)
-                        let json = await new PC28Controller().getLotteryJson()
-                        // 下次开奖时间、加上封盘时间 + 5秒、用来判断用户是否还可以继续下
-                        let nextTime = moment(json.data[0].next_time).subtract(new BotGameConfig().FPTime + 4, 'seconds')
-
-                        // 当前时间充足可以直接加入到游戏中
-                        if (moment(nextTime).isAfter(moment())) {
-                            // 可以继续下注、发送开始下注信息到群组
-                            await new PC28Controller().startPCLow(bot, json)
-                            GameScheduleHandle.checkNextPC28(json)
-                        } else {
-                            let next_time = moment(json.data[0].next_time).subtract(210, 'seconds').format('YYYY-MM-DD HH:mm:ss')
-                            let next_roundId = json.data[0].next_expect + 1
-                            json.data[0].next_time = next_time
-                            json.data[0].next_expect = next_roundId
-                            // 等到下一期在加入游戏中
-                            GameScheduleHandle.checkNextPC28(json)
-                        }
-                    } catch (err) {
-                        console.log('记录日志', err)
-                    }
-                    return
-                }
-
-                // 判断是否发送停止上注提示到群组
-                if (
-                    ScheduleHandle.pc28Config.stopUpTime &&
-                    ScheduleHandle.pc28Config.openTime &&
-                    moment().isAfter(moment(ScheduleHandle.pc28Config.closeTipsTime)) &&
-                    !ScheduleHandle.pc28Config.isCloseTips &&
-                    moment.duration(moment().diff(ScheduleHandle.pc28Config.closeTipsTime)).seconds() < 2
-                ) {
-                    try {
-                        console.log('判断是否发送停止上注提示到群组----')
-                        ScheduleHandle.pc28Config.isCloseTips = true
-                        // 如果已经超出停止上注提示时间、并且没有发送停止上注提示消息、发送提示到群组
-                        await new PC28Controller().sendCloseTopTips(bot, {
-                            roundId: ScheduleHandle.pc28Config.roundId
-                        })
-                    } catch (err) {
-                        ScheduleHandle.pc28Config.isCloseTips = false
-                    }
-                    return
-                }
-
-                // 是否已经发送停止上注信息到群组
-                if (
-                    ScheduleHandle.pc28Config.stopUpTime &&
-                    ScheduleHandle.pc28Config.openTime &&
-                    moment().isAfter(moment(ScheduleHandle.pc28Config.stopUpTime)) &&
-                    !ScheduleHandle.pc28Config.isClose &&
-                    moment.duration(moment().diff(ScheduleHandle.pc28Config.stopUpTime)).seconds() < 2
-                ) {
-                    try {
-                        console.log('是否已经发送停止上注信息到群组----')
-                        ScheduleHandle.pc28Config.isClose = true
-                        // 如果已经超出停止上注时间、并且没有停止上注发送停止上注消息到群组中
-                        await new PC28Controller().sendStopTop(bot, {
-                            roundId: ScheduleHandle.pc28Config.roundId,
-                            openTime: ScheduleHandle.pc28Config.openTime
-                        })
-                    } catch (err) {
-                        ScheduleHandle.pc28Config.isClose = false
-                    }
-                    return
-                }
-
-                // 获取最新的开奖结果
-                if(
-                    ScheduleHandle.pc28Config.stopUpTime &&
-                    ScheduleHandle.pc28Config.openTime &&
-                    moment().isAfter(moment(ScheduleHandle.pc28Config.openTime))
-                    && !ScheduleHandle.pc28Config.isOpenLottery
-                ) {
-                    try {
-                        console.log('获取开奖数据------')
-                        ScheduleHandle.pc28Config.isOpenLottery = true
-                        let pc28Controller = new PC28Controller()
-                        let openJson = await pc28Controller.getLotteryJson()
-
-                        // 开奖结果判定
-                        if (openJson.data.length > 0 && openJson.data[0].expect != ScheduleHandle.pc28Config.roundId) {
-                            console.log('开奖结果错误或者卡奖了、需要重新获取开奖结果')
-                            /**
-                             * 从取到的结果中取判定是否有当前奖、有的话去修正json数据
-                             * 将当前期数的数据放到 data 第一位、下期开奖期数取data[0]的中的数据
-                             */
-                            let isExit = false
-                            let currIndex = 0
-                            openJson.data.forEach((item, index) => {
-                                if (item.expect == ScheduleHandle.pc28Config.roundId) {
-                                    isExit = true
-                                    currIndex = index
-                                }
-                            })
-                            if (isExit) {
-                                // 获取到本期的开奖数据了进行数据修正
-                                openJson.data = [
-                                    {
-                                        expect: openJson.data[currIndex]!.expect,
-                                        open_code: openJson.data[currIndex]!.open_code,
-                                        open_time: openJson.data[currIndex]!.open_time,
-                                        next_expect: openJson.data[0]!.next_expect,
-                                        next_time: openJson.data[0]!.next_time
-                                    },
-                                    ...openJson.data
-                                ]
-                                console.log('修正后的数据', openJson)
-                            } else {
-                                ScheduleHandle.pc28Config.isOpenLottery = false
-                                return
-                            }
-                        }
-
-
-                        // 保存开奖结果到数据库
-                        console.log('保存11结果')
-                        await pc28Controller.saveLotteryJson(openJson)
-                        console.log('保存122结果')
-                        let pledgeUpMap = await pc28Controller.getWinningUser(openJson)
-                        console.log('保存33结果')
-                        await pc28Controller.getLotteryTextBot(bot, openJson, pledgeUpMap)
-                        console.log('保存44结果')
-                        await pc28Controller.getLotteryListBot(bot)
-                        console.log('保存55结果')
-                        await pc28Controller.startPCLow(bot, openJson)
-                        console.log('保存66结果')
-                        GameScheduleHandle.checkNextPC28(openJson)
-                    } catch (err) {
-                        console.log('设置开奖信息保存了', err)
-                        ScheduleHandle.pc28Config.isOpenLottery = false
-                    }
-                    return
-                }
-            })
-            ScheduleHandle.currJobList.push(job)
+            try {
+                let pc28Controller = new PC28Controller()
+                let lotteryJson = await pc28Controller.getLotteryJson()
+                console.log('获取到的数据流 ', lotteryJson)
+                await this.checkNextPC28(lotteryJson)
+            } catch (err) {
+                console.log('获取开奖信息之类的出错了', err)
+            }
         }
     }
 
     /**
      * pc28 切换到下一期
      */
-    private static checkNextPC28 = (openJson: Pc28LotteryJsonType) => {
-        ScheduleHandle.pc28Config.testIndex = ScheduleHandle.pc28Config.testIndex+1
-        if (!ScheduleHandle.pc28Config.testList[ScheduleHandle.pc28Config.testIndex+1]) {
-            ScheduleHandle.pc28Config.testIndex = 0
-        }
+    private static checkNextPC28 = async (openJson: Pc28LotteryJsonType) => {
         let currJson = openJson.data[0]
-        ScheduleHandle.pc28Config.isOpenLottery = false
-        ScheduleHandle.pc28Config.isClose = false
-        ScheduleHandle.pc28Config.isCloseTips = false
-        ScheduleHandle.pc28Config.openTime = currJson.next_time
+
+        if(!ScheduleHandle.pc28Config.isFirstStart) {
+            ScheduleHandle.pc28Config.isFirstStart = true
+            // 下次开奖时间、加上封盘提示时间 + 5秒、用来判断用户是否还可以继续下
+            let nextTime = moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime + 5, 'seconds')
+            // 当前时间充足可以直接加入到游戏中
+            if (moment(nextTime).isAfter(moment())) {
+                // 可以继续下注、发送开始下注信息到群组
+                await new PC28Controller().startPCLow(this.bot, openJson)
+            } else {
+                let nextJob = schedule.scheduleJob(new Date(currJson.next_time), async () => {
+                    console.log('加入到下一期的游戏中 ')
+                    // 等待下一期在发送游戏开始信息
+                    let pc28Controller = new PC28Controller()
+                    let lotteryJson = await pc28Controller.getLotteryJson()
+                    await this.checkNextPC28(lotteryJson)
+                    nextJob.cancel()
+                })
+            }
+        }
+
+        // 发送封盘提示
+        let tipsTime = moment(currJson.next_time)
+            .subtract(new BotGameConfig().FPTipsTime, 'seconds')
+            .format('YYYY-MM-DD HH:mm:ss')
+        console.log('封盘提示时间', tipsTime)
+        let tipJob = schedule.scheduleJob(new Date(tipsTime), async () => {
+            // 如果已经超出停止上注提示时间、并且没有发送停止上注提示消息、发送提示到群组
+            await new PC28Controller().sendCloseTopTips(this.bot, {
+                roundId: ScheduleHandle.pc28Config.roundId
+            })
+            tipJob.cancel()
+        })
+
+        // 发送停止上注提示
+        let stopUpTime = moment(currJson.next_time)
+            .subtract(new BotGameConfig().FPTime, 'seconds')
+            .format('YYYY-MM-DD HH:mm:ss')
+        this.pc28Config.stopUpTime = stopUpTime
+        let stopUpJob = schedule.scheduleJob(new Date(stopUpTime), async () => {
+            // 如果已经超出停止上注提示时间、并且没有发送停止上注提示消息、发送提示到群组
+            await new PC28Controller().sendStopTop(this.bot, {
+                roundId: ScheduleHandle.pc28Config.roundId,
+                openTime: ScheduleHandle.pc28Config.openTime
+            })
+            stopUpJob.cancel()
+        })
+
+        /**
+         * 开奖时间
+         */
+        let openTime = ScheduleHandle.pc28Config.openTime = currJson.next_time
+        // 当前开奖期数
         ScheduleHandle.pc28Config.roundId = currJson.next_expect
-        ScheduleHandle.pc28Config.stopUpTime =
-            moment(currJson.next_time).subtract(new BotGameConfig().FPTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
-        ScheduleHandle.pc28Config.closeTipsTime =
-            moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
+        let openJob = schedule.scheduleJob(new Date(openTime), async () => {
+            let pc28Controller = new PC28Controller()
+            let nextJson: Pc28LotteryJsonType = await pc28Controller.getLotteryJson()
+
+            // 保存开奖结果到数据库
+            console.log('保存11结果')
+            await pc28Controller.saveLotteryJson(nextJson)
+            console.log('保存122结果')
+            let pledgeUpMap = await pc28Controller.getWinningUser(nextJson)
+            console.log('保存33结果')
+            await pc28Controller.getLotteryTextBot(this.bot, nextJson, pledgeUpMap)
+            console.log('保存44结果')
+            await pc28Controller.getLotteryListBot(this.bot)
+            console.log('保存55结果')
+            await pc28Controller.startPCLow(this.bot, nextJson)
+            console.log('保存66结果')
+            await this.checkNextPC28(nextJson!)
+            openJob.cancel()
+        })
+
+
+
+        // ScheduleHandle.pc28Config.isOpenLottery = false
+        // ScheduleHandle.pc28Config.isClose = false
+        // ScheduleHandle.pc28Config.isCloseTips = false
+        // ScheduleHandle.pc28Config.openTime = currJson.next_time
+        // ScheduleHandle.pc28Config.roundId = currJson.next_expect
+        // ScheduleHandle.pc28Config.stopUpTime =
+        //     moment(currJson.next_time).subtract(new BotGameConfig().FPTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
+        // ScheduleHandle.pc28Config.closeTipsTime =
+        //     moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
     }
 }
 
