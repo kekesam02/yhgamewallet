@@ -151,12 +151,12 @@ class WalletHandleTixianMethod {
                                 .getMany()
                             if (userByLinks && userByLinks.length > 1) {
                                 for (let userByLink of userByLinks) {
-                                    result = "风控用户"
                                     fenkongArr.push(userByLink.userName)
                                     await UserModel.createQueryBuilder().update()
                                         .set({riskManagement: 1}).where("id=:id", {id: userByLink.id}).execute()
                                 }
                             }
+                            result = "风控用户(存在一个充值地址两个账号分别是："+fenkongArr.join('、')+")"
                         }else{
                             result = "风控用户"
                         }
@@ -205,7 +205,7 @@ class WalletHandleTixianMethod {
                             "提现地址(点击复制) : <code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '') + "</code>\n" +
                             "货币类型 : USDT\n" +
                             "备注 : " + botUser.notes + "\n" +
-                            "是否异常用户 : " + result + "(存在一个充值地址两个账号分别是："+fenkongArr.join('、')+")\n\n" +
+                            "是否异常用户 : " + result + "\n\n" +
                             "➖➖➖➖➖其他信息➖➖➖➖➖\n" +
                             "上注流水 :  " + (botPayMentObj['m_2'] || 0) + "\n" +
                             "中奖流水 :  " + (botPayMentObj['m_5'] || 0) + "\n" +

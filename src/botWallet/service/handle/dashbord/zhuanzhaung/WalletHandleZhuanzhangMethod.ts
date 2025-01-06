@@ -14,9 +14,7 @@ import {queryRunner} from "../../../../../config/database";
 import WalletHandleMethod from "../../WalletHandleMethod";
 import WalletConfig from "../../../../WalletConfig";
 import {addLockByTgId} from "../../../../../config/redislock";
-import moment from "moment";
 import dateFormatUtils from "../../../../../commons/date/DateFormatUtils";
-import walletController from "../../../../controller/WalletController";
 
 
 /**

@@ -97,12 +97,12 @@ class WalletMyAccountMethod {
                         if (botPaymentModels[i].paymentType == PaymentType.YHZZ) {
                             if (botPaymentModels[i].status == 0) html += "\n操作状态：等待收款"
                             if (botPaymentModels[i].status == 1) html += "\n操作状态：已完成"
+                            if (botPaymentModels[i].status == 2) html += "\n操作状态：超时退回"
                         }
                         // 收款
                         if (botPaymentModels[i].paymentType == PaymentType.YHSK) {
                             if (botPaymentModels[i].status == 0) html += "\n操作状态：等待确认"
                             if (botPaymentModels[i].status == 1) html += "\n操作状态：已完成"
-                            if (botPaymentModels[i].status == 2) html += "\n操作状态：超时自动取消"
                         }
                         // 收款
                         if (botPaymentModels[i].paymentType == PaymentType.HYFL) {

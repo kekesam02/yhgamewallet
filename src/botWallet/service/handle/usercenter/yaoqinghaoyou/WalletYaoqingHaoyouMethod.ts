@@ -1,20 +1,13 @@
 import type {Context} from "telegraf";
-import ButtonUtils from '../../../../../commons/button/ButtonUtils'
-import WalletBotHtml from '../../../../../html/walletHtml/WalletBotHtml'
 import AESUtils from "../../../../../commons/AESUtils";
 import UserModel from "../../../../../models/UserModel";
-import WalletController from "../../../../controller/WalletController";
-import BotWithdrawalAddrModel from "../../../../../models/BotWithdrawalAddrModel";
 import redis from "../../../../../config/redis";
 import WalletHandleMethod from "../../WalletHandleMethod";
 import {addLockByTgId} from "../../../../../config/redislock";
 import BotInviteUserModel from "../../../../../models/BotInviteUserModel";
 import walletConfig from "../../../../WalletConfig";
-import walletUserCenterController from "../../../../controller/WalletUserCenterController";
+import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
 import ButtonInnerQueryUtils from "../../../../../commons/button/ButtonInnerQueryUtils";
-import WalletConfig from "../../../../WalletConfig";
-import WalletUserCenterMethod from "../WalletUserCenterMethod";
-import walletHandleMethod from "../../WalletHandleMethod";
 
 /**
  * 公共方法处理
@@ -57,7 +50,7 @@ class WalletYaoqingHaoyouMethod {
                 "2、邀请列表是：" +arr.join('、')+"\n" +
                 "3、推荐链接：\n<code>" +url+"</code> (点击复制)";
             // 发送消息
-            await ctx.replyWithHTML(html,walletUserCenterController.createUserCenterYaoqingBtn(nickname,url))
+            await ctx.replyWithHTML(html,WalletUserCenterController.createUserCenterYaoqingBtn(nickname,url))
         },async ()=>{
             await ctx.reply('亲，操作慢点，休息一会在操作!')
         })

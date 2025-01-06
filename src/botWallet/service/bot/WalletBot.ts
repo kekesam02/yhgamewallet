@@ -123,7 +123,7 @@ bot.command('start', async (ctx) => {
 
         // 充值
         if (payload.startsWith('deposit')) {
-            WalletHandleChongzhiMethod.startChongZhi(ctx)
+            WalletHandleChongzhiMethod.startChongZhiCommand(ctx)
         }
 
         // 邀请好友
