@@ -7,6 +7,7 @@ import WalletHandleTixianMethod from "../../handle/dashbord/tixian/WalletHandleT
 import WalletHandleShangduiMethod from "../../handle/dashbord/shangdui/WalletHandleShangduiMethod";
 import WalletTixianAddressMethod from "../../handle/usercenter/tixiandizhi/WalletTixianAddressMethod";
 import WalletXiaoeMianmiMethod from "../../handle/usercenter/xiaoemianmi/WalletXiaoeMianmiMethod";
+import BotPaymentModel from "../../../../models/BotPaymentModel";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -28,6 +29,9 @@ class WalletMessageHandle {
         var tgId: number = ctx.message?.from?.id || 0
         const currentop: string = await redis.get("currentop" + tgId) || ""
 
+        // 处理超24小时的转账
+        await BotPaymentModel.updateMoreThan24Hour(tgId)
+
         // 判定是否是快速发放红包命令
         let isQuickRedPacket = await WalletHandleHongBaoMethod.quickSendPacket(text, tgId, ctx)
         if (isQuickRedPacket) {
@@ -35,7 +39,6 @@ class WalletMessageHandle {
             return
         }
 
-        console.log('当前指令--->', currentop)
         if (currentop) {
             // 添加提现地址
             if (currentop == 'addtxaddr' || currentop == 'updatetxaddr') {

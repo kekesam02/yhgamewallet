@@ -141,19 +141,25 @@ class WalletHandleTixianMethod {
                             status:0,// 申请中
                             description:"正在发起提现操作，提现金额是【"+price+"】等待审核中..."
                         })
-                        //判断是否为异常用户 ----------------这里要思考
-                        var userByLinks = await UserModel.createQueryBuilder()
-                            .where('recharge_link = :rechargeLink and del = 0', {'rechargeLink': botUser.rechargeLink})
-                            .getMany()
-                        let result = "没有异常"
-                        if (userByLinks && userByLinks.length > 1) {
-                            for (let userByLink of userByLinks) {
-                                result = "风控用户"
-                                await UserModel.createQueryBuilder().update()
-                                    .set({riskManagement: 1}).where("id=:id", {id: userByLink.id}).execute()
-                            }
-                        }
 
+                        let result = "没有异常"
+                        let fenkongArr = []
+                        if(botUser.riskManagement == 0) {
+                            //判断是否为异常用户 ----------------如果一个充值地址被多个用户使用，说明这个用户用了小号
+                            var userByLinks = await UserModel.createQueryBuilder()
+                                .where('recharge_link = :rechargeLink and del = 0', {'rechargeLink': botUser.rechargeLink})
+                                .getMany()
+                            if (userByLinks && userByLinks.length > 1) {
+                                for (let userByLink of userByLinks) {
+                                    fenkongArr.push(userByLink.userName)
+                                    await UserModel.createQueryBuilder().update()
+                                        .set({riskManagement: 1}).where("id=:id", {id: userByLink.id}).execute()
+                                }
+                            }
+                            result = "风控用户(存在一个充值地址两个账号分别是："+fenkongArr.join('、')+")"
+                        }else{
+                            result = "风控用户"
+                        }
                         // 统计相关
                         var sumPriceArr = await BotPaymentModel.createQueryBuilder("t1")
                             .select(['t1.payment_type as ptype',  'SUM(t1.payment_amount) as num'])
@@ -197,7 +203,7 @@ class WalletHandleTixianMethod {
                             "提现金额 : " + (price || 0) + "\n" +
                             "实际金额 : " + ((price - 1) || 0) + "\n" +
                             "提现地址(点击复制) : <code>" + AESUtils.decodeAddr(botWithdrawalAddrModel?.addr || '') + "</code>\n" +
-                            "提现货币类型（❗️） : USDT\n" +
+                            "货币类型 : USDT\n" +
                             "备注 : " + botUser.notes + "\n" +
                             "是否异常用户 : " + result + "\n\n" +
                             "➖➖➖➖➖其他信息➖➖➖➖➖\n" +
@@ -215,7 +221,6 @@ class WalletHandleTixianMethod {
                             "每日首充返利流水 :  " + (botPayMentObj['m_16'] || 0) + "\n" +
                             "开业豪礼 :  " + (botPayMentObj['m_17'] || 0) + "\n" +
                             "每日首充返利流水 :  " + (botPayMentObj['m_16'] || 0) + "\n"
-
                         // 6: 财务消息
                         await cbot.telegram.sendMessage(tgId, tixian, {
                             parse_mode: "HTML",
@@ -270,9 +275,12 @@ class WalletHandleTixianMethod {
                         passNickname: ctx.botInfo.first_name,
                         passTime: passTime,
                         status:1,// 已完成
-                        description:"提现一笔金额【"+botPayment.paymentAmount+"】已完成"
+                        description:"提现一笔金额【"+botPayment.paymentAmount+"】已完成",
+                        version:()=>{
+                            return 'version + 1'
+                        }
                     })
-                    .where("id=:id", {id: botPayment.id})
+                    .where("id=:id and version = :version", {id: botPayment.id,version:botPayment.version})
                     .execute()
                 const addr = AESUtils.decodeAddr(botPayment.paymentTypeNumber) || ''
                 const html: string = "\uD83D\uDCE3尊敬的用户：" + botPayment?.nickname + "您好！\n" +

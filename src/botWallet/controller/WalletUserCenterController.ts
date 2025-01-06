@@ -17,7 +17,7 @@ class WalletUserCenterController {
      * 返回首页
      */
     public static BackHome = {
-        text: '↩️ 返回',
+        text: '🏘️ 主菜单',
         query: 'backhome'
     }
 
@@ -36,11 +36,12 @@ class WalletUserCenterController {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
-                    text:"💰️ 调整额度",
+                    text:"✏️  调整额度",
                     query:"smNoPasswordChange"
                 }
             ],
             [
+                this.BackHome,
                 this.BackUserHome
             ]
         ])
@@ -146,7 +147,7 @@ class WalletUserCenterController {
     public static createUserCenterBackBtn = () => {
         return new ButtonUtils().createCallbackBtn([
             [
-                this.BackUserHome
+
             ]
         ])
     }

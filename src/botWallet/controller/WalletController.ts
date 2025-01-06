@@ -234,7 +234,7 @@ class WalletController {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
-                    text: '✅标记已打款',
+                    text: '✅ 标记已打款',
                     query: 'bjydk' + botPaymentId
                 },
                 {
@@ -252,7 +252,7 @@ class WalletController {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
-                    text: '✅确认支付',
+                    text: '✅ 确认支付',
                     query: 'skqrzf' + payTgId+","+money+","+tgId
                 },
                 {
