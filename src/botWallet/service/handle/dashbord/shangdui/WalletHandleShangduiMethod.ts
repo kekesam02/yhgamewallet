@@ -18,6 +18,7 @@ import BotPaymentModel from "../../../../../models/BotPaymentModel";
 import PaymentTypeEnum from "../../../../../type/PaymentTypeEnum";
 import OrderUtils from "../../../../../commons/OrderUtils";
 import CommonEnumsIndex from "../../../../../type/CommonEnumsIndex";
+import WalletController from "../../../../controller/WalletController";
 
 
 /**
@@ -60,7 +61,6 @@ class WalletHandleShangduiMethod {
             await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
-
         switch (startWalletEnum) {
             case StartWalletEnum.SHANGDUI_TRX_USDT:
                 await this.sendInput(ctx, StartWalletEnum.SHANGDUI_TRX_USDT)
@@ -105,6 +105,9 @@ class WalletHandleShangduiMethod {
                     text: '♻️TRX=>USDT',
                     query: StartWalletEnum.SHANGDUI_TRX_USDT
                 }
+            ],
+            [
+                WalletController.BackHome
             ]
         ])
         await new MessageUtils().botSendTextToBot(ctx, html, btn.reply_markup)
