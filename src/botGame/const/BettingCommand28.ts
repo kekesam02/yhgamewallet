@@ -293,7 +293,7 @@ class BettingCommand28 {
                     !money
                     || money == '0'
                     || money == ''
-                    || isNaN(Number(money))
+                    || !money.isMoney()
                     || money.split('.').length > 2
                     || money.indexOf('.') > -1
                 )

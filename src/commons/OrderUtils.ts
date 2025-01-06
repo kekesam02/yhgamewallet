@@ -7,25 +7,28 @@ import {customAlphabet, nanoid} from "nanoid";
  */
 class OrderUtils {
 
+    // 默认使用的字符
+    private charStr = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
+
     /**
-     * 生成上押表唯一id
+     * 生成上押唯一id
      */
     public createPledgeUpModelId = (): number => {
         return Number(customAlphabet('0123456789', 18)())
     }
 
     /**
-     * 生成订单表唯一id
+     * 生成订单唯一id
      */
     public createPaymentModelId = (): string => {
-        return 'dd-' + nanoid(20)
+        return 'dd-' + customAlphabet(this.charStr, 21)()
     }
 
     /**
-     * 生成订单表唯一id
+     * 生成红包的唯一
      */
     public createHbModelId = (): string => {
-        return 'hb' + nanoid(20)
+        return 'hb-' + customAlphabet(this.charStr, 21)()
     }
 
 }

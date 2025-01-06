@@ -338,7 +338,6 @@ class BotHb extends BaseEntity {
             await queryRunner.manager.save(botHb)
             await queryRunner.manager.save(payment)
             await queryRunner.commitTransaction()
-
             // 删除redis 数据
             redis.del(this.getRedisKey(ctx))
             return botHb
@@ -375,7 +374,6 @@ class BotHb extends BaseEntity {
             }) as UserModel
             // 领取次数加一
             this.receiveNum++
-            user.updateUserMoney(this.walletType, this.getReceiveMoney())
 
             let newPayment = new BotPaymentModel()
             let paymentType = PaymentType.LHB
@@ -386,16 +384,23 @@ class BotHb extends BaseEntity {
             newPayment.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
             newPayment.balanceBefore = user.getBalance(this.walletType)
             newPayment.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
-                ? new ComputeUtils(user.getBalance(this.walletType)).add(this.money).toString()
-                : new ComputeUtils(user.getBalance(this.walletType)).minus(this.money).toString()
+                ? new ComputeUtils(user.getBalance(this.walletType)).add(this.getReceiveMoney()).toString()
+                : new ComputeUtils(user.getBalance(this.walletType)).minus(this.getReceiveMoney()).toString()
             newPayment.paymentTypeNumber = this.hbId
             newPayment.paymentAmount = this.getReceiveMoney()
             newPayment.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
             newPayment.walletType = this.walletType
             newPayment.gameType = GameTypeEnum.MEPTY
 
-            this.lqMoney = new ComputeUtils(this.money).minus(this.getReceiveMoney()).toString()
+            user.updateUserMoney(this.walletType, this.getReceiveMoney())
+            this.lqMoney = new ComputeUtils(this.lqMoney).add(this.getReceiveMoney()).toString()
             this.jeIndex++
+            // 将红包设置为结束状态
+            if (new ComputeUtils(this.lqMoney).comparedTo(this.money) >= 0) {
+                this.del = 1
+                this.status = 1
+            }
+
             await queryRunner.manager.save(user)
             await queryRunner.manager.save(newPayment)
             await queryRunner.manager.save(this as BotHb)
@@ -599,7 +604,7 @@ class BotHb extends BaseEntity {
         let tgId: number = ctx.message?.from.id ?? 0
 
         // 金额输入错误重新发送金额输入
-        if (isNaN(Number(money))) {
+        if (money.isMoney()) {
             await redis.set('currentop' + tgId, 'hongbaoMoney')
             await new MessageTipUtils().moneyRuleErr(ctx, '红包')
             return false
@@ -636,7 +641,7 @@ class BotHb extends BaseEntity {
         let tgId: number = ctx.message?.from.id ?? 0
         let botHb = await this.getRedisData(ctx)
         //  数量输入错误重新发送金额输入
-        if (isNaN(Number(length))) {
+        if (!length.isMoney()) {
             redis.set('currentop' + tgId, 'hongbaoLength')
             await new MessageTipUtils().lengthRuleErr(ctx, '红包')
             return false

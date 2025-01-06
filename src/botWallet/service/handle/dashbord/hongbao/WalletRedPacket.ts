@@ -215,7 +215,7 @@ class WalletRedPacket {
             await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), ``)
             await new MessageUtils().botSendTextToBot(
                 this.ctx,
-                `\uD83D\uDCA1 发送${result.num}个红包\n支付金额${result.money}${result.hbType == 0? '随机': '均分'}${new CommonEnumsIndex().getWalletTypeStr(result.walletType)}`,
+                `\uD83D\uDCA1 发送${result.num}个红包\n支付金额${result.money}${result.hbType == 1? '随机': '均分'}${new CommonEnumsIndex().getWalletTypeStr(result.walletType)}`,
                 new ButtonUtils().createCallbackBtn([
                     [
                         {
@@ -403,7 +403,7 @@ class WalletRedPacket {
      * 设置红包流水金额
      */
     public setWaterMoney = async (text: string, hbId: string) => {
-        if (isNaN(Number(text))) {
+        if (!text.isMoney()) {
             return new MessageTipUtils().handleErr(this.ctx)
         }
         let botHb = await new BotHb().getBotHb(hbId)

@@ -12,7 +12,11 @@ class ComputeUtils {
         if (num instanceof ComputeUtils) {
             this.num1 = new BigNumber(num.getValue())
         } else {
-            this.num1 = new BigNumber(num)
+            if (num == '' || num == null) {
+                this.num1 = new BigNumber(0)
+            } else {
+                this.num1 = new BigNumber(num)
+            }
         }
     }
 

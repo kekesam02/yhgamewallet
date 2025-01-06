@@ -78,7 +78,7 @@ class WalletHandleTixianMethod {
 
             // 获取提现金额
             const price = parseFloat(text.replaceAll('提现', '').trim())
-            if (isNaN(price) || price < 0) {
+            if (!price.isMoney()) {
                 await ctx.replyWithHTML("⚠️ 请输入提现金额，必须是正整数！")
                 return
             }
