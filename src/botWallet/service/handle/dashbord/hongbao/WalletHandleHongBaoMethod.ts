@@ -96,7 +96,7 @@ class WalletHandleHongBaoMethod {
                 let money = arr[2]
                 // 红包数量
                 let num = 1
-                if (isNaN(Number(money))) {
+                if (!money.isMoney() || !num.isMoney()) {
                     return false
                 }
                 let user = await new UserModel().getUserModel(ctx)
@@ -147,8 +147,8 @@ class WalletHandleHongBaoMethod {
                 // 红包金额
                 let money = arr[1]
                 // 红包数量
-                let num = arr[2]? arr[2]: 1
-                if (isNaN(Number(money))) {
+                let num = arr[2]? arr[2]: '1'
+                if (!money.isMoney() || !num.isMoney()) {
                     return false
                 }
                 // 开始发放红包

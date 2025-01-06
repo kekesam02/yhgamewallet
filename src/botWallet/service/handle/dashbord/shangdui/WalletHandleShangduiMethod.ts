@@ -135,7 +135,7 @@ class WalletHandleShangduiMethod {
      * 开始转换
      */
     public static startExchange = async (text: string, tgId: number, ctx: Context, currentTop: string = '') => {
-        if (isNaN(Number(text))) {
+        if (!text.isMoney()) {
             await new MessageUtils().sendTextReply(ctx,'请输入正确的金额')
             return
         }

@@ -50,7 +50,6 @@ bot.use(async (ctx, next) => {
     let callbackQuery: string = update.callback_query?.data
     // 判断当前环境、如果是在群组中的话只解析快速红包指令
     if (groupId && groupId.indexOf('-') > -1) {
-        console.log('输入的文字', ctx.text)
         if (!callbackQuery) {
             let text = ctx.text ?? ''
             let arr = text.split(' ')
@@ -65,7 +64,7 @@ bot.use(async (ctx, next) => {
                 if (arr[1] != 'hb') {
                     return
                 }
-                if (isNaN(Number(arr[2]))) {
+                if (!arr[2].isMoney()) {
                     return
                 }
                 await next()
@@ -75,22 +74,24 @@ bot.use(async (ctx, next) => {
                 if (arr.length > 3) {
                     return
                 }
-                if (isNaN(Number(arr[1]))) {
+                if (!arr[1].isMoney()) {
                     return
                 }
                 await next()
             }
         }
-        // 点击领取红包按钮
-        if (callbackQuery.indexOf(StartWalletEnum.HONGBAO_RECEIVE) > -1) {
-            if (callbackQuery.split('_').length == 2) {
-                await next()
+        if (callbackQuery) {
+            // 点击领取红包按钮
+            if (callbackQuery.indexOf(StartWalletEnum.HONGBAO_RECEIVE) > -1) {
+                if (callbackQuery.split('_').length == 2) {
+                    await next()
+                }
             }
-        }
-        // 点击验证码数字触发
-        if (callbackQuery.indexOf(StartWalletEnum.HONGBAO_VERIFY_BTN) > -1) {
-            if (callbackQuery.split('_').length == 3) {
-                await next()
+            // 点击验证码数字触发
+            if (callbackQuery.indexOf(StartWalletEnum.HONGBAO_VERIFY_BTN) > -1) {
+                if (callbackQuery.split('_').length == 3) {
+                    await next()
+                }
             }
         }
 

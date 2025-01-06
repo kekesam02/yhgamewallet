@@ -36,7 +36,7 @@ class WalletInnerQueryHandle {
                 if (currentop == 'zhuanzhang') {
                     var text = ""
                     var flag:boolean = false
-                    if(!query || isNaN(Number(query))){
+                    if(!query || !query.isMoney()){
                         flag = true
                         text="请输入数字,并且大于0"
                     }
@@ -72,7 +72,7 @@ class WalletInnerQueryHandle {
                 if (currentop == 'shoukuan') {
                     var text = ""
                     var flag:boolean = false
-                    if(!query || isNaN(Number(query))){
+                    if(!query || !query.isMoney()){
                         flag = true
                         text="请输入数字,并且小于0"
                     }

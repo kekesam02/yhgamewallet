@@ -35,6 +35,7 @@ class WalletMessageHandle {
         // 判定是否是快速发放红包命令
         let isQuickRedPacket = await WalletHandleHongBaoMethod.quickSendPacket(text, tgId, ctx)
         if (isQuickRedPacket) {
+            console.log('指令结束退出')
             return
         }
 
