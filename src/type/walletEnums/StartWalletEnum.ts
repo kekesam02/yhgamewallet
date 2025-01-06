@@ -107,9 +107,7 @@ enum StartWalletEnum {
     HONGBAO_WATER_TIME = 'hongbaoWaterTime_',
 
     /**
-     * 红包 - 点击验证码btn触发
-     *      _hbId_0 关闭
-     *      _hbId_1 开启
+     * 红包 - 点击验证码数字触发
      */
     HONGBAO_VERIFY_BTN = 'hongbaoVerifyBtn_',
 

@@ -19,6 +19,7 @@ import BotPaymentModel from "../../../../models/BotPaymentModel";
  */
 class WalletMessageHandle {
     public listenerMessage = async (ctx: Context,cbot:Telegraf<Context>) => {
+        console.log('解析到的指令 ', ctx)
         let text = ctx.text
         if (!text || text.length <= 0 || text?.trim() == '') {
             return
