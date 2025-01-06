@@ -20,17 +20,18 @@ class RedisHandle {
      *              }
      *           ]
      */
-    public static PlayingUserListRedisKey = 'PlayingUserListRedisKey'
+    public static Playing_User_Key = 'PlayingUserListRedisKey_'
 
     /**
      * 不能进行游戏的用户列表
      *      数据格式: [
      *          {
-     *              tgId: 加密后的tgId
+     *              tgId: 加密后的tgId,
+     *              type: number 暂时没用
      *          }
      *        ]
      */
-    public static NotPlayingUserListRedisKey = 'NotPlayingUserListRedisKey'
+    public static USER_GAME_LOCK_KEY = 'NotPlayingUserListRedisKey_'
 }
 
 export default RedisHandle
