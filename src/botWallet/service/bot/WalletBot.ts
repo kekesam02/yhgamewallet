@@ -41,8 +41,6 @@ bot.telegram.setMyCommands([
  * 中间件拦截器
  */
 bot.use(async (ctx, next) => {
-    console.log("---------------------中间件拦截器--------------")
-
     let groupId = ContextUtil.getGroupId(ctx)
     let update: any = ctx?.update
     let callbackQuery: string = update.callback_query?.data
@@ -92,7 +90,6 @@ bot.use(async (ctx, next) => {
                 }
             }
         }
-
         return
     }
     // if(ctx.from?.id !== 753861233) {

@@ -51,7 +51,7 @@ class WalletRedPacket {
             buttonList.reply_markup.inline_keyboard.push([
                 {
                     text: ButtonCommonMap.backBtnContent,
-                    callback_data: StartWalletEnum.HONGBAO,
+                    callback_data: StartWalletEnum.BACKHOME,
                     url: ''
                 }
             ])

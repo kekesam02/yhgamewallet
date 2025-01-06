@@ -4,6 +4,7 @@ import { getConfig } from "../config/config";
  * 钱包配置
  */
 class WalletConfig {
+
     // 钱包机器人
     static walltPayBotURL:string = getConfig().botConfig.WalletUrl
     // 转账使用
@@ -19,6 +20,5 @@ class WalletConfig {
     // 个人跳转
     static MEURL:string = 'https://t.me/'
 }
-
 
 export default WalletConfig

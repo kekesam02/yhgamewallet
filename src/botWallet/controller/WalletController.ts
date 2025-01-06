@@ -162,11 +162,7 @@ class WalletController {
             {
                 text: '🥯 领取邀请返利',
                 query: WalletUserCenterEnum.YQFL
-            },
-            // {
-            //     text: '🥯 首充返利',
-            //     query: WalletUserCenterEnum.SCFL
-            // }
+            }
         ],
         [
             {
