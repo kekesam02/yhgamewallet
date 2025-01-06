@@ -47,14 +47,14 @@ class WalletYaoqingHaoyouMethod {
             if(arr && arr.length > 0 ) {
                  html = "\uD83C\uDFAA推荐您的朋友加入一号公馆\n" +
                     "\uD83D\uDD25好友完成充值投注后，您将获取好友投注金额【0.2%】的奖励\n" +
-                    "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
+                    "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
                     "1、已邀请人数：" + inviteUserModels.length + "\n" +
                     "2、邀请列表是：" + arr.join('、') + "\n" +
                     "3、推荐链接：\n<code>" + url + "</code> (点击复制)"
             }else{
                  html = "\uD83C\uDFAA推荐您的朋友加入一号公馆\n" +
                     "\uD83D\uDD25好友完成充值投注后，您将获取好友投注金额【0.2%】的奖励\n" +
-                    "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
+                    "➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖\n" +
                     "推荐链接：\n<code>" + url + "</code> (点击复制)"
             }
             // 发送消息
