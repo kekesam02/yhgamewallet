@@ -7,6 +7,7 @@ import WalletHandleShouKuanMethod from "../../handle/dashbord/shoukuan/WalletHan
 import WalletController from "../../../controller/WalletController";
 import WalletConfig from "../../../WalletConfig";
 import WalletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
+import BotPaymentModel from "../../../../models/BotPaymentModel";
 
 /**
  * 钱包机器人收到的用户消息处理器
@@ -28,7 +29,8 @@ class WalletInnerQueryHandle {
             var tgId: number = from?.id || 0
             const loginFlag = await redis.get("login_" + tgId)
             const currentop: string = await redis.get("currentop" + tgId) || ""
-            console.log('传入的参数', currentop)
+            // 处理超24小时的转账
+            await BotPaymentModel.updateMoreThan24Hour(tgId)
             if (loginFlag == "success" && currentop) {
                 // 转账
                 if (currentop == 'zhuanzhang') {

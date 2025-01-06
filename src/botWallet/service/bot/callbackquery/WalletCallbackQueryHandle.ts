@@ -19,6 +19,7 @@ import WalletShouchongFanLiMethod from "../../handle/usercenter/shouchongfanli/W
 import WalletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/WalletYaoqingHaoyouMethod";
 import WalletTixianAddressMethod from "../../handle/usercenter/tixiandizhi/WalletTixianAddressMethod";
 import WalletXiaoeMianmiMethod from "../../handle/usercenter/xiaoemianmi/WalletXiaoeMianmiMethod";
+import BotPaymentModel from "../../../../models/BotPaymentModel";
 
 
 /**
@@ -46,9 +47,12 @@ class WalletCallbackQueryHandle {
     }
 
     public static listenerMessage = async (ctx: Context,bot:Telegraf<Context>,cbot:Telegraf<Context>) => {
-        console.log('callback_query回调', ctx)
         let update: any = ctx?.update
         let callbackStr: string = update.callback_query?.data
+        // 1：获取telegram的tgId
+        var tgId = ctx.callbackQuery?.from?.id || 0
+        // 处理超24小时的转账
+        await BotPaymentModel.updateMoreThan24Hour(tgId)
         if (callbackStr.startsWith('num_') || callbackStr === 'delete' || callbackStr === 'clear') {// 计算器callback
             WalletHandleMethod.startInputPassword(ctx)
         }else if(callbackStr.startsWith('qrjs')){// 确认提现
@@ -180,7 +184,6 @@ class WalletCallbackQueryHandle {
                 // 红包 - 选择流水时间触发
                 case StartWalletEnum.HONGBAO_WATER_TIME + callbackStr.replaceAll(StartWalletEnum.HONGBAO_WATER_TIME, ''):
                     return new WalletRedPacket(ctx).selectWaterTime(callbackStr.replaceAll(StartWalletEnum.HONGBAO_WATER_TIME, ''))
-
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:
                     return  WalletHandleShangduiMethod.startShanDui(ctx,cbot, StartWalletEnum.SHANGDUI)
@@ -216,7 +219,6 @@ class WalletCallbackQueryHandle {
             }
         }
     }
-
 
     /**
      * 开始定位球游戏

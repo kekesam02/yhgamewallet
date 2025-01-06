@@ -14,6 +14,9 @@ import {queryRunner} from "../../../../../config/database";
 import WalletHandleMethod from "../../WalletHandleMethod";
 import WalletConfig from "../../../../WalletConfig";
 import {addLockByTgId} from "../../../../../config/redislock";
+import moment from "moment";
+import dateFormatUtils from "../../../../../commons/date/DateFormatUtils";
+import walletController from "../../../../controller/WalletController";
 
 
 /**
@@ -66,7 +69,7 @@ class WalletHandleZhuanzhangMethod {
                     // 创建一个可分享的结果
                     await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                         id: queryId,
-                        title: '⚠️温馨提示：操作失败，余额不足！',
+                        title: '⚠️ 温馨提示：操作失败，余额不足！',
                         description: '提示：余额不足，当前余额：【' + userUsdt + '】 不足以转出【' + zhuanMoney + '】!',
                         input_message_content: {
                             message_text: '\uD83D\uDC47 \n'
@@ -108,7 +111,7 @@ class WalletHandleZhuanzhangMethod {
                 // 创建一个可分享的结果
                 await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                     id: queryId,
-                    title: '⚠️温馨提示：操作失败，余额不足！',
+                    title: '⚠️ 温馨提示：操作失败，余额不足！',
                     description: "\uD83D\uDCB0当前余额：" + botUser.USDT + " USDT",
                     input_message_content: {
                         message_text: '\uD83D\uDC47 \n'
@@ -144,7 +147,7 @@ class WalletHandleZhuanzhangMethod {
         var sendTgId = callbackStr.replaceAll("qrjs", "").split(",")[1];
         // 必须是转账本人操作。否则返回
         if (sendTgId != tgId.toString()) {
-            await ctx.answerCbQuery('提示：不是你发起的转账', {show_alert: true})
+            await ctx.answerCbQuery('⚠️ 提示：不是你发起的转账', {show_alert: true})
             return
         }
         // 开始查询用户
@@ -156,12 +159,12 @@ class WalletHandleZhuanzhangMethod {
             let walletFreeLimit = parseFloat(botUser.withdrawalLimit || "100")
             // 余额不足
             if (userUsdt <= 0) {
-                await ctx.answerCbQuery('提示：余额不足，当前余额是0', {show_alert: true})
+                await ctx.answerCbQuery('⚠️ 提示：余额不足，当前余额是0', {show_alert: true})
                 return
             }
             // 余额不够
             if (userUsdt < zhuanMoney) {
-                await ctx.answerCbQuery('提示：余额不足，当前余额：【' + userUsdt + '】 不足以转出【' + zhuanMoney + '】!', {show_alert: true})
+                await ctx.answerCbQuery('⚠️ 提示：余额不足，当前余额：【' + userUsdt + '】 不足以转出【' + zhuanMoney + '】!', {show_alert: true})
                 return
             }
             // 开始验证免密额度 --- 直接转账
@@ -205,7 +208,7 @@ class WalletHandleZhuanzhangMethod {
                     await redis.set("tx_botpayment_"+tgId,botPayment.id,"EX",60 * 60 * 24)
                 } catch (e) {
                     await queryRunner.rollbackTransaction()
-                    await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
+                    await ctx.answerCbQuery('⚠️ 提示：服务器忙，请稍后在试', {show_alert: true})
                 }
             } else {
                 const cacheLogin = await redis.get("zk_input_lock_"+tgId)
@@ -353,7 +356,7 @@ class WalletHandleZhuanzhangMethod {
                         // 清空缓存
                         await WalletHandleMethod.clearCacheRelation(ctx)
                         // 发送消息
-                        await ctx.replyWithHTML("你已成功解锁该笔转账!")
+                        await ctx.replyWithHTML("✅ 你已成功解锁该笔转账!",WalletController.createBackBtn())
                         // 同时改变按钮的状态为收款
                         await this.startZhuanZhangPwdUnLock(ctx,tgId + '_' + money + '_' + inlineMessageId)
                     } else {
@@ -369,7 +372,7 @@ class WalletHandleZhuanzhangMethod {
                     // 清空缓存
                     await WalletHandleMethod.clearCacheRelation(ctx)
                     // 发送消息
-                    await ctx.replyWithHTML("你已成功解锁该笔转账!")
+                    await ctx.replyWithHTML("✅ 你已成功解锁该笔转账!",WalletController.createBackBtn())
                     // 同时改变按钮的状态为收款
                     await this.startZhuanZhangPwdUnLock(ctx,tgId + '_' + money + '_' + inlineMessageId)
                 }
@@ -394,11 +397,11 @@ class WalletHandleZhuanzhangMethod {
         var sendTgId = callbackStr.replaceAll("qrjs", "").split(",")[1];
         // 必须是转账本人操作。否则返回
         if (sendTgId != tgId.toString()) {
-            ctx.answerCbQuery('提示：不是你发起的转账', {show_alert: true})
+            ctx.answerCbQuery('⚠️ 提示：不是你发起的转账', {show_alert: true})
             return
         }
         // 删除此消息
-        await ctx.editMessageText("提示：对方已取消转账!")
+        await ctx.editMessageText("⚠️ 提示：对方已取消转账!")
         // 删除缓存操作
         await redis.del("zk_input_lock_"+tgId)
         await redis.del("tx_botpayment_"+tgId)
@@ -443,7 +446,7 @@ class WalletHandleZhuanzhangMethod {
                     return;
                 }
                 // 开始判断订单是否超过24小时，如果超过24小时就把订单作废，余额退回
-                var mark = true
+                var mark = dateFormatUtils.isMoreThan24HoursApartCurrent(botPayment.createTime)
                 if(mark){
                     try {
                         // 操作时间
@@ -455,7 +458,8 @@ class WalletHandleZhuanzhangMethod {
                         await queryRunner.startTransaction()
                         // 修改订单信息
                         await queryRunner.manager.update(BotPaymentModel,{
-                            id:botPayment.id
+                            id:botPayment.id,
+                            version:botPayment.version
                         },{
                             status:2,//超时退回
                             balanceBefore:userUsdt,//退回之余额
@@ -464,7 +468,10 @@ class WalletHandleZhuanzhangMethod {
                             passTime:applyTime,
                             passTgid:'1',
                             passUsername:"机器人退回",
-                            passNickname:"机器人退回"
+                            passNickname:"机器人退回",
+                            version:()=>{
+                                return 'version + 1'
+                            }
                         })
                        // 把退回的余额加回去
                        await queryRunner.manager.update(UserModel,{
@@ -518,13 +525,17 @@ class WalletHandleZhuanzhangMethod {
                     const afterAmount: number = parseFloat(beforeAmount) + parseFloat(botPayment?.paymentAmount || '0')
                     //4：修改原来的订单为为--成功
                     await queryRunner.manager.update(BotPaymentModel, {
-                        id: botPayment?.id
+                        id: botPayment?.id,
+                        version:botPayment.version
                     }, {
                         status: 1,// 已完成转账
                         passTime: applyTime,
                         passTgid: encodeUserId,
                         passUsername: username,
-                        passNickname: nickname
+                        passNickname: nickname,
+                        version:()=>{
+                            return 'version + 1'
+                        }
                     })
 
                     //5：保存收款记录
@@ -568,6 +579,8 @@ class WalletHandleZhuanzhangMethod {
 
         })
     }
+
+
 }
 
 export default WalletHandleZhuanzhangMethod

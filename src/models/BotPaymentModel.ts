@@ -109,7 +109,8 @@ class BotPaymentModel extends BaseEntity {
      * 支付类型对应的号充值对应充值单号/上押对应上押号
      */
     @Column({
-        name: 'payment_type_number'
+        name: 'payment_type_number',
+        default:''
     })
     paymentTypeNumber: string
 
@@ -258,6 +259,16 @@ class BotPaymentModel extends BaseEntity {
         default:''
     })
     description: string
+
+    /**
+     * 分布式锁的互斥性处理
+     * 防止：修改订单和吊机收款的冲突
+     */
+    @Column({
+        name: 'version',
+        default:1
+    })
+    version: number
 
     /**
      * 保存用户订单对象
@@ -741,6 +752,58 @@ class BotPaymentModel extends BaseEntity {
             }
         })
         return result
+    }
+
+    /**
+     * 修改用户超24小时的转账
+     * @param tgId
+     */
+    public static updateMoreThan24Hour = async(tgId:number)=>{
+        if(tgId <= 0)return
+        try {
+            const aesTgId = AESUtils.encodeUserId(tgId.toString())
+            // 修改超时的订单状态
+            const botyPayments = await BotPaymentModel.createQueryBuilder().where("user_id=:tgId and payment_type = 10 and status = 0 and create_time < (NOW() - INTERVAL 24 HOUR)", {tgId: aesTgId}).getMany()
+            if (botyPayments && botyPayments.length > 0 ) {
+                for (let i = 0; i < botyPayments.length; i++) {
+                    await queryRunner.startTransaction()
+                    const botPayment = botyPayments[i]
+                    // 操作时间
+                    var applyTime = DateFormatUtils.CurrentDateFormatString()
+                    // 1：查询收款人是否注册
+                    let botUser: UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: botPayment.tgId}).getOne()
+                    const userUsdt = botUser?.USDT || "0"
+                    const backUserUsdt = parseFloat(botPayment.paymentAmount) + parseFloat(userUsdt)
+                    // 修改订单信息
+                    await queryRunner.manager.update(BotPaymentModel, {
+                        id: botPayment.id,
+                        version:botPayment.version
+                    }, {
+                        status: 2,//超时退回
+                        balanceBefore: userUsdt,//退回之余额
+                        balanceAfter: backUserUsdt.toString(),//退回之后余额
+                        description: "超时自动退回",
+                        passTime: applyTime,
+                        passTgid: '1',
+                        passUsername: "机器人退回",
+                        passNickname: "机器人退回",
+                        version:()=>{
+                            return 'version + 1'
+                        }
+                    })
+                    // 把退回的余额加回去
+                    await queryRunner.manager.update(UserModel, {
+                        id: botUser?.id
+                    }, {
+                        USDT: backUserUsdt.toString()
+                    })
+
+                    await queryRunner.commitTransaction()
+                }
+            }
+        }catch (e){
+            await queryRunner.rollbackTransaction()
+        }
     }
 
 }
