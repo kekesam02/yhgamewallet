@@ -19,7 +19,6 @@ import BotPaymentModel from "../../../../models/BotPaymentModel";
  */
 class WalletInnerQueryHandle {
     public static listenerInnerQuery = async (ctx: Context,cbot:Telegraf<Context>) => {
-        console.log('--------------------内连按钮回调--------------', ctx)
         let query = ctx.inlineQuery?.query || ''
         query = query.trim()
         const queryId:string = ctx.inlineQuery?.id +''
@@ -72,11 +71,11 @@ class WalletInnerQueryHandle {
                 if (currentop == 'shoukuan') {
                     var text = ""
                     var flag:boolean = false
-                    if(!query || !query.isMoney()){
+                    var price = parseFloat(query || "0")
+                    if(!query || isNaN(price)){
                         flag = true
                         text="请输入数字,并且小于0"
                     }
-                    var price = parseFloat(query || "0")
                     if(price >= 0){
                         flag = true
                         text="转账金额必须是正整数,并且小于0"

@@ -1,5 +1,6 @@
 import process from "node:process";
 import ScheduleHandle from "./commons/schedule/ScheduleHandle";
+require('./commons/expand/ExpandIndex')
 const moment = require('moment-timezone')
 
 require('./commons/expand/ExpandSelectQueryBuilder')

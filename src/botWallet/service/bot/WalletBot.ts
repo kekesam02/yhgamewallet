@@ -13,9 +13,7 @@ import WalletYaoqingHaoyouMethod from "../handle/usercenter/yaoqinghaoyou/Wallet
 import WalletUserCenterMethod from "../handle/usercenter/WalletUserCenterMethod";
 import ScheduleHandle from "../../../commons/schedule/ScheduleHandle";
 import ContextUtil from "../../../commons/ContextUtil";
-import MessageUtils from "../../../commons/message/MessageUtils";
 import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
-
 /**
  * 娱乐机器人核心代码
  */
@@ -52,19 +50,19 @@ bot.use(async (ctx, next) => {
     if (groupId && groupId.indexOf('-') > -1) {
         if (!callbackQuery) {
             let text = ctx.text ?? ''
-            let arr = text.split(' ')
+            let arr = text.split(' ') || ['','','']
             if (text.indexOf('hb') < 0) {
                 return
             }
             // 判定 @xxx 3 指令
-            if (arr[0].startsWith('@')) {
+            if (arr  && arr[0].startsWith('@')) {
                 if (arr.length > 3) {
                     return
                 }
                 if (arr[1] != 'hb') {
                     return
                 }
-                if (!arr[2].isMoney()) {
+                if (!arr[2].toString().isMoney()) {
                     return
                 }
                 await next()
@@ -74,7 +72,7 @@ bot.use(async (ctx, next) => {
                 if (arr.length > 3) {
                     return
                 }
-                if (!arr[1].isMoney()) {
+                if (!arr[1].toString().isMoney()) {
                     return
                 }
                 await next()

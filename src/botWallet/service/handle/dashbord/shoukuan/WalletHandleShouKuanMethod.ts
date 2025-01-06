@@ -47,7 +47,7 @@ class WalletHandleShouKuanMethod {
         }
         // 发送消息
         const html = "\uD83D\uDC47 点击下方按钮选择付款人";
-        await ctx.replyWithHTML(html, WalletController.createShouKuanSwitchBtn("-1"))
+        await ctx.replyWithHTML(html, WalletController.createShouKuanSwitchBtn(" -1"))
     }
 
     // 收款具体逻辑
@@ -67,8 +67,8 @@ class WalletHandleShouKuanMethod {
             // 创建一个可分享的结果
             await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                 id: queryId,
-                title: "你正发起收款操作，收款金额【" + money + "】USDT",
-                description: "",
+                title: "发起收款操作",
+                description: "你正发起收款操作，收款金额【" + money + "】USDT",
                 input_message_content: {
                     message_text: "\uD83D\uDCB0【@" + fusername + "】向你发起收款，收款金额【" + money + "】USDT。",
                     parse_mode: "HTML"
@@ -128,12 +128,11 @@ class WalletHandleShouKuanMethod {
         const botUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: tgIdvaluePwd}).getOne()
         var html = "\uD83D\uDCB8 你正在付款给" + botUser?.nickName + "\n" +
             "\n" +
-            "收款人用户ID : " + tgIdvalue + "\n" +
-            "收款人名称 : " + botUser?.userName + "\n" +
-            "\n" +
-            "支付金额 : " + value + " USDT\n" +
-            "\n" +
-            "提示: 本次转账即时完成, 无法追回!";
+            "1、收款人用户ID : " + tgIdvalue + "\n" +
+            "2、收款人名称 : " + botUser?.userName + "\n" +
+            "3、支付金额 : " + value + " USDT\n" +
+            "4、转账时间 : " + DateFormatUtils.CurrentDateFormatString() + " USDT\n" +
+            "⚠️ 提示: 本次转账即时完成, 无法追回!";
 
         // 发送消息
         await bot.telegram.sendMessage(payTgId, html, {
@@ -216,7 +215,7 @@ class WalletHandleShouKuanMethod {
                         passNickname: payBotUser.nickName,
                         status:1,
                         chatId: chatId,
-                        description:"已收到来自用户<a href='tg://user?id="+payBotUser?.tgId+"'>【@"+payBotUser?.userName+"】</a>转账"
+                        description:"已收到用户<a href='tg://user?id="+payBotUser?.tgId+"'>【@"+payBotUser?.userName+"】</a>转账"
                     })
                     // 付款人余额减少
                     await queryRunner.manager.update(UserModel, {
@@ -249,18 +248,17 @@ class WalletHandleShouKuanMethod {
                         description:"已转账给用户<a href='tg://user?id="+shouKuanBotUser?.tgId+"'>【@"+shouKuanBotUser?.userName+"】</a>"
                     })
                     // 付款人信息
-                    var html = "🥯 成功转账给 " + shouKuanBotUser?.userName +
-                        "\n" +
-                        "用户ID : " + currentTgId+ "\n" +
-                        "名称 : " + shouKuanBotUser?.userName + "\n" +
-                        "用户名 : " + shouKuanBotUser?.nickName + "\n" +
-                        "支付金额 : " + money + "USDT" +
-                        "\n" +
-                        "\n" +
-                        "提示 : 您可以将次支付凭证转发给收款人";
+                    var html = "✅ 成功转账给 " + shouKuanBotUser?.userName +
+                        "\n\n" +
+                        "1、用户ID  : " + currentTgId+ "\n" +
+                        "2、转账用户 : " + shouKuanBotUser?.userName + "\n" +
+                        "3、转账昵称 : " + shouKuanBotUser?.nickName + "\n" +
+                        "4、支付金额 : " + money + "USDT" + "\n" +
+                        "5、转账时间 : " + applyTime + "\n" +
+                        "⚠️ 提示 : 您可以将次支付凭证转发给收款人";
                     await ctx.telegram.sendMessage(currentTgId,html,{parse_mode:"HTML"})
                     // 收款人消息
-                    var html2 = "✅ 收到来自用户@"+payBotUser.userName+ "的付款 :【" + money + " 】USTD信息，请注意查收！"
+                    var html2 = "✅ 收到用户@"+payBotUser.userName+ "的付款 :【" + money + " 】USTD信息，请注意查收！"
                     await ctx.telegram.sendMessage(callbackSkTgId,html2,{parse_mode:"HTML"})
                     // 提交事务
                     await queryRunner.commitTransaction()
@@ -290,10 +288,10 @@ class WalletHandleShouKuanMethod {
         var callbackSkTgId = callbackData[2]
         // 如果付款人是同一个人
         if (currentTgId == callbackPayTgId) {
+            // 删除消息
+            await ctx.deleteMessage(messageId)
             // 修改收款的信息
             await ctx.telegram.answerCbQuery(callbackQueryId, "操作成功", {show_alert: false})
-            await ctx.deleteMessage(messageId)
-            await ctx.reply("已取消")
         } else {
             await bot.telegram.sendMessage(currentTgId, "⚠️ 自己不能删除自己的操作")
         }

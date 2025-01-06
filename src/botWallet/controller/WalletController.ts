@@ -108,7 +108,7 @@ class WalletController {
                 query: StartWalletEnum.CHONGZHI
             },
             {
-                text: '💸 提现',
+                text: '💰 提现',
                 query: StartWalletEnum.TIXIAN
             }
         ],
@@ -150,7 +150,7 @@ class WalletController {
                 query: WalletUserCenterEnum.BACCOUNT
             },
             {
-                text: '💸 提币历史',
+                text: '💰 提币历史',
                 query: WalletUserCenterEnum.TBLS
             }
         ],
@@ -170,7 +170,7 @@ class WalletController {
         ],
         [
             {
-                text: '💰️ 小额免密',
+                text: '🔑 小额免密',
                 query: WalletUserCenterEnum.XEMM
             },
             {
@@ -189,12 +189,6 @@ class WalletController {
                 query: WalletUserCenterEnum.HOME,
             }
         ]
-        // , [
-        //     {
-        //         text: '🏘️ 测试',
-        //         url: 'https://t.me/VertexPaybot?start=withdraw'
-        //     }
-        // ]
     ]
 
     /**

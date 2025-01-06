@@ -161,7 +161,7 @@ class WalletUserCenterController {
                 this.BackUserHome,
                 {
                     text: '选择好友',
-                    switch_inline_query: '来自好友【@'+username+'】邀请你加入一号公馆，点击链接即可加入：\n' + url
+                    switch_inline_query: '好友【@'+username+'】邀请你加入一号公馆，点击链接即可加入：\n' + url
                 }
             ]
         ])
