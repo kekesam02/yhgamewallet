@@ -258,6 +258,8 @@ class BotHb extends BaseEntity {
             .where('tg_id = :tgId', {
                 tgId: tgId
             })
+            .andWhere('status = 0')
+            .andWhere('del = 0')
             .whereTime(timeUtils.startTime, timeUtils.endTime)
             .getMany()
     }

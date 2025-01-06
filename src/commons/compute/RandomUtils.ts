@@ -107,9 +107,21 @@ class RandomUtils {
         }
         let sum2 = moneyList.reduce((prev, curr) => prev + curr)
         console.log('随机数列表', sum2, moneyList)
-        return moneyList.map(item => {
+        return this.shuffle(moneyList.map(item => {
             return new ComputeUtils(item).dividedBy(100, 2).getNumber()
-        })
+        }))
+    }
+
+    /**
+     * 打乱数组
+     * @param arr
+     */
+    public shuffle = (arr: Array<number>) => {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]]
+        }
+        return arr
     }
 }
 

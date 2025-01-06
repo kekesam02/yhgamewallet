@@ -403,7 +403,7 @@ class WalletRedPacket {
      * 设置红包流水金额
      */
     public setWaterMoney = async (text: string, hbId: string) => {
-        if (!text.isMoney()) {
+        if (isNaN(Number(text))) {
             return new MessageTipUtils().handleErr(this.ctx)
         }
         let botHb = await new BotHb().getBotHb(hbId)
