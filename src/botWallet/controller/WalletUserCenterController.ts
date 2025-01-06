@@ -25,7 +25,7 @@ class WalletUserCenterController {
      * 返回个人中心
      */
     public static BackUserHome = {
-        text: '🏘️ 个人中心',
+        text: '↪️ 个人中心',
         query: StartWalletEnum.USERCENTER,
     }
 

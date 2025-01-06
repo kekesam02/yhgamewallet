@@ -50,7 +50,7 @@ class WalletCaiJinZhuanhuaMethod {
             //查询是否有正在上注的游戏
             //查极速骰子最新未封盘期数
             var list2  = await BotRoundModel.createQueryBuilder()
-                .where("tg_id:tgId and getEntertained = 0 and round_type = " + GameTypeEnum.TOUZIJS).getMany();
+                .where("tg_id = :tgId and getEntertained = 0 and round_type = " + GameTypeEnum.TOUZIJS,{tgId:AESUtils.encodeUserId(tgId+'')}).getMany();
             if (list2.length >0 ) {
                 //有启动骰子
                 const botRoundModel: BotRoundModel = list2[0]
