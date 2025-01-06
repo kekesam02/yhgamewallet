@@ -73,7 +73,7 @@ class WalletMyAccountMethod {
                 html+=searchStr
                 if(botPaymentModelPage.total > 0) {
                     for (let i = 0; i < botPaymentModels.length; i++) {
-                        html += "\n(" + (botPaymentModels[i].operateType == 1 ? "➕收入" : "➖支出") + ")➖➖➖➖第" + ((pageNo - 1) * pageSize + i + 1) + "笔➖➖➖"
+                        html += "\n(" + (botPaymentModels[i].operateType == 1 ? "➕收入" : "➖支出") + ")➖➖➖➖➖第" + ((pageNo - 1) * pageSize + i + 1) + "笔➖➖➖➖➖"
                         html += "\n货币类型：" + (botPaymentModels[i].walletType == WalletType.USDT ? 'USDT' : 'TRX')
                         html += "\n操作类型：" + botPaymentModels[i].paymentTypeName
                         if (botPaymentModels[i].paymentType == PaymentType.TX_DKJL) {
@@ -81,9 +81,11 @@ class WalletMyAccountMethod {
                         } else {
                             html += "\n操作金额：" + botPaymentModels[i].paymentAmount + ' ' + (botPaymentModels[i].walletType == WalletType.USDT ? 'USDT' : 'TRX')
                         }
-                        html += "\n" + (botPaymentModels[i].operateType == 1 ? "收入" : "支出") + "前余额：" + botPaymentModels[i].balanceBefore + ' ' + (botPaymentModels[i].walletType == WalletType.USDT ? 'USDT' : 'TRX')
-                        html += "\n" + (botPaymentModels[i].operateType == 1 ? "收入" : "支出") + "后余额：" + botPaymentModels[i].balanceAfter + ' ' + (botPaymentModels[i].walletType == WalletType.USDT ? 'USDT' : 'TRX')
-                        html += "\n操作时间：" + moment(botPaymentModels[i].createTime).format('yyyy-MM-DD HH:mm')
+                        const markStr1 = botPaymentModels[i].status == 2 ? '退回' : "收入"
+                        const markStr2 = botPaymentModels[i].status == 2 ? '退回' : "支出"
+                        html += "\n" + (botPaymentModels[i].operateType == 1 ? markStr1 : markStr2) + "前余额：" + botPaymentModels[i].balanceBefore + ' ' + (botPaymentModels[i].walletType == WalletType.USDT ? 'USDT' : 'TRX')
+                        html += "\n" + (botPaymentModels[i].operateType == 1 ? markStr1 : markStr2) + "后余额：" + botPaymentModels[i].balanceAfter + ' ' + (botPaymentModels[i].walletType == WalletType.USDT ? 'USDT' : 'TRX')
+                        html += "\n创建时间：" + moment(botPaymentModels[i].createTime).format('yyyy-MM-DD HH:mm')
                         if (botPaymentModels[i].applyTime) html += "\n申请时间：" + moment(botPaymentModels[i].applyTime).format('yyyy-MM-DD HH:mm')
                         if (botPaymentModels[i].passTime) html += "\n通过日期：" + moment(botPaymentModels[i].passTime).format('yyyy-MM-DD HH:mm')
                         if (botPaymentModels[i].description) html += "\n操作备注：" + botPaymentModels[i].description

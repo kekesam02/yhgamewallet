@@ -111,14 +111,13 @@ class WalletHandleChongzhiMethod {
      * @param ctx
      */
     public static startChongZhiCommand = async (ctx: Context) => {
-
         let update: any = ctx?.update
         // 1：获取telegram的tgId
         var tgId: string = update?.message?.from?.id + '' || ''
         var firstName: string = update?.message?.from?.first_name + '' || ''
         var username: string = update?.message?.from?.username + '' || ''
         // 2：查询用户信息
-        let userId = AESUtils.encodeUserId(tgId?.toString())
+        let userId = AESUtils.encodeUserId(tgId)
         // 根据tgId查询用户是否存在。
         let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
         var link: string | undefined = '';
