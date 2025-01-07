@@ -31,7 +31,8 @@ class GameUserRedis {
      */
     public static  addUserGameLock = async (tgId: string, type: number = 0) => {
         let key = RedisHandle.USER_GAME_LOCK_KEY
-        if (redis.exists(tgId) == 1) {
+        var numberPromise = await redis.exists(tgId);
+        if (numberPromise == 1) {
             try {
                 const data = await redis.get(key) || ""
                 let redisData = JSON.parse(data) as Array<any>
@@ -56,7 +57,8 @@ class GameUserRedis {
      */
     public static addPlayingUser = async (tgId: string, gameType: GameTypeEnum) => {
         let key = RedisHandle.Playing_User_Key
-        if (redis.exists(tgId) == 1) {
+        var numberPromise = await redis.exists(tgId);
+        if (numberPromise == 1) {
             try {
                 const data = await redis.get(key) || ""
                 let redisData = JSON.parse(data) as Array<any>

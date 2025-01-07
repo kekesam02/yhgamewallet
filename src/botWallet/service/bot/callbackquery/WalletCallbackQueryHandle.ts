@@ -79,7 +79,7 @@ class WalletCallbackQueryHandle {
         } else if (callbackStr.startsWith("lqyqhyfl")){// 领取邀请返利
             WalletYaoqingFanLiMethod.startLingquFanli(ctx)
         }  else if (callbackStr.startsWith("tycjzh")){// 领取邀请返利
-            WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr)
+            WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr,cbot)
         } else{
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
