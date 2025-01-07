@@ -110,7 +110,7 @@ class GameScheduleHandle {
 
                 let pc28Controller = new PC28Controller()
                 let lotteryJson = await pc28Controller.getLotteryJson()
-                console.log('获取到的数据流 ', lotteryJson)
+                console.log('获取到的开奖结果 ', lotteryJson)
                 await this.checkNextPC28(lotteryJson)
             } catch (err) {
                 console.log('获取开奖信息之类的出错了', err)
@@ -178,7 +178,7 @@ class GameScheduleHandle {
         let openJob = schedule.scheduleJob(new Date(openTime), async () => {
             let pc28Controller = new PC28Controller()
             let nextJson: Pc28LotteryJsonType = await pc28Controller.getLotteryJson()
-
+            console.log('获取到的开奖结果', nextJson)
             // 保存开奖结果到数据库
             console.log('保存11结果')
             await pc28Controller.saveLotteryJson(nextJson)
