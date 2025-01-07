@@ -1,9 +1,8 @@
 import RedisHandle from "./RedisHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import gameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 import RedisUtils from "./RedisUtils";
 import redis from "../../config/redis";
-import {remove} from "winston";
-import redisUtils from "./RedisUtils";
 
 /**
  * 正在游戏（锁定不能游戏）的用户 redis 数据
@@ -51,7 +50,7 @@ class GameUserRedis {
      *      true: 正在游戏中
      *      false: 暂未开始游戏
      */
-    public static getUserIsPlaying = async (tgId: string, gameType: GameTypeEnum): Promise<boolean> => {
+    public static getUserIsPlaying = async (tgId: string, gameType: GameTypeEnum = gameTypeEnum.PC28DI): Promise<boolean> => {
         let key = RedisHandle.Playing_User_Key
         let data = await redis.get(key)
         if (data) {
@@ -74,7 +73,7 @@ class GameUserRedis {
     /**
      * 添加正在进行游戏的用户信息、不需要根据游戏类型进行区分
      */
-    public static addPlayingUser = async (tgId: string, gameType: GameTypeEnum) => {
+    public static addPlayingUser = async (tgId: string, gameType: GameTypeEnum = GameTypeEnum.PC28DI) => {
         let key = RedisHandle.Playing_User_Key
         let data = await redis.get(key)
         if (data) {
@@ -97,7 +96,7 @@ class GameUserRedis {
      * 根据游戏类型删除正在游戏中的用户
      * @param gameType
      */
-    public static clearPlayingUser = async (gameType: GameTypeEnum) => {
+    public static clearPlayingUser = async (gameType: GameTypeEnum = GameTypeEnum.PC28DI) => {
         let key = RedisHandle.Playing_User_Key
         let result = await redis.get(key)
         if (result) {

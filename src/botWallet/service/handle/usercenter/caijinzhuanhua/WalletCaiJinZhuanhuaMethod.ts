@@ -43,7 +43,7 @@ class WalletCaiJinZhuanhuaMethod {
             // 设置操作
             await redis.set("currentop" + tgId, "caijinzhuanghua", 'EX', 60 * 60)
             // 1： 这里要加互斥锁 --如果用户正在上注就就不能彩金转化
-            var userIsPlaying = GameUserRedis.getUserIsPlaying(tgId + '');
+            var userIsPlaying = await GameUserRedis.getUserIsPlaying(tgId + '');
             if (userIsPlaying) {
                 await ctx.replyWithHTML("⚠️ 您已有正在投注的彩金，无法转化，请无投注后重试！");
                 return
