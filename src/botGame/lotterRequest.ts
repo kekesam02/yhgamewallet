@@ -3,6 +3,7 @@ import GameScheduleHandle from "../commons/schedule/GameScheduleHandle";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
 import moment from "moment";
 import ComputeUtils from "../commons/compute/ComputeUtils";
+import ScheduleHandle from "../commons/schedule/ScheduleHandle";
 
 
 /**
@@ -23,6 +24,17 @@ class LotteryRequest {
                 console.log('第二个接口返回的数据', val)
                 resolve(val)
             })
+
+            /**
+             * 这个接口只有在前俩个接口卡奖后(超过20秒获取不到开奖结果)才会去调用
+             *      因为他没有返回下一期开奖期数和下期开奖时间
+             */
+            setTimeout(() => {
+                this.request3().then((val) => {
+                    console.log('第三个接口返回的数据', val)
+                    resolve(val)
+                })
+            }, 1000)
         })
     }
 
@@ -185,6 +197,112 @@ class LotteryRequest {
             })
         }
         return lotteryJson
+    }
+
+    /**
+     * 获取第三个接口开奖数据
+     */
+    public request3 = async (): Promise<Pc28LotteryJsonType> => {
+        let roundId = GameScheduleHandle.pc28Config.roundId
+        let lotteryJson: Pc28LotteryJsonType = {
+            data: []
+        }
+        while (1 < 2) {
+            let json: {
+                data: {
+                    data: {
+                        result: Array<{
+                            // 当前期数
+                            issue: string,
+                            // 开奖结果
+                            code: string,
+                            // 开奖时间
+                            gmtCreateStr: string,
+                        }>
+                    }
+                }
+            } = await request({
+                url: 'https://www.kk2888.com/lotto/query-trend?code=jndpcdd&screen=30&mode=times',
+                method: 'get'
+            })
+            console.log('卡奖接口请求到的数据', json.data.data.result)
+            if (json.data
+                && json.data.data
+                && json.data.data.result
+            ) {
+                let list: Array<{
+                    // 当前期数
+                    issue: string,
+                    // 开奖结果
+                    code: string,
+                    // 开奖时间
+                    gmtCreateStr: string,
+                }> = json.data.data.result
+                let isExit = false
+                let currIndex = 0
+                if (!roundId || roundId == '') {
+                    isExit = true
+                } else {
+                    list.findIndex(item => {
+                        if (item.issue == roundId) {
+                            isExit = true
+                            return true
+                        }
+                    })
+                }
+                if (isExit) {
+                    let currItem = {...list[currIndex]}
+                    let {nextRoundId, nextTime} = await this.getNextJson()
+                    lotteryJson.data = [
+                        {
+                            expect: currItem.issue,
+                            open_code: currItem.code,
+                            open_time: currItem.gmtCreateStr,
+                            next_expect: nextRoundId,
+                            next_time: nextTime,
+                        }
+                    ]
+                    break
+                }
+            }
+            await new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    resolve(null)
+                }, 1000)
+            })
+        }
+        return lotteryJson
+    }
+
+    private getNextJson = async () => {
+        // 下期结果需要请求其他接口才能获取到
+        let nextJson: {
+            data: {
+                data: {
+                    result: Array<{
+                        // 当前期数
+                        period: string,
+                        // 开奖结果
+                        result: Array<number>,
+                        // 开奖时间
+                        kj_time: string,
+                    }>,
+                    next: {
+                        // 下期期数
+                        period: string,
+                        // 开奖时间
+                        kj_time: string
+                    }
+                }
+            }
+        } = await request({
+            url: 'https://api.xgram.me/api/pc28/get_history_by_website',
+            method: 'get'
+        })
+        return {
+            nextRoundId: nextJson.data.data.next.period,
+            nextTime: moment(nextJson.data.data.next.kj_time).format('YYYY-MM-DD HH:mm:ss')
+        }
     }
 }
 
