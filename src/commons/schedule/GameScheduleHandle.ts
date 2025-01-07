@@ -1,11 +1,12 @@
 import {Context, Telegraf} from "telegraf";
 import schedule from "node-schedule";
 import moment from "moment-timezone";
-import TimeUtils from "../date/TimeUtils";
 import PC28Controller from "../../botGame/gameController/PC28Controller";
 import BotGameConfig from "../../botGame/BotGameConfig";
 import {Pc28LotteryJsonType} from "../../type/gameEnums/LooteryJsonType";
 import ScheduleHandle from "./ScheduleHandle";
+import GameUserRedis from "../redis/GameUserRedis";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 
 
 class GameScheduleHandle {
@@ -192,8 +193,10 @@ class GameScheduleHandle {
             console.log('保存55结果')
             await pc28Controller.startPCLow(this.bot, nextJson)
             console.log('保存66结果')
-            await this.checkNextPC28(nextJson!)
+            await GameUserRedis.clearPlayingUser(GameTypeEnum.PC28DI)
+            await GameUserRedis.clearPlayingUser(GameTypeEnum.PC28GAO)
             openJob.cancel()
+            await this.checkNextPC28(nextJson!)
         })
 
 

@@ -1,6 +1,9 @@
-import redis from "../../config/redis";
 import RedisHandle from "./RedisHandle";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import RedisUtils from "./RedisUtils";
+import redis from "../../config/redis";
+import {remove} from "winston";
+import redisUtils from "./RedisUtils";
 
 /**
  * 正在游戏（锁定不能游戏）的用户 redis 数据
@@ -8,28 +11,21 @@ import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 class GameUserRedis {
 
     /**
-     * 判断用户是否正在游戏中
-     *      true: 正在游戏中
-     *      false: 暂未开始游戏
-     */
-    public static getUserIsPlaying = (tgId: string) => {
-        return !!this.getPlayingUser(tgId)
-    }
-
-    /**
      * 判断用户是否可以开始游戏
      *      true: 可以开始游戏
      *      false: 不能开始游戏
      */
-    private static  getUserIsStartGame = (tgId: string) => {
-        return !this.getUserGameLock(tgId)
+    public static getUserIsStartGame = async (tgId: string): Promise<boolean> => {
+        let key = RedisHandle.USER_GAME_LOCK_KEY
+        let result = await new RedisUtils().getArrData(key, 'tgId', tgId)
+        return result == null
     }
 
     /**
      * 添加用户游戏锁、添加在列表中的用户不能进行游戏
      *      type: 预留一下
      */
-    public static  addUserGameLock = async (tgId: string, type: number = 0) => {
+    public static addUserGameLock = async (tgId: string, type: number = 0) => {
         let key = RedisHandle.USER_GAME_LOCK_KEY
         var numberPromise = await redis.exists(tgId);
         if (numberPromise == 1) {
@@ -42,14 +38,48 @@ class GameUserRedis {
                 })
                 await redis.set(key, redisData.toString())
             }catch (e){
+        let result = await new RedisUtils().setArrData(key, {
+            tgId: tgId,
+            type: type
+        }, 'tgId')
+        return result
+    }
 
+    /**
+     * 删除用户游戏锁、删除后用户可以进行游戏
+     * @param tgId
+     */
+    public static removeUserGameLock = async (tgId: string) => {
+        let key = RedisHandle.USER_GAME_LOCK_KEY
+        let result = await new RedisUtils().removeArrData(key, 'tgId', tgId)
+        return result
+    }
+
+    // ------- 下面是判定用户是否正在游戏中的方法
+
+    /**
+     * 判断用户是否正在游戏中
+     *      true: 正在游戏中
+     *      false: 暂未开始游戏
+     */
+    public static getUserIsPlaying = async (tgId: string, gameType: GameTypeEnum): Promise<boolean> => {
+        let key = RedisHandle.Playing_User_Key
+        let data = await redis.get(key)
+        if (data) {
+            let json: any = JSON.parse(data)
+            if (json[gameType]) {
+                let index = json[gameType].findIndex((item: any) => {
+                    if (item == tgId) {
+                        return true
+                    }
+                })
+                if (index > -1) {
+                    return true
+                }
             }
-        } else {
-            await redis.set(key, [{
-                tgId: tgId,
-                type: type
-            }].toString())
+            return false
         }
+        return false
     }
 
     /**
@@ -69,71 +99,39 @@ class GameUserRedis {
                 await  redis.set(key, redisData.toString())
             }catch (e){
 
+        let data = await redis.get(key)
+        if (data) {
+            let json: any = JSON.parse(data)
+            if (json[gameType]) {
+                json[gameType].push(tgId)
+                new RedisUtils().setJsonData(key, json)
+            } else {
+                json[gameType] = [tgId]
+                new RedisUtils().setJsonData(key, json)
             }
         } else {
-            redis.set(key, [{
-                tgId: tgId,
-                gameType: gameType
-            }].toString())
+            new RedisUtils().setJsonData(key, {
+                gameType: [tgId]
+            })
         }
     }
 
-
     /**
-     * 获取正在进行游戏的用户信息
+     * 根据游戏类型删除正在游戏中的用户
+     * @param gameType
      */
-    private static  getPlayingUser = async (tgId: string) => {
+    public static clearPlayingUser = async (gameType: GameTypeEnum) => {
         let key = RedisHandle.Playing_User_Key
-        let resultStr = await redis.get(key)
-        let curr: {
-            gameType: GameTypeEnum,
-            tgId: string
-        } | null = null
-        if (resultStr) {
-            try {
-                let result = JSON.parse(resultStr) as Array<any>
-                for (let i = 0; i < result.length; i++) {
-                    let item = result[i]
-                    if (item.tgId == tgId) {
-                        curr = item
-                        break
-                    }
-                }
-            } catch (err) {
-
+        let result = await redis.get(key)
+        if (result) {
+            let json: Array<any> = JSON.parse(result)
+            if (json[gameType]) {
+                json[gameType] = []
             }
+            new RedisUtils().setJsonData(key, json)
         }
-        return curr
+        return result
     }
-
-
-    /**
-     * 获取正在进行游戏的用户信息
-     */
-    private static  getUserGameLock = async (tgId: string) => {
-        let key = RedisHandle.USER_GAME_LOCK_KEY
-        let resultStr = await redis.get(key)
-        let curr: {
-            type: number,
-            tgId: string
-        } | null = null
-        if (resultStr) {
-            try {
-                let result = JSON.parse(resultStr) as Array<any>
-                for (let i = 0; i < result.length; i++) {
-                    let item = result[i]
-                    if (item.tgId == tgId) {
-                        curr = item
-                        break
-                    }
-                }
-            } catch (err) {
-
-            }
-        }
-        return curr
-    }
-
 }
 
 export default GameUserRedis

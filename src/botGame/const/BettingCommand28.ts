@@ -12,6 +12,9 @@ import MessageUtils from "../../commons/message/MessageUtils";
 import GameBettingTips from "../../html/gameHtml/GameBettingTips";
 import UserModel from "../../models/UserModel";
 import WalletType from "../../type/WalletType";
+import GameUserRedis from "../../commons/redis/GameUserRedis";
+import ContextUtil from "../../commons/ContextUtil";
+import gameTypeEnum from "../../type/gameEnums/GameTypeEnum";
 
 
 /**
@@ -136,6 +139,14 @@ class BettingCommand28 {
      */
     public listenerCommand = async (
     ) => {
+        // 添加用户正在游戏状态
+        await GameUserRedis.addPlayingUser(ContextUtil.getUserId(this.ctx), gameTypeEnum.PC28DI)
+        let userIsStartGame = await GameUserRedis.getUserIsStartGame(ContextUtil.getUserId(this.ctx))
+        if (!userIsStartGame) {
+            await new MessageUtils().sendTextReply(this.ctx,'当前正在结算彩金！不能开始游戏')
+            return false
+        }
+
         let text = this.ctx.text!
         let  parseList =  this.parseCommand(text)
         if (parseList.list.length <= 0) {
@@ -154,16 +165,6 @@ class BettingCommand28 {
 
 
         await addLockByCtx(this.ctx,async () => {
-            // await queryRunner.startTransaction()
-            // let userModelList = await queryRunner.manager.find(UserModel, {
-            //     where: {
-            //         tgId: AESUtils.encodeUserId(this.ctx?.from?.id.toString())
-            //     }
-            // }) as Array<UserModel>
-            // if (userModelList.length < 0) {
-            //     return
-            // }
-            // let userModel = userModelList[0]
             if (
                 new ComputeUtils(userModel.CUSDT).comparedTo(parseList.totalMoney) < 0
                 && new ComputeUtils(userModel.USDT).comparedTo(parseList.totalMoney) >= 0
@@ -210,7 +211,6 @@ class BettingCommand28 {
                 this.group,
                 parseList
             )
-            // ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
         }, async () => {
             console.log('上注出现错误')
         })
