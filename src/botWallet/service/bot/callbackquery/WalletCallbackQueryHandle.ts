@@ -20,6 +20,7 @@ import WalletYaoqingHaoyouMethod from "../../handle/usercenter/yaoqinghaoyou/Wal
 import WalletTixianAddressMethod from "../../handle/usercenter/tixiandizhi/WalletTixianAddressMethod";
 import WalletXiaoeMianmiMethod from "../../handle/usercenter/xiaoemianmi/WalletXiaoeMianmiMethod";
 import BotPaymentModel from "../../../../models/BotPaymentModel";
+import BotHb from "../../../../models/BotHb";
 
 
 /**
@@ -214,10 +215,11 @@ class WalletCallbackQueryHandle {
                     return  new WalletRedPacket(ctx).addRedPacket()
                 case StartWalletEnum.HONGBAO_CANCEL_2:
                     // 红包返回按钮类型 2、回退到红包选择货币页面
-                    return  new WalletRedPacket(ctx).addRedPacket()
+                    return  new WalletRedPacket(ctx).selectWallType()
                 case StartWalletEnum.HONGBAO_CANCEL_3:
                     // 红包返回按钮类型 3、回退到红包类型页面(选择随机还是均分)
-                    return  new WalletRedPacket(ctx).addRedPacket()
+                    let data = await new BotHb().getRedisData(ctx)
+                    return  new WalletRedPacket(ctx).selectRedPacketType(data?.walletType ?? WalletType.USDT)
             }
         }
     }

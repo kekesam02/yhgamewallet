@@ -168,8 +168,14 @@ class MessageUtils {
     /**
      * 删除当前消息
      */
-    public removeMessage = (ctx: Context) =>{
-        return ctx.deleteMessage()
+    public removeMessage = async (ctx: Context) =>{
+        try {
+            await ctx.deleteMessage()
+            return true
+        } catch (err) {
+            console.log('删除消息出错了', err)
+            return false
+        }
     }
 }
 

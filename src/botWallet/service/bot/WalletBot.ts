@@ -14,8 +14,9 @@ import WalletUserCenterMethod from "../handle/usercenter/WalletUserCenterMethod"
 import ScheduleHandle from "../../../commons/schedule/ScheduleHandle";
 import ContextUtil from "../../../commons/ContextUtil";
 import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
+
 /**
- * 娱乐机器人核心代码
+ * 钱包机器人核心代码
  */
 const bot = new Telegraf(getConfig().botConfig.WalletToken)
 const botWallet = new Telegraf(getConfig().botConfig.WalletTokenTest)

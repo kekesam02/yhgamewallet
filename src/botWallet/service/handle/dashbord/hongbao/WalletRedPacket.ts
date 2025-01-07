@@ -68,6 +68,7 @@ class WalletRedPacket {
                 ])
             })
             addBtnList()
+            await new MessageUtils().removeMessage(this.ctx)
             await new MessageUtils().sendTextReply(
                 this.ctx,
                 '从下面的列表中选择一个红包',
@@ -75,6 +76,7 @@ class WalletRedPacket {
             )
         } else {
             addBtnList()
+            await new MessageUtils().removeMessage(this.ctx)
             await new MessageUtils().sendTextReply(
                 this.ctx,
                 '请在下面按钮操作您的红包：',
