@@ -44,6 +44,8 @@ class WalletCallbackQueryHandle {
         } else if(callbackStr.startsWith('txycth')){
             // 异常驳回
             WalletHandleTixianMethod.startRefuseTixian(tgId,callbackStr,ctx,ubot)
+        } else if (callbackStr.startsWith("tyzh_")){// 领取邀请返利
+            WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr,ubot)
         }
     }
 
@@ -78,9 +80,7 @@ class WalletCallbackQueryHandle {
             WalletTiBiHistoryMethod.searchFilterTb(ctx,callbackStr)
         } else if (callbackStr.startsWith("lqyqhyfl")){// 领取邀请返利
             WalletYaoqingFanLiMethod.startLingquFanli(ctx)
-        }  else if (callbackStr.startsWith("tycjzh")){// 领取邀请返利
-            WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr,cbot)
-        } else{
+        }  else{
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
                 // 我的账单

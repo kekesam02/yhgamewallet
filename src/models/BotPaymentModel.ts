@@ -138,7 +138,8 @@ class BotPaymentModel extends BaseEntity {
      *  0: 减少
      */
     @Column({
-        name: 'operate_type'
+        name: 'operate_type',
+        default:0
     })
     operateType: number
 

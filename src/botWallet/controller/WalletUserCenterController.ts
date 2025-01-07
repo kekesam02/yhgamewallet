@@ -159,12 +159,27 @@ class WalletUserCenterController {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
-                    text:"同意转化",
-                    query:'tycjzh'+orderId
+                    text:"✅ 点击按钮同意转化",
+                    query:'tyzh_'+orderId
                 }
             ]
         ])
     }
+
+    /**
+     * 创建领取邀请返利
+     */
+    public static createUserCenterCJZHBackSuccessBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text:"✅ 审核成功",
+                    query:"tzzhsuccess"
+                }
+            ]
+        ])
+    }
+
 
     /**
      * 邀请好友
