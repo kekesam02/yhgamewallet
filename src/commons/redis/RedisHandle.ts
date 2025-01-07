@@ -13,12 +13,10 @@ class RedisHandle {
 
     /**
      * 正在进行游戏的列表 key 值
-     *      数据格式:[
-     *              {
-     *               gameType: GameType,
-     *               tgId: 加密后的tgId
-     *              }
-     *           ]
+     *      数据格式:{
+     *          gameType1: [tgId, tgId],
+     *          gameType2: [tgId, tgId]
+     *      }
      */
     public static Playing_User_Key = 'PlayingUserListRedisKey_'
 
