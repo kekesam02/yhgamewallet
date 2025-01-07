@@ -9,6 +9,7 @@ import moment from "moment";
 import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
 import MessageUtils from "../../commons/message/MessageUtils";
 import GameBettingTips from "../../html/gameHtml/GameBettingTips";
+import GameCallbackHandle from "./GameCallbackHandle";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -26,6 +27,10 @@ class GameMessageHandle {
             || text === '/start'
             || text === '开始游戏'
             || text === '开始':
+                let result = await GameCallbackHandle.isCanStartGame(ctx)
+                if (!result) {
+                    return
+                }
                 // 开始游戏
                 this.startGame(ctx).then()
                 break

@@ -150,7 +150,6 @@ class GameScheduleHandle {
             .format('YYYY-MM-DD HH:mm:ss')
         console.log('封盘提示时间', tipsTime)
         let tipJob = schedule.scheduleJob(new Date(tipsTime), async () => {
-            // 如果已经超出停止上注提示时间、并且没有发送停止上注提示消息、发送提示到群组
             await new PC28Controller().sendCloseTopTips(this.bot, {
                 roundId: ScheduleHandle.pc28Config.roundId
             })
@@ -163,7 +162,6 @@ class GameScheduleHandle {
             .format('YYYY-MM-DD HH:mm:ss')
         this.pc28Config.stopUpTime = stopUpTime
         let stopUpJob = schedule.scheduleJob(new Date(stopUpTime), async () => {
-            // 如果已经超出停止上注提示时间、并且没有发送停止上注提示消息、发送提示到群组
             await new PC28Controller().sendStopTop(this.bot, {
                 roundId: ScheduleHandle.pc28Config.roundId,
                 openTime: ScheduleHandle.pc28Config.openTime

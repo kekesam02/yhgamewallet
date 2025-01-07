@@ -90,12 +90,12 @@ class BotGameModel extends BaseEntity{
     /**
      * 创建新的游戏记录
      */
-    public createNewGame = (ctx: Context): Promise<BotGameModel> => {
+    public createNewGame = (ctx: Context, gameType: GameTypeEnum = GameTypeEnum.PC28DI): Promise<BotGameModel> => {
         let groupId = ContextUtil.getGroupId(ctx)
         let userId = ContextUtil.getUserId(ctx)
         this.gameState = 1
         this.botUserId = userId
-        this.gameType = GameTypeEnum.PC28DI
+        this.gameType = gameType
         this.groupId =  groupId
         return BotGameModel.save(this)
     }
