@@ -13,8 +13,8 @@ import WalletHandleZhuanzhangMethod from "./dashbord/zhuanzhaung/WalletHandleZhu
 import WalletHandleShouKuanMethod from "./dashbord/shoukuan/WalletHandleShouKuanMethod";
 import WalletHandleHongBaoMethod from "./dashbord/hongbao/WalletHandleHongBaoMethod";
 import WalletHandleShangduiMethod from "./dashbord/shangdui/WalletHandleShangduiMethod";
-import walletUserCenterMethod from "./usercenter/WalletUserCenterMethod";
 import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
+import WalletUserCenterMethod from "./usercenter/WalletUserCenterMethod";
 
 /**
  * 公共方法处理
@@ -336,9 +336,9 @@ class WalletHandleMethod {
             || currentOp == 'shouchongfanli'
             || currentOp == 'caijinzhuanghua'
             || currentOp == 'myaccount') {
-            walletUserCenterMethod.startUserCenterCallback(ctx)
+            WalletUserCenterMethod.startUserCenterCallback(ctx)
         }else{
-            this.startButtonBack(ctx)
+            WalletHandleMethod.startButtonBack(ctx)
         }
     }
 

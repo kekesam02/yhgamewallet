@@ -116,7 +116,7 @@ class WalletMyAccountMethod {
                     html += "\n\n暂无任务交易记录"
                 }
                 // 设置操作
-                await redis.set("currentop" + tgId, "tibilishi", 'EX', 60 * 60)
+                await redis.set("currentop" + tgId, "myaccount", 'EX', 60 * 60)
                 if(mark) {
                     await ctx.replyWithHTML(html, WalletUserCenterController.createUserAccountListBtn(pageNo,pages, searchWalletType))
                 }else{
