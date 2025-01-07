@@ -19,6 +19,7 @@ import {queryRunner} from "../config/database";
 import ScheduleHandle from "../commons/schedule/ScheduleHandle";
 import AESUtils from "../commons/AESUtils";
 import DateFormatUtils from "../commons/date/DateFormatUtils";
+import walletType from "../type/WalletType";
 
 /**
  * 用户流水表
@@ -806,6 +807,28 @@ class BotPaymentModel extends BaseEntity {
         }
     }
 
+    /**
+     * 统计各类型订单的总金额
+     * @param tgId
+     * @param paymentType
+     * @param walletType
+     */
+    public static chax = async (tgId:number,paymentType:PaymentType,walletType:WalletType)=>{
+       const list2 = await BotPaymentModel.createQueryBuilder()
+            .where("user_id = :tgId and payment_type = :ptype and wallet_type = :wtype and del = 0",{
+                tgId:AESUtils.encodeUserId(tgId+''),
+                ptype:paymentType,
+                wtype:walletType
+            }).getMany()
+        var totalAmount = 0
+        if(list2 && list2.length > 0) {
+            for (let i = 0; i < list2.length; i++) {
+                totalAmount += parseFloat(list2[i].paymentAmount)
+            }
+        }
+
+        return totalAmount
+    }
 }
 
 

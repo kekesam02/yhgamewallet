@@ -147,7 +147,21 @@ class WalletUserCenterController {
     public static createUserCenterBackBtn = () => {
         return new ButtonUtils().createCallbackBtn([
             [
+                this.BackUserHome,
+            ]
+        ])
+    }
 
+    /**
+     * 同意彩金转化审批
+     */
+    public static createUserCenterCJZHBackBtn = (orderId:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text:"同意转化",
+                    query:'tycjzh'+orderId
+                }
             ]
         ])
     }

@@ -37,9 +37,14 @@ class PaymentTypeEnum {
     static SZ_QX = {name:"取消上注",value:PaymentType.SZ_QX};
 
     /**
-     * 彩金提现
+     * 彩金申请提现
      */
-    static CJTX = {name:"彩金提现",value:PaymentType.CJTX};
+    static CJTX = {name:"彩金申请提现",value:PaymentType.CJTX};
+
+    /**
+     * 彩金打款记录
+     */
+    static CJ_DKJL = {name:"彩金打款记录",value:PaymentType.CJ_DKJL};
 
     /**
      * 提现打款记录
@@ -49,11 +54,6 @@ class PaymentTypeEnum {
      * 提现退款记录
      */
     static TK_DKJL = {name:"提现退款",value:PaymentType.TK_DKJL};
-
-    /**
-     * 彩金打款记录
-     */
-    static CJ_DKJL = {name:"彩金打款",value:PaymentType.CJ_DKJL};
 
     /**
      * 用户转账

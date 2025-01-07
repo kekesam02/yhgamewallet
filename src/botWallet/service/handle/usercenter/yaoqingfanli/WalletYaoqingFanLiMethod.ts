@@ -129,7 +129,8 @@ class WalletYaoqingFanLiMethod {
                         paymentRealAmount: botKyHongDong.cjje,
                         walletType: WalletType.USDT,
                         applyTime: applyTime,
-                        chatId: inlineMessageId
+                        chatId: inlineMessageId,
+                        description: "申请好友返利"
                     })
                     // 删除上一次消息
                     await WalletUserCenterMethod.removeMessage(ctx)
