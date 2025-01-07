@@ -105,8 +105,7 @@ class WalletYaoqingHaoyouMethod {
             var nickname: string = update.message?.from?.first_name || ''
             var username: string = update.message?.from?.username || ''
             if(tgId == inviteTgId){
-                await ctx.replyWithHTML("⚠️  自己不能邀请自己!")
-                await WalletHandleMethod.startCommandCallback(ctx)
+                await ctx.answerCbQuery("⚠️  自己不能邀请自己!",{show_alert:true})
                 return;
             }
             var quitTgIdAes = AESUtils.encodeUserId(tgId)
@@ -117,7 +116,8 @@ class WalletYaoqingHaoyouMethod {
             // 说明被邀请过了
             if(num > 0){
                 // 返回
-                WalletHandleMethod.startCommandCallback(ctx)
+                await ctx.answerCbQuery("⚠️  已被邀请!",{show_alert:true})
+                await WalletHandleMethod.startCommandCallback(ctx)
                 return
             }
             // 1、注册被邀请人
