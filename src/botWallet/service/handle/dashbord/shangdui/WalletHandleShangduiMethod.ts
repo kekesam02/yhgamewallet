@@ -19,6 +19,7 @@ import PaymentTypeEnum from "../../../../../type/PaymentTypeEnum";
 import OrderUtils from "../../../../../commons/OrderUtils";
 import CommonEnumsIndex from "../../../../../type/CommonEnumsIndex";
 import WalletController from "../../../../controller/WalletController";
+import MessageTipUtils from "../../../../../commons/message/MessageTipUtils";
 
 
 /**
@@ -191,6 +192,11 @@ class WalletHandleShangduiMethod {
             exchangeType = ExchangeEnum.USDT_TRX
             beforeFromMoney = user.USDT
             beforeToMoney = user.TRX
+        }
+
+        if (new ComputeUtils(user.getBalance(fromWalletType)).comparedTo(money) < 0) {
+            await new MessageTipUtils().balanceNotErr(ctx)
+            return
         }
 
         // 获取当前 trx 转 usdt 的汇率

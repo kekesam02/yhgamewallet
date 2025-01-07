@@ -606,7 +606,7 @@ class BotHb extends BaseEntity {
         let tgId: number = ctx.message?.from.id ?? 0
 
         // 金额输入错误重新发送金额输入
-        if (money.isMoney()) {
+        if (!money.isMoney()) {
             await redis.set('currentop' + tgId, 'hongbaoMoney')
             await new MessageTipUtils().moneyRuleErr(ctx, '红包')
             return false

@@ -11,13 +11,26 @@ interface Number {
 
 /**
  * 判定字符串是否是 金额
+ * @param isDecimal: 是否可为小数
+ *      false: 金额类型不能是小数
  */
-String.prototype.isMoney = function (): boolean {
-    return !(isNaN(Number(this)) || this.indexOf('-') > -1)
+String.prototype.isMoney = function (isDecimal: boolean = false): boolean {
+    if (isNaN(Number(this))
+        || this.toString().indexOf('-1') > -1
+    ) {
+        return false
+    }
+    if (!isDecimal && this.toString().indexOf('.') > -1) {
+        return false
+    }
+    return true
 }
 
-Number.prototype.isMoney = function (): boolean {
+Number.prototype.isMoney = function (isDecimal: boolean = false): boolean {
     if (isNaN(Number(this)) || this.toString().indexOf('-1') > -1) {
+        return false
+    }
+    if (!isDecimal && this.toString().indexOf('.') > -1) {
         return false
     }
     return true

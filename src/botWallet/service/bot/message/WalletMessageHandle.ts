@@ -20,6 +20,9 @@ import BotPaymentModel from "../../../../models/BotPaymentModel";
 class WalletMessageHandle {
     public listenerMessage = async (ctx: Context,cbot:Telegraf<Context>) => {
         console.log('解析到的指令 ', ctx)
+
+        console.log('添加用户为正在游戏的用户', ctx)
+
         let text = ctx.text
         if (!text || text.length <= 0 || text?.trim() == '') {
             return
