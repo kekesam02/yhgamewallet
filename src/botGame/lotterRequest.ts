@@ -274,6 +274,9 @@ class LotteryRequest {
         return lotteryJson
     }
 
+    /**
+     * 获取最新的下期开奖数据
+     */
     private getNextJson = async () => {
         // 下期结果需要请求其他接口才能获取到
         let nextJson: {
