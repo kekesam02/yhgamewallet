@@ -98,6 +98,15 @@ class GameScheduleHandle {
         if (!ScheduleHandle.isStartPC28) {
             ScheduleHandle.isStartPC28 = true
             try {
+                // 封盘提示、每天晚上8点发送
+                let rule = new schedule.RecurrenceRule()
+                rule.hour = 20
+                rule.minute = 0
+                let nextJob = schedule.scheduleJob(rule, async () => {
+                    await new PC28Controller().sendRepairHtml(bot)
+                    nextJob.cancel()
+                })
+
                 let pc28Controller = new PC28Controller()
                 let lotteryJson = await pc28Controller.getLotteryJson()
                 console.log('获取到的数据流 ', lotteryJson)
