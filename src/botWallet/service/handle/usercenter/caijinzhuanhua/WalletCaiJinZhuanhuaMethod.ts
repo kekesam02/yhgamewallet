@@ -41,88 +41,98 @@ class WalletCaiJinZhuanhuaMethod {
             // 设置操作
             await redis.set("currentop" + tgId, "caijinzhuanghua", 'EX', 60 * 60)
 
-            // 1： 这里要加互斥锁 --如果用户正在上注就就不能彩金转化
-            var userIsPlaying = GameUserRedis.getUserIsPlaying(tgId + '');
-            if (userIsPlaying) {
-                await ctx.replyWithHTML("⚠️ 您已有正在投注的彩金，无法转化，请无投注后重试！");
-                return
-            }
+         //    // 1： 这里要加互斥锁 --如果用户正在上注就就不能彩金转化
+         //    var userIsPlaying = GameUserRedis.getUserIsPlaying(tgId + '');
+         //    if (userIsPlaying) {
+         //        await ctx.replyWithHTML("⚠️ 您已有正在投注的彩金，无法转化，请无投注后重试！");
+         //        return
+         //    }
+         //
+         //    // 2: 当前转化用户
+         //    const aesUserId = AESUtils.encodeUserId(tgId + '')
+         //    var userById = await new UserModel().getUserModelById(aesUserId)
+         //
+         //    // 3: 获取上次申请彩金转化的最大时间 del = 1
+         //    let {ks}: string = await BotPaymentModel.createQueryBuilder().select("max(create_time)", "ks")
+         //        .where("payment_type = " + paymentType.CJTX + " and del = 1 and wallet_type = " + walletType.USDT + " and user_id = :tgId",
+         //            {}).getOne()
+         //    // 4: 领取好友返利的最大时间查询和处理
+         //    // let {ks1}:string = await BotPaymentModel.createQueryBuilder().select("max(create_time)", "ks")
+         //    //     .where("payment_type = " + paymentType.HYFL + " and del = 0 and wallet_type = " + walletType.USDT + " and user_id = :tgId",
+         //    //         {}).getOne()
+         //    // if(ks1 && ks1.isAfter(ks)){
+         //    //     ks = ks1
+         //    // }
+         //
+         //    //5: 获大于上次时间的新的需要转化的上注彩金流水 del == 0 也就是新的彩金订单
+         //    let sql = "payment_type = " + paymentType.SZ + " and del = 0 and wallet_type = "
+         //        + walletType.USDT + " and user_id = :tgId"
+         //    if (ks) sql += " and create_time >=" + ks
+         //    var list = await BotPaymentModel.createQueryBuilder()
+         //        .where(sql, {tgId: aesUserId})
+         //        .getMany();
+         //    // 如果没有彩金订单就返回了。
+         //    if(list && list.length <= 0 ){
+         //        await ctx.replyWithHTML("⚠️ 暂无新的彩金订单，请投注后再试！");
+         //        return
+         //    }
+         //
+         //    //彩金流水--culs当天提现彩U的总流水
+         //    var culs = 0;
+         //    var tzuls = 0;
+         //    var pculs = 0;
+         //    var pcgaouls = 0;
+         //    var pcdwquls = 0;
+         //    var tzjsuls = 0;
+         //
+         //    //游戏类型彩金流水
+         //    for (let i = 0; i < list.length; i++) {
+         //        const botPayment = list[i]
+         //        culs = culs + parseFloat(botPayment.paymentAmount);
+         //        if (botPayment.gameType == GameTypeEnum.TOUZI) {
+         //            tzuls = tzuls + parseFloat(botPayment.paymentAmount);
+         //        }
+         //
+         //        if (botPayment.gameType == GameTypeEnum.PC28DI) {
+         //            pculs = pculs + parseFloat(botPayment.paymentAmount);
+         //        }
+         //
+         //        if (botPayment.gameType == GameTypeEnum.PC28GAO) {
+         //            pcgaouls = pcgaouls + parseFloat(botPayment.paymentAmount);
+         //        }
+         //
+         //        if (botPayment.gameType == GameTypeEnum.PCDWQ) {
+         //            pcdwquls = pcdwquls + parseFloat(botPayment.paymentAmount);
+         //        }
+         //
+         //        if (botPayment.gameType == GameTypeEnum.TOUZIJS) {
+         //            tzjsuls = tzjsuls + parseFloat(botPayment.paymentAmount);
+         //        }
+         //    }
+         //
+         //    /**
+         //     * 彩U设置的倍率
+         //     *      比如：发送（send_cusdt）100彩金、设置倍率(cusdt_bl)为3、用户需要达到300流水才能将剩下的彩金提现
+         // *          用户当天流水金额 > send_cusdt(发放的彩U) * cusdt_bl(彩U倍率)    的时候才能将剩下的彩金提现
+         //     */
+         //    const cusdtBl = userById?.cusdtBl; // 彩金倍率
+         //    const sendCusdt = userById?.sendCusdt; // 发放彩U
+         //
+         //    // 开始保存转化订单
+         //    var orderId: string = CustomSnowflake.snowflake()
+         //    var applyTime = DateFormatUtils.CurrentDateFormatString()
 
-            // 2: 当前转化用户
-            const aesUserId = AESUtils.encodeUserId(tgId + '')
-            var userById = await new UserModel().getUserModelById(aesUserId)
-
-            // 3: 获取已经申请的彩金提现时间--最大时间
-            let {ks}: string = await BotPaymentModel.createQueryBuilder().select("max(create_time)", "ks")
-                .where("payment_type = " + paymentType.CJTX + " and del = 1 and wallet_type = " + walletType.USDT + " and user_id = :tgId",
-                    {}).getOne()
-            // 4: 领取好友返利的最大时间查询和处理
-            // let {ks1}:string = await BotPaymentModel.createQueryBuilder().select("max(create_time)", "ks")
-            //     .where("payment_type = " + paymentType.HYFL + " and del = 0 and wallet_type = " + walletType.USDT + " and user_id = :tgId",
-            //         {}).getOne()
-            // if(ks1 && ks1.isAfter(ks)){
-            //     ks = ks1
-            // }
-
-            //5: 获取用户彩金流水，把大于上次提现的最大时间上注数据查询出来，进行申请。
-            let sql = "payment_type = " + paymentType.SZ + " and del = 0 and wallet_type = "
-                + walletType.USDT + " and user_id = :tgId"
-            if (ks) sql += " and create_time >=" + ks
-            var list = await BotPaymentModel.createQueryBuilder()
-                .where(sql, {tgId: aesUserId})
-                .getMany();
-            //彩金流水
-            var culs = 0;
-            var tzuls = 0;
-            var pculs = 0;
-            var pcgaouls = 0;
-            var pcdwquls = 0;
-            var tzjsuls = 0;
-
-            //游戏类型彩金流水
-            for (let i = 0; i < list.length; i++) {
-                const botPayment = list[i]
-                culs = culs + parseFloat(botPayment.paymentAmount);
-                if (botPayment.gameType == GameTypeEnum.TOUZI) {
-                    tzuls = tzuls + parseFloat(botPayment.paymentAmount);
-                }
-
-                if (botPayment.gameType == GameTypeEnum.PC28DI) {
-                    pculs = pculs + parseFloat(botPayment.paymentAmount);
-                }
-
-                if (botPayment.gameType == GameTypeEnum.PC28GAO) {
-                    pcgaouls = pcgaouls + parseFloat(botPayment.paymentAmount);
-                }
-
-                if (botPayment.gameType == GameTypeEnum.PCDWQ) {
-                    pcdwquls = pcdwquls + parseFloat(botPayment.paymentAmount);
-                }
-
-                if (botPayment.gameType == GameTypeEnum.TOUZIJS) {
-                    tzjsuls = tzjsuls + parseFloat(botPayment.paymentAmount);
-                }
-            }
-
-            // 查询用户的彩金设置的倍率和发放的彩金
-            const cusdtBl = userById?.cusdtBl;
-            const sendCusdt = userById?.sendCusdt;
-
-            // 开始保存转化订单
-            var orderId: string = CustomSnowflake.snowflake()
-            var applyTime = DateFormatUtils.CurrentDateFormatString()
-
-//             Boolean wd = false;
-//             BigDecimal multiply = new BigDecimal(cusdtBl).multiply(new BigDecimal(sendCusdt));
-//             if (culs.compareTo(multiply) >= 0 && multiply.compareTo(new BigDecimal(0)) > 0) {
-//                 String cusdt = userById.getCusdt();
-//                 if (new BigDecimal(cusdt).compareTo(new BigDecimal(0)) == 0) {
-//                     String html = "\uD83D\uDCB0未转化彩u" + new BigDecimal(userById.getCusdt()) + "\n\uD83D\uDCB0" +
+//             let wd:boolean = false;
+//             let multiply = cusdtBl * sendCusdt;
+//             if ((culs - multiply) >= 0 && multiply > 0) {
+//                 let cusdt = userById?.CUSDT;
+//                 if (cusdt == 0) {
+//                     const html = "\uD83D\uDCB0未转化彩u" + cusdt + "\n\uD83D\uDCB0" +
 //                         "转化彩u流水 " + culs + "/" + multiply + "\n\uD83D\uDCB0可转化彩u0";
-//
-//                     botEncapsulation.sendPop(html, callbackQueryId, bot);
+//                     await ctx.answerCbQuery(html);
 //                     return;
 //                 }
+//
 //                 boolean update = botUserService.lambdaUpdate().eq(BotUser::getId, userById.getId())
 //                     .set(BotUser::getCusdt, 0)
 //                     .set(BotUser::getSendCusdt, 0).update();
