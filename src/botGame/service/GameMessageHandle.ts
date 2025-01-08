@@ -10,6 +10,8 @@ import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
 import MessageUtils from "../../commons/message/MessageUtils";
 import GameBettingTips from "../../html/gameHtml/GameBettingTips";
 import GameCallbackHandle from "./GameCallbackHandle";
+import GameUserRedis from "../../commons/redis/GameUserRedis";
+import ContextUtil from "../../commons/ContextUtil";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -64,6 +66,11 @@ class GameMessageHandle {
             case CommandController.defect.includes(text):
                 // 反水
                 console.log('进行反水')
+                let isPlaying = await GameUserRedis.getUserIsPlaying(ContextUtil.getUserId(ctx))
+                if (isPlaying) {
+                    await new MessageUtils().sendTextReply(ctx, '亲！正在游戏中、需等本期游戏结束在进行反水')
+                    break
+                }
                 await new CommandController().createDefect(ctx)
                 break
             case CommandController.cancel.includes(text):

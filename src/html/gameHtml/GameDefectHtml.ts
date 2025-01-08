@@ -17,7 +17,7 @@ class GameDefectHtml {
      * @param time 上次领取时间
      */
     public createDefectHtml = (needList: DefectListType, time: string) => {
-        time = moment(time).format('YYYY-MM-DD HH:mm:ss')
+        time = time? moment(time).format('YYYY-MM-DD HH:mm:ss'): ''
         let html = ``
         if (needList.length <= 0) {
             html += `当前无反水${this.N}`
