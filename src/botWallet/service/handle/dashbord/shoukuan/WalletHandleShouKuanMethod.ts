@@ -65,7 +65,7 @@ class WalletHandleShouKuanMethod {
                 return
             }
             var money = query.replaceAll('-', '')
-            let orderId = new OrderUtils().createPaymentModelId()
+            var orderId: string = CustomSnowflake.snowflake()
             // 创建一个可分享的结果
             await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                 id: queryId,
@@ -163,7 +163,7 @@ class WalletHandleShouKuanMethod {
         // 收款人
         var callbackSkTgId = callbackData[2]
         // 订单ID防止幂等性用的
-        var orderId = callbackData[3]
+        const orderId = callbackData[3]
 
         var manys = await BotPaymentModel.createQueryBuilder().where(
             "payment_type_number = :ptnum and user_id =:tgId ",{
@@ -195,7 +195,6 @@ class WalletHandleShouKuanMethod {
                 const ecnodeCallbackSkTgId = AESUtils.encodeUserId(callbackSkTgId)
                 const shouKuanBotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: ecnodeCallbackSkTgId}).getOne()
                 //保存转账记录
-                var orderId: string = CustomSnowflake.snowflake()
                 var applyTime = DateFormatUtils.CurrentDateFormatString()
                 // 收款金额
                 const shoukuanBeforeMoney = parseFloat(shouKuanBotUser?.USDT || "0")
@@ -311,7 +310,7 @@ class WalletHandleShouKuanMethod {
         // 幂等性处理
         var manys = await BotPaymentModel.createQueryBuilder().where(
             "payment_type_number = :ptnum and user_id =:tgId ",{
-                "ptnum":orderId,
+                "ptnum":'zk'+orderId,
                 "tgId":AESUtils.encodeUserId(currentTgId)
             }).getMany();
 
@@ -319,14 +318,16 @@ class WalletHandleShouKuanMethod {
             await ctx.editMessageReplyMarkup(WalletController.createSureErrorBtn().reply_markup)
             return;
         }
-
-
         // 如果付款人是同一个人
         if (currentTgId == callbackPayTgId) {
             // 删除消息
             await ctx.deleteMessage(messageId)
             // 修改收款的信息
-            await ctx.telegram.answerCbQuery(callbackQueryId, "操作成功", {show_alert: false})
+            await ctx.replyWithHTML("✅ 取消操作成功")
+            const ecnodecallbackPayTgId = AESUtils.encodeUserId(callbackPayTgId)
+            const payBotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: ecnodecallbackPayTgId}).getOne()
+            var html2 = "⚠️ 你发起的收款操作，被用户@"+payBotUser?.userName+ "拒绝，金额是：" + money + " "
+            await ctx.telegram.sendMessage(callbackSkTgId,html2,{parse_mode:"HTML",reply_markup: WalletController.createBackBtn().reply_markup})
         } else {
             await bot.telegram.sendMessage(currentTgId, "⚠️ 自己不能删除自己的操作")
         }
