@@ -17,7 +17,7 @@ class LotteryRequest {
     /**
      * 获取开奖 json 数据
      */
-    public getLotteryJson = async (): Promise<Pc28LotteryJsonType> => {
+    public getLotteryJson = async (): Promise<Pc28LotteryJsonType | null> => {
         try {
             return new Promise<Pc28LotteryJsonType>((resolve, reject) => {
                 // 正常开奖结果处理
@@ -34,7 +34,9 @@ class LotteryRequest {
                 setTimeout(() => {
                     this.request11().then((val) => {
                         console.log('卡奖接口返回的数据', val)
-                        resolve(val)
+                        if (val != null) {
+                            resolve(val)
+                        }
                     }).catch(err => {
                         console.log('卡奖处理出错了', err)
                     })
@@ -42,6 +44,7 @@ class LotteryRequest {
             })
         } catch (err) {
             console.log('开奖请求出错了', err)
+            return null
         }
     }
 
