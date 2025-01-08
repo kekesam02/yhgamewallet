@@ -34,7 +34,7 @@ database:
 redis:
   host: 127.0.0.7
   port: 6379
-  password: rlj45%ki@
+  password: rLJ45123
   db: 1
 
 rateLimit:

@@ -28,13 +28,13 @@
 //
 // // 服务器配置
 // const serverConfig = {
-//     port: config.APP.payWalletPort || 3002, // 从配置文件读取端口，默认4000
-//     hostname: config.APP.host || "localhost", // 从配置文件读取主机名，默认localhost
+//     port: config.app.payWalletPort || 3002, // 从配置文件读取端口，默认4000
+//     hostname: config.app.host || "localhost", // 从配置文件读取主机名，默认localhost
 // }
 //
 // // 启动服务器并监听指定端口
 // app.listen(serverConfig, () => {
 //     logger.info(
-//         `${config.APP.name} Server is running on http://${serverConfig.hostname}:${serverConfig.port}`
+//         `${config.app.name} Server is running on http://${serverConfig.hostname}:${serverConfig.port}`
 //     )
 // })

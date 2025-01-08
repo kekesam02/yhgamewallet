@@ -25,16 +25,16 @@ cors:
     - Authorization
 
 database:
-  host : 127.0.0.7
+  host : 202.79.175.11
   port : 3306
   database : spinach_robot_test
   user: root
   password : 0287dfc565570ecd
 
 redis:
-  host: 127.0.0.7
+  host: 202.79.175.11
   port: 6379
-  password: rlj45%ki@
+  password: rLJ45123
   db: 1
 
 rateLimit:

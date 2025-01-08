@@ -6,8 +6,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev src/index.ts RUNNING_ENV=dev",
-    "fglocal": "ts-node-dev src/indexwallet.ts  RUNNING_ENV=fglocal",
-    "fgserver": "ts-node-dev src/indexwallet.ts  RUNNING_ENV=fgserver",
+    "fg": "ts-node-dev src/indexwallet.ts  RUNNING_ENV=fg",
     "zs": "RUNNING_ENV=zs ts-node-dev src/index.ts"
   },
   "keywords": [

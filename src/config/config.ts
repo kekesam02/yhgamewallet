@@ -8,7 +8,7 @@ import { RedisOptions } from "ioredis";
 
 // 定义基础配置接口
 interface Config {
-  APP: {
+  app: {
     name: string;
     walletPort: number;
     payWalletPort: number;

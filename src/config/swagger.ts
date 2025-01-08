@@ -7,13 +7,13 @@ const options: swaggerJsdoc.Options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: config.APP.name,
+      title: config.app.name,
       version: "1.0.0",
       description: "API documentation for the application",
     },
     servers: [
       {
-        url: `http://${config.APP.host}:${config.APP.gamePort}`,
+        url: `http://${config.app.host}:${config.app.gamePort}`,
         description: "Development server",
       },
     ],

@@ -8,6 +8,7 @@ import initRoutes from "./router";
 import { initMiddleware } from "../middlewares";
 import {getConfig} from "../config/config";
 const config = getConfig()
+
 // 创建 Express 应用
 const app = express()
 
@@ -24,8 +25,8 @@ app.use(errorHandler)
 
 // 服务器配置
 const serverConfig = {
-    port: config.APP.walletPort || 3000, // 从配置文件读取端口，默认3000
-    hostname: config.APP.host || "localhost", // 从配置文件读取主机名，默认localhost
+    port: config.app.walletPort || 3000, // 从配置文件读取端口，默认3000
+    hostname: config.app.host || "localhost", // 从配置文件读取主机名，默认localhost
 }
 // 启动服务器并监听指定端口
 let server = app.listen(serverConfig, () => {
