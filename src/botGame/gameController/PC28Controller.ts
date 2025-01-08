@@ -267,6 +267,9 @@ class PC28Controller {
     ) => {
         let result = await this.getJoinGameGroup()
         let json = lotteryJson? lotteryJson: await this.getLotteryJson()
+        if (!json) {
+            return
+        }
         // 查询游戏赔率表
         let oddsMap = await new OddsController().getOddsMap()
         let startImage = await new ImageUtils().readImageFile('./../../../static/images/start.png')
@@ -436,6 +439,9 @@ class PC28Controller {
         // })
         if (GameScheduleHandle.pc28Config.isTest) {
             let result = await new LotteryRequest().getLotteryJson()
+            if (!result) {
+                return null
+            }
             result.data[0].open_code = GameScheduleHandle.pc28Config.testList[GameScheduleHandle.pc28Config.testIndex]
             GameScheduleHandle.pc28Config.testIndex++
             return result
