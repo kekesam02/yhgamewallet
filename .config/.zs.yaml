@@ -43,6 +43,6 @@ redis:
 
 rateLimit:
   windowMs: 600000 # 15 分钟
-  max: 1000 # 每个 IP 在 15 分钟内最多只能发出 100 个请求
-  message: "Too many requests from this IP, please try again later."
+  max: 1000 # 每个 ip 在 15 分钟内最多只能发出 100 个请求
+  message: "too many requests from this ip, please try again later."
   customHeader: "x-forwarded-for" # 自定义头部字段
