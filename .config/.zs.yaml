@@ -11,7 +11,6 @@ botConfig:
   GameBotToken: '7840670913:AAHlRHjs_TJHpfXEHERi1leLkaz3uz9FHEQ'
   WalletToken: '7635600144:AAHELBLU6wF63MQ7j3o7A50DF7TleH6icls'
   WalletTokenTest: '7910370278:AAEta2tSswFj6RdjCkVzJG15DofJNzKmEjQ'
-  # 机器人跳转地址
   WalletUrl: 'http://t.me/sanjinzsbot'
 
 

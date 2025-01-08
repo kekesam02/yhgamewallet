@@ -77,7 +77,7 @@ class WalletHandleShouKuanMethod {
                     inline_keyboard: [
                         [{
                             text: '\uD83D\uDCB8 立即支付',
-                            url: WalletConfig.walltPayBotSKInlineURL + id + '_' + money
+                            url: WalletConfig.walltPayBotSKInlineURL() + id + '_' + money
                         }]
                     ]
                 }

@@ -5,8 +5,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node-dev src/index.ts RUNNING_ENV=dev ",
-    "fg": "ts-node-dev src/index.ts RUNNING_ENV=fg ",
+    "dev": "ts-node-dev src/index.ts RUNNING_ENV=dev",
+    "fg": "ts-node-dev src/index.ts RUNNING_ENV=fg",
+    "fgtest": "ts-node-dev src/index.ts RUNNING_ENV=fgtest",
     "zs": "RUNNING_ENV=zs ts-node-dev src/index.ts"
   },
   "keywords": [

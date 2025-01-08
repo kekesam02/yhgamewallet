@@ -1,45 +1,44 @@
-APP:
-  name: MyApp
-  walletPort: 3000
-  gamePort: 3001
-  payWalletPort: 3002
+app:
+  name: myapp
+  walletport: 3000
+  gameport: 3001
+  paywalletport: 3002
   host: localhost
 
 jwt_secret: your_jwt_secret
 
-botConfig:
-  GameBotToken: '7840670913:AAHlRHjs_TJHpfXEHERi1leLkaz3uz9FHEQ'
-  WalletToken: '7723665206:aafehmbvs8hw4clgl9mvksoiskenfaj2nnk'
-  WalletTokenTest: '7873009878:aah0mmdgevjyp5zvk9gbml_fbjveyh6ga-q'
-  # 机器人跳转地址
-  WalletUrl: 'https://t.me/myxukebot'
+botconfig:
+  gamebottoken: '7840670913:aahlrhjs_tjhpfxeheri1lelkaz3uz9fheq'
+  wallettoken: '7723665206:aafehmbvs8hw4clgl9mvksoiskenfaj2nnk'
+  wallettokentest: '7873009878:aah0mmdgevjyp5zvk9gbml_fbjveyh6ga-q'
+  walleturl: 'http://t.me/vertexpaybot'
 
 cors:
   origin: "*"
   methods:
-    - GET
-    - POST
-    - PUT
-    - DELETE
-  allowedHeaders:
-    - Content-Type
-    - Authorization
+    - get
+    - post
+    - put
+    - delete
+  allowedheaders:
+    - content-type
+    - authorization
 
 database:
-  host : 127.0.0.1
+  host : 127.0.0.7
   port : 3306
   database : spinach_robot_test
   user: root
-  password : mkxiaoer
+  password : 0287dfc565570ecd
 
 redis:
-  host: 127.0.0.1
+  host: 127.0.0.7
   port: 6379
-  password:
+  password: rlj45%ki@
   db: 1
 
-rateLimit:
-  windowMs: 600000 # 15 分钟
-  max: 1000 # 每个 IP 在 15 分钟内最多只能发出 100 个请求
-  message: "Too many requests from this IP, please try again later."
-  customHeader: "x-forwarded-for" # 自定义头部字段
+ratelimit:
+  windowms: 600000 # 15 分钟
+  max: 1000 # 每个 ip 在 15 分钟内最多只能发出 100 个请求
+  message: "too many requests from this ip, please try again later."
+  customheader: "x-forwarded-for" # 自定义头部字段

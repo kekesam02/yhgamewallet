@@ -70,7 +70,7 @@ class WalletController {
             [
                 {
                     text: '\uD83D\uDCB0验证安全密码',
-                    url: WalletConfig.walltPayBotInlineURL + msgId + "_" + money + "_" + operator + "_" + tgId
+                    url: WalletConfig.walltPayBotInlineURL() + msgId + "_" + money + "_" + operator + "_" + tgId
                 }
             ]
         ])
@@ -289,7 +289,7 @@ class WalletController {
             [
                 {
                     text: '⚠️ 点我充值',
-                    url: WalletConfig.walltPayBotChongZhiURL
+                    url: WalletConfig.walltPayBotChongZhiURL()
                 }
             ]
         ])
@@ -497,7 +497,7 @@ class WalletController {
             [
                 {
                     text:"\uD83D\uDCB0 一号公馆钱包",
-                    url: WalletConfig.walltPayBotURL
+                    url: WalletConfig.walltPayBotURL()
                 }
             ]
         ])
@@ -512,7 +512,7 @@ class WalletController {
             [
                 {
                     text: '↩️ 返回',
-                    url: WalletConfig.walltPayBotLoginURL
+                    url: WalletConfig.walltPayBotLoginURL()
                 }
             ]
         ])
