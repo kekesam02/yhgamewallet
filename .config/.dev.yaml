@@ -8,7 +8,7 @@ app:
 jwt_secret: your_jwt_secret
 
 botConfig:
-  GameBotToken: '7840670913:aahlrhjs_tjhpfxeheri1lelkaz3uz9fheq'
+  GameBotToken: '7840670913:AAHlRHjs_TJHpfXEHERi1leLkaz3uz9FHEQ'
   WalletToken: '7723665206:aafehmbvs8hw4clgl9mvksoiskenfaj2nnk'
   WalletTokenTest: '7873009878:aah0mmdgevjyp5zvk9gbml_fbjveyh6ga-q'
   WalletUrl: 'http://t.me/vertexpaybot'

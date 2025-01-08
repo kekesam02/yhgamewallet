@@ -137,18 +137,18 @@ class PC28Controller {
      */
     public getLotteryListBot = async (bot: Telegraf<Context>) => {
         let result = await this.getJoinGameGroup()
+        let gameType = GameTypeEnum.PC28DI
+        let historyList = await BotRoundModel
+            .createQueryBuilder()
+            .where('round_type = :round_type', {
+                round_type: gameType
+            })
+            .take(20)
+            .orderBy('create_time', 'DESC')
+            .getMany()
+        let botImage = await new GameBotImage().createPC28Img(historyList)
         for (let i = 0; i < result.length; i++) {
             let item = result[i]
-            let gameType = item?.gameType
-            let historyList = await BotRoundModel
-                .createQueryBuilder()
-                .where('round_type = :round_type', {
-                    round_type: gameType
-                })
-                .take(20)
-                .orderBy('create_time', 'DESC')
-                .getMany()
-            let botImage = await new GameBotImage().createPC28Img(historyList)
             await bot.telegram.sendPhoto(
                 item.groupId.indexOf('-') < -1? AESUtils.decodeUserId(item.botUserId): item.groupId,
                 botImage

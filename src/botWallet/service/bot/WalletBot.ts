@@ -13,12 +13,13 @@ import WalletUserCenterMethod from "../handle/usercenter/WalletUserCenterMethod"
 import ScheduleHandle from "../../../commons/schedule/ScheduleHandle";
 import ContextUtil from "../../../commons/ContextUtil";
 import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
+import {getConfig} from "../../../config/config";
 
 /**
  * 钱包机器人核心代码
  */
-const bot = new Telegraf('7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk')
-const botWallet = new Telegraf('7873009878:AAH0MmDGevJYp5ZVK9GbML_fBjVeYh6gA-Q')
+const bot = new Telegraf(getConfig().botConfig.WalletToken)
+const botWallet = new Telegraf(getConfig().botConfig.WalletTokenTest)
 
 bot.command('quit', async (ctx: Context) => {
     WalletHandleMethod.clearCacheLogin(ctx)
