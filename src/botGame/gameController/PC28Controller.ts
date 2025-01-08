@@ -429,7 +429,7 @@ class PC28Controller {
     /**
      * 获取pc28开奖结果
      */
-    public getLotteryJson = async (): Promise<Pc28LotteryJsonType> => {
+    public getLotteryJson = async (): Promise<Pc28LotteryJsonType | null> => {
         // let json = await request({
         //     url: 'http://api.openjiang.com/api?token=230F534DE38145D7&t=jnd28&rows=5&p=json',
         //     method: 'get'
