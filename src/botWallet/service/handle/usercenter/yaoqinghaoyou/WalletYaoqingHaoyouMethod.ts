@@ -105,7 +105,7 @@ class WalletYaoqingHaoyouMethod {
             var nickname: string = update.message?.from?.first_name || ''
             var username: string = update.message?.from?.username || ''
             if(tgId == inviteTgId){
-                await ctx.answerCbQuery("⚠️  自己不能邀请自己!",{show_alert:true})
+                await ctx.replyWithHTML("⚠️  自己不能邀请自己!")
                 return;
             }
             var quitTgIdAes = AESUtils.encodeUserId(tgId)
@@ -113,14 +113,18 @@ class WalletYaoqingHaoyouMethod {
             const {num} = await BotInviteUserModel.createQueryBuilder().select("count(1)","num")
                 .where("quilt_tg_id = :quiltTgId",{"quiltTgId":quitTgIdAes})
                 .getRawOne()
-            // 说明被邀请过了
-            if(num > 0){
+            const {num1} = await BotInviteUserModel.createQueryBuilder().select("count(1)","num1")
+                .where("inviter_tg_id = :inviterTgId",{"inviterTgId":quitTgIdAes})
+                .getRawOne()
+            // 说明被邀请过了--单向开关
+            if(num > 0 || num1 > 0 ){
                 // 返回
-                await ctx.answerCbQuery("⚠️  已被邀请!",{show_alert:true})
+                await ctx.replyWithHTML("⚠️  已被邀请!")
                 await WalletHandleMethod.startCommandCallback(ctx)
                 return
             }
-            // 1、注册被邀请人
+
+            // 1、注册被邀请人 --- 如果被邀请人已经注册，就不绑定关系了
             var quitTgIdUserBot = await new UserModel().getUserModelById(quitTgIdAes)
             if(!quitTgIdUserBot){
                 // 如果用户不存在就添加用户，把交易地址赋值给他
@@ -154,6 +158,23 @@ class WalletYaoqingHaoyouMethod {
                 // 4、返回
                 await WalletHandleMethod.startCommandCallback(ctx)
             }else{
+                // 2、查询邀请人信息
+                var inviteTgIdAes = AESUtils.encodeUserId(inviteTgId)
+                var inviterTgIdUserBot = await new UserModel().getUserModelById(inviteTgIdAes)
+                // 3、保存邀请关系
+                await BotInviteUserModel.createQueryBuilder().insert().into(BotInviteUserModel)
+                    .values({
+                        inviterTgId:inviteTgIdAes,
+                        inviterUserId:inviterTgIdUserBot?.id,
+                        inviterUsername:inviterTgIdUserBot?.nickName,
+                        inviterNickname:inviterTgIdUserBot?.userName,
+                        quiltTgId:quitTgIdAes,
+                        quiltUserId:quitTgIdUserBot?.id,
+                        quiltUsername:quitTgIdUserBot?.nickName,
+                        quiltNickname:quitTgIdUserBot?.userName,
+                        linkType: 0
+                    }).execute()
+                // 4、返回
                 await WalletHandleMethod.startCommandCallback(ctx)
             }
         }, async () => {

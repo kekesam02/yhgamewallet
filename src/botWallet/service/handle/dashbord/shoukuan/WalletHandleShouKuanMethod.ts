@@ -324,10 +324,19 @@ class WalletHandleShouKuanMethod {
             await ctx.deleteMessage(messageId)
             // 修改收款的信息
             await ctx.replyWithHTML("✅ 取消操作成功")
-            const ecnodecallbackPayTgId = AESUtils.encodeUserId(callbackPayTgId)
-            const payBotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: ecnodecallbackPayTgId}).getOne()
-            var html2 = "⚠️ 你发起的收款操作，被用户@"+payBotUser?.userName+ "拒绝，金额是：" + money + " "
-            await ctx.telegram.sendMessage(callbackSkTgId,html2,{parse_mode:"HTML",reply_markup: WalletController.createBackBtn().reply_markup})
+
+            // 防止恶意输入无限的弹窗和显示
+            const opvoer = await redis.get("op_over_"+currentTgId)
+            if(!opvoer) {
+                const ecnodecallbackPayTgId = AESUtils.encodeUserId(callbackPayTgId)
+                const payBotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: ecnodecallbackPayTgId}).getOne()
+                var html2 = "⚠️ 你发起的收款操作，被用户@" + payBotUser?.userName + "拒绝，金额是：" + money + " "
+                await ctx.telegram.sendMessage(callbackSkTgId, html2, {
+                    parse_mode: "HTML",
+                    reply_markup: WalletController.createBackBtn().reply_markup
+                })
+                await redis.set("op_over_"+currentTgId,"success","EX",60 * 60)
+            }
         } else {
             await bot.telegram.sendMessage(currentTgId, "⚠️ 自己不能删除自己的操作")
         }

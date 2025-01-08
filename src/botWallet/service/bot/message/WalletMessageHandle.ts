@@ -100,7 +100,7 @@ class WalletMessageHandle {
             if(!opvoer) {
                 ctx.replyWithHTML("操作已失效，请重新点击面板进行操作!")
                 WalletHandleMethod.startCommandCallback(ctx).then()
-                await redis.set("op_over_"+tgId,"success","EX",60)
+                await redis.set("op_over_"+tgId,"success","EX",60 * 60)
             }
         }
     }
