@@ -1,4 +1,3 @@
-require('./service/bot/WalletBot')
 import express from "express";
 import { getConfig } from "../config/config";
 import errorHandler from "../middlewares/errorHandler";
@@ -7,6 +6,9 @@ import database from "../config/database";
 import initRoutes from "./router";
 import { initMiddleware } from "../middlewares";
 import process from "node:process";
+setTimeout(() => {
+    require('./service/bot/WalletBot')
+}, 1000)
 
 // 读取配置文件
 const config = getConfig()
