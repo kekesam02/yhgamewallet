@@ -150,7 +150,7 @@ class BettingCommand28 {
         let text = this.ctx.text!
         let  parseList =  this.parseCommand(text)
         if (parseList.list.length <= 0) {
-            return new MessageUtils().sendTextReply(this.ctx, '请输入正确的下注指令')
+            return
         }
 
         // // 判断是否是USDT下注、如果是USDT下注没有下注限制
