@@ -83,6 +83,9 @@ class GameMessageHandle {
                 console.log('查看盈亏')
                 await new CommandController().profitLoss(ctx)
                 break
+            case text.indexOf('hb') > -1:
+                // 当前是红包的指令不进行处理
+                break
 
             // 下面是下注相关 =================
             default:
