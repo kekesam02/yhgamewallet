@@ -47,6 +47,8 @@ class WalletTiBiHistoryMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         await addLockByTgId(['tibilis_lock_'+tgId],async()=>{
             try {
+                // 设置操作
+                await redis.set("currentop" + tgId, "tibilishi", 'EX', 60 * 60 * 24)
                 // 查询用户信息
                 let nickname = ctx.callbackQuery?.from?.first_name || 0
                 var accountCallbackData = callbackData?.replaceAll('tbls_','') ||''
@@ -107,8 +109,6 @@ class WalletTiBiHistoryMethod {
                 }else{
                     html += "\n\n暂无任务交易记录"
                 }
-                // 设置操作
-                await redis.set("currentop" + tgId, "tibilishi", 'EX', 60 * 60)
                 if(mark) {
                     await ctx.replyWithHTML(html, WalletUserCenterController.createTiBiLishiListBtn(pageNo,pages, searchWalletType))
                 }else{

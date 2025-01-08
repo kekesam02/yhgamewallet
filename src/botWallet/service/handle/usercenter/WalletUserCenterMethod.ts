@@ -6,7 +6,7 @@ import UserModel from "../../../../models/UserModel";
 import WalletController from "../../../controller/WalletController";
 import BotWithdrawalAddrModel from "../../../../models/BotWithdrawalAddrModel";
 import redis from "../../../../config/redis";
-import WalletHandleMethod from "../WalletHandleMethod";
+import WalletHandleMethod from "../dashbord/WalletHandleMethod";
 
 /**
  * 公共方法处理

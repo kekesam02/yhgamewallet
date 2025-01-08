@@ -20,7 +20,7 @@ class WalletShouchongFanLiMethod {
         // 获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 设置操作
-        await redis.set("currentop" + tgId, "shouchongfanli", 'EX', 60 * 60)
+        await redis.set("currentop" + tgId, "shouchongfanli", 'EX', 60 * 60 * 24)
 
     }
 }

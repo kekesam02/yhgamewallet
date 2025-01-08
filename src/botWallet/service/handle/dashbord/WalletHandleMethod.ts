@@ -1,20 +1,20 @@
 import type {Context, Telegraf} from "telegraf";
-import ButtonUtils from '../../../commons/button/ButtonUtils'
-import WalletBotHtml from '../../../html/walletHtml/WalletBotHtml'
-import AESUtils from "../../../commons/AESUtils";
-import UserModel from "../../../models/UserModel";
-import WalletController from "../../controller/WalletController";
-import {ButtonCallbackType} from "../../../commons/button/ButtonCallbackType";
-import WalletMessage from "../../const/WalletMessage";
-import BotWithdrawalAddrModel from "../../../models/BotWithdrawalAddrModel";
-import redis from "../../../config/redis";
-import WalletHandleTixianMethod from "./dashbord/tixian/WalletHandleTixianMethod";
-import WalletHandleZhuanzhangMethod from "./dashbord/zhuanzhaung/WalletHandleZhuanzhangMethod";
-import WalletHandleShouKuanMethod from "./dashbord/shoukuan/WalletHandleShouKuanMethod";
-import WalletHandleHongBaoMethod from "./dashbord/hongbao/WalletHandleHongBaoMethod";
-import WalletHandleShangduiMethod from "./dashbord/shangdui/WalletHandleShangduiMethod";
-import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
-import WalletUserCenterMethod from "./usercenter/WalletUserCenterMethod";
+import ButtonUtils from '../../../../commons/button/ButtonUtils'
+import WalletBotHtml from '../../../../html/walletHtml/WalletBotHtml'
+import AESUtils from "../../../../commons/AESUtils";
+import UserModel from "../../../../models/UserModel";
+import WalletController from "../../../controller/WalletController";
+import {ButtonCallbackType} from "../../../../commons/button/ButtonCallbackType";
+import WalletMessage from "../../../const/WalletMessage";
+import BotWithdrawalAddrModel from "../../../../models/BotWithdrawalAddrModel";
+import redis from "../../../../config/redis";
+import WalletHandleTixianMethod from "./tixian/WalletHandleTixianMethod";
+import WalletHandleZhuanzhangMethod from "./zhuanzhaung/WalletHandleZhuanzhangMethod";
+import WalletHandleShouKuanMethod from "./shoukuan/WalletHandleShouKuanMethod";
+import WalletHandleHongBaoMethod from "./hongbao/WalletHandleHongBaoMethod";
+import WalletHandleShangduiMethod from "./shangdui/WalletHandleShangduiMethod";
+import StartWalletEnum from "../../../../type/walletEnums/StartWalletEnum";
+import WalletUserCenterMethod from "../usercenter/WalletUserCenterMethod";
 
 /**
  * 公共方法处理
@@ -35,7 +35,17 @@ class WalletHandleMethod {
         try {
             var messageId: number = ctx.callbackQuery?.message?.message_id || 0
             if (messageId > 0) {
-                ctx.deleteMessage(messageId)
+                await ctx.deleteMessage(messageId)
+            }
+        } catch (e) {
+        }
+    }
+
+    public static removeTextMessage = async (ctx: Context) => {
+        try {
+            var messageId: number = ctx?.message?.message_id || 0
+            if (messageId > 0) {
+                await ctx.deleteMessage(messageId)
             }
         } catch (e) {
         }
@@ -59,6 +69,7 @@ class WalletHandleMethod {
         var tgId: number | string = ctx.callbackQuery?.message?.chat?.id || ctx.message?.from?.id || 0
         await redis.del("login_" + tgId)
         await redis.del('mark_' + tgId)
+        await redis.del("currentop" + tgId)
     }
 
     /**
@@ -71,7 +82,7 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         var firstName: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
-        redis.del("currentop" + tgId)
+        await redis.del("currentop" + tgId)
         await this.removeMessage(ctx)
         await this.clearCacheRelation(ctx)
         await this.startCommand(ctx, tgId, username, firstName)
@@ -86,8 +97,8 @@ class WalletHandleMethod {
         var tgId: number = ctx.message?.from?.id || 0
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
-        redis.del("currentop" + tgId)// 删除操作
-        await this.removeMessage(ctx)
+        await redis.del("currentop" + tgId)// 删除操作
+        await this.removeTextMessage(ctx)
         await this.clearCacheRelation(ctx)
         await this.startCommand(ctx, tgId, username, firstName)
     }
@@ -166,10 +177,10 @@ class WalletHandleMethod {
             var cacheValue = await redis.get('pwd_' + tgId) || ''
             var cvalue = cacheValue + currentVal
             if (cvalue.length > 4) cvalue = cvalue.substring(0,4)
-            redis.set('pwd_' + tgId, cvalue)
+            await  redis.set('pwd_' + tgId, cvalue)
             await this.sendPasswordSetupMessage(ctx, cvalue, false, {inlineMessageId,money,operator,tgId:sendTgId})
         } else if (callbackStr == 'clear') {
-            redis.del('pwd_' + tgId)
+            await redis.del('pwd_' + tgId)
             await this.sendPasswordSetupMessage(ctx, "", false, {inlineMessageId,money,operator,tgId:sendTgId})
         } else if (callbackStr == 'delete') {
             var cacheKey = await redis.get('pwd_' + tgId)
@@ -177,7 +188,7 @@ class WalletHandleMethod {
                 var arr = cacheKey.split("")
                 arr.pop()
                 var join = arr.join('')
-                redis.set('pwd_' + tgId, join)
+                await redis.set('pwd_' + tgId, join)
                 await this.sendPasswordSetupMessage(ctx, join, false, {inlineMessageId,money,operator,tgId:sendTgId})
             }
         }
@@ -303,10 +314,8 @@ class WalletHandleMethod {
                     await this.loginCallback(tgId, ctx, cbot)
                 }
             } else {
-                ctx.replyWithHTML(WalletMessage.PASSWPORD_ERROR)
+                await ctx.answerCbQuery(WalletMessage.PASSWPORD_ERROR,{show_alert:true})
             }
-        } else {
-            ctx.replyWithHTML(WalletMessage.PASSWPORD_EMPTY)
         }
     }
 

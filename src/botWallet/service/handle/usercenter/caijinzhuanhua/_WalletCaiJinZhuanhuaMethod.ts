@@ -41,7 +41,7 @@
 //         //var callbackQueryId: string = ctx.callbackQuery?.id || ''
 //         await addLockByTgId(['caijinzhuanghua_lock_' + tgId], async () => {
 //             // 设置操作
-//             await redis.set("currentop" + tgId, "caijinzhuanghua", 'EX', 60 * 60)
+//             await redis.set("currentop" + tgId, "caijinzhuanghua", 'EX', 60 * 60 * 24)
 //             // 1： 这里要加互斥锁 --如果用户正在上注就就不能彩金转化
 //             // var userIsPlaying = GameUserRedis.getUserIsPlaying(tgId + '');
 //             // if (userIsPlaying) {

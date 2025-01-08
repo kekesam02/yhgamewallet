@@ -11,7 +11,9 @@ import DateFormatUtils from "../../../../../commons/date/DateFormatUtils";
 import PaymentTypeEnum from "../../../../../type/PaymentTypeEnum";
 import WalletType from "../../../../../type/WalletType";
 import {queryRunner} from "../../../../../config/database";
-import WalletHandleMethod from "../../WalletHandleMethod";
+import WalletHandleMethod from "../WalletHandleMethod";
+import walletUserCenterMethod from "../../usercenter/WalletUserCenterMethod";
+import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
 
 
 /**
@@ -35,19 +37,8 @@ class WalletHandleTixianMethod {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
-        redis.set("currentop" + tgId, "tx", 'EX', 60 * 60)
-        // 查询用户信息
-        let userId = AESUtils.encodeUserId(tgId?.toString())
-        // 查询用户是否存在交易地址
-        const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
-            .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
-        if (!botWithdrawalAddrModel?.addr) {
-            WalletHandleMethod.removeMessage(ctx)
-            ctx.replyWithHTML("⚠️ 尚未设置提现地址请前往个人中心设置",
-                WalletController.createBackDoubleBtn())
-            return;
-        }
-        // 2：密码确认
+        await redis.set("currentop" + tgId, "tx", 'EX', 60 * 60 * 24)
+        // 1：密码确认
         const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {
@@ -55,7 +46,16 @@ class WalletHandleTixianMethod {
             await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
-        return ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
+        // 查询用户信息
+        let userId = AESUtils.encodeUserId(tgId?.toString())
+        // 查询用户是否存在交易地址
+        const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
+            .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
+        if (!botWithdrawalAddrModel?.addr) {
+            await ctx.replyWithHTML("⚠️ 尚未设置提现地址、点击设置提现地址。",WalletUserCenterController.createUserSettingAddrBackBtn())
+            return;
+        }
+        await ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
     }
 
     // 提现具体逻辑
@@ -72,19 +72,19 @@ class WalletHandleTixianMethod {
 
             // 2: 判断是否提现开头
             if (!text.startsWith('提现')) {
-                await ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现10或者提现 10")
+                await ctx.answerCbQuery("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现10或者提现 10",{show_alert:true})
                 return
             }
 
             // 获取提现金额
             const price = parseFloat(text.replaceAll('提现', '').trim())
             if (!price.isMoney()) {
-                await ctx.replyWithHTML("⚠️ 请输入提现金额，必须是正整数！")
+                await ctx.answerCbQuery("⚠️ 请输入提现金额，必须是正整数！",{show_alert:true})
                 return
             }
 
             if (price < 10) {
-                await ctx.replyWithHTML("⚠️ 最低提现10u！")
+                await ctx.answerCbQuery("⚠️ 最低提现10u！",{show_alert:true})
                 return
             }
 
@@ -97,7 +97,7 @@ class WalletHandleTixianMethod {
                 const shengyuUsdt = userUsdt - price
                 // 用户的余额 - 提现的余额 如果小于1，说明不够，因为手续费需要1U
                 if (shengyuUsdt < 1) {
-                    await ctx.replyWithHTML("⚠️ 账户余额不足！")
+                    await ctx.answerCbQuery("⚠️ 账户余额不足！",{show_alert:true})
                     return
                 }
                 try {
@@ -105,7 +105,7 @@ class WalletHandleTixianMethod {
                     const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
                         .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
                     if (!botWithdrawalAddrModel?.addr) {
-                        await ctx.replyWithHTML("⚠️ 交易异常，提现地址不存在！")
+                        await ctx.answerCbQuery("⚠️ 交易异常，提现地址不存在！",{show_alert:true})
                         return
                     }
 
@@ -117,7 +117,6 @@ class WalletHandleTixianMethod {
                         }, {
                             USDT: shengyuUsdt + ''
                         })
-
                         // 申请时间
                         var applyTime = DateFormatUtils.CurrentDateFormatString()
                         const chatId = ctx?.chat?.id + '' || '';
@@ -234,11 +233,11 @@ class WalletHandleTixianMethod {
                         await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
                     }
                 } catch (e) {
-                    return ctx.reply('⌛️ 亲操作慢点，休息一会在操作!')
+                    return ctx.answerCbQuery('⌛️ 亲操作慢点，休息一会在操作!',{show_alert:true})
                 }
             }
         }, async () => {
-            await ctx.reply('亲，操作慢点，休息一会在操作!')
+            await ctx.answerCbQuery('亲，操作慢点，休息一会在操作!',{show_alert:true})
         })
     }
 
@@ -255,12 +254,12 @@ class WalletHandleTixianMethod {
             if (botPayment) {
                 // 如果审核已经通过，就无须在操作了
                 if (botPayment.paymentType == PaymentTypeEnum.TX_DKJL.value) {
-                    await ctx.replyWithHTML("⚠️ 已操作过打款业务，不要重复操作!")
+                    await ctx.answerCbQuery("⚠️ 已操作过打款业务，不要重复操作!",{show_alert:true})
                     return;
                 }
 
                 if (botPayment.paymentType == PaymentTypeEnum.TK_DKJL.value) {
-                    await ctx.replyWithHTML("⚠️ 已操作过退款操作，不要重复操作!")
+                    await ctx.answerCbQuery("⚠️ 已操作过退款操作，不要重复操作!",{show_alert:true})
                     return;
                 }
 
@@ -318,12 +317,12 @@ class WalletHandleTixianMethod {
             // 获取用户提现的金额
             if (botPayment) {
                 if (botPayment.paymentType == PaymentTypeEnum.TK_DKJL.value) {
-                    await ctx.replyWithHTML("⚠️ 已操作过退款业务，不要重复操作!")
+                    await ctx.answerCbQuery("⚠️ 已操作过退款业务，不要重复操作!",{show_alert:true})
                     return;
                 }
                 // 如果审核已经通过，就无须在操作了
                 if (botPayment.paymentType == PaymentTypeEnum.TX_DKJL.value) {
-                    await ctx.replyWithHTML("⚠️ 已操作过打款业务，不要重复操作!")
+                    await ctx.answerCbQuery("⚠️ 已操作过打款业务，不要重复操作!",{show_alert:true})
                     return;
                 }
 

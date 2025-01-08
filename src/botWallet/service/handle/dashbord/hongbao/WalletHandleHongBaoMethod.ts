@@ -1,7 +1,7 @@
 import type {Context, Telegraf} from "telegraf";
 import redis from "../../../../../config/redis";
 import WalletRedPacket from "./WalletRedPacket";
-import WalletHandleMethod from "../../WalletHandleMethod";
+import WalletHandleMethod from "../WalletHandleMethod";
 import UserModel from "../../../../../models/UserModel";
 import MessageUtils from "../../../../../commons/message/MessageUtils";
 import RandomUtils from "../../../../../commons/compute/RandomUtils";
@@ -31,7 +31,7 @@ class WalletHandleHongBaoMethod {
         // 1：获取telegram的tgId
         let tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
-        redis.set("currentop" + tgId, "hongbao", 'EX', 60 * 60)
+        await redis.set("currentop" + tgId, "hongbao", 'EX', 60 * 60 * 24)
         const flag = await WalletHandleMethod.isLogin(tgId, ctx)
         // 如果密码为空就开始设置密码
         var mark = await redis.get('mark_' + tgId) || '0'

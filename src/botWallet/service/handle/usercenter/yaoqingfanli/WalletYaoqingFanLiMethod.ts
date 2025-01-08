@@ -33,7 +33,7 @@ class WalletYaoqingFanLiMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         await addLockByTgId(['yahyfanli_lock_'+tgId],async ()=>{
             // 设置操作
-            await redis.set("currentop" + tgId, "yaoqingfanli", 'EX', 60 * 60)
+            await redis.set("currentop" + tgId, "yaoqingfanli", 'EX', 60 * 60 * 24)
             // fafcs : 是否领取 0未领取 1领取
             // hdtype : 活动类型 1为开业充值，2为每日首充返利 3.邀请返利
             // tg_id : 领取用户
@@ -77,7 +77,7 @@ class WalletYaoqingFanLiMethod {
         //查询是否有好友返利
         await addLockByTgId(['liqufanli_lock_'+tgId],async ()=>{
             // 设置操作
-            await redis.set("currentop" + tgId, "yaoqingfanli", 'EX', 60 * 60)
+            await redis.set("currentop" + tgId, "yaoqingfanli", 'EX', 60 * 60 * 24)
             // fafcs : 是否领取 0未领取 1领取
             // hdtype : 活动类型 1为开业充值，2为每日首充返利 3.邀请返利
             // tg_id : 领取用户

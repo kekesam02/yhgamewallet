@@ -3,7 +3,7 @@ import WalletController from "../../../../controller/WalletController";
 import redis from "../../../../../config/redis";
 import {addLockByTgId} from "../../../../../config/redislock";
 import ButtonInnerQueryUtils from "../../../../../commons/button/ButtonInnerQueryUtils";
-import WalletHandleMethod from "../../WalletHandleMethod";
+import WalletHandleMethod from "../WalletHandleMethod";
 import WalletConfig from "../../../../WalletConfig";
 import UserModel from "../../../../../models/UserModel";
 import AESUtils from "../../../../../commons/AESUtils";
@@ -36,7 +36,7 @@ class WalletHandleShouKuanMethod {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
-        redis.set("currentop" + tgId, "shoukuan", 'EX', 60 * 60)
+        await redis.set("currentop" + tgId, "shoukuan", 'EX', 60 * 60 * 24)
         // 3：判断是否登录
         const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
         // 4: 如果没有登录就输入密码登录

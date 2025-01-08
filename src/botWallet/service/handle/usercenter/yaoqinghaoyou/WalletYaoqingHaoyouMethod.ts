@@ -2,7 +2,7 @@ import type {Context} from "telegraf";
 import AESUtils from "../../../../../commons/AESUtils";
 import UserModel from "../../../../../models/UserModel";
 import redis from "../../../../../config/redis";
-import WalletHandleMethod from "../../WalletHandleMethod";
+import WalletHandleMethod from "../../dashbord/WalletHandleMethod";
 import {addLockByTgId} from "../../../../../config/redislock";
 import BotInviteUserModel from "../../../../../models/BotInviteUserModel";
 import walletConfig from "../../../../WalletConfig";
@@ -30,7 +30,7 @@ class WalletYaoqingHaoyouMethod {
         var nickname: string = ctx.callbackQuery?.from?.first_name || ''
         await addLockByTgId(['yaoqinghaoyou_lock_'+tgId+''],async ()=>{
             // 设置操作
-            await redis.set("currentop" + tgId, "yaoqinghaoyou", 'EX', 60 * 60)
+            await redis.set("currentop" + tgId, "yaoqinghaoyou", 'EX', 60 * 60 * 24)
             // 统计邀请人数
             const inviteUserModels = await BotInviteUserModel.createQueryBuilder()
                 .where("inviter_tg_id = :inviteTgId",{"inviteTgId":AESUtils.encodeUserId(tgId+'')})

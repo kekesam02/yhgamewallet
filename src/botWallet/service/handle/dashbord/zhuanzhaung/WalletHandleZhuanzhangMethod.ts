@@ -11,7 +11,7 @@ import ButtonInnerQueryUtils from "../../../../../commons/button/ButtonInnerQuer
 import CustomSnowflake from "../../../../../commons/CustomSnowflake";
 import WalletType from "../../../../../type/WalletType";
 import {queryRunner} from "../../../../../config/database";
-import WalletHandleMethod from "../../WalletHandleMethod";
+import WalletHandleMethod from "../WalletHandleMethod";
 import WalletConfig from "../../../../WalletConfig";
 import {addLockByTgId} from "../../../../../config/redislock";
 import dateFormatUtils from "../../../../../commons/date/DateFormatUtils";
@@ -37,6 +37,8 @@ class WalletHandleZhuanzhangMethod {
     public static startZhuanZhang = async (ctx: Context, cbot: Telegraf<Context>) => {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
+        // 2：设置操作
+        await redis.set("currentop" + tgId, "zhuanzhang", 'EX', 60 * 60 * 24)
         // 3：判断是否登录
         const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
         // 4: 如果没有登录就输入密码登录
@@ -48,8 +50,6 @@ class WalletHandleZhuanzhangMethod {
         const html = "\uD83D\uDC47 点击下方按钮选择收款人";
         // 发送消息
         await ctx.replyWithHTML(html, WalletController.createZhuanzhangSwitchBtn("1"))
-        // 2：设置操作
-        await redis.set("currentop" + tgId, "zhuanzhang", 'EX', 60 * 60)
     }
 
     // 转账具体逻辑
@@ -230,6 +230,7 @@ class WalletHandleZhuanzhangMethod {
      * @param payload
      */
     public static startCommandInputPassword = async (ctx: Context, payload: string) => {
+        
         var qrjs = payload.replaceAll("inline_", "");
         var tgId: number = ctx.message?.from?.id || 0
         var inlineMessageId = qrjs.split("_")[0] || ""
@@ -317,7 +318,7 @@ class WalletHandleZhuanzhangMethod {
             // 提交事务
             await queryRunner.commitTransaction()
             // 写入缓存，这样就可以避免下次大额在输入密码
-            await redis.set("zk_input_lock_"+tgId,"success",'EX',60 * 60)
+            await redis.set("zk_input_lock_"+tgId,"success",'EX',60 * 60 * 24)
             // 删除密码验证------------------------------如果想续期不输入密码就注释掉
             // 开始写入24小时定时过期转账
             await redis.set("tx_botpayment_"+tgId,botPayment.id,"EX",60 * 60 * 24)
@@ -377,8 +378,6 @@ class WalletHandleZhuanzhangMethod {
             } else {
                 ctx.replyWithHTML(WalletMessage.PASSWPORD_ERROR)
             }
-        } else {
-            ctx.replyWithHTML(WalletMessage.PASSWPORD_EMPTY)
         }
     }
 

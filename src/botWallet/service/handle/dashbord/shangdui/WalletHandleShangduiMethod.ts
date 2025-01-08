@@ -1,7 +1,7 @@
 import type {Context, Telegraf} from "telegraf";
 import redis from "../../../../../config/redis";
 import {addLockByCtx, addLockByTgId} from "../../../../../config/redislock";
-import WalletHandleMethod from "../../WalletHandleMethod";
+import WalletHandleMethod from "../WalletHandleMethod";
 import QuickExchangeHtml from "../../../../../html/walletHtml/ShanduiHtml";
 import ShanduiHtml from "../../../../../html/walletHtml/ShanduiHtml";
 import ButtonUtils from "../../../../../commons/button/ButtonUtils";
@@ -54,7 +54,7 @@ class WalletHandleShangduiMethod {
         // 1：获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
-        redis.set("currentop" + tgId, "shangdui", 'EX', 60 * 60)
+        await redis.set("currentop" + tgId, "shangdui", 'EX', 60 * 60 * 24)
         const flag = await WalletHandleMethod.isLogin(tgId, ctx)
         // 如果密码为空就开始设置密码
         if (!flag) {

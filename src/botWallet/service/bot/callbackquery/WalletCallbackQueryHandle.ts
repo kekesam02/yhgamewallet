@@ -1,6 +1,6 @@
 import {Context, Telegraf} from "telegraf";
 import StartWalletEnum from "../../../../type/walletEnums/StartWalletEnum";
-import WalletHandleMethod from "../../handle/WalletHandleMethod";
+import WalletHandleMethod from "../../handle/dashbord/WalletHandleMethod";
 import WalletUserCenterMethod from "../../handle/usercenter/WalletUserCenterMethod";
 import WalletUserCenterEnum from "../../../../type/walletEnums/WalletUserCenterEnum";
 import WalletRedPacket from "../../handle/dashbord/hongbao/WalletRedPacket";
@@ -130,17 +130,14 @@ class WalletCallbackQueryHandle {
                     break
                 // 转账
                 case StartWalletEnum.ZHUANZHANG:
-                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleZhuanzhangMethod.startZhuanZhang(ctx,cbot)
                     break
                 // 收款
                 case StartWalletEnum.SHOUKUANG:
-                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleShouKuanMethod.startShouKuan(ctx,cbot)
                     break
                 // 红包
                 case StartWalletEnum.HONGBAO:
-                    WalletHandleMethod.removeMessage(ctx)
                     return WalletHandleHongBaoMethod.startHongBao(ctx,cbot)
                 // 点击添加红包按钮回调
                 case StartWalletEnum.HONGBAO_ADD:

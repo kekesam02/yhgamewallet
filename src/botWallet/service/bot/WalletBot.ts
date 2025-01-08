@@ -3,7 +3,7 @@ import {message} from 'telegraf/filters'
 import process from 'node:process'
 import WalletMessageHandle from './message/WalletMessageHandle'
 import WalletCallbackQueryHandle from "./callbackquery/WalletCallbackQueryHandle";
-import WalletHandleMethod from "../handle/WalletHandleMethod";
+import WalletHandleMethod from "../handle/dashbord/WalletHandleMethod";
 import WalletInnerQueryHandle from "./inlinequery/WalletInnerQueryHandle";
 import WalletHandleZhuanzhangMethod from "../handle/dashbord/zhuanzhaung/WalletHandleZhuanzhangMethod";
 import WalletHandleShouKuanMethod from "../handle/dashbord/shoukuan/WalletHandleShouKuanMethod";
@@ -23,7 +23,7 @@ const botWallet = new Telegraf('7873009878:AAH0MmDGevJYp5ZVK9GbML_fBjVeYh6gA-Q')
 bot.command('quit', async (ctx: Context) => {
     WalletHandleMethod.clearCacheLogin(ctx)
     WalletHandleMethod.clearCacheRelation(ctx)
-    ctx.reply("退出成功，谢谢你的使用！")
+    await ctx.reply("退出成功，谢谢你的使用！")
     await ctx.leaveChat()
 })
 
@@ -92,10 +92,6 @@ bot.use(async (ctx, next) => {
         }
         return
     }
-    // if(ctx.from?.id !== 753861233) {
-    //     await ctx.reply("你没有权限操作")
-    //     return
-    // }
     await next()
 })
 
@@ -128,10 +124,9 @@ bot.command('start', async (ctx) => {
                 WalletYaoqingHaoyouMethod.startYaoqingHaoYou(inviteTgId, ctx)
             }else{
                 // 返回个人首页
-                WalletUserCenterMethod.startUserCenterCallback(ctx)
+                WalletUserCenterMethod.startUserCenterMessageCallback(ctx)
             }
         }
-
     } else {
         WalletHandleMethod.startCommandCallback(ctx)
     }

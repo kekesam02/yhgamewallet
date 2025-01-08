@@ -47,6 +47,8 @@ class WalletMyAccountMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         await addLockByTgId(['account_lock_'+tgId],async()=>{
             try {
+                // 设置操作
+                await redis.set("currentop" + tgId, "myaccount", 'EX', 60 * 60 * 24)
                 // 查询用户信息
                 let nickname = ctx.callbackQuery?.from?.first_name || 0
                 var accountCallbackData = callbackData?.replaceAll('myaccount_','') ||''
@@ -115,8 +117,6 @@ class WalletMyAccountMethod {
                 }else{
                     html += "\n\n暂无任务交易记录"
                 }
-                // 设置操作
-                await redis.set("currentop" + tgId, "myaccount", 'EX', 60 * 60)
                 if(mark) {
                     await ctx.replyWithHTML(html, WalletUserCenterController.createUserAccountListBtn(pageNo,pages, searchWalletType))
                 }else{

@@ -1,7 +1,7 @@
 import type {Context} from "telegraf";
 import UserModel from "../../../../../models/UserModel";
 import redis from "../../../../../config/redis";
-import WalletHandleMethod from "../../WalletHandleMethod";
+import WalletHandleMethod from "../../dashbord/WalletHandleMethod";
 import walletUserCenterController from "../../../../controller/WalletUserCenterController";
 import WalletUserCenterMethod from "../WalletUserCenterMethod";
 import {addLockByTgId} from "../../../../../config/redislock";
@@ -27,7 +27,7 @@ class WalletXiaoeMianmiMethod {
         // 查询用户信息
         var botUser = await new UserModel().getUserModelByIdNumber(tgId)
         // 设置操作
-        redis.set("currentop" + tgId, "xemm", 'EX', 60 * 60)
+        await redis.set("currentop" + tgId, "xemm", 'EX', 60 * 60 * 24)
         // 返回模板
         const html = "您当前额度是：" + botUser?.withdrawalLimit + "\n" + "\n" +
             "1、设置额度是为了资金安全" + "\n" +

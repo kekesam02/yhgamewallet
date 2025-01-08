@@ -152,6 +152,17 @@ class WalletUserCenterController {
         ])
     }
 
+    public static createUserSettingAddrBackBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '✏️ 点击设置提现地址',
+                    query: WalletUserCenterEnum.SZTXDZ,
+                }
+            ]
+        ])
+    }
+
     /**
      * 同意彩金转化审批
      */
