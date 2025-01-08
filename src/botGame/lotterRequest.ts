@@ -33,7 +33,6 @@ class LotteryRequest {
                  */
                 setTimeout(() => {
                     this.request11().then((val) => {
-                        console.log('卡奖接口返回的数据', val)
                         if (val != null) {
                             resolve(val)
                         }
@@ -54,7 +53,6 @@ class LotteryRequest {
     public normalHandle = (): Promise<Pc28LotteryJsonType> => {
         return new Promise((resolve, reject) => {
             this.request1().then((val) => {
-                console.log('第一个接口返回的数据', val)
                 if (val != null) {
                     resolve(val)
                 }
@@ -62,7 +60,6 @@ class LotteryRequest {
                 console.log('第一个接口出错了', err)
             })
             this.request2().then((val) => {
-                console.log('第二个接口返回的数据', val)
                 if (val != null) {
                     resolve(val)
                 }
@@ -70,7 +67,6 @@ class LotteryRequest {
                 console.log('第二个接口出错了', err)
             })
             this.request3().then((val) => {
-                console.log('第三个接口返回的数据', val)
                 if (val != null) {
                     resolve(val)
                 }
@@ -113,7 +109,6 @@ class LotteryRequest {
                     url: 'https://api.xgram.me/api/pc28/get_history_by_website',
                     method: 'get'
                 })
-                console.log('请求到的数据', json.data.data)
                 if (json.data
                     && json.data.data
                     && json.data.data.result
@@ -278,7 +273,6 @@ class LotteryRequest {
                     url: 'https://pc28061.com/api/v1/trend/getHistoryList?lotCode=10029&date=&pageSize=20',
                     method: 'get'
                 })
-                console.log('请求到的数据', json.data.data)
                 if (json.data
                     && json.data.data
                     && json.data.data.list
@@ -385,7 +379,6 @@ class LotteryRequest {
                 //         }
                 //     }
                 // } = await new MockLottery().getData()
-                console.log('卡奖接口请求到的数据', json.data.data.result)
                 if (json.data
                     && json.data.data
                     && json.data.data.result
