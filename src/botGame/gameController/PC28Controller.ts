@@ -147,15 +147,17 @@ class PC28Controller {
             .orderBy('create_time', 'DESC')
             .getMany()
         let botImage = await new GameBotImage().createPC28Img(historyList)
+        let promiseList: Array<Promise<any>> = []
         for (let i = 0; i < result.length; i++) {
             let item = result[i]
-            bot.telegram.sendPhoto(
-                item.groupId.indexOf('-') < -1? AESUtils.decodeUserId(item.botUserId): item.groupId,
-                botImage
-            ).then(val => {}).catch(err => {
-                console.log('发送开奖图片失败')
-            })
+            promiseList.push(
+                bot.telegram.sendPhoto(
+                    item.groupId.indexOf('-') < -1? AESUtils.decodeUserId(item.botUserId): item.groupId,
+                    botImage
+                )
+            )
         }
+        await Promise.all(promiseList)
     }
 
     /**
