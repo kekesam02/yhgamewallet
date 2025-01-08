@@ -190,7 +190,8 @@ class WalletHandleZhuanzhangMethod {
                         paymentRealAmount: zhuanMoney + '',
                         walletType: WalletType.USDT,
                         applyTime: applyTime,
-                        chatId: inlineMessageId
+                        chatId: inlineMessageId,
+                        description:"用户【@"+botUser?.userName+"】发起转账，金额：" + money,
                     })
 
                     await queryRunner.manager.update(UserModel, {
@@ -230,7 +231,6 @@ class WalletHandleZhuanzhangMethod {
      * @param payload
      */
     public static startCommandInputPassword = async (ctx: Context, payload: string) => {
-        
         var qrjs = payload.replaceAll("inline_", "");
         var tgId: number = ctx.message?.from?.id || 0
         var inlineMessageId = qrjs.split("_")[0] || ""
@@ -341,7 +341,8 @@ class WalletHandleZhuanzhangMethod {
         var sendTgId = callbackData.split("_")[3] || ""
         var tgId: string = ctx.callbackQuery?.from?.id + "" || ''
         var cacheValue = await redis.get('pwd_' + tgId)
-        if (cacheValue) {
+        const currentOp = await redis.get("currentop" + tgId)
+        if (cacheValue && currentOp == 'zhuanzhang') {
             if (cacheValue.length >= 4) {
                 var firstName: string = ctx.callbackQuery?.from?.first_name || ''
                 let userId = AESUtils.encodeUserId(tgId?.toString())

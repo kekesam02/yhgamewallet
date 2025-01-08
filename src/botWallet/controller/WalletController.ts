@@ -518,6 +518,19 @@ class WalletController {
         ])
     }
 
+    /**
+     * 收款的确认支付以后的按钮返回
+     */
+    public static createSureSuccessBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '✅ 支付成功，点击返回',
+                    url: WalletConfig.walltPayBotURL
+                }
+            ]
+        ])
+    }
 
     /**
      * 创建空按钮

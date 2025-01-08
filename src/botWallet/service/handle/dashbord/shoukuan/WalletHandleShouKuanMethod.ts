@@ -150,7 +150,20 @@ class WalletHandleShouKuanMethod {
         //var messageId = ctx?.callbackQuery?.message?.message_id || 0
         //var callbackQueryId = ctx?.callbackQuery?.id + ''
         var chatId = ctx?.chat?.id + ''
+        // 防止幂等性
         var currentTgId = ctx?.callbackQuery?.from?.id + ''
+
+        var manys = await BotPaymentModel.createQueryBuilder().where(
+            "chat_id = :chatId and user_id =:tgId ",{
+                "chatId":chatId,
+                "tgId":AESUtils.encodeUserId(currentTgId)
+            }).getMany();
+
+        if (manys && manys.length > 0){
+            await ctx.editMessageReplyMarkup(WalletController.createSureSuccessBtn().reply_markup)
+            return;
+        }
+
         var callbackData = callbackText.replaceAll('skqrzf', '')?.split(',') || []
         // 付款人
         var callbackPayTgId = callbackData[0]
@@ -158,7 +171,6 @@ class WalletHandleShouKuanMethod {
         var money = parseFloat(callbackData[1] || "0")
         // 收款人
         var callbackSkTgId = callbackData[2]
-
         // 查询付款人信息
         const ecnodecallbackPayTgId = AESUtils.encodeUserId(callbackPayTgId)
         const payBotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: ecnodecallbackPayTgId}).getOne()
@@ -167,7 +179,7 @@ class WalletHandleShouKuanMethod {
             const fukuanBeforeMoney = parseFloat(payBotUser?.USDT || "0")
             // 如果付款金额不足就返回
             if (fukuanBeforeMoney < money) {
-                await ctx.replyWithHTML("余额不足",{
+                await ctx.replyWithHTML("提示：余额不足",{
                     parse_mode:"HTML",
                     reply_markup:WalletController.createSkChongzhiBtn().reply_markup
                 })
@@ -215,7 +227,7 @@ class WalletHandleShouKuanMethod {
                         passNickname: payBotUser.nickName,
                         status:1,
                         chatId: chatId,
-                        description:"已收到用户<a href='tg://user?id="+payBotUser?.tgId+"'>【@"+payBotUser?.userName+"】</a>转账"
+                        description:"已收到用户【@"+payBotUser?.userName+"】转账"
                     })
                     // 付款人余额减少
                     await queryRunner.manager.update(UserModel, {
@@ -245,7 +257,7 @@ class WalletHandleShouKuanMethod {
                         passNickname: shouKuanBotUser?.nickName,
                         status:1,
                         chatId: chatId,
-                        description:"已转账给用户<a href='tg://user?id="+shouKuanBotUser?.tgId+"'>【@"+shouKuanBotUser?.userName+"】</a>"
+                        description:"已转账给用户【@"+shouKuanBotUser?.userName+"】"
                     })
                     // 付款人信息
                     var html = "✅ 成功转账给 " + shouKuanBotUser?.userName +
@@ -259,12 +271,14 @@ class WalletHandleShouKuanMethod {
                     await ctx.telegram.sendMessage(currentTgId,html,{parse_mode:"HTML"})
                     // 收款人消息
                     var html2 = "✅ 收到用户@"+payBotUser.userName+ "的付款 :【" + money + " 】USTD信息，请注意查收！"
-                    await ctx.telegram.sendMessage(callbackSkTgId,html2,{parse_mode:"HTML"})
+                    await ctx.telegram.sendMessage(callbackSkTgId,html2,{parse_mode:"HTML",reply_markup: WalletController.createBackBtn().reply_markup})
+                    // 修改确认支付按钮
+                    await ctx.editMessageReplyMarkup(WalletController.createSureSuccessBtn().reply_markup)
                     // 提交事务
                     await queryRunner.commitTransaction()
                 }catch (e) {
                     await queryRunner.rollbackTransaction()
-                    ctx.replyWithHTML("付款失败，请联系客服进行处理...")
+                    await ctx.replyWithHTML("付款失败，请联系客服进行处理...")
                 }
             }
         }

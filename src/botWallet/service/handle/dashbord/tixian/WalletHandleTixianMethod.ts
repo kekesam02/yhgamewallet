@@ -52,7 +52,7 @@ class WalletHandleTixianMethod {
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
         if (!botWithdrawalAddrModel?.addr) {
-            await ctx.replyWithHTML("⚠️ 尚未设置提现地址、点击设置提现地址。",WalletUserCenterController.createUserSettingAddrBackBtn())
+            await ctx.replyWithHTML("⚠️ 尚未设置提现地址请前往个人中心设置",WalletUserCenterController.createUserCenterBackBtn())
             return;
         }
         await ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
@@ -72,19 +72,19 @@ class WalletHandleTixianMethod {
 
             // 2: 判断是否提现开头
             if (!text.startsWith('提现')) {
-                await ctx.answerCbQuery("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现10或者提现 10",{show_alert:true})
+                await ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现10或者提现 10")
                 return
             }
 
             // 获取提现金额
             const price = parseFloat(text.replaceAll('提现', '').trim())
             if (!price.isMoney()) {
-                await ctx.answerCbQuery("⚠️ 请输入提现金额，必须是正整数！",{show_alert:true})
+                await ctx.replyWithHTML("⚠️ 请输入提现金额，必须是正整数！")
                 return
             }
 
             if (price < 10) {
-                await ctx.answerCbQuery("⚠️ 最低提现10u！",{show_alert:true})
+                await ctx.replyWithHTML("⚠️ 最低提现10u！")
                 return
             }
 
@@ -97,7 +97,7 @@ class WalletHandleTixianMethod {
                 const shengyuUsdt = userUsdt - price
                 // 用户的余额 - 提现的余额 如果小于1，说明不够，因为手续费需要1U
                 if (shengyuUsdt < 1) {
-                    await ctx.answerCbQuery("⚠️ 账户余额不足！",{show_alert:true})
+                    await ctx.replyWithHTML("⚠️ 账户余额不足！")
                     return
                 }
                 try {
@@ -105,7 +105,7 @@ class WalletHandleTixianMethod {
                     const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
                         .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
                     if (!botWithdrawalAddrModel?.addr) {
-                        await ctx.answerCbQuery("⚠️ 交易异常，提现地址不存在！",{show_alert:true})
+                        await ctx.replyWithHTML("⚠️ 交易异常，提现地址不存在！")
                         return
                     }
 
@@ -140,6 +140,7 @@ class WalletHandleTixianMethod {
                             status:0,// 申请中
                             description:"正在发起提现操作，提现金额是【"+price+"】等待审核中..."
                         })
+                        await queryRunner.commitTransaction()
 
                         let result = "没有异常"
                         let fenkongArr = []
@@ -154,11 +155,14 @@ class WalletHandleTixianMethod {
                                     await UserModel.createQueryBuilder().update()
                                         .set({riskManagement: 1}).where("id=:id", {id: userByLink.id}).execute()
                                 }
+                                result = "风控用户(存在一个充值地址两个账号分别是："+fenkongArr.join('、')+")"
                             }
-                            result = "风控用户(存在一个充值地址两个账号分别是："+fenkongArr.join('、')+")"
                         }else{
                             result = "风控用户"
                         }
+
+                        // 或者一个用户多个提现地址
+
                         // 统计相关
                         var sumPriceArr = await BotPaymentModel.createQueryBuilder("t1")
                             .select(['t1.payment_type as ptype',  'SUM(t1.payment_amount) as num'])
@@ -227,17 +231,16 @@ class WalletHandleTixianMethod {
                         })
                         // 7: 发送消息
                         await ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT, shengyuUsdt, price, botWithdrawalAddrModel?.addr), WalletController.createBackBtn())
-                        await queryRunner.commitTransaction()
                     } catch (e) {
                         await queryRunner.rollbackTransaction()
-                        await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
+                        await ctx.replyWithHTML('提示：服务器忙，请稍后在试')
                     }
                 } catch (e) {
-                    return ctx.answerCbQuery('⌛️ 亲操作慢点，休息一会在操作!',{show_alert:true})
+                    return ctx.replyWithHTML('⌛️ 亲操作慢点，休息一会在操作!')
                 }
             }
         }, async () => {
-            await ctx.answerCbQuery('亲，操作慢点，休息一会在操作!',{show_alert:true})
+            await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
         })
     }
 
@@ -254,12 +257,12 @@ class WalletHandleTixianMethod {
             if (botPayment) {
                 // 如果审核已经通过，就无须在操作了
                 if (botPayment.paymentType == PaymentTypeEnum.TX_DKJL.value) {
-                    await ctx.answerCbQuery("⚠️ 已操作过打款业务，不要重复操作!",{show_alert:true})
+                    await ctx.replyWithHTML("⚠️ 已操作过打款业务，不要重复操作!")
                     return;
                 }
 
                 if (botPayment.paymentType == PaymentTypeEnum.TK_DKJL.value) {
-                    await ctx.answerCbQuery("⚠️ 已操作过退款操作，不要重复操作!",{show_alert:true})
+                    await ctx.replyWithHTML("⚠️ 已操作过退款操作，不要重复操作!")
                     return;
                 }
 
@@ -317,12 +320,12 @@ class WalletHandleTixianMethod {
             // 获取用户提现的金额
             if (botPayment) {
                 if (botPayment.paymentType == PaymentTypeEnum.TK_DKJL.value) {
-                    await ctx.answerCbQuery("⚠️ 已操作过退款业务，不要重复操作!",{show_alert:true})
+                    await ctx.replyWithHTML("⚠️ 已操作过退款业务，不要重复操作!")
                     return;
                 }
                 // 如果审核已经通过，就无须在操作了
                 if (botPayment.paymentType == PaymentTypeEnum.TX_DKJL.value) {
-                    await ctx.answerCbQuery("⚠️ 已操作过打款业务，不要重复操作!",{show_alert:true})
+                    await ctx.replyWithHTML("⚠️ 已操作过打款业务，不要重复操作!")
                     return;
                 }
 
@@ -372,7 +375,7 @@ class WalletHandleTixianMethod {
                     await queryRunner.commitTransaction()
                 } catch (e) {
                     await queryRunner.rollbackTransaction()
-                    await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
+                    await ctx.replyWithHTML('提示：服务器忙，请稍后在试')
                 }
             }
         }

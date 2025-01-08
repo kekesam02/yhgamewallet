@@ -29,7 +29,7 @@ bot.command('quit', async (ctx: Context) => {
 })
 
 bot.telegram.setMyCommands([
-    {command: "start", description: "启动机器人"},
+    {command: "start", description: "启动一号公告钱包"},
     {command: "quit", description: "退出机器人"},
     // 可以添加更多命令
 ]).then(() => {
