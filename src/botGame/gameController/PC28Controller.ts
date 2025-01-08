@@ -149,10 +149,12 @@ class PC28Controller {
         let botImage = await new GameBotImage().createPC28Img(historyList)
         for (let i = 0; i < result.length; i++) {
             let item = result[i]
-            await bot.telegram.sendPhoto(
+            bot.telegram.sendPhoto(
                 item.groupId.indexOf('-') < -1? AESUtils.decodeUserId(item.botUserId): item.groupId,
                 botImage
-            )
+            ).then(val => {}).catch(err => {
+                console.log('发送开奖图片失败')
+            })
         }
     }
 
@@ -235,11 +237,13 @@ class PC28Controller {
                     item.gameType,
                     currPrivateUser
                 )
-                await new MessageUtils().botSendText(
+                new MessageUtils().botSendText(
                     bot,
                     item.groupId.indexOf('-') < 0? AESUtils.decodeUserId(item.botUserId): item.groupId,
                     html
-                )
+                ).then(val => {}).catch(err => {
+                    console.log('发送开奖消息失败', err)
+                })
             } else {
                 // 公开的发送开奖信息
                 let html = new GameBotHtml().getLotteryTextHtml(
@@ -249,11 +253,13 @@ class PC28Controller {
                     item.gameType,
                     publicList
                 )
-                await new MessageUtils().botSendText(
+                new MessageUtils().botSendText(
                     bot,
                     item.groupId.indexOf('-') < 0? AESUtils.decodeUserId(item.botUserId): item.groupId,
                     html
-                )
+                ).then(val => {}).catch(err => {
+                    console.log('发送开奖消息失败', err)
+                })
             }
         }
     }
