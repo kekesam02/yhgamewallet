@@ -1,11 +1,11 @@
 import {Context, Telegraf} from "telegraf";
-import {
+import type {
     ForceReply,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     ReplyKeyboardMarkup,
     ReplyKeyboardRemove
-} from "@telegraf/types/markup";
+} from 'telegraf/src/core/types/typegram'
 
 /**
  * 消息发送类、整理发送消息方法

@@ -1,5 +1,4 @@
-import {InlineQueryResult, InlineQueryResultArticle} from "@telegraf/types/inline";
-import {ExtraAnswerInlineQuery} from "telegraf/typings/telegram-types";
+
 
 /**
  * 生成共的一些按钮按钮类
