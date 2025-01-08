@@ -48,12 +48,11 @@ class WalletCaiJinZhuanhuaMethod {
             // 1： 这里要加互斥锁 --如果用户正在上注就就不能彩金转化
             var userIsPlaying = await GameUserRedis.getUserIsPlaying(tgId + '');
             if (userIsPlaying) {
-                await ctx.answerCbQuery("⚠️ 您已有正在投注的彩金操作，无法转化停止投注后再重试！",{show_alert:true});
+                await ctx.answerCbQuery("⚠️ 您已有正在投注彩金操作无法转化，请停止投注后再重试！",{show_alert:true});
                 return
             }
             // 2: 当前转化用户
             try {
-
                 const aesUserId = AESUtils.encodeUserId(tgId + '')
                 var userById = await new UserModel().getUserModelById(aesUserId)
                 if (userById) {
@@ -62,7 +61,6 @@ class WalletCaiJinZhuanhuaMethod {
                         await ctx.answerCbQuery("⚠️ 暂时没有需要转化的彩金！", {show_alert: true})
                         return
                     }
-
                     // 3: 查询上次彩金提现的最大时间 del = 1
                     let {ks}: any = await BotPaymentModel.createQueryBuilder().select("max(create_time)", "ks")
                         .where("payment_type = " + paymentType.CJTX + " and status = 1 and wallet_type = " + walletType.USDT + " and user_id = :tgId",

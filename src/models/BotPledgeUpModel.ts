@@ -376,7 +376,7 @@ class BotPledgeUpModel extends BaseEntity {
             pledgeUp.isWinning = 0
             pledgeUp.winningAmount = '0'
             pledgeUp.userName = userModel.userName
-            pledgeUp.isSm = 2
+            pledgeUp.isSm = group.groupId.indexOf('-') > -1? 2: 1
             pledgeUp.state = 0
             pledgeUp.del = 0
             pledgeUpInfo.totalMoney = totalMoney
@@ -399,6 +399,7 @@ class BotPledgeUpModel extends BaseEntity {
         // 返回的更新数据列表
         let pledgeUpList: Array<BotPledgeUpModel> = []
         for (let i = 0; i < pledgeUpInfo.list.length; i++) {
+            console.log('私密状态', group.groupId.indexOf('-') > -1? 2: 1)
             let item = pledgeUpInfo.list[i]
             // 当前下注钱包类型
             wallType = new ComputeUtils(userModel.CUSDT).comparedTo(item.money) >= 0? WalletType.CUSDT: WalletType.USDT
@@ -417,7 +418,7 @@ class BotPledgeUpModel extends BaseEntity {
             pledgeUp.isWinning = 0
             pledgeUp.winningAmount = '0'
             pledgeUp.userName = userModel.userName
-            pledgeUp.isSm = 2
+            pledgeUp.isSm = group.groupId.indexOf('-') > -1? 2: 1
             pledgeUp.state = 0
             pledgeUp.del = 0
             pledgeUpList.push(pledgeUp)

@@ -24,6 +24,8 @@ import {queryRunner} from "../../config/database";
 import {addLockByTgId} from "../../config/redislock";
 import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
 import LotteryRequest from "../lotterRequest";
+import AESUtils from "../../commons/AESUtils";
+import GameScheduleHandle from "../../commons/schedule/GameScheduleHandle";
 
 type PC28LotteryType = {
 
@@ -34,15 +36,10 @@ type PC28LotteryType = {
  */
 class PC28Controller {
 
-    private groupList: Array<BotGameModel> = []
-
     /**
      * 获取当前加入 pc28 游戏的群组
      */
     private getJoinGameGroup = async (): Promise<Array<BotGameModel>> => {
-        if (this.groupList.length > 0) {
-            return Promise.resolve(this.groupList)
-        }
         let result = await BotGameModel
             .createQueryBuilder()
             .where('game_state = :game_state', {
@@ -58,6 +55,7 @@ class PC28Controller {
                 return true
             }
         })
+        console.log('当前加入游戏的群组', result)
         return result
     }
 
@@ -65,7 +63,7 @@ class PC28Controller {
      * 添加游戏到用户群组
      *      bot_game(当前正在进行游戏的群组) 数据库
      */
-    public joinPC28Low = async (ctx: Context) => {
+    public joinPC28Low = async (ctx: Context, gameType: GameTypeEnum) => {
         // 查询当前群组是否已经加入游戏
         let result = await BotGameModel
             .createQueryBuilder()
@@ -74,18 +72,21 @@ class PC28Controller {
             })
             .getMany()
         if (!result.length) {
-            await new BotGameModel().createNewGame(ctx)
+            await new BotGameModel().createNewGame(ctx, gameType)
         } else {
             if (result[0]) {
                 if (result[0].gameState == 0) {
+                    result[0].gameType = gameType
                     result[0].gameState = 1
-                    await BotGameModel
-                        .createQueryBuilder()
-                        .update(result[0])
-                        .where('id = :id', {
-                            id: result[0].id
-                        })
-                        .execute()
+                    await BotGameModel.save(result[0])
+                } else {
+                    if (result[0].gameType == gameType) {
+                        return
+                    }
+                    // 更换游戏
+                    result[0].gameType = gameType
+                    result[0].gameState = 1
+                    await BotGameModel.save(result[0])
                 }
             }
         }
@@ -148,7 +149,10 @@ class PC28Controller {
                 .orderBy('create_time', 'DESC')
                 .getMany()
             let botImage = await new GameBotImage().createPC28Img(historyList)
-            await bot.telegram.sendPhoto(item.groupId, botImage)
+            await bot.telegram.sendPhoto(
+                item.groupId.indexOf('-') < -1? AESUtils.decodeUserId(item.botUserId): item.groupId,
+                botImage
+            )
         }
     }
 
@@ -171,26 +175,37 @@ class PC28Controller {
         let groupList = await this.getJoinGameGroup()
         for (let i = 0; i < groupList.length; i++) {
             let item = groupList[i]
+            // 当前群组的私密用户列表
+            let currPrivateUser = []
+            // 公开下注的用户列表
+            let publicList = []
             let winningList = await this.getUserIsWinning(pledgeUpMap, lotteryJson, item.gameType)
             // 需要更新的用户列表
             let updateUserList: Array<UserModel> = []
             let tgIdList: Array<string> = []
             let userMap: Map<string, UserModel> = new Map()
             for (let i = 0; i < winningList.length; i++) {
-                let item = winningList[i]
-                if (item.tgId) {
+                let item2 = winningList[i]
+                if (item2.tgId) {
                     let user: UserModel
-                    if (userMap.has(item.tgId)) {
-                        user = userMap.get(item.tgId)!
+                    if (userMap.has(item2.tgId)) {
+                        user = userMap.get(item2.tgId)!
                     } else {
-                        let user_ = await new UserModel().getUserModelById(item.tgId)
+                        let user_ = await new UserModel().getUserModelById(item2.tgId)
                         if (!user_) {
                             continue
                         }
                         user = user_
-                        userMap.set(item.tgId, user)
+                        userMap.set(item2.tgId, user)
                     }
-                    user.updateUserMoney(item.walletType, item.winningAmount)
+                    user.updateUserMoney(item2.walletType, item2.winningAmount)
+                }
+                if (winningList[i].isSm == 2) {
+                    publicList.push(winningList[i])
+                } else if (winningList[i].isSm == 1) {
+                    if (winningList[i].groupId == item.groupId) {
+                        currPrivateUser.push(winningList[i])
+                    }
                 }
             }
             userMap.forEach((value, key, map) => {
@@ -211,15 +226,35 @@ class PC28Controller {
             },async()=>{
             })
 
-
-            let html = new GameBotHtml().getLotteryTextHtml(
-                lotteryJson,
-                roundId,
-                number,
-                item.gameType,
-                winningList
-            )
-            await new MessageUtils().botSendText(bot, item.groupId, html)
+            if (item.groupId.indexOf('-') < 0) {
+                // 私聊发送消息
+                let html = new GameBotHtml().getLotteryTextHtml(
+                    lotteryJson,
+                    roundId,
+                    number,
+                    item.gameType,
+                    currPrivateUser
+                )
+                await new MessageUtils().botSendText(
+                    bot,
+                    item.groupId.indexOf('-') < 0? AESUtils.decodeUserId(item.botUserId): item.groupId,
+                    html
+                )
+            } else {
+                // 公开的发送开奖信息
+                let html = new GameBotHtml().getLotteryTextHtml(
+                    lotteryJson,
+                    roundId,
+                    number,
+                    item.gameType,
+                    publicList
+                )
+                await new MessageUtils().botSendText(
+                    bot,
+                    item.groupId.indexOf('-') < 0? AESUtils.decodeUserId(item.botUserId): item.groupId,
+                    html
+                )
+            }
         }
     }
 
@@ -230,9 +265,11 @@ class PC28Controller {
         bot: Telegraf<Context>,
         lotteryJson?: Pc28LotteryJsonType
     ) => {
-        console.log('获取开始下注信息')
         let result = await this.getJoinGameGroup()
         let json = lotteryJson? lotteryJson: await this.getLotteryJson()
+        if (!json) {
+            return
+        }
         // 查询游戏赔率表
         let oddsMap = await new OddsController().getOddsMap()
         let startImage = await new ImageUtils().readImageFile('./../../../static/images/start.png')
@@ -240,7 +277,11 @@ class PC28Controller {
         // 遍历群组列表、并发送游戏信息到群组
         result.forEach((item) => {
             let html = new GameBotHtml().getStartGameHtml(json, item.gameType, oddsMap)
-            new MessageUtils().sendPhotoHtmlBtn(bot, item.groupId, html, replyMarkup, startImage)
+            if (item.groupId.indexOf('-') < -1) {
+                new MessageUtils().sendPhotoHtmlBtn(bot, AESUtils.decodeUserId(item.botUserId), html, replyMarkup, startImage)
+            } else {
+                new MessageUtils().sendPhotoHtmlBtn(bot, item.groupId, html, replyMarkup, startImage)
+            }
         })
     }
 
@@ -262,10 +303,10 @@ class PC28Controller {
             let html = new GameBotHtml().getCloseTips(roundId)
             new MessageUtils().botSendText(
                 bot,
-                item.groupId,
+                item.groupId.indexOf('-') < -1? AESUtils.decodeUserId(item.botUserId): item.groupId,
                 html,
                 new GameController().createCommonBtnList().reply_markup
-            ).then(() => {})
+            )
         })
     }
 
@@ -311,14 +352,34 @@ class PC28Controller {
                 gameType: GameTypeEnum.PC28GAO
             })
             .getMany()
+
         // 遍历群组列表、并发送游戏信息到群组
         result.forEach((item) => {
+            let publishList =  item.gameType == GameTypeEnum.PC28DI ? pledgeUpList28Di: pledgeUpList28Gao
+            let privateList: Array<BotPledgeUpModel> =  []
+            publishList = publishList.filter(item2 => {
+                if (item2.isSm == 2) {
+                    return true
+                } else {
+                    privateList.push(item2)
+                    return false
+                }
+            })
+            privateList = privateList.filter(item2 => {
+                return item2.groupId == item.groupId
+            })
             let html = new GameBotHtml().getStopTopHtml(
                 roundId,
                 openTime,
-                item.gameType == GameTypeEnum.PC28DI ? pledgeUpList28Di: pledgeUpList28Gao
+                item.groupId.indexOf('-') >= 0? publishList: privateList
             )
-            new MessageUtils().sendPhotoHtmlBtn(bot, item.groupId, html, replyMarkup, stopImage)
+            new MessageUtils().sendPhotoHtmlBtn(
+                bot,
+                item.groupId.indexOf('-') < -1? AESUtils.decodeUserId(item.botUserId): item.groupId,
+                html,
+                replyMarkup,
+                stopImage
+            )
         })
     }
 
@@ -371,13 +432,23 @@ class PC28Controller {
     /**
      * 获取pc28开奖结果
      */
-    public getLotteryJson = async (): Promise<Pc28LotteryJsonType> => {
+    public getLotteryJson = async (): Promise<Pc28LotteryJsonType | null> => {
         // let json = await request({
         //     url: 'http://api.openjiang.com/api?token=230F534DE38145D7&t=jnd28&rows=5&p=json',
         //     method: 'get'
         // })
+        if (GameScheduleHandle.pc28Config.isTest) {
+            let result = await new LotteryRequest().getLotteryJson()
+            if (!result) {
+                return null
+            }
+            result.data[0].open_code = GameScheduleHandle.pc28Config.testList[GameScheduleHandle.pc28Config.testIndex]
+            GameScheduleHandle.pc28Config.testIndex++
+            return result
+        } else {
+            return new LotteryRequest().getLotteryJson()
+        }
 
-        return new LotteryRequest().getLotteryJson()
 
         // let json = await request({
         //     url: 'https://api.8828355.com/api?token=11EB9FBB41B4D90C&t=jnd28&rows=5&p=json',

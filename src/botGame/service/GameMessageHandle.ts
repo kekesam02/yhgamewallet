@@ -9,6 +9,7 @@ import moment from "moment";
 import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
 import MessageUtils from "../../commons/message/MessageUtils";
 import GameBettingTips from "../../html/gameHtml/GameBettingTips";
+import GameCallbackHandle from "./GameCallbackHandle";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -26,6 +27,10 @@ class GameMessageHandle {
             || text === '/start'
             || text === '开始游戏'
             || text === '开始':
+                let result = await GameCallbackHandle.isCanStartGame(ctx)
+                if (!result) {
+                    return
+                }
                 // 开始游戏
                 this.startGame(ctx).then()
                 break
@@ -77,6 +82,9 @@ class GameMessageHandle {
                 // 盈亏
                 console.log('查看盈亏')
                 await new CommandController().profitLoss(ctx)
+                break
+            case text.indexOf('hb') > -1:
+                // 当前是红包的指令不进行处理
                 break
 
             // 下面是下注相关 =================
