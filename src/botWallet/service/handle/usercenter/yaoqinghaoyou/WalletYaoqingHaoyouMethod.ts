@@ -42,7 +42,7 @@ class WalletYaoqingHaoyouMethod {
                 arr.push('<a href="tg://user?id='+dtgId+'">@'+inviteUserModels[i].quiltUsername+'</a>')
             }
             // 用户点击就绑定关系
-            const url= walletConfig.walltPayBotYaoQingURL()+tgId
+            const url= walletConfig.walltPayBotYaoQingURL+tgId
             let html = ""
             if(arr && arr.length > 0 ) {
                  html = "\uD83C\uDFAA推荐您的朋友加入一号公馆\n" +

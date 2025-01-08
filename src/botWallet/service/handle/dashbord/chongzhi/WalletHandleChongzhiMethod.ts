@@ -99,7 +99,8 @@ class WalletHandleChongzhiMethod {
 
         if (link != null) {
             var s = AESUtils.decodeAddr(link)
-            const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s)
+            //const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s)
+            const qrCodeImage = await QRCodeUtils.createQrcodeBuffer(s)
             let replyMarkup = WalletController.createBackBtn().reply_markup
             new messageUtils().sendPhotoHtmlCtxBtn(ctx, WalletBotHtml.getBotUserHtml(s), replyMarkup, qrCodeImage)
         }
@@ -184,7 +185,8 @@ class WalletHandleChongzhiMethod {
 
         if (link != null) {
             var s = AESUtils.decodeAddr(link)
-            const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s)
+            //const qrCodeImage = await QRCodeUtils.createQRCodeWithLogo(s)
+            const qrCodeImage = await QRCodeUtils.createQrcodeBuffer(s)
             let replyMarkup = WalletController.createBackBtn().reply_markup
             new messageUtils().sendPhotoHtmlCtxBtn(ctx, WalletBotHtml.getBotUserHtml(s), replyMarkup, qrCodeImage)
         }

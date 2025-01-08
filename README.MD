@@ -60,5 +60,13 @@ BaseProject/express
 ```
 sharp兼容问题解决
 ```
-npm install --platform=win32 --arch=x64 sharp
+npm cache clean -f
+npm install --platform=win32 --arch=x64 sharp@0.33.2
+npm install --os=linux --cpu=x64 sharp@0.33.2
+npm install @img/sharp-darwin-arm64 
+@img/sharp-libvips-darwin-arm64 
+@img/sharp-libvips-linux-x64 
+@img/sharp-libvips-linuxmusl-x64 
+@img/sharp-linux-x64 
+@img/sharp-linuxmusl-x64 --force
 ```

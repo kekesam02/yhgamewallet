@@ -1,18 +1,13 @@
+import process from "node:process";
+require('./service/bot/WalletBot')
 import express from "express";
-import { getConfig } from "../config/config";
 import errorHandler from "../middlewares/errorHandler";
 import logger from "../logger";
 import database from "../config/database";
 import initRoutes from "./router";
 import { initMiddleware } from "../middlewares";
-import process from "node:process";
-setTimeout(() => {
-    require('./service/bot/WalletBot')
-}, 1000)
-
-// 读取配置文件
+import {getConfig} from "../config/config";
 const config = getConfig()
-
 // 创建 Express 应用
 const app = express()
 
@@ -32,11 +27,10 @@ const serverConfig = {
     port: config.APP.walletPort || 3000, // 从配置文件读取端口，默认3000
     hostname: config.APP.host || "localhost", // 从配置文件读取主机名，默认localhost
 }
-
 // 启动服务器并监听指定端口
 let server = app.listen(serverConfig, () => {
     logger.info(
-        `${config.APP.name} Server is running on http://${serverConfig.hostname}:${serverConfig.port}`
+        `钱包机器人服务 Server is running on http://${serverConfig.hostname}:${serverConfig.port}`
     )
 })
 

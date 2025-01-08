@@ -12,7 +12,6 @@ import database from "../config/database";
 import initRoutes from "./router";
 import { initMiddleware } from "../middlewares";
 
-
 // 读取配置文件
 const config = getConfig()
 

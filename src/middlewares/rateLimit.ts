@@ -12,7 +12,6 @@ interface RateLimitOptions extends Options {
  */
 export const rateLimitMiddleware = (app: Express) => {
   const { rateLimit: rateLimitConfig } = getConfig();
-
   const limiter = rateLimit({
     windowMs: rateLimitConfig.windowMs,
     max: rateLimitConfig.max,

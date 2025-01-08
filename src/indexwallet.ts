@@ -3,9 +3,8 @@ import ScheduleHandle from "./commons/schedule/ScheduleHandle";
 require('./commons/expand/ExpandIndex')
 const moment = require('moment-timezone')
 require('./commons/expand/ExpandSelectQueryBuilder')
-require('./botGame/GameServe')
 moment.tz?.setDefault('Asia/Shanghai')
-
+require('./botWallet/WalletServe')
 process.once('SIGINT', () => {
     console.log('关闭任务')
     ScheduleHandle.closeJobs()

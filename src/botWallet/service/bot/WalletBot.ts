@@ -1,7 +1,6 @@
 import {Context, Telegraf} from 'telegraf'
 import {message} from 'telegraf/filters'
 import process from 'node:process'
-import {getConfig} from "../../../config/config";
 import WalletMessageHandle from './message/WalletMessageHandle'
 import WalletCallbackQueryHandle from "./callbackquery/WalletCallbackQueryHandle";
 import WalletHandleMethod from "../handle/WalletHandleMethod";
@@ -18,8 +17,8 @@ import StartWalletEnum from "../../../type/walletEnums/StartWalletEnum";
 /**
  * 钱包机器人核心代码
  */
-const bot = new Telegraf(getConfig().botConfig.WalletToken)
-const botWallet = new Telegraf(getConfig().botConfig.WalletTokenTest)
+const bot = new Telegraf('7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk')
+const botWallet = new Telegraf('7873009878:AAH0MmDGevJYp5ZVK9GbML_fBjVeYh6gA-Q')
 
 bot.command('quit', async (ctx: Context) => {
     WalletHandleMethod.clearCacheLogin(ctx)

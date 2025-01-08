@@ -6,8 +6,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev src/index.ts RUNNING_ENV=dev",
-    "fg": "ts-node-dev src/index.ts RUNNING_ENV=fg",
-    "fgtest": "ts-node-dev src/index.ts RUNNING_ENV=fgtest",
+    "fglocal": "ts-node-dev src/indexwallet.ts  RUNNING_ENV=fglocal",
+    "fgserver": "ts-node-dev src/indexwallet.ts  RUNNING_ENV=fgserver",
     "zs": "RUNNING_ENV=zs ts-node-dev src/index.ts"
   },
   "keywords": [
@@ -67,7 +67,6 @@
     "qr-image": "^3.2.0",
     "qrcode": "^1.5.4",
     "redlock": "^4.2.0",
-    "sharp": "^0.33.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "telegraf": "^4.16.3",

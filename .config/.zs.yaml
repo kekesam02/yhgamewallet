@@ -8,10 +8,10 @@ APP:
 jwt_secret: your_jwt_secret
 
 botConfig:
-  GameBotToken: '7840670913:AAHlRHjs_TJHpfXEHERi1leLkaz3uz9FHEQ'
-  WalletToken: '7635600144:AAHELBLU6wF63MQ7j3o7A50DF7TleH6icls'
-  WalletTokenTest: '7910370278:AAEta2tSswFj6RdjCkVzJG15DofJNzKmEjQ'
-  WalletUrl: 'http://t.me/sanjinzsbot'
+  gameBotToken: '7840670913:AAHlRHjs_TJHpfXEHERi1leLkaz3uz9FHEQ'
+  walletToken: '7635600144:AAHELBLU6wF63MQ7j3o7A50DF7TleH6icls'
+  walletTokenTest: '7910370278:AAEta2tSswFj6RdjCkVzJG15DofJNzKmEjQ'
+  walletUrl: 'http://t.me/sanjinzsbot'
 
 
 cors:
@@ -33,12 +33,9 @@ database:
   password : 0287dfc565570ecd
 
 redis:
-#  host: 202.79.175.11
-#  port: 6379
-#  password: rLJ45%ki@
-#  db: 1
-  host: localhost
+  host: 202.79.175.11
   port: 6379
+  password: rLJ45%ki@
   db: 1
 
 rateLimit:

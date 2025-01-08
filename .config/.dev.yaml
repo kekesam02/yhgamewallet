@@ -25,20 +25,19 @@ cors:
     - authorization
 
 database:
-  host : 127.0.0.7
-  port : 3306
+  host : 127.0.0.1
   database : spinach_robot_test
   user: root
   password : 0287dfc565570ecd
 
 redis:
-  host: 127.0.0.7
+  host: 127.0.0.1
   port: 6379
   password: rlj45%ki@
   db: 1
 
 ratelimit:
-  windowms: 600000 # 15 分钟
+  windowMs: 600000 # 15 分钟
   max: 1000 # 每个 ip 在 15 分钟内最多只能发出 100 个请求
   message: "too many requests from this ip, please try again later."
   customheader: "x-forwarded-for" # 自定义头部字段
