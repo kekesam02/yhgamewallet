@@ -220,7 +220,6 @@ class WalletHandleShangduiMethod {
                 if (user) {
                     await queryRunner.manager.save(user)
                     let orderId = new OrderUtils().createPaymentModelId()
-
                     await queryRunner.manager.save(BotPaymentModel, {
                         tgId: user.tgId,
                         uid: user?.id,

@@ -564,12 +564,12 @@ class WalletHandleZhuanzhangMethod {
                         chatId: inlineMessageId
                     })
                     //7：提示收款完成
-                    ctx.editMessageText("✅ 于【"+applyTime+"】"+nickname+"已完成收款!")
-                    ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username || '').reply_markup)
+                    ctx.editMessageText("✅ "+nickname+"已完成收款!")
+                    ctx.editMessageReplyMarkup(WalletController.createBackBtn().reply_markup)
                     await queryRunner.commitTransaction()
                 } catch (e) {
                     ctx.editMessageText("出错了，请稍后在试试!")
-                    ctx.editMessageReplyMarkup(WalletController.createZhuanzhangSureBtn(botPayment?.username || '').reply_markup)
+                    ctx.editMessageReplyMarkup(WalletController.createBackBtn().reply_markup)
                     await queryRunner.rollbackTransaction()
                 }
             }

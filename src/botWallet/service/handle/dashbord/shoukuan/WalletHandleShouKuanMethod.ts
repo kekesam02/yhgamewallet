@@ -13,6 +13,7 @@ import BotPaymentModel from "../../../../../models/BotPaymentModel";
 import WalletType from "../../../../../type/WalletType";
 import CustomSnowflake from "../../../../../commons/CustomSnowflake";
 import DateFormatUtils from "../../../../../commons/date/DateFormatUtils";
+import OrderUtils from "../../../../../commons/OrderUtils";
 
 
 /**
@@ -64,6 +65,7 @@ class WalletHandleShouKuanMethod {
                 return
             }
             var money = query.replaceAll('-', '')
+            let orderId = new OrderUtils().createPaymentModelId()
             // 创建一个可分享的结果
             await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                 id: queryId,
@@ -77,7 +79,7 @@ class WalletHandleShouKuanMethod {
                     inline_keyboard: [
                         [{
                             text: '\uD83D\uDCB8 立即支付',
-                            url: WalletConfig.walltPayBotSKInlineURL + id + '_' + money
+                            url: WalletConfig.walltPayBotSKInlineURL + id + '_' + money+"_"+orderId
                         }]
                     ]
                 }
@@ -102,6 +104,7 @@ class WalletHandleShouKuanMethod {
         var split = s.split("_");
         var tgIdvalue = split[0] || '' // 收款人
         var value = split[1] // 收款金额
+        var orderId = split[2] || '' // 收款人
         // 如果是自己就拦截掉
         if (payTgId == tgIdvalue) {
             bot.telegram.sendMessage(payTgId, "⚠️ 不可以转账给自己")
@@ -133,11 +136,10 @@ class WalletHandleShouKuanMethod {
             "3、支付金额 : " + value + " USDT\n" +
             "4、转账时间 : " + DateFormatUtils.CurrentDateFormatString() + " USDT\n" +
             "⚠️ 提示: 本次转账即时完成, 无法追回!";
-
         // 发送消息
         await bot.telegram.sendMessage(payTgId, html, {
             parse_mode: "HTML",
-            reply_markup: WalletController.createPayBotButton(payTgId, tgIdvalue, value).reply_markup
+            reply_markup: WalletController.createPayBotButton(payTgId, tgIdvalue, value,orderId).reply_markup
         })
     }
 
@@ -147,23 +149,12 @@ class WalletHandleShouKuanMethod {
      */
     public static startPayCallback = async (ctx: Context, bot: Telegraf<Context>, callbackText: string) => {
         // 删除消息
-        //var messageId = ctx?.callbackQuery?.message?.message_id || 0
+        //var messageId = ctx?.callbackQuery?.message?.message_id+'' || '0'
         //var callbackQueryId = ctx?.callbackQuery?.id + ''
         var chatId = ctx?.chat?.id + ''
         // 防止幂等性
         var currentTgId = ctx?.callbackQuery?.from?.id + ''
-
-        var manys = await BotPaymentModel.createQueryBuilder().where(
-            "chat_id = :chatId and user_id =:tgId ",{
-                "chatId":chatId,
-                "tgId":AESUtils.encodeUserId(currentTgId)
-            }).getMany();
-
-        if (manys && manys.length > 0){
-            await ctx.editMessageReplyMarkup(WalletController.createSureSuccessBtn().reply_markup)
-            return;
-        }
-
+        //  返回数据
         var callbackData = callbackText.replaceAll('skqrzf', '')?.split(',') || []
         // 付款人
         var callbackPayTgId = callbackData[0]
@@ -171,6 +162,20 @@ class WalletHandleShouKuanMethod {
         var money = parseFloat(callbackData[1] || "0")
         // 收款人
         var callbackSkTgId = callbackData[2]
+        // 订单ID防止幂等性用的
+        var orderId = callbackData[3]
+
+        var manys = await BotPaymentModel.createQueryBuilder().where(
+            "payment_type_number = :ptnum and user_id =:tgId ",{
+                "ptnum":'zk'+orderId,
+                "tgId":AESUtils.encodeUserId(currentTgId)
+            }).getMany();
+
+        if (manys && manys.length > 0){
+            await ctx.editMessageReplyMarkup(WalletController.createSureErrorBtn().reply_markup)
+            return;
+        }
+
         // 查询付款人信息
         const ecnodecallbackPayTgId = AESUtils.encodeUserId(callbackPayTgId)
         const payBotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: ecnodecallbackPayTgId}).getOne()
@@ -300,6 +305,22 @@ class WalletHandleShouKuanMethod {
         var money = callbackData[1]
         // 收款人
         var callbackSkTgId = callbackData[2]
+        // 收款人
+        var orderId = callbackData[3]
+
+        // 幂等性处理
+        var manys = await BotPaymentModel.createQueryBuilder().where(
+            "payment_type_number = :ptnum and user_id =:tgId ",{
+                "ptnum":orderId,
+                "tgId":AESUtils.encodeUserId(currentTgId)
+            }).getMany();
+
+        if (manys && manys.length > 0){
+            await ctx.editMessageReplyMarkup(WalletController.createSureErrorBtn().reply_markup)
+            return;
+        }
+
+
         // 如果付款人是同一个人
         if (currentTgId == callbackPayTgId) {
             // 删除消息

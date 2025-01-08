@@ -238,16 +238,16 @@ class WalletController {
     /**
      * 财务审核按钮
      */
-    public static createPayBotButton = (payTgId: string,tgId:string,money:string) => {
+    public static createPayBotButton = (payTgId: string,tgId:string,money:string,orderId:string) => {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
                     text: '✅ 确认支付',
-                    query: 'skqrzf' + payTgId+","+money+","+tgId
+                    query: 'skqrzf' + payTgId+","+money+","+tgId+","+orderId
                 },
                 {
                     text: '\uD83D\uDEAB取消支付',
-                    query: 'skqxzf' + payTgId+","+money+","+tgId
+                    query: 'skqxzf' + payTgId+","+money+","+tgId+","+orderId
                 }
             ]
         ])
@@ -525,7 +525,21 @@ class WalletController {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
-                    text: '✅ 支付成功，点击返回',
+                    text: '✅  支付支付成功，点击返回',
+                    url: WalletConfig.walltPayBotURL
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 收款的确认支付以后的按钮返回
+     */
+    public static createSureErrorBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '⚠️ 不要重复支付，点击返回',
                     url: WalletConfig.walltPayBotURL
                 }
             ]
