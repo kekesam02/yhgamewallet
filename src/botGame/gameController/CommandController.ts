@@ -108,7 +108,7 @@ class CommandController {
     }
 
     /**
-     * 给用户进行反水（暂时不对、需要确定规则）
+     * 给用户进行反水
      * @param ctx
      */
     public createDefect = async (ctx: Context) => {

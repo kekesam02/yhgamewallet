@@ -174,7 +174,6 @@ class BettingCommand28 {
 
             // 下注规则判定返回值
             let ruleNum = await this.ruleJudge(parseList, text)
-            console.log('下注规则判定', ruleNum)
             // USDT 下注没有限制
             if (!isJudge) {
                 // 用户对押
@@ -366,7 +365,7 @@ class BettingCommand28 {
          * 如果点杀次数不等于1的话、需要从数据库进行查找本次下注的点杀数据
          */
         if (killNum == 0) {
-            if (errIndex != 0 && errIndex != 5) {
+            if (errIndex != 0 && errIndex != 5 && errIndex != 1) {
                 return errIndex
             }
         }
@@ -483,30 +482,36 @@ class BettingCommand28 {
         let errIndex = 0
         // 最大下注金额限制
         let limitMoney = new BotGameConfig().maxMoney28
-        if (new ComputeUtils(info.totalMoney).comparedTo(limitMoney) > 0) {
-            errIndex = 1
-            return {
-                errIndex: errIndex,
-                killNum: 0
-            }
-        }
-
         // 点杀 0和27 下注金额限制为500
         let shaSpecialMoney = new ComputeUtils(0)
+        // key上注入类型、value 上注金额
+        let topUpMap: any = {}
         info.list.forEach(item => {
             console.log(item.money)
-            if (item.command.indexOf('杀') > -1) {
-                let key = item.content.split('杀')[0]
-                if (
-                    new ComputeUtils(key).comparedTo(0) == 0
-                    || new ComputeUtils(key).comparedTo(27) == 0
-                ) {
-                    shaSpecialMoney = shaSpecialMoney.add(item.money)
-                }
+            let itemKey = item.command[0]
+            if (item.content.indexOf('杀') > -1) {
+                itemKey = `${item.content.split('杀')[0]}杀`
+            }
+            if (topUpMap[itemKey]) {
+                topUpMap[itemKey] = new ComputeUtils(topUpMap[itemKey]).add(item.money).toString()
+            } else {
+                topUpMap[itemKey] = item.money
             }
         })
-        console.log('当前点杀下注金额', shaSpecialMoney.getNumber())
-        if (shaSpecialMoney.comparedTo(new BotGameConfig().shaSpecialMoney) > 0) {
+        let isExceed = false
+        for (let key in topUpMap) {
+            let item = topUpMap[key]
+            if (key == '27杀' || key == '0杀') {
+                if (new ComputeUtils(item).comparedTo(new BotGameConfig().shaSpecialMoney) > 0) {
+                    isExceed = true
+                }
+            } else {
+                if (new ComputeUtils(item).comparedTo(new BotGameConfig().maxMoney28) > 0) {
+                    isExceed = true
+                }
+            }
+        }
+        if (isExceed) {
             errIndex = 1
             return {
                 errIndex: errIndex,

@@ -1,4 +1,5 @@
 import ButtonUtils from "../../commons/button/ButtonUtils";
+import {getConfig} from "../../config/config";
 
 /**
  * 公共的游戏控制器
@@ -44,7 +45,7 @@ class GameController {
      */
     public static recharge = {
         text: '\uD83D\uDE80充值',
-        url: 'https://t.me/VertexPaybot?start=deposit'
+        url: `${getConfig().botConfig.WalletUrl}?start=deposit`
     }
 
     /**
@@ -52,7 +53,7 @@ class GameController {
      */
     public static withdrawal = {
         text: '\uD83C\uDFF5提现',
-        url: 'https://t.me/VertexPaybot?start=withdraw'
+        url: `${getConfig().botConfig.WalletUrl}?start=withdraw`
     }
 
     /**

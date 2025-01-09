@@ -101,8 +101,8 @@ class GameMessageHandle {
                     if (moment().isBefore(ScheduleHandle.pc28Config.stopUpTime)) {
                         await new BettingController(ctx, text).listenerBettingCommand()
                     } else {
-                        let stopHtml = new GameBettingTips().stopPledgeUpHtml()
-                        await new MessageUtils().sendTextReply(ctx, stopHtml)
+                        // let stopHtml = new GameBettingTips().stopPledgeUpHtml()
+                        // await new MessageUtils().sendTextReply(ctx, stopHtml)
                     }
                 }
         }
