@@ -10,7 +10,7 @@ jwt_secret: your_jwt_secret
 botConfig:
   GameBotToken: '7840670913:AAHlRHjs_TJHpfXEHERi1leLkaz3uz9FHEQ'
   WalletToken: '7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk'
-  WalletTokenTest: '7873009878:AAH0MmDGevJYp5ZVK9GbML_fBjVeYh6gA-Q'
+  WalletTokenTest: '7873009878:aah0mmdgevjyp5zvk9gbml_fbjveyh6ga-q'
   #WalletUrl: 'http://t.me/vertexpaybot'
   WalletUrl: 'https://t.me/myxukebot'
 

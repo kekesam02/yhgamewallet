@@ -88,7 +88,7 @@ class WalletHandleZhuanzhangMethod {
                 await ctx.answerInlineQuery(ButtonInnerQueryUtils.createInnerQueryReplyUpDialog({
                     id: queryId,
                     title: "转款金额【" + query + "】USDT",
-                    description: "\uD83D\uDCB0您正在向用户【@" + fusername + "】发起转账，点击【确定转账】并立即生效",
+                    description: "\uD83D\uDCB0您正在向用户【@" + fusername + "】发起转账，点击并立即生效",
                     input_message_content: {
                         message_text: "\uD83D\uDD30为了您的资金安全，请验证密码来解锁此笔转账，请耐心等待！",
                         parse_mode: "HTML"
