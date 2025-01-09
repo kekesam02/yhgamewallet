@@ -31,7 +31,6 @@ class WalletScheduleHandle {
          }
     }
 
-
     public static redPacketMap = new Map()
 
     /**

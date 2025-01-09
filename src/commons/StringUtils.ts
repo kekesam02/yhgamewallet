@@ -20,6 +20,23 @@ class StringUtils {
     public isNum = (numStr: string): boolean => {
         return /^\d+$/.test(numStr)
     }
+
+    /**
+     * 数字截取
+     * @param num
+     */
+    public static toFixedNoRounding = (data:string,point:number)=> {
+        // 将数字转换为字符串
+        var numStr = data.toString();
+        // 判断是否有小数部分
+        if (numStr.indexOf('.') >= 0) {
+            // 截取小数点后两位
+            return numStr.slice(0, numStr.indexOf('.') + (point + 1));
+        } else {
+            // 没有小数部分，直接返回原数字
+            return numStr;
+        }
+    }
 }
 
 

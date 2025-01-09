@@ -56,6 +56,19 @@ class BotExchangeModel extends BaseEntity {
             .getOne()
         return result
     }
+
+    /**
+     * 获取 TRX 转 USDT 汇率
+     */
+    public updateRate = async (type: ExchangeEnum,rate:string) => {
+         await BotExchangeModel
+            .createQueryBuilder()
+            .update()
+            .set({proportion:rate})
+            .where('exchange_type = :exchangeType', {
+                exchangeType: type
+            }).execute()
+    }
 }
 
 
