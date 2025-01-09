@@ -93,7 +93,7 @@ class WalletInnerQueryHandle {
                                     [{
                                         text: '\uD83D\uDCB0一号公馆钱包',
                                         callback_data: 'qwe123',
-                                        url: 'http://t.me/VertexPaybot'
+                                        url: WalletConfig.walltPayBotURL
                                     }]
                                 ]
                             }
