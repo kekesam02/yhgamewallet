@@ -8,6 +8,7 @@ import RandomUtils from "../../../../../commons/compute/RandomUtils";
 import WalletType from "../../../../../type/WalletType";
 import BotHb from "../../../../../models/BotHb";
 import RedPacketHtml from "../../../../../html/walletHtml/RedPacketHtml";
+import StartWalletEnum from "../../../../../type/walletEnums/StartWalletEnum";
 
 
 /**
@@ -26,8 +27,16 @@ class WalletHandleHongBaoMethod {
      * 红包
      * 代号：hongbao_btn
      * @param ctx
+     * @param cbot
+     * @param startWalletEnum
+     * @param params
      */
-    public static startHongBao = async (ctx: Context, cbot: Telegraf<Context>) => {
+    public static startHongBao = async (
+        ctx: Context,
+        cbot: Telegraf<Context>,
+        startWalletEnum: StartWalletEnum,
+        params: any = null
+    ) => {
         // 1：获取telegram的tgId
         let tgId: number = ctx.callbackQuery?.from?.id || 0
         // 2：设置操作
@@ -40,7 +49,7 @@ class WalletHandleHongBaoMethod {
             await WalletHandleMethod.sendPasswordSetupMessage(ctx, "", mark != '1', {inlineMessageId: "0"})
             return
         }
-        return new WalletRedPacket(ctx).addRedPacket()
+        return new WalletRedPacket(ctx).addRedPacket(startWalletEnum, params)
     }
 
     // 红包接收用户输入文字处理

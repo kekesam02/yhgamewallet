@@ -20,8 +20,8 @@ import RandomUtils from "../commons/compute/RandomUtils";
 import {RedPackConditionJsonType} from "../type/WalletType/RedPackType";
 import TimeUtils from "../commons/date/TimeUtils";
 import ButtonUtils from "../commons/button/ButtonUtils";
-import ButtonCommonMap from "../commons/button/ButtonCommonMap";
 import GameController from "../botGame/gameController/GameController";
+import StartWalletEnum from "../type/walletEnums/StartWalletEnum";
 
 
 /**
@@ -252,14 +252,26 @@ class BotHb extends BaseEntity {
     /**
      * 根据当前用户id 可用红包列表
      */
-    public getBotHbList = (tgId: string) => {
+    public getBotHbList = (tgId: string, startWalletEnum: StartWalletEnum, page: number) => {
         let timeUtils = new TimeUtils().getDayTime(this.createTime)
         return BotHb.createQueryBuilder()
             .where('tg_id = :tgId', {
                 tgId: tgId
             })
-            .andWhere('status = 0')
-            .andWhere('del = 0')
+            .andWhere(
+            startWalletEnum == StartWalletEnum.HONGBAO_LIST_ALL
+                    ? '(status = 0 or status = 1)'
+                    : startWalletEnum == StartWalletEnum.HONGBAO_LIST_PROGRESS
+                        ? 'status = 0'
+                        : 'status = 1'
+            )
+            .andWhere(
+                startWalletEnum == StartWalletEnum.HONGBAO_LIST_ALL
+                    ? '(del = 0 or del = 1)'
+                    : startWalletEnum == StartWalletEnum.HONGBAO_LIST_PROGRESS
+                        ? 'del = 0'
+                        : 'del = 1'
+            )
             .whereTime(timeUtils.startTime, timeUtils.endTime)
             .getMany()
     }
@@ -303,7 +315,7 @@ class BotHb extends BaseEntity {
             botHb.tgId = ContextUtil.getUserId(ctx)
             botHb.money = redisData.money
             botHb.walletType = redisData.walletType
-            botHb.status = 1
+            botHb.status = 0
             botHb.num = redisData.num
             botHb.hbId = hbId
             botHb.receiveNum = 0

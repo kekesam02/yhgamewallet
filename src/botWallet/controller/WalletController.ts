@@ -333,6 +333,11 @@ class WalletController {
                     text: '⚙️设置条件',
                     query: StartWalletEnum.HONGBAO_TYPE_CONDITION + hbId
                 }
+            ], [
+                {
+                    text: '❌关闭',
+                    query: StartWalletEnum.CLOSE_MESSAGE
+                }
             ]
         ])
     }

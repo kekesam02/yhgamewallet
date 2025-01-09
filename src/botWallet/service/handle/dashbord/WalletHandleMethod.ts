@@ -332,7 +332,7 @@ class WalletHandleMethod {
         } else if (currentOp == 'shoukuan') {
             WalletHandleShouKuanMethod.startShouKuan(ctx, cbot)
         } else if (currentOp == 'hongbao') {
-            WalletHandleHongBaoMethod.startHongBao(ctx, cbot)
+            WalletHandleHongBaoMethod.startHongBao(ctx,cbot, StartWalletEnum.HONGBAO_LIST_ALL)
         } else if (currentOp == 'shandui') {
             WalletHandleShangduiMethod.startShanDui(ctx, cbot, StartWalletEnum.SHANGDUI)
         }else if (currentOp == 'xemm'

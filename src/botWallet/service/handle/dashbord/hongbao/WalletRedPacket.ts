@@ -17,14 +17,13 @@ import BotHb from "../../../../../models/BotHb";
 import WalletController from "../../../../controller/WalletController";
 import redis from "../../../../../config/redis";
 import BotPaymentModel from "../../../../../models/BotPaymentModel";
+import botPaymentModel from "../../../../../models/BotPaymentModel";
 import PaymentType from "../../../../../type/PaymentType";
 import MessageTipUtils from "../../../../../commons/message/MessageTipUtils";
 import moment from "moment";
-import botPaymentModel from "../../../../../models/BotPaymentModel";
 import ComputeUtils from "../../../../../commons/compute/ComputeUtils";
 import RandomUtils from "../../../../../commons/compute/RandomUtils";
 import {ButtonCallbackType} from "../../../../../commons/button/ButtonCallbackType";
-
 
 
 class WalletRedPacket {
@@ -38,7 +37,14 @@ class WalletRedPacket {
     /**
      * 点击红包按钮触发 - 跳转到添加红包页面
      */
-    public addRedPacket = async () => {
+    public addRedPacket = async (startWalletEnum: StartWalletEnum, page: string) => {
+        if (page == '' || !page) {
+            page = '0'
+        }
+        if (isNaN(Number(page))) {
+            page = '0'
+        }
+        let currentPage = Number(page)
         let buttonList =  new ButtonUtils().createCallbackBtn([])
         let addBtnList = () => {
             buttonList.reply_markup.inline_keyboard.push([
@@ -56,17 +62,53 @@ class WalletRedPacket {
                 }
             ])
         }
-        let botHbList: Array<BotHb> = await new BotHb().getBotHbList(ContextUtil.getUserId(this.ctx))
+        let botHbList: Array<BotHb> = await new BotHb().getBotHbList(ContextUtil.getUserId(this.ctx), startWalletEnum, currentPage)
         if (botHbList.length > 0) {
-            botHbList.forEach(item => {
+            if (currentPage * 10 > botHbList.length) {
+                // 超过当前页数
+                return new MessageUtils().sendPopMessage(this.ctx, '没有更多了')
+            }
+            buttonList.reply_markup.inline_keyboard.push([
+                {
+                    text: startWalletEnum == StartWalletEnum.HONGBAO_LIST_ALL? '◼️全部': '全部',
+                    callback_data: StartWalletEnum.HONGBAO_LIST_ALL + '0',
+                    url: ''
+                },{
+                    text: startWalletEnum == StartWalletEnum.HONGBAO_LIST_PROGRESS? '◼️进行中': '进行中',
+                    callback_data: StartWalletEnum.HONGBAO_LIST_PROGRESS + '0',
+                    url: ''
+                },{
+                    text: startWalletEnum == StartWalletEnum.HONGBAO_LIST_END? '◼️已结束': '已结束',
+                    callback_data: StartWalletEnum.HONGBAO_LIST_END + '0',
+                    url: ''
+                }
+            ])
+            let minIndex = currentPage * 10
+            let maxIndex = (currentPage + 1) * 10
+            botHbList.forEach((item, index) => {
+                if (index >= minIndex && index < maxIndex) {
+                    buttonList.reply_markup.inline_keyboard.push([
+                        {
+                            text: `\uD83E\uDDE7 [${moment(item.createTime).format('MM-DD HH:mm')}] ${item.receiveNum ?? item.num}/${item.num} - ${new CommonEnumsIndex().getWalletTypeStr(item.walletType)} ${item.status == 0? '(进行中)': '(已结束)'}`,
+                            callback_data: StartWalletEnum.HONGBAO_INFO + item.hbId,
+                            url: ''
+                        }
+                    ])
+                }
+            })
+            if (botHbList.length > 10) {
                 buttonList.reply_markup.inline_keyboard.push([
                     {
-                        text: `\uD83E\uDDE7 [${moment(item.createTime).format('MM-DD HH:mm')}] ${item.receiveNum ?? item.num}/${item.num} - ${new CommonEnumsIndex().getWalletTypeStr(item.walletType)}`,
-                        callback_data: StartWalletEnum.HONGBAO_INFO + item.hbId,
+                        text: `⬅️`,
+                        callback_data: `${startWalletEnum}${(currentPage - 1 < 0? 0: currentPage - 1)}`,
+                        url: ''
+                    }, {
+                        text: `➡️`,
+                        callback_data: `${startWalletEnum}${(currentPage + 1)}`,
                         url: ''
                     }
                 ])
-            })
+            }
             addBtnList()
             await new MessageUtils().removeMessage(this.ctx)
             await new MessageUtils().sendTextReply(
@@ -97,7 +139,6 @@ class WalletRedPacket {
             return new MessageTipUtils().handleErr(this.ctx)
         }
         let html = new RedPacketHtml().getSuccessHtml(user, botHb)
-        await new MessageUtils().removeMessage(this.ctx)
         await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), `hongbaoWaterMoney_${hbId}`)
         await new MessageUtils().botSendTextToBot(this.ctx, html, WalletController.createSendHbBtn(botHb.hbId).reply_markup)
     }
@@ -262,6 +303,7 @@ class WalletRedPacket {
                 }
                 let html = new RedPacketHtml().getSuccessHtml(user, botHb)
                 await redis.set('currentop' + ContextUtil.getUserId(this.ctx, false), `hongbaoWaterMoney_${botHb.hbId}`)
+                await new MessageUtils().removeMessage(this.ctx)
                 await new MessageUtils().botSendTextToBot(this.ctx, html, WalletController.createSendHbBtn(botHb.hbId).reply_markup)
             }
             return false
