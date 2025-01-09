@@ -130,9 +130,7 @@ class WalletHandleMethod {
                 nickName: firstName,
                 userName: username,
                 vip: 0,
-                USDT: "0",
-                promotionLink: '',
-                rechargeLink: ''
+                USDT: "0"
             }).execute()
             // 查询覆盖原来的值
             user = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()

@@ -133,9 +133,7 @@ class WalletYaoqingHaoyouMethod {
                     nickName: nickname,
                     userName: username,
                     vip: 0,
-                    USDT: "0",
-                    promotionLink: '',
-                    rechargeLink: ''
+                    USDT: "0"
                 }).execute()
                 // 查询回填ID
                 quitTgIdUserBot = await new UserModel().getUserModelById(quitTgIdAes)

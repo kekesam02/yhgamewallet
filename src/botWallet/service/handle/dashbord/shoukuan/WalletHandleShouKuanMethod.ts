@@ -120,9 +120,7 @@ class WalletHandleShouKuanMethod {
                 nickName: payNickname,
                 userName: payUsername,
                 vip: 0,
-                USDT: "0",
-                promotionLink: '',
-                rechargeLink: ''
+                USDT: "0"
             }).execute()
         }
 

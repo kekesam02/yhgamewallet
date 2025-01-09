@@ -504,8 +504,6 @@ class WalletHandleZhuanzhangMethod {
                             userName: username,
                             vip: 0,
                             USDT: "0",
-                            promotionLink: '',
-                            rechargeLink: '',
                         }).execute()
                     }
                     // 再次查询用户信息
