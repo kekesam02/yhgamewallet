@@ -9,8 +9,8 @@ jwt_secret: your_jwt_secret
 
 botConfig:
   GameBotToken: '7840670913:AAHlRHjs_TJHpfXEHERi1leLkaz3uz9FHEQ'
-  WalletToken: '7723665206:aafehmbvs8hw4clgl9mvksoiskenfaj2nnk'
-  WalletTokenTest: '7873009878:aah0mmdgevjyp5zvk9gbml_fbjveyh6ga-q'
+  WalletToken: '7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk'
+  WalletTokenTest: '7873009878:AAH0MmDGevJYp5ZVK9GbML_fBjVeYh6gA-Q'
   #WalletUrl: 'http://t.me/vertexpaybot'
   WalletUrl: 'https://t.me/myxukebot'
 
@@ -26,14 +26,14 @@ cors:
     - Authorization
 
 database:
-  host : 127.0.0.7
+  host : 202.79.175.11
   port : 3306
   database : spinach_robot_test
   user: root
   password : 0287dfc565570ecd
 
 redis:
-  host: 127.0.0.7
+  host: 202.79.175.11
   port: 6379
   password: rLJ45123
   db: 1
