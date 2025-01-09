@@ -82,7 +82,6 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         var firstName: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
-        await redis.del("currentop" + tgId)
         await this.removeMessage(ctx)
         await this.clearCacheRelation(ctx)
         await this.startCommand(ctx, tgId, username, firstName)
@@ -97,7 +96,6 @@ class WalletHandleMethod {
         var tgId: number = ctx.message?.from?.id || 0
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
-        await redis.del("currentop" + tgId)// 删除操作
         await this.removeTextMessage(ctx)
         await this.clearCacheRelation(ctx)
         await this.startCommand(ctx, tgId, username, firstName)
@@ -118,6 +116,8 @@ class WalletHandleMethod {
      *  // var messageId:number = ctx.message?.message_id || 0
      */
     public static startCommand = async (ctx: Context, tgId: number, username: string, firstName: string) => {
+        // 设置操作
+        await redis.set("currentop" + tgId, "home", 'EX', 60 * 60 * 24)
         // 查询用户信息
         let userId = AESUtils.encodeUserId(tgId?.toString())
         // 根据tgId查询用户是否存在。

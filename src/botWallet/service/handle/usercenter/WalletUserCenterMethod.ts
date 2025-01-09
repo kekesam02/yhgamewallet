@@ -41,6 +41,8 @@ class WalletUserCenterMethod {
         var username: string = ctx.message?.from?.username || ''
         // 查询用户信息
         let userId = AESUtils.encodeUserId(tgId?.toString())
+        // 设置操作
+        await redis.set("currentop" + tgId, "usercenter", 'EX', 60 * 60 * 24)
         // 1：密码确认
         const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
         // 如果密码为空就开始设置密码
@@ -106,6 +108,8 @@ class WalletUserCenterMethod {
         var username: string = ctx.callbackQuery?.from?.username || ''
         // 查询用户信息
         let userId = AESUtils.encodeUserId(tgId?.toString())
+        // 设置操作
+        await redis.set("currentop" + tgId, "usercenter", 'EX', 60 * 60 * 24)
         // 1：密码确认
         const flag: boolean = await WalletHandleMethod.isLogin(tgId, ctx)
         // 如果密码为空就开始设置密码

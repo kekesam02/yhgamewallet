@@ -32,7 +32,7 @@ class WalletTixianAddressMethod {
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
         if (!botWithdrawalAddrModel?.addr) {
-            ctx.replyWithHTML("👜 请在消息框填写您的提现地址")
+            await ctx.replyWithHTML("👜 请在消息框填写您的提现地址")
             return;
         }
         // 删除上一次的消息
