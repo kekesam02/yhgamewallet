@@ -145,21 +145,24 @@ class GameScheduleHandle {
                     }
                     nextJob.cancel()
                 })
+                return
             }
         }
 
         let nextTime = moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime + 5, 'seconds')
         // 当前时间不够加入本局游戏了、需要切换到下一期
         if (!moment(nextTime).isAfter(moment())) {
-            ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
-            let nextJobTime = moment(currJson.next_time)
-                .add(3, 'minutes')
-                .add(30, 'seconds')
-                .format('YYYY-MM-DD HH:mm:ss')
-            let nextJob = schedule.scheduleJob(new Date(nextJobTime), async () => {
+            if (ScheduleHandle.pc28Config.roundId) {
+                ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
+            }
+            let nextJob = schedule.scheduleJob(new Date(currJson.next_time), async () => {
+                console.log('加入到下一期的游戏中 ')
+                // 等待下一期在发送游戏开始信息
                 let pc28Controller = new PC28Controller()
-                let nextJson: Pc28LotteryJsonType | null = await pc28Controller.getLotteryJson()
-                await this.checkNextPC28(nextJson!)
+                let lotteryJson = await pc28Controller.getLotteryJson()
+                if (lotteryJson) {
+                    await this.checkNextPC28(lotteryJson)
+                }
                 nextJob.cancel()
             })
             return
