@@ -26,17 +26,17 @@ const addLockByTgId = async (tgList: Array<string>, fn: () => Promise<any>, efn:
  */
 const addLockByCtx = async (ctx: Context, fn: () => Promise<any>, efn: () => Promise<any>, lockTTL = 1000 * 30) => {
     // 分布式锁的key
-    let lockKey = [ContextUtil.getUserId(ctx)]
+    let lockKey = ContextUtil.getUserId(ctx)
     return addLock(lockKey, fn, efn, lockTTL)
 }
 
-const addLock = async (lockKeyList: Array<string>, fn: () => Promise<any>, efn: () => Promise<any>, lockTTL = 1000  * 30) => {
+const addLock = async (lockKeyList: Array<string> | string, fn: () => Promise<any>, efn: () => Promise<any>, lockTTL = 1000  * 30) => {
     try {
         let lock = await redlock.lock(lockKeyList, lockTTL)
         try {
             // 执行异步操作
-            return  fn()
-        }finally {
+            await fn()
+        } finally {
             // 释放锁
             await redlock.unlock(lock)
         }

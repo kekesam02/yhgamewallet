@@ -19,7 +19,6 @@ import {queryRunner} from "../config/database";
 import ScheduleHandle from "../commons/schedule/ScheduleHandle";
 import AESUtils from "../commons/AESUtils";
 import DateFormatUtils from "../commons/date/DateFormatUtils";
-import walletType from "../type/WalletType";
 
 /**
  * 用户流水表
@@ -457,6 +456,7 @@ class BotPaymentModel extends BaseEntity {
             .andWhere('payment_type = :paymentType', {
                 paymentType: PaymentType.SZ
             })
+            .whereWalletType([WalletType.USDT])
             .andWhere('del = 0')
             .whereTime(
                 near ? near.createTime : '',
@@ -470,7 +470,7 @@ class BotPaymentModel extends BaseEntity {
         }
 
         // 需要反水的数据列表
-        let needList = this.defectResultHandle(paymentList, userModel)
+        let needList = this.defectResultHandle(paymentList, userModel, groupModel)
         let saveList = []
 
         // 没有需要反水的订单
@@ -701,7 +701,7 @@ class BotPaymentModel extends BaseEntity {
     /**
      * 获取需要反水的数据列表
      */
-    private defectResultHandle = (paymentList: Array<BotPaymentModel>, user: UserModel): DefectListType => {
+    private defectResultHandle = (paymentList: Array<BotPaymentModel>, user: UserModel, groupModel: BotGameModel): DefectListType => {
         let result = [
             {wallType: WalletType.USDT, waterMoney: '0', backMoney: '0'},
             {wallType: WalletType.CUSDT, waterMoney: '0', backMoney: '0'},
@@ -731,7 +731,10 @@ class BotPaymentModel extends BaseEntity {
         // 过滤出需要反水的数据列表
         result = result.filter(item => {
             if (item.waterMoney >= 100) {
-                item.backMoney = new ComputeUtils(item.waterMoney).multiplied(0.002).toString()
+                item.backMoney = new ComputeUtils(item.waterMoney).multiplied(0.0025).toString()
+                if (groupModel.gameType == GameTypeEnum.PC28GAO) {
+                    item.backMoney = new ComputeUtils(item.waterMoney).multiplied(0.003).toString()
+                }
                 switch (item.wallType) {
                     case WalletType.USDT:
                         user.USDT = new ComputeUtils(user.USDT).add(item.backMoney).getValue()
