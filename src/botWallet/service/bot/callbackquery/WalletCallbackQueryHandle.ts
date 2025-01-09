@@ -21,6 +21,7 @@ import WalletTixianAddressMethod from "../../handle/usercenter/tixiandizhi/Walle
 import WalletXiaoeMianmiMethod from "../../handle/usercenter/xiaoemianmi/WalletXiaoeMianmiMethod";
 import BotPaymentModel from "../../../../models/BotPaymentModel";
 import BotHb from "../../../../models/BotHb";
+import MessageUtils from "../../../../commons/message/MessageUtils";
 
 
 /**
@@ -138,7 +139,28 @@ class WalletCallbackQueryHandle {
                     break
                 // 红包
                 case StartWalletEnum.HONGBAO:
-                    return WalletHandleHongBaoMethod.startHongBao(ctx,cbot)
+                    return WalletHandleHongBaoMethod.startHongBao(ctx,cbot, StartWalletEnum.HONGBAO_LIST_ALL)
+                case StartWalletEnum.HONGBAO_LIST_ALL + callbackStr.replaceAll(StartWalletEnum.HONGBAO_LIST_ALL, ''):
+                    return WalletHandleHongBaoMethod.startHongBao(
+                        ctx,
+                        cbot,
+                        StartWalletEnum.HONGBAO_LIST_ALL,
+                        callbackStr.replaceAll(StartWalletEnum.HONGBAO_LIST_ALL, '')
+                    )
+                case StartWalletEnum.HONGBAO_LIST_PROGRESS + callbackStr.replaceAll(StartWalletEnum.HONGBAO_LIST_PROGRESS, ''):
+                    return WalletHandleHongBaoMethod.startHongBao(
+                        ctx,
+                        cbot,
+                        StartWalletEnum.HONGBAO_LIST_PROGRESS,
+                        callbackStr.replaceAll(StartWalletEnum.HONGBAO_LIST_PROGRESS, '')
+                    )
+                case StartWalletEnum.HONGBAO_LIST_END + callbackStr.replaceAll(StartWalletEnum.HONGBAO_LIST_END, ''):
+                    return WalletHandleHongBaoMethod.startHongBao(
+                        ctx,
+                        cbot,
+                        StartWalletEnum.HONGBAO_LIST_END,
+                        callbackStr.replaceAll(StartWalletEnum.HONGBAO_LIST_END, '')
+                    )
                 // 点击添加红包按钮回调
                 case StartWalletEnum.HONGBAO_ADD:
                     return new WalletRedPacket(ctx).selectWallType()
@@ -199,6 +221,10 @@ class WalletCallbackQueryHandle {
                 case StartWalletEnum.BACKHOME:
                     WalletHandleMethod.startButtonBack(ctx)
                     break
+                case StartWalletEnum.CLOSE_MESSAGE:
+                    // 删除本条消息
+                    await new MessageUtils().removeMessage(ctx)
+                    break
                 // 返回按钮
                 case StartWalletEnum.CLOSE_COMPUTER:
                     WalletHandleMethod.startButtonBack(ctx)
@@ -209,7 +235,7 @@ class WalletCallbackQueryHandle {
                     break
                 case StartWalletEnum.HONGBAO_CANCEL_1:
                     // 红包返回按钮类型 1、回到点击红包按钮第一页
-                    return  new WalletRedPacket(ctx).addRedPacket()
+                    return  new WalletRedPacket(ctx).addRedPacket(StartWalletEnum.HONGBAO_LIST_ALL, '0')
                 case StartWalletEnum.HONGBAO_CANCEL_2:
                     // 红包返回按钮类型 2、回退到红包选择货币页面
                     return  new WalletRedPacket(ctx).selectWallType()

@@ -7,6 +7,12 @@ enum StartWalletEnum {
      * 返回首页
      */
     BACKHOME = 'backhome',
+
+    /**
+     * 关闭当前消息
+     */
+    CLOSE_MESSAGE = 'CLOSE_MESSAGE',
+
     /**
      * 充值
      */
@@ -36,6 +42,21 @@ enum StartWalletEnum {
      * 红包
      */
     HONGBAO_INFO = 'hongbao_look_info_',
+
+    /**
+     * 红包查看全部红包列表 _后面是查询的页数
+     */
+    HONGBAO_LIST_ALL = 'HONGBAO_LIST_ALL_',
+
+    /**
+     * 红包查询进行中的红包列表
+     */
+    HONGBAO_LIST_PROGRESS = 'HONGBAO_LIST_PROGRESS_',
+
+    /**
+     * 查看已结束的红包数据列表列表
+     */
+    HONGBAO_LIST_END = 'HONGBAO_LIST_END_',
 
     /**
      * 点击添加红包按钮回掉参数

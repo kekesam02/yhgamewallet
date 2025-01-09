@@ -26,7 +26,7 @@ class ImageUtils {
                     '--no-zygote'
                 ],
                 // ignoreDefaultArgs: ['--disable-extensions'],
-                // executablePath: '/usr/bin/chromium-browser'
+                executablePath: '/usr/bin/chromium-browser'
             }
         }) as Buffer
         return {
