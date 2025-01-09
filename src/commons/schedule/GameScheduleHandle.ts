@@ -148,6 +148,23 @@ class GameScheduleHandle {
             }
         }
 
+        let nextTime = moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime + 5, 'seconds')
+        // 当前时间不够加入本局游戏了、需要切换到下一期
+        if (!moment(nextTime).isAfter(moment())) {
+            ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
+            let nextJobTime = moment(currJson.next_time)
+                .add(3, 'minutes')
+                .add(30, 'seconds')
+                .format('YYYY-MM-DD HH:mm:ss')
+            let nextJob = schedule.scheduleJob(new Date(nextJobTime), async () => {
+                let pc28Controller = new PC28Controller()
+                let nextJson: Pc28LotteryJsonType | null = await pc28Controller.getLotteryJson()
+                await this.checkNextPC28(nextJson!)
+                nextJob.cancel()
+            })
+            return
+        }
+
         // 发送封盘提示
         let tipsTime = moment(currJson.next_time)
             .subtract(new BotGameConfig().FPTipsTime, 'seconds')
