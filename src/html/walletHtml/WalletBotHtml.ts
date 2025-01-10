@@ -36,10 +36,7 @@ class WalletBotHtml {
      * 生成开始游戏的html字符串
      */
     static getBotStartHtml = (tgId: number,addr:string, model: UserModel): string => {
-        var vipHtml = "💎尊敬的<code>【"+model.nickName+"】</code>欢迎使用一号公馆钱包!";
-        if (model.vip && model.vip < 10) {
-            vipHtml = "💎尊贵的VIP" + model.vip + "💎\n";
-        }
+        var vipHtml = "Hi！【<code>"+model.nickName+"</code>】欢迎使用一号公馆钱包!\n";
         var add = '';
         if (addr) {
             add = "\n🧾 提现地址：<code>" + AESUtils.decodeAddr(addr) + "</code>\n";
@@ -47,7 +44,7 @@ class WalletBotHtml {
             add = "\n👐 暂无提现地址请前往个人中心绑定👐\n";
         }
         return vipHtml + "\n🆔 账户ID：" + tgId +
-            "\n\n🥯 USDT：" + model.USDT +
+            "\n🥯 USDT：" + model.USDT +
             "\n🥯 TRX：" + model.TRX +
             "\n🥯 彩u：" + model.CUSDT +
             "\n🥯 彩t：" + model.CTRX +

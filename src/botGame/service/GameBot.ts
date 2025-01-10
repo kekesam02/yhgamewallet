@@ -21,7 +21,7 @@ bot.command('quit', async (ctx) => {
 
 bot.telegram.setMyCommands([
     {command: "start", description: "启动机器人"},
-    {command: "quit", description: "退出机器人"},
+    //{command: "quit", description: "退出机器人"},
     // 可以添加更多命令
 ]).then(() => {
     console.log("命令设置成功");

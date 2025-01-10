@@ -605,6 +605,20 @@ class WalletController {
     }
 
     /**
+     * 等待对方收款
+     */
+    public static createStatusWaitTextBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '等待对方收款',
+                    query: 'wait'
+                }
+            ]
+        ])
+    }
+
+    /**
      * 创建返回按钮
      */
     public static createModelBackBtn = (operator:string) => {
@@ -633,6 +647,18 @@ class WalletController {
                     url: WalletConfig.CLIENT_URL
                 }
             ]
+        ])
+    }
+
+    /**
+     * 返回一号公馆
+     */
+    public static createHomeBackEmptyBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [{
+                text:"\uD83D\uDCB0 一号公馆钱包",
+                url: WalletConfig.walltPayBotURL
+            }]
         ])
     }
 
