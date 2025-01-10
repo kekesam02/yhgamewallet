@@ -19,6 +19,8 @@ class WalletConfig {
     static walltPayBotYaoQingURL:string = this.walltPayBotURL+'?start=hy'
     // 个人跳转
     static MEURL:string = 'https://t.me/'
+    // 客服
+    static CLIENT_URL:string = 'https://t.me/zhang9610'
 }
 
 export default WalletConfig

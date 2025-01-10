@@ -27,6 +27,18 @@ import WalletUserCenterMethod from "../usercenter/WalletUserCenterMethod";
  * 仓库地址：https://github.com/gaozhihen/yhgame
  */
 class WalletHandleMethod {
+
+    /**
+     * 提现返回
+     * @param ctx
+     */
+    public static closeModelBack = async (ctx: Context,op:string, tgId: string) => {
+        await redis.del(op+"main_msgid_" + tgId)
+        await redis.del(op+"main_chatid_" + tgId)
+        await redis.del("currentop" + tgId)
+        WalletHandleMethod.startButtonBack(ctx)
+    }
+
     /**
      * 删除上一次消息
      * @param ctx

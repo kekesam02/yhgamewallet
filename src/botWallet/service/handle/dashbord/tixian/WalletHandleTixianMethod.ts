@@ -14,6 +14,7 @@ import {queryRunner} from "../../../../../config/database";
 import WalletHandleMethod from "../WalletHandleMethod";
 import walletUserCenterMethod from "../../usercenter/WalletUserCenterMethod";
 import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
+import walletHandleMethod from "../WalletHandleMethod";
 
 
 /**
@@ -52,12 +53,12 @@ class WalletHandleTixianMethod {
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
         if (!botWithdrawalAddrModel?.addr) {
-            await ctx.replyWithHTML("⚠️ 尚未设置提现地址，请点击【设置提现地址】按钮进行设置",WalletController.createTiXianBackBtn())
+            await ctx.replyWithHTML("⚠️ 尚未设置提现地址，请点击【设置提现地址】按钮进行设置", WalletController.createTiXianBackBtn())
             return;
         }
-        const promise = await ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
-        await redis.set("txmain_msgid_"+tgId,promise.message_id)
-        await redis.set("txmain_chatid_"+tgId,promise.chat.id)
+        const promise = await ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createModelBackBtn('tx'))
+        await redis.set("txmain_msgid_" + tgId, promise.message_id)
+        await redis.set("txmain_chatid_" + tgId, promise.chat.id)
     }
 
     // 提现具体逻辑
@@ -78,7 +79,7 @@ class WalletHandleTixianMethod {
             const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
                 .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
             if (!botWithdrawalAddrModel?.addr) {
-                await ctx.replyWithHTML("⚠️ 尚未设置提现地址，请点击【设置提现地址】按钮进行设置",WalletController.createTiXianBackBtn())
+                await ctx.replyWithHTML("⚠️ 尚未设置提现地址，请点击【设置提现地址】按钮进行设置", WalletController.createTiXianBackBtn())
                 return;
             }
 
@@ -148,14 +149,14 @@ class WalletHandleTixianMethod {
                             walletType: WalletType.USDT,
                             applyTime: applyTime,
                             chatId: chatId,
-                            status:0,// 申请中
-                            description:"正在发起提现操作，提现金额是【"+price+"】等待审核中..."
+                            status: 0,// 申请中
+                            description: "正在发起提现操作，提现金额是【" + price + "】等待审核中..."
                         })
                         await queryRunner.commitTransaction()
 
                         let result = "没有异常"
                         let fenkongArr = []
-                        if(botUser.riskManagement == 0) {
+                        if (botUser.riskManagement == 0) {
                             //判断是否为异常用户 ----------------如果一个充值地址被多个用户使用，说明这个用户用了小号
                             var userByLinks = await UserModel.createQueryBuilder()
                                 .where('recharge_link = :rechargeLink and del = 0', {'rechargeLink': botUser.rechargeLink})
@@ -166,15 +167,15 @@ class WalletHandleTixianMethod {
                                     await UserModel.createQueryBuilder().update()
                                         .set({riskManagement: 1}).where("id=:id", {id: userByLink.id}).execute()
                                 }
-                                result = "风控用户(存在一个充值地址两个账号分别是："+fenkongArr.join('、')+")"
+                                result = "风控用户(存在一个充值地址两个账号分别是：" + fenkongArr.join('、') + ")"
                             }
-                        }else{
+                        } else {
                             result = "风控用户"
                         }
 
                         // 统计相关
                         var sumPriceArr = await BotPaymentModel.createQueryBuilder("t1")
-                            .select(['t1.payment_type as ptype',  'SUM(t1.payment_amount) as num'])
+                            .select(['t1.payment_type as ptype', 'SUM(t1.payment_amount) as num'])
                             .where('t1.user_id = :tgId and t1.del = 0 and t1.wallet_type = 1', {tgId: botUser.tgId})
                             .groupBy("t1.payment_type").execute()
 
@@ -236,7 +237,7 @@ class WalletHandleTixianMethod {
 
                         // 6: 财务消息
                         var userVipModels = await new UserModel().findUserModeVip();
-                        if(userVipModels && userVipModels.length > 0) {
+                        if (userVipModels && userVipModels.length > 0) {
                             for (let i = 0; i < userVipModels.length; i++) {
                                 await ctx.telegram.sendMessage(AESUtils.decodeUserId(userVipModels[i].tgId), tixian, {
                                     parse_mode: "HTML",
@@ -246,14 +247,13 @@ class WalletHandleTixianMethod {
                         }
 
                         // 7: 发送消息
-                       const promise = await ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT, shengyuUsdt, price, botWithdrawalAddrModel?.addr), WalletController.createBackBtn())
-
+                        const promise = await ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT, shengyuUsdt, price, botWithdrawalAddrModel?.addr), WalletController.createStatusTxBtn())
                         // 删除上一次的消息
-                        var mmsgId :string | null = await redis.get("txmain_msgid_"+tgId) || "0"
-                        var mchatId :string | null = await redis.get("txmain_chatid_"+tgId) || "0"
-                        await ctx.telegram.deleteMessage(mchatId,parseInt(mmsgId))
-                        await redis.set("txmain_msgid_"+tgId,promise.message_id)
-                        await redis.set("txmain_chatid_"+tgId,promise.chat.id)
+                        var mmsgId: string | null = await redis.get("txmain_msgid_" + tgId) || "0"
+                        var mchatId: string | null = await redis.get("txmain_chatid_" + tgId) || "0"
+                        await ctx.telegram.deleteMessage(mchatId, parseInt(mmsgId))
+                        await redis.set("txmain_msgid_" + tgId, promise.message_id)
+                        await redis.set("txmain_chatid_" + tgId, promise.chat.id)
 
                     } catch (e) {
                         await ctx.replyWithHTML('⌛️ 提示：服务器忙，请稍后在试')
@@ -300,39 +300,39 @@ class WalletHandleTixianMethod {
                         passUsername: ctx.botInfo.username,
                         passNickname: ctx.botInfo.first_name,
                         passTime: passTime,
-                        status:1,// 已完成
-                        description:"提现一笔金额【"+botPayment.paymentAmount+"】已完成",
-                        version:()=>{
+                        status: 1,// 已完成
+                        description: "提现一笔金额【" + botPayment.paymentAmount + "】已完成",
+                        version: () => {
                             return 'version + 1'
                         }
                     })
-                    .where("id=:id and version = :version", {id: botPayment.id,version:botPayment.version})
+                    .where("id=:id and version = :version", {id: botPayment.id, version: botPayment.version})
                     .execute()
                 const addr = AESUtils.decodeAddr(botPayment.paymentTypeNumber) || ''
                 const html: string = "\uD83D\uDCE3尊敬的用户：" + botPayment?.nickname + "您好！\n" +
                     "\uD83D\uDCE3财务已确认打款，请查收\n" +
                     "\uD83D\uDCE3温馨提示，提现手续费usdt为1u，TRX为实时等额汇率\n" +
                     "\uD83D\uDCE31号公馆祝您赌运昌隆\uD83C\uDF8A\n" +
-                    "\uD83D\uDD3A实际提现：" + (botPayment?.paymentRealAmount || 0) + "、手续费：1U\n" +
-                    "\uD83D\uDD3A到账金额：" + (botPayment?.paymentAmount || 0) + "\n" +
-                    "\uD83D\uDD3A还剩余额：" + (botPayment?.balanceAfter || 0) + "\n" +
-                    "\uD83D\uDD3A申请时间：" + botPayment.applyTime + "\n" +
-                    "\uD83D\uDD3A打款时间：" + passTime + "\n" +
-                    "\uD83D\uDD3A货币类型：USDT" + "\n" +
-                    "\uD83D\uDD3A提现地址：" + addr
+                    "✅ 实际提现：" + (botPayment?.paymentRealAmount || 0) + "、手续费：1U\n" +
+                    "✅ 到账金额：" + (botPayment?.paymentAmount || 0) + "\n" +
+                    "✅ 还剩余额：" + (botPayment?.balanceAfter || 0) + "\n" +
+                    "✅ 申请时间：" + botPayment.applyTime + "\n" +
+                    "✅ 打款时间：" + passTime + "\n" +
+                    "✅ 货币类型：USDT" + "\n" +
+                    "✅ 提现地址：" + addr
 
 
                 // 删除上一次的消息
                 var botPayUerId = AESUtils.decodeUserId(botPayment.tgId);
-                var mmsgId :string | null = await redis.get("txmain_msgid_"+botPayUerId) || "0"
-                var mchatId :string | null = await redis.get("txmain_chatid_"+botPayUerId) || "0"
-                await ctx.telegram.deleteMessage(mchatId,parseInt(mmsgId))
-                await redis.del("txmain_msgid_"+botPayUerId)
-                await redis.del("txmain_chatid_"+botPayUerId)
+                var mmsgId: string | null = await redis.get("txmain_msgid_" + botPayUerId) || "0"
+                var mchatId: string | null = await redis.get("txmain_chatid_" + botPayUerId) || "0"
+                await ctx.telegram.deleteMessage(mchatId, parseInt(mmsgId))
+                await redis.del("txmain_msgid_" + botPayUerId)
+                await redis.del("txmain_chatid_" + botPayUerId)
                 // 5:给申请人发消息
                 await ubot.telegram.sendMessage(mchatId, html, {
                     parse_mode: "HTML",
-                    reply_markup: WalletController.createBackBtn().reply_markup
+                    reply_markup: WalletController.createModelClientBackBtn('tx').reply_markup
                 })
                 // 6: 编辑回复的按钮
                 await ctx.editMessageReplyMarkup(WalletController.createSuccessBtn(botPayment.username).reply_markup)
@@ -381,8 +381,8 @@ class WalletHandleTixianMethod {
                         passUsername: ctx.botInfo.username,
                         passNickname: ctx.botInfo.first_name,
                         passTime: refuseTime,
-                        status:2,// 被拒绝
-                        description:"提现一笔金额【"+botPayment.paymentAmount+"】被拒"
+                        status: 2,// 被拒绝
+                        description: "提现一笔金额【" + botPayment.paymentAmount + "】被拒"
                     })
 
                     const addr = AESUtils.decodeAddr(botPayment.paymentTypeNumber) || ''
@@ -402,15 +402,15 @@ class WalletHandleTixianMethod {
                     // 删除上一次的消息
                     var botPayUerId = AESUtils.decodeUserId(botPayment.tgId);
                     // 删除上一次的消息
-                    var mmsgId :string | null = await redis.get("txmain_msgid_"+botPayUerId) || "0"
-                    var mchatId :string | null = await redis.get("txmain_chatid_"+botPayUerId) || "0"
+                    var mmsgId: string | null = await redis.get("txmain_msgid_" + botPayUerId) || "0"
+                    var mchatId: string | null = await redis.get("txmain_chatid_" + botPayUerId) || "0"
                     // 给申请人发消息
-                    await ubot.telegram.editMessageText(mchatId, parseInt(mmsgId),'',html, {
+                    await ubot.telegram.editMessageText(mchatId, parseInt(mmsgId), '', html, {
                         parse_mode: "HTML",
-                        reply_markup: WalletController.createBackBtn().reply_markup
+                        reply_markup: WalletController.createModelClientBackBtn('tx').reply_markup
                     })
-                    await redis.del("txmain_msgid_"+botPayUerId)
-                    await redis.del("txmain_chatid_"+botPayUerId)
+                    await redis.del("txmain_msgid_" + botPayUerId)
+                    await redis.del("txmain_chatid_" + botPayUerId)
                     // 6: 编辑回复的按钮
                     await ctx.editMessageReplyMarkup(WalletController.createFailBtn(botPayment.username).reply_markup)
                     await queryRunner.commitTransaction()
@@ -425,15 +425,16 @@ class WalletHandleTixianMethod {
     public static noteOrderTxcg = (ye: string, shengyuUsdt: number, je: number, address: string | undefined) => {
         var html =
             "✅ 提现成功，等待客服确认到账！\n\n" +
-            "\uD83D\uDD3A提现金额：" + je + "U\n" +
-            "\uD83D\uDD3A实际到账金额：" + (je - 1) + "U，手续费：1U\n" +
-            "\uD83D\uDD3A提之前余额：" + ye + " USDT\n" +
-            "\uD83D\uDD3A提之后余额：" + shengyuUsdt + " USDT\n" +
-            "\uD83D\uDD3A申请时间：" + DateFormatUtils.CurrentDateFormatString() + "\n" +
-            "\uD83D\uDD3A提现地址：" + AESUtils.decodeAddr(address || '') + "\n" +
-            "\uD83D\uDD3A货币类型：USDT"
+            "1、提现金额：" + je + "U\n" +
+            "2、实际到账金额：" + (je - 1) + "U，手续费：1U\n" +
+            "3、提之前余额：" + ye + " USDT\n" +
+            "4、提之后余额：" + shengyuUsdt + " USDT\n" +
+            "5、申请时间：" + DateFormatUtils.CurrentDateFormatString() + "\n" +
+            "6、提现地址：" + AESUtils.decodeAddr(address || '') + "\n" +
+            "7、货币类型：USDT"
         return html;
     }
+
 }
 
 

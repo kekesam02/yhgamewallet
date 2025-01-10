@@ -267,7 +267,7 @@ class WalletController {
     /**
      * 创建转账返回按钮
      */
-    public static createZhuanzhangSwitchBtn = (query: string) => {
+    public static createZhuanzhangSwitchBtn = (query: string,operator:string) => {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 {
@@ -276,7 +276,10 @@ class WalletController {
                 }
             ],
             [
-                WalletController.CancelAndBackHome
+                {
+                    text: '\uD83D\uDEAB 取消',
+                    query: 'model_backhome' + operator
+                }
             ]
         ])
     }
@@ -458,8 +461,8 @@ class WalletController {
         return new ButtonUtils().createCallbackBtn([
             [
                 {
-                    text: '⚠️ 已拒绝，点击联系用户',
-                    url: WalletConfig.MEURL + username
+                    text: '⚠️ 申请已被拒绝',
+                    query: '@'+username
                 }
             ]
         ])
@@ -582,6 +585,52 @@ class WalletController {
                 {
                     text: '💰 开始提现',
                     query: StartWalletEnum.TIXIAN
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 提示等待客服审核
+     */
+    public static createStatusTxBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '等待客服审核',
+                    query: 'await'
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 创建返回按钮
+     */
+    public static createModelBackBtn = (operator:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '↩️ 返回',
+                    query: 'model_backhome' + operator
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 创建返回按钮-带客服
+     */
+    public static createModelClientBackBtn = (operator:string) => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '↩️ 返回',
+                    query: 'model_backhome' + operator
+                },
+                {
+                    text: '🛄 联系客服',
+                    url: WalletConfig.CLIENT_URL
                 }
             ]
         ])

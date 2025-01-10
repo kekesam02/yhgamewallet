@@ -88,14 +88,17 @@ class WalletCallbackQueryHandle {
             WalletHandleTixianMethod.startRefuseTixian(tgId+'',callbackStr,ctx,bot)
         } else if (callbackStr.startsWith("tyzh_")){// 领取邀请返利
             WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr,bot)
-        } else if(callbackStr.startsWith('bjydk')){
-            // 标记打款
+        } else if(callbackStr.startsWith('bjydk')){ // 标记打款
             WalletHandleTixianMethod.startMarkTixian(tgId+'',callbackStr,ctx,bot)
-        } else if(callbackStr.startsWith('txycth')){
-            // 异常驳回
+        } else if(callbackStr.startsWith('txycth')){// 异常驳回
             WalletHandleTixianMethod.startRefuseTixian(tgId+'',callbackStr,ctx,bot)
         } else if (callbackStr.startsWith("tyzh_")){// 领取邀请返利
             WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr,bot)
+        }else if(callbackStr.startsWith('model_backhome')){ // 返回
+            var op = callbackStr.replaceAll('model_backhome','')
+            WalletHandleMethod.closeModelBack(ctx,op,tgId+'')
+        }else if(callbackStr.startsWith('await')){
+            await ctx.answerCbQuery("提示：等待客服审核",{show_alert:true})
         }else{
             switch (callbackStr) {
                 // 我的账单
