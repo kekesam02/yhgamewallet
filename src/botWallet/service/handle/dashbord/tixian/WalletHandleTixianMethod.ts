@@ -312,7 +312,7 @@ class WalletHandleTixianMethod {
                 const html: string = "\uD83D\uDCE3尊敬的用户：" + botPayment?.nickname + "您好！\n" +
                     "\uD83D\uDCE3财务已确认打款，请查收\n" +
                     "\uD83D\uDCE3温馨提示，提现手续费usdt为1u，TRX为实时等额汇率\n" +
-                    "\uD83D\uDCE31号公馆祝您赌运昌隆\uD83C\uDF8A\n" +
+                    "\uD83D\uDCE31号公馆祝您赌运昌隆\uD83C\uDF8A\n\n" +
                     "✅ 实际提现：" + (botPayment?.paymentRealAmount || 0) + "、手续费：1U\n" +
                     "✅ 到账金额：" + (botPayment?.paymentAmount || 0) + "\n" +
                     "✅ 还剩余额：" + (botPayment?.balanceAfter || 0) + "\n" +

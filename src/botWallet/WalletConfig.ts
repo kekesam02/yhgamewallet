@@ -21,6 +21,7 @@ class WalletConfig {
     static MEURL:string = 'https://t.me/'
     // 客服
     static CLIENT_URL:string = 'https://t.me/zhang9610'
+    static CLIENT_UNAME:string = '@zhang9610'
 }
 
 export default WalletConfig

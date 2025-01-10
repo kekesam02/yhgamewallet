@@ -1,6 +1,7 @@
 import AESUtils from '../../commons/AESUtils'
 import DateFormatUtils from '../../commons/date/DateFormatUtils'
 import UserModel from "../../models/UserModel";
+import WalletConfig from "../../botWallet/WalletConfig";
 
 /**
  * 游戏机器人返回的html字段
@@ -51,8 +52,8 @@ class WalletBotHtml {
             "\n🥯 彩u：" + model.CUSDT +
             "\n🥯 彩t：" + model.CTRX +
             "\n🥯 免密额度：" + model.withdrawalLimit + add +
-            "\n\uD83C\uDFAE 游戏官方频道:@OnePalace " +
-            "\uD83C\uDFAA\uD83C\uDFB2\uD83C\uDFB0";
+            "\n\uD83C\uDFAE 游戏官方频道:@OnePalace \uD83C\uDFAA\uD83C\uDFB2\uD83C\uDFB0" +
+            "\n🛄 遇到问题联系客服："+WalletConfig.CLIENT_UNAME ;
     }
 }
 
