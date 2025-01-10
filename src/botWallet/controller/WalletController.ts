@@ -685,6 +685,20 @@ class WalletController {
     }
 
     /**
+     * 创建客服
+     */
+    public static createModelClientServerBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '🛄 遇到问题联系客服',
+                    url: WalletConfig.CLIENT_URL
+                }
+            ]
+        ])
+    }
+
+    /**
      * 返回一号公馆
      */
     public static createHomeBackEmptyBtn = () => {

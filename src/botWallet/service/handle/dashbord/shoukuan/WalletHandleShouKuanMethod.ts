@@ -87,10 +87,11 @@ class WalletHandleShouKuanMethod {
                 }
             }))
 
+
             // 提示钱包机器人已转账
             var msgId :string | null = await redis.get("shoukuanmain_msgid_"+tgId) || "0"
             var chatId :string | null = await redis.get("shoukuanmain_chatid_"+tgId) || "0"
-            await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"⚠️  等待支付！",
+            await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"⚠️  等待好友支付！",
                 {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitPayBtn().reply_markup})
         }, async () => {
             await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
@@ -114,6 +115,9 @@ class WalletHandleShouKuanMethod {
         var value = split[1] // 收款金额
         var orderId = split[2] || '' // 收款人
         var queryId = split[3] || '' // 改变内联的按钮状态
+
+        //bot.telegram.editMessageText('',undefined,queryId,"xxxxxxxxxxxxx")
+
         // 如果是自己就拦截掉
         if (payTgId == tgIdvalue) {
             bot.telegram.sendMessage(payTgId, "⚠️ 不可以转账给自己")
@@ -156,6 +160,8 @@ class WalletHandleShouKuanMethod {
             parse_mode: "HTML",
             reply_markup: WalletController.createPayBotButton(payTgId, tgIdvalue, value,orderId).reply_markup
         })
+
+        await redis.set("shouku_query_"+tgIdvalue,queryId)
     }
 
     /**
@@ -287,7 +293,7 @@ class WalletHandleShouKuanMethod {
                         "4、支付金额 : " + money + " U" + "\n" +
                         "5、转账时间 : " + applyTime + "\n" +
                         "⚠️ 提示 : 您可以将次支付凭证转发给收款人";
-                    await ctx.editMessageText(html,{parse_mode:"HTML",reply_markup:WalletController.createHomeBackEmptyBtn().reply_markup})
+                    await ctx.editMessageText(html,{parse_mode:"HTML",reply_markup:WalletController.createModelClientServerBtn().reply_markup})
                     // 收款人消息
                     var html2 = "✅ 收款操作完成，收到用户@"+payBotUser.userName+ "的付款信息金额是:" + money + " U"
                     var cmsgId :string | null = await redis.get("shoukuanmain_msgid_"+callbackSkTgId) || "0"
@@ -345,6 +351,7 @@ class WalletHandleShouKuanMethod {
             // 防止恶意输入无限的弹窗和显示
             const ecnodecallbackPayTgId = AESUtils.encodeUserId(callbackPayTgId)
             const payBotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: ecnodecallbackPayTgId}).getOne()
+
             var html2 = "⚠️ 你发起的收款操作，已被用户@" + payBotUser?.userName + "拒绝，金额是：" + money
             var cmsgId :string | null = await redis.get("shoukuanmain_msgid_"+callbackSkTgId) || "0"
             var cchatId :string | null = await redis.get("shoukuanmain_chatid_"+callbackSkTgId) || "0"
