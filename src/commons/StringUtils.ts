@@ -4,6 +4,22 @@
 class StringUtils {
 
     /**
+     * 判断字符串不为空
+     * @param str
+     */
+    public static isNotEmpty = (str: string = ''): boolean => {
+        return !this.isEmpty(str);
+    }
+
+    /**
+     * 判断字符串不为空
+     * @param str
+     */
+    public static isEmpty = (str: string = ''): boolean => {
+        return (!str || str.length === 0);
+    }
+
+    /**
      * 判断numStr是否以数字开头
      * @param numStr
      * @return true: 以数字开头的
@@ -25,7 +41,7 @@ class StringUtils {
      * 数字截取
      * @param num
      */
-    public static toFixedNoRounding = (data:string,point:number)=> {
+    public static toFixedNoRounding = (data: string, point: number) => {
         // 将数字转换为字符串
         var numStr = data.toString();
         // 判断是否有小数部分

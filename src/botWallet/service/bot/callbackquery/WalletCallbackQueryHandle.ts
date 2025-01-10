@@ -22,6 +22,7 @@ import WalletXiaoeMianmiMethod from "../../handle/usercenter/xiaoemianmi/WalletX
 import BotPaymentModel from "../../../../models/BotPaymentModel";
 import BotHb from "../../../../models/BotHb";
 import MessageUtils from "../../../../commons/message/MessageUtils";
+import walletHandleMethod from "../../handle/dashbord/WalletHandleMethod";
 
 
 /**
@@ -123,6 +124,7 @@ class WalletCallbackQueryHandle {
                 // ===============================按钮组2：用户充值、提现===========================
                 // 充值
                 case StartWalletEnum.CHONGZHI:
+                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleChongzhiMethod.startChongZhi(ctx)
                     break
                 // 提现

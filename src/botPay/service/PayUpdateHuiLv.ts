@@ -27,7 +27,7 @@ class PayUpdateHuiLv {
                     const marketInfo = jsonData['trc20_tokens'][0]["market_info"]
                     if(marketInfo && marketInfo.priceInTrx > 0) {
                         // 获取usdt--->trx的实时汇率
-                        const priceInTrx = StringUtils.toFixedNoRounding(marketInfo.priceInTrx,2)
+                        const priceInTrx = StringUtils.toFixedNoRounding((parseFloat(marketInfo.priceInTrx)-0.1).toString(),2)
                         // 获取trx--->usdt的实时汇率
                         const priceInUsd = StringUtils.toFixedNoRounding((100 / (parseFloat(priceInTrx) * 100)).toString(),2)
                         // 开始更新汇率 USDT转 trx的时候会直接*类型1的值

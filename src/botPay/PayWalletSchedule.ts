@@ -6,7 +6,6 @@ function InitUpdateHuilv() {
     // 默认执行一次.
     PayUpdateHuiLv.updateHuiLv()
     const job = schedule.scheduleJob(rule,()=>{
-        console.log('开始执行汇率更新。');
         // 取消job。会被监听
         PayUpdateHuiLv.updateHuiLv()
     })

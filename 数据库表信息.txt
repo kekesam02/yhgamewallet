@@ -1,6 +1,28 @@
 pm2 start --interpreter ./node_modules/.bin/ts-node-dev --env RUNNING_ENV=dev ./src/index.ts --log ./logFile.log
 pm2 start --interpreter ./node_modules/.bin/ts-node-dev --env RUNNING_ENV=fg ./src/indexwallet.ts --log ./logFile.log
 
+娱乐机器人：botDic
+用户名：OnePalace_Gamebot
+Token：7924047798:AAFl1FZDK-irPQK25tbng9M1NeC1jw_6LIo
+
+娱乐群组机器人：botGroup
+用户名：OnePalace_Gmbot
+Token：7405467169:AAEQMjrv8VN3-ezhTRgRGyoveYWJ4x0qxss
+
+娱乐群组机器人：botPromotion
+用户名：OnePalace_Promotionbot
+Token：8054803390:AAHLescj6DIjQ4ebR8_w5Al4MbGpXd2QIXA
+
+钱包确认机器人：botCheckWallet
+用户名：cha_uuubot
+Token：7369879247:AAH-d-SEQdmCz79-k1oLuduRj2c1egAiRsY
+
+用户钱包机器人: botWallet
+用户名：VertexPaybot
+Token：7652391972:AAGSWOQtY5_mnCz2ZOrPvWOIFbYJ5mjmAlM
+
+TQKKuYk3zNBJoBjLbZ1rp99URZuPQgNFey
+
 
 spinach_robot_dice：8085
 spinach_robot_pay：8086

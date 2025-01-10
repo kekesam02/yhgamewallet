@@ -70,6 +70,16 @@ class WalletHandleTixianMethod {
                 return
             }
 
+            // 查询用户信息
+            let userId = AESUtils.encodeUserId(tgId?.toString())
+            // 查询用户是否存在交易地址
+            const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
+                .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
+            if (!botWithdrawalAddrModel?.addr) {
+                await ctx.replyWithHTML("⚠️ 尚未设置提现地址请前往个人中心设置",WalletUserCenterController.createUserCenterBackBtn())
+                return;
+            }
+
             // 2: 判断是否提现开头
             if (!text.startsWith('提现')) {
                 await ctx.replyWithHTML("⚠️ 请输入正确的提现格式：提现+金额\n比如：提现10或者提现 10")
@@ -89,7 +99,6 @@ class WalletHandleTixianMethod {
             }
 
             // 查询用户信息
-            let userId = AESUtils.encodeUserId(tgId?.toString())
             let botUser = await UserModel.createQueryBuilder().where('tg_id = :tgId', {tgId: userId}).getOne()
             // 查询用户余额
             if (botUser) {
