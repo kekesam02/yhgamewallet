@@ -90,7 +90,6 @@ class WalletCallbackQueryHandle {
             WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr,bot)
         } else{
             switch (callbackStr) {
-                // ===========================按钮组1：用户中心===========================
                 // 我的账单
                 case WalletUserCenterEnum.BACCOUNT:
                     WalletMyAccountMethod.startBAccount(ctx,callbackStr)
@@ -127,7 +126,6 @@ class WalletCallbackQueryHandle {
                 case WalletUserCenterEnum.HOME:
                     WalletHandleMethod.startButtonBack(ctx)
                     break
-                // ===============================按钮组2：用户充值、提现===========================
                 // 充值
                 case StartWalletEnum.CHONGZHI:
                     WalletHandleMethod.removeMessage(ctx)

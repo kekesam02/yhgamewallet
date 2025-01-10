@@ -15,6 +15,8 @@ import WalletHandleMethod from "../WalletHandleMethod";
 import WalletConfig from "../../../../WalletConfig";
 import {addLockByTgId} from "../../../../../config/redislock";
 import dateFormatUtils from "../../../../../commons/date/DateFormatUtils";
+import walletHandleMethod from "../WalletHandleMethod";
+import walletController from "../../../../controller/WalletController";
 
 
 /**
@@ -49,7 +51,9 @@ class WalletHandleZhuanzhangMethod {
         }
         const html = "\uD83D\uDC47 点击下方按钮选择收款人";
         // 发送消息
-        await ctx.replyWithHTML(html, WalletController.createZhuanzhangSwitchBtn("1"))
+        const promise = await ctx.replyWithHTML(html, WalletController.createZhuanzhangSwitchBtn("1"));
+        await redis.set("zhuan_msgid_"+tgId,promise.message_id)
+        await redis.set("zhuan_chatid_"+tgId,promise.chat.id)
     }
 
     // 转账具体逻辑
@@ -97,10 +101,10 @@ class WalletHandleZhuanzhangMethod {
                         inline_keyboard: [
                             [{
                                 text: '✅ 确认解锁',
-                                callback_data: "qrjs" + query + "," + tgId
+                                callback_data: "qrjs" + query + "," + tgId+","+fusername
                             }, {
                                 text: '\uD83D\uDEAB 取消转账',
-                                callback_data: "quxiaozz" + query + "," + tgId
+                                callback_data: "quxiaozz" + query + "," + tgId+","+fusername
                             }]
                         ]
                     }
@@ -141,13 +145,16 @@ class WalletHandleZhuanzhangMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         let inlineMessageId = ctx.callbackQuery?.inline_message_id || ""
         // 转账金额
-        var money = callbackStr.replaceAll("qrjs", "").split(",")[0];
-        var sendTgId = callbackStr.replaceAll("qrjs", "").split(",")[1];
+        var callbackDataSplit = callbackStr.replaceAll("qrjs", "").split(",")
+        var money = callbackDataSplit[0];
+        var sendTgId = callbackDataSplit[1];
+        var fusername = callbackDataSplit[2];
         // 必须是转账本人操作。否则返回
         if (sendTgId != tgId.toString()) {
             await ctx.answerCbQuery('⚠️ 提示：不是你发起的转账', {show_alert: true})
             return
         }
+
         // 开始查询用户
         let userId = AESUtils.encodeUserId(tgId?.toString())
         const botUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: userId}).getOne()
@@ -205,6 +212,15 @@ class WalletHandleZhuanzhangMethod {
                     await queryRunner.commitTransaction()
                     // 开始写入24小时定时过期转账
                     await redis.set("tx_botpayment_"+tgId,botPayment.id,"EX",60 * 60 * 24)
+
+                    // 提示钱包机器人已转账
+                    var msgId :string | null = await redis.get("zhuan_msgid_"+tgId) || "0"
+                    var chatId :string | null = await redis.get("zhuan_chatid_"+tgId) || "0"
+                    await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"✅ 已转账已成功！",
+                        {parse_mode:"HTML",reply_markup:WalletController.createBackBtn().reply_markup})
+                    await redis.del("zhuan_msgid_"+tgId)
+                    await redis.del("zhuan_chatid_"+tgId)
+
                 } catch (e) {
                     await queryRunner.rollbackTransaction()
                     await ctx.answerCbQuery('⚠️ 提示：服务器忙，请稍后在试', {show_alert: true})
@@ -322,6 +338,15 @@ class WalletHandleZhuanzhangMethod {
             // 删除密码验证------------------------------如果想续期不输入密码就注释掉
             // 开始写入24小时定时过期转账
             await redis.set("tx_botpayment_"+tgId,botPayment.id,"EX",60 * 60 * 24)
+
+            // 提示钱包机器人已转账
+            var msgId :string | null = await redis.get("zhuan_msgid_"+tgId) || "0"
+            var chatId :string | null = await redis.get("zhuan_chatid_"+tgId) || "0"
+            await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"✅ 已转账成功！",
+                {parse_mode:"HTML",reply_markup:WalletController.createBackBtn().reply_markup})
+            await redis.del("zhuan_msgid_"+tgId)
+            await redis.del("zhuan_chatid_"+tgId)
+
         } catch (e) {
             await queryRunner.rollbackTransaction()
             await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
@@ -398,6 +423,14 @@ class WalletHandleZhuanzhangMethod {
             ctx.answerCbQuery('⚠️ 提示：不是你发起的转账', {show_alert: true})
             return
         }
+
+        // 删除机器人的选择收款人消息
+        var msgId :string | null = await redis.get("zhuan_msgid_"+tgId) || "0"
+        var chatId :string | null = await redis.get("zhuan_chatid_"+tgId) || "0"
+        await ctx.telegram.deleteMessage(chatId,parseInt(msgId))
+        await redis.del("zhuan_msgid_"+tgId)
+        await redis.del("zhuan_chatid_"+tgId)
+
         // 删除此消息
         await ctx.editMessageText("⚠️ 提示：对方已取消转账!")
         // 删除缓存操作
