@@ -48,7 +48,9 @@ class WalletHandleShouKuanMethod {
         }
         // 发送消息
         const html = "\uD83D\uDC47 点击下方按钮选择付款人";
-        await ctx.replyWithHTML(html, WalletController.createShouKuanSwitchBtn(" -1"))
+        const promise = await ctx.replyWithHTML(html, WalletController.createShouKuanSwitchBtn(" -1",'shoukuan'))
+        await redis.set("shoukuanmain_msgid_"+tgId,promise.message_id)
+        await redis.set("shoukuanmain_chatid_"+tgId,promise.chat.id)
     }
 
     // 收款具体逻辑
@@ -79,13 +81,19 @@ class WalletHandleShouKuanMethod {
                     inline_keyboard: [
                         [{
                             text: '\uD83D\uDCB8 立即支付',
-                            url: WalletConfig.walltPayBotSKInlineURL + id + '_' + money+"_"+orderId
+                            url: WalletConfig.walltPayBotSKInlineURL + id + '_' + money+"_"+orderId+"_"+queryId
                         }]
                     ]
                 }
             }))
+
+            // 提示钱包机器人已转账
+            var msgId :string | null = await redis.get("shoukuanmain_msgid_"+tgId) || "0"
+            var chatId :string | null = await redis.get("shoukuanmain_chatid_"+tgId) || "0"
+            await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"⚠️  等待支付！",
+                {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitPayBtn().reply_markup})
         }, async () => {
-            await ctx.answerCbQuery('亲，操作慢点，休息一会在操作!')
+            await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
         })
     }
 
@@ -105,6 +113,7 @@ class WalletHandleShouKuanMethod {
         var tgIdvalue = split[0] || '' // 收款人
         var value = split[1] // 收款金额
         var orderId = split[2] || '' // 收款人
+        var queryId = split[3] || '' // 改变内联的按钮状态
         // 如果是自己就拦截掉
         if (payTgId == tgIdvalue) {
             bot.telegram.sendMessage(payTgId, "⚠️ 不可以转账给自己")
@@ -135,6 +144,14 @@ class WalletHandleShouKuanMethod {
             "4、转账时间 : " + DateFormatUtils.CurrentDateFormatString() + " USDT\n" +
             "⚠️ 提示: 本次转账即时完成, 无法追回!";
         // 发送消息
+        // 改变上个的支付状态
+        //await ctx.telegram.editMessageReplyMarkup('',undefined,queryId,WalletController.createStatusWaitSurePayBtn().reply_markup)
+        // 提示钱包机器人已转账
+        var msgId :string | null = await redis.get("shoukuanmain_msgid_"+tgIdvalue) || "0"
+        var chatId :string | null = await redis.get("shoukuanmain_chatid_"+tgIdvalue) || "0"
+        await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"\"✅  好友正在确认支付！",
+            {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitPayBtn().reply_markup})
+        // 生成新的确认和支付按钮
         await bot.telegram.sendMessage(payTgId, html, {
             parse_mode: "HTML",
             reply_markup: WalletController.createPayBotButton(payTgId, tgIdvalue, value,orderId).reply_markup
@@ -267,15 +284,18 @@ class WalletHandleShouKuanMethod {
                         "1、用户ID  : " + currentTgId+ "\n" +
                         "2、转账用户 : " + shouKuanBotUser?.userName + "\n" +
                         "3、转账昵称 : " + shouKuanBotUser?.nickName + "\n" +
-                        "4、支付金额 : " + money + "USDT" + "\n" +
+                        "4、支付金额 : " + money + " U" + "\n" +
                         "5、转账时间 : " + applyTime + "\n" +
                         "⚠️ 提示 : 您可以将次支付凭证转发给收款人";
-                    await ctx.telegram.sendMessage(currentTgId,html,{parse_mode:"HTML"})
+                    await ctx.editMessageText(html,{parse_mode:"HTML",reply_markup:WalletController.createHomeBackEmptyBtn().reply_markup})
                     // 收款人消息
-                    var html2 = "✅ 收到用户@"+payBotUser.userName+ "的付款 :【" + money + " 】USTD信息，请注意查收！"
-                    await ctx.telegram.sendMessage(callbackSkTgId,html2,{parse_mode:"HTML",reply_markup: WalletController.createBackBtn().reply_markup})
-                    // 修改确认支付按钮
-                    await ctx.editMessageReplyMarkup(WalletController.createSureSuccessBtn().reply_markup)
+                    var html2 = "✅ 收款操作完成，收到用户@"+payBotUser.userName+ "的付款信息金额是:" + money + " U"
+                    var cmsgId :string | null = await redis.get("shoukuanmain_msgid_"+callbackSkTgId) || "0"
+                    var cchatId :string | null = await redis.get("shoukuanmain_chatid_"+callbackSkTgId) || "0"
+                    await ctx.telegram.editMessageText(cchatId,parseInt(cmsgId),'',html2,
+                        {parse_mode:"HTML",reply_markup:WalletController.createModelBackBtn('shoukuan').reply_markup})
+                    await redis.del("shoukuanmain_msgid_"+callbackSkTgId)
+                    await redis.del("shoukuanmain_chatid_"+callbackSkTgId)
                     // 提交事务
                     await queryRunner.commitTransaction()
                 }catch (e) {
@@ -321,20 +341,17 @@ class WalletHandleShouKuanMethod {
             // 删除消息
             await ctx.deleteMessage(messageId)
             // 修改收款的信息
-            await ctx.replyWithHTML("✅ 取消操作成功")
-
+            await ctx.replyWithHTML("✅ 取消转账成功！")
             // 防止恶意输入无限的弹窗和显示
-            const opvoer = await redis.get("op_over_"+currentTgId)
-            if(!opvoer) {
-                const ecnodecallbackPayTgId = AESUtils.encodeUserId(callbackPayTgId)
-                const payBotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: ecnodecallbackPayTgId}).getOne()
-                var html2 = "⚠️ 你发起的收款操作，被用户@" + payBotUser?.userName + "拒绝，金额是：" + money + " "
-                await ctx.telegram.sendMessage(callbackSkTgId, html2, {
-                    parse_mode: "HTML",
-                    reply_markup: WalletController.createBackBtn().reply_markup
-                })
-                await redis.set("op_over_"+currentTgId,"success","EX",60 * 60)
-            }
+            const ecnodecallbackPayTgId = AESUtils.encodeUserId(callbackPayTgId)
+            const payBotUser = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: ecnodecallbackPayTgId}).getOne()
+            var html2 = "⚠️ 你发起的收款操作，已被用户@" + payBotUser?.userName + "拒绝，金额是：" + money
+            var cmsgId :string | null = await redis.get("shoukuanmain_msgid_"+callbackSkTgId) || "0"
+            var cchatId :string | null = await redis.get("shoukuanmain_chatid_"+callbackSkTgId) || "0"
+            await ctx.telegram.editMessageText(cchatId,parseInt(cmsgId),'',html2,
+                {parse_mode:"HTML",reply_markup:WalletController.createModelBackBtn('shoukuan').reply_markup})
+            await redis.del("shoukuanmain_msgid_"+callbackSkTgId)
+            await redis.del("shoukuanmain_chatid_"+callbackSkTgId)
         } else {
             await bot.telegram.sendMessage(currentTgId, "⚠️ 自己不能删除自己的操作")
         }

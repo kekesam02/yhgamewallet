@@ -301,7 +301,7 @@ class WalletController {
     /**
      * 创建收款按钮
      */
-    public static createShouKuanSwitchBtn = (query: string) => {
+    public static createShouKuanSwitchBtn = (query: string,operator:string) => {
         return new ButtonUtils().createInlineKeySwitchBoard([
             [
                 {
@@ -310,7 +310,10 @@ class WalletController {
                 }
             ],
             [
-                WalletController.CancelAndBackHome
+                {
+                    text: '\uD83D\uDEAB 取消',
+                    query: 'model_backhome' + operator
+                }
             ]
         ])
     }
@@ -617,6 +620,37 @@ class WalletController {
             ]
         ])
     }
+
+
+    /**
+     * 等待对方支付
+     */
+    public static createStatusWaitPayBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '等待对方支付',
+                    query: 'wait'
+                }
+            ]
+        ])
+    }
+
+
+    /**
+     * 等待对方支付
+     */
+    public static createStatusWaitSurePayBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '等待支付',
+                    query: 'wait'
+                }
+            ]
+        ])
+    }
+
 
     /**
      * 创建返回按钮

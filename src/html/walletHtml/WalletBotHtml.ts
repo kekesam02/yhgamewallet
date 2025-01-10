@@ -8,6 +8,9 @@ import WalletConfig from "../../botWallet/WalletConfig";
  */
 class WalletBotHtml {
 
+    /**
+     * 提现模板
+     */
     static getTixianHtml = ()=> {
        var  html = "\uD83D\uDD39 提现指南 \uD83D\uDD39\n" +
             "——————————————————\n" +
@@ -20,7 +23,10 @@ class WalletBotHtml {
         return html
     }
 
-
+    /**
+     * 充值模板
+     * @param s
+     */
     static getBotUserHtml = (s: string) => {
         // 获取当前日期和时间
         const formattedDate = DateFormatUtils .DateFormat(new Date());
@@ -32,6 +38,7 @@ class WalletBotHtml {
             '请仔细比对地址，如果和图片中地址不一致，请停止充值，立即重新安装飞机软件。';
         return html
     }
+
     /**
      * 生成开始游戏的html字符串
      */

@@ -84,7 +84,7 @@ class WalletYaoqingHaoyouMethod {
                 }
             }))
         }, async () => {
-            await ctx.answerCbQuery('亲，操作慢点，休息一会在操作!')
+            await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
         })
     }
 
