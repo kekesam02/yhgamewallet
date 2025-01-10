@@ -19,6 +19,7 @@ import {queryRunner} from "../config/database";
 import ScheduleHandle from "../commons/schedule/ScheduleHandle";
 import AESUtils from "../commons/AESUtils";
 import DateFormatUtils from "../commons/date/DateFormatUtils";
+import botGameModel from "./BotGameModel";
 
 /**
  * 用户流水表
@@ -446,7 +447,7 @@ class BotPaymentModel extends BaseEntity {
      */
     public startDefect = async (ctx, groupModel: BotGameModel, userModel: UserModel) => {
         // 最近的一次反水记录
-        let near = await this.getUserDefect(ctx)
+        let near = await this.getUserDefect(ctx, groupModel)
         // 需要反水的订单
         let paymentList = await BotPaymentModel
             .createQueryBuilder()
@@ -457,6 +458,7 @@ class BotPaymentModel extends BaseEntity {
                 paymentType: PaymentType.SZ
             })
             .whereWalletType([WalletType.USDT])
+            .whereGameType([groupModel.gameType])
             .andWhere('del = 0')
             .whereTime(
                 near ? near.createTime : '',
@@ -684,7 +686,7 @@ class BotPaymentModel extends BaseEntity {
     /**
      * 获取用户最近一次的反水数据
      */
-    public getUserDefect = async (ctx): Promise<BotPaymentModel | null> => {
+    public getUserDefect = async (ctx, groupModel: botGameModel): Promise<BotPaymentModel | null> => {
         return BotPaymentModel
             .createQueryBuilder()
             .where('user_id = :tgId', {
@@ -693,6 +695,7 @@ class BotPaymentModel extends BaseEntity {
             .andWhere('payment_type = :paymentType', {
                 paymentType: PaymentType.FS
             })
+            .whereGameType([groupModel.gameType])
             .orderBy('create_time', 'DESC')
             .getOne()
     }

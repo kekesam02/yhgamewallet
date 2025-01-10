@@ -3,6 +3,7 @@ import {Context, Telegraf} from "telegraf";
 import GameScheduleHandle from "./GameScheduleHandle";
 import WalletScheduleHandle from "./WalletScheduleHandle";
 import AESUtils from "../AESUtils";
+import {clearTimeout} from "timers";
 
 /**
  * 定时任务控制器
@@ -18,6 +19,8 @@ class ScheduleHandle {
      * key value 形式的job
      */
     public static currJobMap: Map<string, Job> = new Map()
+
+    public static clearTimeoutMap: Map<string, any> = new Map()
 
     /**
      * 游戏是否已经开始
@@ -66,6 +69,11 @@ class ScheduleHandle {
         })
         this.currJobMap.forEach(item => {
             if(item) item.cancel()
+        })
+        this.clearTimeoutMap.forEach(item => {
+            if (item) {
+                clearTimeout(item)
+            }
         })
     }
 }

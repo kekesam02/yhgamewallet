@@ -7,6 +7,7 @@ import {Pc28LotteryJsonType} from "../../type/gameEnums/LooteryJsonType";
 import ScheduleHandle from "./ScheduleHandle";
 import GameUserRedis from "../redis/GameUserRedis";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import {clearTimeout} from "timers";
 
 
 class GameScheduleHandle {
@@ -112,7 +113,6 @@ class GameScheduleHandle {
                 let pc28Controller = new PC28Controller()
                 let lotteryJson = await pc28Controller.getLotteryJson()
                 if (lotteryJson) {
-                    console.log('获取到的开奖结果 ', lotteryJson)
                     await this.checkNextPC28(lotteryJson)
                 }
             } catch (err) {
@@ -136,17 +136,21 @@ class GameScheduleHandle {
                 // 可以继续下注、发送开始下注信息到群组
                 await new PC28Controller().startPCLow(this.bot, openJson)
             } else {
-                let nextJob = schedule.scheduleJob(new Date(currJson.next_time), async () => {
-                    console.log('加入到下一期的游戏中 ')
+                // 每10秒钟尝试加入下一局游戏
+                let timer = setTimeout( async () => {
                     // 等待下一期在发送游戏开始信息
                     let pc28Controller = new PC28Controller()
-                    let lotteryJson = await pc28Controller.getLotteryJson()
+                    let lotteryJson: Pc28LotteryJsonType | null = await pc28Controller.getLotteryJson()
+                    ScheduleHandle.clearTimeoutMap.forEach(item => {
+                        if (item) {
+                            clearTimeout(item)
+                        }
+                    })
                     if (lotteryJson) {
                         await this.checkNextPC28(lotteryJson)
                     }
-                    nextJob.cancel()
-                })
-                ScheduleHandle.currJobMap.set('gameSchedule2', nextJob)
+                }, 10000)
+                ScheduleHandle.clearTimeoutMap.set('game_2', timer)
                 return
             }
         }
@@ -154,20 +158,21 @@ class GameScheduleHandle {
         let nextTime = moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime + 5, 'seconds')
         // 当前时间不够加入本局游戏了、需要切换到下一期
         if (!moment(nextTime).isAfter(moment())) {
-            if (ScheduleHandle.pc28Config.roundId) {
-                ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
-            }
-            let nextJob = schedule.scheduleJob(new Date(currJson.next_time), async () => {
-                console.log('加入到2下一期的游戏中 ')
+            // 每10秒钟尝试加入下一局游戏
+            let timer = setTimeout( async () => {
                 // 等待下一期在发送游戏开始信息
                 let pc28Controller = new PC28Controller()
                 let lotteryJson = await pc28Controller.getLotteryJson()
+                ScheduleHandle.clearTimeoutMap.forEach(item => {
+                    if (item) {
+                        clearTimeout(item)
+                    }
+                })
                 if (lotteryJson) {
                     await this.checkNextPC28(lotteryJson)
                 }
-                nextJob.cancel()
-            })
-            ScheduleHandle.currJobMap.set('gameSchedule3', nextJob)
+            }, 10000)
+            ScheduleHandle.clearTimeoutMap.set('game_1', timer)
             return
         }
 

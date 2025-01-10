@@ -16,8 +16,11 @@ interface Number {
  */
 String.prototype.isMoney = function (isDecimal: boolean = false): boolean {
     if (isNaN(Number(this))
-        || this.toString().indexOf('-1') > -1
+        || this.toString().indexOf('-') > -1
     ) {
+        return false
+    }
+    if (Number(this) <= 0 || this.toString().startsWith('0')) {
         return false
     }
     if (!isDecimal && this.toString().indexOf('.') > -1) {
@@ -27,7 +30,10 @@ String.prototype.isMoney = function (isDecimal: boolean = false): boolean {
 }
 
 Number.prototype.isMoney = function (isDecimal: boolean = false): boolean {
-    if (isNaN(Number(this)) || this.toString().indexOf('-1') > -1) {
+    if (isNaN(Number(this)) || this.toString().indexOf('-') > -1) {
+        return false
+    }
+    if (Number(this) <= 0 || this.toString().startsWith('0')) {
         return false
     }
     if (!isDecimal && this.toString().indexOf('.') > -1) {
