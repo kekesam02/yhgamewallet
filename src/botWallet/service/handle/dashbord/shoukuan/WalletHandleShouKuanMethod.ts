@@ -115,14 +115,23 @@ class WalletHandleShouKuanMethod {
         var value = split[1] // 收款金额
         var orderId = split[2] || '' // 收款人
         var queryId = split[3] || '' // 改变内联的按钮状态
-
-        //bot.telegram.editMessageText('',undefined,queryId,"xxxxxxxxxxxxx")
-
         // 如果是自己就拦截掉
         if (payTgId == tgIdvalue) {
             bot.telegram.sendMessage(payTgId, "⚠️ 不可以转账给自己")
             return
         }
+
+        var manys = await BotPaymentModel.createQueryBuilder().where(
+            "payment_type_number = :ptnum and user_id =:tgId ",{
+                "ptnum":'zk'+orderId,
+                "tgId":AESUtils.encodeUserId(tgIdvalue)
+            }).getMany();
+
+        if (manys && manys.length > 0){
+            await ctx.replyWithHTML("请不要重复操作!",WalletController.createModelClientServerBtn())
+            return;
+        }
+
         // 如果付款人没注册，就注册
         var payUserId = AESUtils.encodeUserId(payTgId);
         let payBotUser: UserModel | null = await UserModel.createQueryBuilder().where("tg_id=:tgId", {tgId: payUserId}).getOne()
