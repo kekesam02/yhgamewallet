@@ -1,16 +1,17 @@
+import BotGameConfig from "../../botGame/BotGameConfig";
+
+
 /**
  * 娱乐机器人下注相关提示文案
  */
-import BotGameConfig from "../../botGame/BotGameConfig";
-
 class GameBettingTips {
 
 
     /**
-     * 禁止对押金提示文案
+     * 上注金额超过最大限制提示
      */
     public limitMaxMoney = () => {
-        return `超过最大金额限制${new BotGameConfig().maxMoney28}`
+        return `超过最大限制`
     }
 
     /**
