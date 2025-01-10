@@ -158,7 +158,7 @@ class GameScheduleHandle {
                 ScheduleHandle.pc28Config.roundId = `${Number(ScheduleHandle.pc28Config.roundId) + 1}`
             }
             let nextJob = schedule.scheduleJob(new Date(currJson.next_time), async () => {
-                console.log('加入到下一期的游戏中 ')
+                console.log('加入到2下一期的游戏中 ')
                 // 等待下一期在发送游戏开始信息
                 let pc28Controller = new PC28Controller()
                 let lotteryJson = await pc28Controller.getLotteryJson()

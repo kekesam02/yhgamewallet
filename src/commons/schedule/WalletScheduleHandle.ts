@@ -54,6 +54,7 @@ class WalletScheduleHandle {
                 await this.startRefund()
                 job.cancel()
             })
+            ScheduleHandle.currJobMap.set(`walletHb${item.hbId}`, job)
         })
     }
 
