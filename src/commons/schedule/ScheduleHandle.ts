@@ -15,6 +15,11 @@ class ScheduleHandle {
     public static currJobList: Array<Job> = []
 
     /**
+     * key value 形式的job
+     */
+    public static currJobMap: Map<string, Job> = new Map()
+
+    /**
      * 游戏是否已经开始
      *      true: 已经开始游戏、定时器正在执行
      *      false: 游戏还没有开始运行
@@ -47,7 +52,7 @@ class ScheduleHandle {
         // 每天凌晨执行一次定时器
         let job = schedule.scheduleJob('0 0 * * *',()=>{
                 this.bot = bot
-                WalletScheduleHandle.init(bot)
+                WalletScheduleHandle.init(bot).then(r => {})
         })
         this.currJobList.push(job)
     }
@@ -57,7 +62,10 @@ class ScheduleHandle {
      */
     public static closeJobs = () => {
         this.currJobList.forEach(item => {
-            item.cancel()
+            if(item) item.cancel()
+        })
+        this.currJobMap.forEach(item => {
+            if(item) item.cancel()
         })
     }
 }

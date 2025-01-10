@@ -107,6 +107,7 @@ class GameScheduleHandle {
                     await new PC28Controller().sendRepairHtml(bot)
                     nextJob.cancel()
                 })
+                ScheduleHandle.currJobMap.set('gameSchedule1', nextJob)
 
                 let pc28Controller = new PC28Controller()
                 let lotteryJson = await pc28Controller.getLotteryJson()
@@ -145,6 +146,7 @@ class GameScheduleHandle {
                     }
                     nextJob.cancel()
                 })
+                ScheduleHandle.currJobMap.set('gameSchedule2', nextJob)
                 return
             }
         }
@@ -165,6 +167,7 @@ class GameScheduleHandle {
                 }
                 nextJob.cancel()
             })
+            ScheduleHandle.currJobMap.set('gameSchedule3', nextJob)
             return
         }
 
@@ -177,6 +180,7 @@ class GameScheduleHandle {
             await new PC28Controller().sendCloseTopTips(this.bot, {
                 roundId: ScheduleHandle.pc28Config.roundId
             })
+            ScheduleHandle.currJobMap.set('gameSchedule4', tipJob)
             tipJob.cancel()
         })
 
@@ -192,6 +196,7 @@ class GameScheduleHandle {
             })
             stopUpJob.cancel()
         })
+        ScheduleHandle.currJobMap.set('gameSchedule5', stopUpJob)
 
         /**
          * 开奖时间
@@ -217,18 +222,7 @@ class GameScheduleHandle {
             openJob.cancel()
             await this.checkNextPC28(nextJson!)
         })
-
-
-
-        // ScheduleHandle.pc28Config.isOpenLottery = false
-        // ScheduleHandle.pc28Config.isClose = false
-        // ScheduleHandle.pc28Config.isCloseTips = false
-        // ScheduleHandle.pc28Config.openTime = currJson.next_time
-        // ScheduleHandle.pc28Config.roundId = currJson.next_expect
-        // ScheduleHandle.pc28Config.stopUpTime =
-        //     moment(currJson.next_time).subtract(new BotGameConfig().FPTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
-        // ScheduleHandle.pc28Config.closeTipsTime =
-        //     moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime, 'seconds').format('YYYY-MM-DD HH:mm:ss')
+        ScheduleHandle.currJobMap.set('gameSchedule6', openJob)
     }
 }
 
