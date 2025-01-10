@@ -324,6 +324,15 @@ class UserModel extends BaseEntity {
 
 
     /**
+     * 获取客服信息
+     * @param tgId
+     */
+    public findUserModeVip = async (): Promise<UserModel[] | null> => {
+        return await UserModel.createQueryBuilder().where("vip = :vip and del = 0",{vip:100}).getMany()
+    }
+
+
+    /**
      * 更新用户金额信息、指定金额类型
      * @param wallType 钱包类型
      * @param money 金额数量

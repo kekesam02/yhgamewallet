@@ -6,6 +6,8 @@ import redis from "../../../../../config/redis";
 import WalletUserCenterController from "../../../../controller/WalletUserCenterController";
 import {addLockByTgId} from "../../../../../config/redislock";
 import WalletUserCenterMethod from "../WalletUserCenterMethod";
+import walletController from "../../../../controller/WalletController";
+import WalletController from "../../../../controller/WalletController";
 
 /**
  * 公共方法处理
@@ -99,9 +101,7 @@ class WalletTixianAddressMethod {
                    }).execute()
                }
                // 发送机器人消息
-               await ctx.replyWithHTML("✅ 设置成功\n👜 您当前的提现地址是：<code>" + text+"</code>")
-               // 进入到主页
-               await WalletUserCenterMethod.startUserCenterMessageCallback(ctx)
+               await ctx.replyWithHTML("✅ 设置成功\n👜 您当前的提现地址是：<code>" + text+"</code>",WalletController.createSettingTxBtn())
            }else{
                await ctx.reply('用户不存在！')
            }

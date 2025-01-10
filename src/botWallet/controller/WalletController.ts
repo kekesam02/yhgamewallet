@@ -552,6 +552,42 @@ class WalletController {
     }
 
     /**
+     * 提现按钮
+     */
+    public static createTiXianBackBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '🏘️ 主菜单',
+                    query: WalletUserCenterEnum.HOME,
+                },
+                {
+                    text: '🛄 设置提现地址',
+                    query: WalletUserCenterEnum.SZTXDZ,
+                }
+            ]
+        ])
+    }
+
+    /**
+     * 设置成功提现地址
+     */
+    public static createSettingTxBtn = () => {
+        return new ButtonUtils().createCallbackBtn([
+            [
+                {
+                    text: '🏘️ 主菜单',
+                    query: WalletUserCenterEnum.HOME,
+                },
+                {
+                    text: '💰 开始提现',
+                    query: StartWalletEnum.TIXIAN
+                }
+            ]
+        ])
+    }
+
+    /**
      * 创建空按钮
      */
     public static createEmptyBtn = () => {

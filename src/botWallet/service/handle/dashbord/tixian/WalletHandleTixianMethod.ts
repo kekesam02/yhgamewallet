@@ -52,7 +52,7 @@ class WalletHandleTixianMethod {
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
             .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
         if (!botWithdrawalAddrModel?.addr) {
-            await ctx.replyWithHTML("⚠️ 尚未设置提现地址请前往个人中心设置",WalletUserCenterController.createUserCenterBackBtn())
+            await ctx.replyWithHTML("⚠️ 尚未设置提现地址，请点击【设置提现地址】按钮进行设置",WalletController.createTiXianBackBtn())
             return;
         }
         await ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
@@ -76,7 +76,7 @@ class WalletHandleTixianMethod {
             const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder("t1")
                 .where('tg_id = :tgId and del = 0', {tgId: userId}).getOne()
             if (!botWithdrawalAddrModel?.addr) {
-                await ctx.replyWithHTML("⚠️ 尚未设置提现地址请前往个人中心设置",WalletUserCenterController.createUserCenterBackBtn())
+                await ctx.replyWithHTML("⚠️ 尚未设置提现地址，请点击【设置提现地址】按钮进行设置",WalletController.createTiXianBackBtn())
                 return;
             }
 
@@ -233,23 +233,31 @@ class WalletHandleTixianMethod {
                             "每日首充返利流水 :  " + (botPayMentObj['m_16'] || 0) + "\n" +
                             "开业豪礼 :  " + (botPayMentObj['m_17'] || 0) + "\n" +
                             "每日首充返利流水 :  " + (botPayMentObj['m_16'] || 0) + "\n"
+
                         // 6: 财务消息
-                        await cbot.telegram.sendMessage(tgId, tixian, {
-                            parse_mode: "HTML",
-                            reply_markup: WalletController.createMarkClientBtn(botPayment.id + "").reply_markup
-                        })
+                        var userVipModels = await new UserModel().findUserModeVip();
+                        if(userVipModels && userVipModels.length > 0) {
+                            for (let i = 0; i < userVipModels.length; i++) {
+                                await ctx.telegram.sendMessage(AESUtils.decodeUserId(userVipModels[i].tgId), tixian, {
+                                    parse_mode: "HTML",
+                                    reply_markup: WalletController.createMarkClientBtn(botPayment.id + "").reply_markup
+                                })
+                            }
+                        }
+
                         // 7: 发送消息
                         await ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT, shengyuUsdt, price, botWithdrawalAddrModel?.addr), WalletController.createBackBtn())
+
                     } catch (e) {
+                        await ctx.replyWithHTML('⌛️ 提示：服务器忙，请稍后在试')
                         await queryRunner.rollbackTransaction()
-                        await ctx.replyWithHTML('提示：服务器忙，请稍后在试')
                     }
                 } catch (e) {
                     return ctx.replyWithHTML('⌛️ 亲操作慢点，休息一会在操作!')
                 }
             }
         }, async () => {
-            await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
+            await ctx.replyWithHTML('⌛️ 亲，操作慢点，休息一会在操作!')
         })
     }
 

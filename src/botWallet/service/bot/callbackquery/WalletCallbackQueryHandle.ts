@@ -82,7 +82,13 @@ class WalletCallbackQueryHandle {
             WalletTiBiHistoryMethod.searchFilterTb(ctx,callbackStr)
         } else if (callbackStr.startsWith("lqyqhyfl")){// 领取邀请返利
             WalletYaoqingFanLiMethod.startLingquFanli(ctx)
-        }  else{
+        }  if(callbackStr.startsWith('bjydk')){ // 标记打款
+            WalletHandleTixianMethod.startMarkTixian(tgId+'',callbackStr,ctx,bot)
+        } else if(callbackStr.startsWith('txycth')){ // 异常驳回
+            WalletHandleTixianMethod.startRefuseTixian(tgId+'',callbackStr,ctx,bot)
+        } else if (callbackStr.startsWith("tyzh_")){// 领取邀请返利
+            WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr,bot)
+        } else{
             switch (callbackStr) {
                 // ===========================按钮组1：用户中心===========================
                 // 我的账单
@@ -129,18 +135,22 @@ class WalletCallbackQueryHandle {
                     break
                 // 提现
                 case StartWalletEnum.TIXIAN:
+                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleTixianMethod.startTiXian(ctx,cbot)
                     break
                 // 转账
                 case StartWalletEnum.ZHUANZHANG:
+                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleZhuanzhangMethod.startZhuanZhang(ctx,cbot)
                     break
                 // 收款
                 case StartWalletEnum.SHOUKUANG:
+                    WalletHandleMethod.removeMessage(ctx)
                     WalletHandleShouKuanMethod.startShouKuan(ctx,cbot)
                     break
                 // 红包
                 case StartWalletEnum.HONGBAO:
+                    WalletHandleMethod.removeMessage(ctx)
                     return WalletHandleHongBaoMethod.startHongBao(ctx,cbot, StartWalletEnum.HONGBAO_LIST_ALL)
                 case StartWalletEnum.HONGBAO_LIST_ALL + callbackStr.replaceAll(StartWalletEnum.HONGBAO_LIST_ALL, ''):
                     return WalletHandleHongBaoMethod.startHongBao(
@@ -210,6 +220,7 @@ class WalletCallbackQueryHandle {
                     return new WalletRedPacket(ctx).selectWaterTime(callbackStr.replaceAll(StartWalletEnum.HONGBAO_WATER_TIME, ''))
                 // 闪兑
                 case StartWalletEnum.SHANGDUI:
+                    WalletHandleMethod.removeMessage(ctx)
                     return  WalletHandleShangduiMethod.startShanDui(ctx,cbot, StartWalletEnum.SHANGDUI)
                 case StartWalletEnum.SHANGDUI_TRX_USDT:
                     return  WalletHandleShangduiMethod.startShanDui(ctx,cbot, StartWalletEnum.SHANGDUI_TRX_USDT)
