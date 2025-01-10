@@ -76,13 +76,9 @@ class RandomUtils {
         let minIndex = 0
         for (let i = 0; i < count; i++) {
             let currCompute = new ComputeUtils(balance.getNumber()).dividedBy(2, 2)
-            console.log('随机范围', currCompute.getNumber())
             let currMoney = this.getRandomInt(1, currCompute.getNumber())
-            console.log('当前金额', currMoney)
-            console.log('余额', currCompute.getRemain())
 
             balance.minus(currMoney).add(currCompute.getRemain())
-            console.log('余额', balance.getNumber())
             if (i == count - 1) {
                 moneyList.push(balance.add(currMoney).getNumber())
             } else {

@@ -205,19 +205,13 @@ class GameScheduleHandle {
             if (!nextJson) {
                 return
             }
-            console.log('获取到的开奖结果', nextJson)
+
             // 保存开奖结果到数据库
-            console.log('保存11结果')
             await pc28Controller.saveLotteryJson(nextJson)
-            console.log('保存122结果')
             let pledgeUpMap = await pc28Controller.getWinningUser(nextJson)
-            console.log('保存33结果')
             await pc28Controller.getLotteryTextBot(this.bot, nextJson, pledgeUpMap)
-            console.log('保存44结果')
             await pc28Controller.getLotteryListBot(this.bot)
-            console.log('保存55结果')
             await pc28Controller.startPCLow(this.bot, nextJson)
-            console.log('保存66结果')
             await GameUserRedis.clearPlayingUser(GameTypeEnum.PC28DI)
             await GameUserRedis.clearPlayingUser(GameTypeEnum.PC28GAO)
             openJob.cancel()

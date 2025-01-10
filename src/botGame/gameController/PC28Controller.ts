@@ -55,7 +55,6 @@ class PC28Controller {
                 return true
             }
         })
-        console.log('当前加入游戏的群组', result)
         return result
     }
 

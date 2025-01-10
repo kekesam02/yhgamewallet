@@ -503,11 +503,9 @@ class BotHb extends BaseEntity {
         if (this.hbType == 0) {
             // 均分包处理
             this.jeJson = new RandomUtils().averageAllocate(Number(this.money), this.num).toString()
-            console.log('均分包结果', this.jeJson)
         } else {
             // 随机包处理
             this.jeJson = new RandomUtils().randomAllocate(Number(this.money), this.num).toString()
-            console.log('随机包结果', this.jeJson)
         }
     }
 

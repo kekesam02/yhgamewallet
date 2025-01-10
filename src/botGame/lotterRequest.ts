@@ -57,21 +57,21 @@ class LotteryRequest {
                     resolve(val)
                 }
             }).catch(err => {
-                console.log('第一个接口出错了', err)
+                console.log('第一个接口出错了')
             })
             this.request2().then((val) => {
                 if (val != null) {
                     resolve(val)
                 }
             }).catch(err => {
-                console.log('第二个接口出错了', err)
+                console.log('第二个接口出错了')
             })
             this.request3().then((val) => {
                 if (val != null) {
                     resolve(val)
                 }
             }).catch(err => {
-                console.log('第三个接口出错了', err)
+                console.log('第三个接口出错了')
             })
         })
     }
@@ -171,7 +171,7 @@ class LotteryRequest {
                 })
             }
         } catch (err) {
-            console.log('接口地址1出错了', err)
+            console.log('接口地址1出错了')
             return null
         }
         return lotteryJson
@@ -240,7 +240,7 @@ class LotteryRequest {
                 })
             }
         } catch (err) {
-            console.log('接口地址2出错了', err)
+            console.log('接口地址2出错了')
             return null
         }
         return lotteryJson
@@ -450,7 +450,7 @@ class LotteryRequest {
                 })
             }
         } catch (err) {
-            console.log('卡奖处理出错了', err)
+            console.log('卡奖处理出错了')
             return null
         }
         return lotteryJson
