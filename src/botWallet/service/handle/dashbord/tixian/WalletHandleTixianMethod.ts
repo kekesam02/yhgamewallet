@@ -55,7 +55,9 @@ class WalletHandleTixianMethod {
             await ctx.replyWithHTML("⚠️ 尚未设置提现地址，请点击【设置提现地址】按钮进行设置",WalletController.createTiXianBackBtn())
             return;
         }
-        await ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
+        const promise = await ctx.replyWithHTML(WalletBotHtml.getTixianHtml(), WalletController.createBackBtn())
+        await redis.set("txmain_msgid_"+tgId,promise.message_id)
+        await redis.set("txmain_chatid_"+tgId,promise.chat.id)
     }
 
     // 提现具体逻辑
@@ -170,8 +172,6 @@ class WalletHandleTixianMethod {
                             result = "风控用户"
                         }
 
-                        // 或者一个用户多个提现地址
-
                         // 统计相关
                         var sumPriceArr = await BotPaymentModel.createQueryBuilder("t1")
                             .select(['t1.payment_type as ptype',  'SUM(t1.payment_amount) as num'])
@@ -246,7 +246,14 @@ class WalletHandleTixianMethod {
                         }
 
                         // 7: 发送消息
-                        await ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT, shengyuUsdt, price, botWithdrawalAddrModel?.addr), WalletController.createBackBtn())
+                       const promise = await ctx.replyWithHTML(this.noteOrderTxcg(botUser.USDT, shengyuUsdt, price, botWithdrawalAddrModel?.addr), WalletController.createBackBtn())
+
+                        // 删除上一次的消息
+                        var mmsgId :string | null = await redis.get("txmain_msgid_"+tgId) || "0"
+                        var mchatId :string | null = await redis.get("txmain_chatid_"+tgId) || "0"
+                        await ctx.telegram.deleteMessage(mchatId,parseInt(mmsgId))
+                        await redis.set("txmain_msgid_"+tgId,promise.message_id)
+                        await redis.set("txmain_chatid_"+tgId,promise.chat.id)
 
                     } catch (e) {
                         await ctx.replyWithHTML('⌛️ 提示：服务器忙，请稍后在试')
@@ -314,8 +321,16 @@ class WalletHandleTixianMethod {
                     "\uD83D\uDD3A货币类型：USDT" + "\n" +
                     "\uD83D\uDD3A提现地址：" + addr
 
+
+                // 删除上一次的消息
+                var botPayUerId = AESUtils.decodeUserId(botPayment.tgId);
+                var mmsgId :string | null = await redis.get("txmain_msgid_"+botPayUerId) || "0"
+                var mchatId :string | null = await redis.get("txmain_chatid_"+botPayUerId) || "0"
+                await ctx.telegram.deleteMessage(mchatId,parseInt(mmsgId))
+                await redis.del("txmain_msgid_"+botPayUerId)
+                await redis.del("txmain_chatid_"+botPayUerId)
                 // 5:给申请人发消息
-                await ubot.telegram.sendMessage(tgId, html, {
+                await ubot.telegram.sendMessage(mchatId, html, {
                     parse_mode: "HTML",
                     reply_markup: WalletController.createBackBtn().reply_markup
                 })
@@ -382,11 +397,20 @@ class WalletHandleTixianMethod {
                         "\uD83D\uDD3A退回时间：" + refuseTime + "\n" +
                         "\uD83D\uDD3A货币类型：USDT" + "\n" +
                         "\uD83D\uDD3A地址：" + addr
+
+
+                    // 删除上一次的消息
+                    var botPayUerId = AESUtils.decodeUserId(botPayment.tgId);
+                    // 删除上一次的消息
+                    var mmsgId :string | null = await redis.get("txmain_msgid_"+botPayUerId) || "0"
+                    var mchatId :string | null = await redis.get("txmain_chatid_"+botPayUerId) || "0"
                     // 给申请人发消息
-                    await ubot.telegram.sendMessage(tgId, html, {
+                    await ubot.telegram.editMessageText(mchatId, parseInt(mmsgId),'',html, {
                         parse_mode: "HTML",
                         reply_markup: WalletController.createBackBtn().reply_markup
                     })
+                    await redis.del("txmain_msgid_"+botPayUerId)
+                    await redis.del("txmain_chatid_"+botPayUerId)
                     // 6: 编辑回复的按钮
                     await ctx.editMessageReplyMarkup(WalletController.createFailBtn(botPayment.username).reply_markup)
                     await queryRunner.commitTransaction()

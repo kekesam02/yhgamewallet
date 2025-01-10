@@ -88,7 +88,15 @@ class WalletCallbackQueryHandle {
             WalletHandleTixianMethod.startRefuseTixian(tgId+'',callbackStr,ctx,bot)
         } else if (callbackStr.startsWith("tyzh_")){// 领取邀请返利
             WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr,bot)
-        } else{
+        } else if(callbackStr.startsWith('bjydk')){
+            // 标记打款
+            WalletHandleTixianMethod.startMarkTixian(tgId+'',callbackStr,ctx,bot)
+        } else if(callbackStr.startsWith('txycth')){
+            // 异常驳回
+            WalletHandleTixianMethod.startRefuseTixian(tgId+'',callbackStr,ctx,bot)
+        } else if (callbackStr.startsWith("tyzh_")){// 领取邀请返利
+            WalletCaiJinZhuanhuaMethod.startTongYiZhuanhua(ctx,callbackStr,bot)
+        }else{
             switch (callbackStr) {
                 // 我的账单
                 case WalletUserCenterEnum.BACCOUNT:
