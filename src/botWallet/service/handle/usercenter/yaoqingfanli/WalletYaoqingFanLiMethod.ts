@@ -144,7 +144,7 @@ class WalletYaoqingFanLiMethod {
                     var botUser = await new UserModel().getUserModelByIdNumber(tgId);
                     const userCUsdt = botUser?.CUSDT
                     const dcusdt = (cjje * parseFloat(botUser?.yqNum || "1"))
-                    const addUserCUsdt = dcusdt + parseFloat(userCUsdt || "0")
+                    const addUserCUsdt = (dcusdt + parseFloat(userCUsdt || "0")).toFixed(3)
                     await queryRunner.manager.update(UserModel, {
                         id: botUser?.id
                     }, {
@@ -188,7 +188,10 @@ class WalletYaoqingFanLiMethod {
                     // 删除上一次消息
                     await WalletUserCenterMethod.removeMessage(ctx)
                     // 发送消息
-                    await ctx.replyWithHTML("✅ 领取成功", WalletUserCenterController.createUserCenterBackBtn())
+                    await ctx.replyWithHTML("✅ 领取成功\n" +
+                        "\n领取之前彩U余额："+userCUsdt +
+                        "\n领取之后彩U余额："+addUserCUsdt
+                        , WalletUserCenterController.createUserCenterBackBtn())
 
                 } catch (e) {
                     await queryRunner.rollbackTransaction()
