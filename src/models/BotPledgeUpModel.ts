@@ -151,6 +151,7 @@ class BotPledgeUpModel extends BaseEntity {
      * 是否取消上注（好像和是否删除一样）
      *      -1： 取消上注
      *      0： 正常上注
+     *      1: 完成上注(停止上注了不能在取消订单了)
      */
     @Column({
         name: 'state'
@@ -207,7 +208,6 @@ class BotPledgeUpModel extends BaseEntity {
             })
             .whereGameType(gameTypeList)
             .whereWalletType(wallTypeList)
-            .andWhere('state = 0')
             .andWhere('del = 0')
             .take(total)
             .orderBy('create_time', 'DESC')
@@ -221,7 +221,11 @@ class BotPledgeUpModel extends BaseEntity {
      * @param tgId: 用户id
      * @param gameTypeList
      */
-    public getUserList = async (roundId: string, tgId: string | null = null, gameTypeList: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType()): Promise<Array<BotPledgeUpModel>> => {
+    public getUserList = async (
+        roundId: string,
+        tgId: string | null = null,
+        gameTypeList: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType()
+    ): Promise<Array<BotPledgeUpModel>> => {
         let query = BotPledgeUpModel
             .createQueryBuilder()
             .where('round_id = :roundId', {
@@ -296,7 +300,11 @@ class BotPledgeUpModel extends BaseEntity {
      */
     public cancelPledgeUp = async (ctx: Context, groupModel: BotGameModel, roundId: string) => {
         let userModel = await new UserModel().getUserModel(ctx)
-        let pledgeModelList = await this.getUserList(`${ScheduleHandle.pc28Config.roundId}`, userModel.tgId, groupModel.gameType)
+        let pledgeModelList = await this.getUserList(
+            `${ScheduleHandle.pc28Config.roundId}`,
+            userModel.tgId,
+            [groupModel.gameType]
+        )
         pledgeModelList.forEach(item => {
             item.state = -1
             item.del = 1
@@ -304,12 +312,13 @@ class BotPledgeUpModel extends BaseEntity {
         })
         let paymentList = await new BotPaymentModel().getPaymentModelList({
             roundId
-        })
+        }, [groupModel.gameType])
         paymentList.forEach(item => {
             item.del = 1
         })
         await queryRunner.startTransaction()
         try{
+            console.log('开始取消下注')
             await queryRunner.manager.save(pledgeModelList)
             await queryRunner.manager.save(userModel)
             await queryRunner.manager.save(paymentList)

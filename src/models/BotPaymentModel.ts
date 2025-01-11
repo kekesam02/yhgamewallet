@@ -164,6 +164,9 @@ class BotPaymentModel extends BaseEntity {
      *     0 申请中
      *     1 已完成
      *     2 被拒绝
+     * ---------- 上注
+     *     0: 生成上注订单(此时上注订单可以取消)
+     *     1: 正式完成上注(锁死订单不可更改)
      */
     @Column({
         name: 'status',
@@ -317,7 +320,7 @@ class BotPaymentModel extends BaseEntity {
         this.gameType = gameType
         this.applyTime = DateFormatUtils.CurrentDateFormatString()
         this.del = 0
-        this.status = 1
+        this.status = 0
         return this
     }
 
@@ -432,6 +435,7 @@ class BotPaymentModel extends BaseEntity {
             .whereGameType(gameTypeList)
             .wherePaymentType(paymentTypeList)
             .andWhere('del = 0')
+            .andWhere('status = 1')
             .andWhere('(wallet_type = :walletType or wallet_type = :walletType2 or wallet_type = :walletType3 or wallet_type = :walletType4)', {
                 walletType: WalletType.USDT,
                 walletType2: WalletType.TRX,
@@ -470,6 +474,7 @@ class BotPaymentModel extends BaseEntity {
             .whereWalletType([WalletType.USDT])
             .whereGameType([groupModel.gameType])
             .andWhere('del = 0')
+            .andWhere('status = 1')
             .whereTime(
                 near ? near.createTime : '',
                 ''
@@ -514,17 +519,22 @@ class BotPaymentModel extends BaseEntity {
     /**
      * 获取用户当前下注列表数据
      * @param roundId
+     * @param gameType
      */
-    public getPaymentModelList = ({
-                                      roundId
-                                  }: {
-        roundId: string
-    }) => {
+    public getPaymentModelList = (
+        {
+            roundId
+        }: {
+            roundId: string
+        },
+        gameType: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType()
+    ) => {
         return BotPaymentModel
             .createQueryBuilder()
             .where('payment_type_number = :paymentTypeNumber', {
                 paymentTypeNumber: roundId
             })
+            .whereGameType(gameType)
             .andWhere('del = 0')
             .getMany()
     }

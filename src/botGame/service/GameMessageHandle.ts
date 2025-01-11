@@ -29,6 +29,12 @@ class GameMessageHandle {
         }
 
         switch (true) {
+            case text == 'quit'
+                || text == '/quit'
+                || text == '退出'
+                || text == '/退出':
+                await new GameMessageHandle().quitGame(ctx)
+                break
             case text === 'start'
             || text === '/start'
             || text === '开始游戏'
@@ -70,11 +76,6 @@ class GameMessageHandle {
             case CommandController.defect.includes(text):
                 // 反水
                 console.log('进行反水')
-                let isPlaying = await GameUserRedis.getUserIsPlaying(ContextUtil.getUserId(ctx))
-                if (isPlaying) {
-                    await new MessageUtils().sendTextReply(ctx, '亲！正在游戏中、需等本期游戏结束在进行反水')
-                    break
-                }
                 await new CommandController().createDefect(ctx)
                 break
             case CommandController.cancel.includes(text):
@@ -86,13 +87,7 @@ class GameMessageHandle {
                 break
             case CommandController.water.includes(text):
                 // 流水
-                let groupId = ContextUtil.getGroupId(ctx)
-                let groupModel = await BotGameModel
-                    .createQueryBuilder()
-                    .where('group_id = :groupId', {
-                        groupId: groupId
-                    })
-                    .getOne()
+                let groupModel = await new BotGameModel().getCurrGroup(ctx)
                 if (!groupModel) {
                     return
                 }
@@ -102,13 +97,7 @@ class GameMessageHandle {
                 // 盈亏
                 console.log('查看盈亏')
                 // 查询用户流水
-                let groupId2 = ContextUtil.getGroupId(ctx)
-                let groupModel2 = await BotGameModel
-                    .createQueryBuilder()
-                    .where('group_id = :groupId', {
-                        groupId: groupId2
-                    })
-                    .getOne()
+                let groupModel2 = await new BotGameModel().getCurrGroup(ctx)
                 if (!groupModel2) {
                     return
                 }

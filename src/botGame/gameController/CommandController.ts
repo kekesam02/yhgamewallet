@@ -132,11 +132,17 @@ class CommandController {
     public cancelBet = async (ctx: Context) => {
         // 获取当前群组信息
         let groupModel = await new BotGameModel().getCurrGroup(ctx)
+        console.log('群组信息 ', groupModel)
         if (!groupModel?.gameType) {
             return
         }
         await addLockByCtx(ctx, async () => {
-            let {pledgeModelList, userModel} = await new BotPledgeUpModel().cancelPledgeUp(ctx, groupModel, ScheduleHandle.pc28Config.roundId)
+            let {pledgeModelList, userModel} = await new BotPledgeUpModel().cancelPledgeUp(
+                ctx,
+                groupModel,
+                ScheduleHandle.pc28Config.roundId
+            )
+            console.log('取消上住内容', pledgeModelList)
             let html = new GamePledgeUpHtml().cancelUp(userModel, pledgeModelList, ScheduleHandle.pc28Config.roundId)
             await new MessageUtils().sendTextReply(ctx, html)
         }, async () => {
