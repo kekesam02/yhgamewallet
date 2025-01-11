@@ -21,11 +21,12 @@ import ComputeUtils from "../../commons/compute/ComputeUtils";
 import GameCommandHtml from "../../html/gameHtml/GameCommandHtml";
 import UserModel from "../../models/UserModel";
 import {queryRunner} from "../../config/database";
-import {addLockByTgId} from "../../config/redislock";
+import {addLock, addLockByTgId} from "../../config/redislock";
 import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
 import LotteryRequest from "../lotterRequest";
 import AESUtils from "../../commons/AESUtils";
 import GameScheduleHandle from "../../commons/schedule/GameScheduleHandle";
+import GameUserRedis from "../../commons/redis/GameUserRedis";
 
 type PC28LotteryType = {
 
@@ -63,6 +64,11 @@ class PC28Controller {
      *      bot_game(当前正在进行游戏的群组) 数据库
      */
     public joinPC28Low = async (ctx: Context, gameType: GameTypeEnum) => {
+        let isPlaying = await GameUserRedis.getUserIsPlaying(ContextUtil.getUserId(ctx))
+        if (isPlaying) {
+            await new MessageUtils().sendTextReply(ctx, '亲！正在游戏中、需等本期游戏结束才能切换')
+            return
+        }
         // 查询当前群组是否已经加入游戏
         let result = await BotGameModel
             .createQueryBuilder()
@@ -74,30 +80,30 @@ class PC28Controller {
             await new BotGameModel().createNewGame(ctx, gameType)
         } else {
             if (result[0]) {
-                if (result[0].gameState == 0) {
-                    result[0].gameType = gameType
-                    result[0].gameState = 1
-                    await BotGameModel.save(result[0])
-                } else {
-                    if (result[0].gameType == gameType) {
-                        return
+                await addLock([result[0].groupId], async () => {
+                    try {
+                        await queryRunner.startTransaction()
+                        result[0].gameType = gameType
+                        result[0].gameState = 1
+                        await queryRunner.manager.save(result[0])
+                        await queryRunner.commitTransaction()
+                    } catch (err) {
+                        console.log('回滚了', err)
+                        await queryRunner.rollbackTransaction()
                     }
-                    // 更换游戏
-                    result[0].gameType = gameType
-                    result[0].gameState = 1
-                    await BotGameModel.save(result[0])
-                }
+                }, async () => {
+                })
             }
         }
-        await this.sendJoinGameMessage(ctx)
+        await this.sendJoinGameMessage(ctx, gameType)
     }
 
     /**
      * 发送加入游戏消息、群组添加游戏后发送消息
      */
-    public sendJoinGameMessage = (ctx: Context) => {
+    public sendJoinGameMessage = (ctx: Context, gameType: GameTypeEnum) => {
         return ctx.replyWithHTML(
-            new GameBotHtml().getGameModelHtml(StartGameEnum.LOW),
+            new GameBotHtml().getGameModelHtml(gameType),
             new ButtonUtils().createCallbackBtn([[
                 {
                     text: '一号PC2.0公馆',

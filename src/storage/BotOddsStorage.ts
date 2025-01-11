@@ -1,5 +1,4 @@
 import BotOddsModel from "../models/BotOddsModel"
-import botOddsModel from "../models/BotOddsModel"
 import GameEnumsIndex from "../type/gameEnums/GameEnumsIndex"
 import GameTypeEnum from "../type/gameEnums/GameTypeEnum"
 import ComputeUtils from "../commons/compute/ComputeUtils";
@@ -16,13 +15,13 @@ class BotOddsStorage {
      *      value: 当前类型游戏的赔率数据列表
      *  }
      */
-    private static oddsMap = new Map<number, Array<botOddsModel>>()
+    private static oddsMap = new Map<number, Array<BotOddsModel>>()
 
     /**
      * 列表odds
      * @private
      */
-    private static oddsList: Array<botOddsModel> = []
+    private static oddsList: Array<BotOddsModel> = []
 
     /**
      * 根据id获取赔率数据
@@ -146,7 +145,7 @@ class BotOddsStorage {
     /**
      * 获取赔率表数据列表
      */
-    public static getOddsList = async (): Promise<Map<number, Array<botOddsModel>>> => {
+    public static getOddsList = async (): Promise<Map<number, Array<BotOddsModel>>> => {
         if (BotOddsStorage.oddsMap.size <= 0) {
             await BotOddsStorage.init()
             return BotOddsStorage.oddsMap

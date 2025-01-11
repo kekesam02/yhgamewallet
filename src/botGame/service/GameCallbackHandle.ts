@@ -6,6 +6,8 @@ import GameFindController from "../gameController/GameFindController";
 import ContextUtil from "../../commons/ContextUtil";
 import MessageUtils from "../../commons/message/MessageUtils";
 import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import BotGameModel from "../../models/BotGameModel";
+import CommonEnumsIndex from "../../type/CommonEnumsIndex";
 
 
 /**
@@ -56,11 +58,11 @@ class GameCallbackHandle {
                 break
             case GameController.flowingWater.query:
                 // 查询用户流水
-                await new GameFindController(ctx).getUserFlowingWater()
+                await new GameFindController(ctx).getUserFlowingWater(true, new CommonEnumsIndex().getAllGameType())
                 break
             case GameController.profitLoss.query:
                 // 查询用户盈亏
-                await new GameFindController(ctx).getUserProfitLoss()
+                await new GameFindController(ctx).getUserProfitLoss(true, new CommonEnumsIndex().getAllGameType())
                 break
         }
     }

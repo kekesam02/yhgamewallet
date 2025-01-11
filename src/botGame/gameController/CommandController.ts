@@ -147,19 +147,21 @@ class CommandController {
     /**
      * 查看用户流水
      * @param ctx
+     * @param gameTypeList 游戏类型列表
      */
-    public water = async (ctx: Context) => {
+    public water = async (ctx: Context, gameTypeList: Array<GameTypeEnum>) => {
         console.log('查看用户流水')
-        return new GameFindController(ctx).getUserFlowingWater(false)
+        return new GameFindController(ctx).getUserFlowingWater(false, gameTypeList)
     }
 
     /**
      * 查看用户盈亏
      * @param ctx
+     * @param gameTypeList
      */
-    public profitLoss = async (ctx: Context) => {
+    public profitLoss = async (ctx: Context, gameTypeList: Array<GameTypeEnum>) => {
         console.log('查看用户盈亏')
-        return  new GameFindController(ctx).getUserProfitLoss(false)
+        return  new GameFindController(ctx).getUserProfitLoss(false, gameTypeList)
     }
 
 }

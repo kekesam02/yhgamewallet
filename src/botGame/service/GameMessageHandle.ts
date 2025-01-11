@@ -12,6 +12,10 @@ import GameBettingTips from "../../html/gameHtml/GameBettingTips";
 import GameCallbackHandle from "./GameCallbackHandle";
 import GameUserRedis from "../../commons/redis/GameUserRedis";
 import ContextUtil from "../../commons/ContextUtil";
+import BotGameModel from "../../models/BotGameModel";
+import {addLock} from "../../config/redislock";
+import {queryRunner} from "../../config/database";
+import CommonEnumsIndex from "../../type/CommonEnumsIndex";
 
 /**
  * 娱乐机器人接收到的用户消息处理器
@@ -82,13 +86,33 @@ class GameMessageHandle {
                 break
             case CommandController.water.includes(text):
                 // 流水
-                console.log('查看流水')
-                await new CommandController().water(ctx)
+                let groupId = ContextUtil.getGroupId(ctx)
+                let groupModel = await BotGameModel
+                    .createQueryBuilder()
+                    .where('group_id = :groupId', {
+                        groupId: groupId
+                    })
+                    .getOne()
+                if (!groupModel) {
+                    return
+                }
+                await new CommandController().water(ctx, [groupModel.gameType])
                 break
             case CommandController.profitLoss.includes(text):
                 // 盈亏
                 console.log('查看盈亏')
-                await new CommandController().profitLoss(ctx)
+                // 查询用户流水
+                let groupId2 = ContextUtil.getGroupId(ctx)
+                let groupModel2 = await BotGameModel
+                    .createQueryBuilder()
+                    .where('group_id = :groupId', {
+                        groupId: groupId2
+                    })
+                    .getOne()
+                if (!groupModel2) {
+                    return
+                }
+                await new CommandController().profitLoss(ctx, [groupModel2.gameType])
                 break
             case text.indexOf('hb') > -1:
                 // 当前是红包的指令不进行处理
@@ -131,6 +155,43 @@ class GameMessageHandle {
             ]]))
         } catch (err) {
 
+        }
+    }
+
+    /**
+     * 退出当前游戏
+     */
+    public quitGame = async (ctx: Context) => {
+        let isPlaying = await GameUserRedis.getUserIsPlaying(ContextUtil.getUserId(ctx))
+        if (isPlaying) {
+            await new MessageUtils().sendTextReply(ctx, '亲！正在游戏中、需等本期游戏结束才能退出')
+            return
+        }
+        let groupId = ContextUtil.getGroupId(ctx)
+        let tgId = ContextUtil.getUserId(ctx)
+        let groupModel = await BotGameModel
+            .createQueryBuilder()
+            .where('group_id = :groupId', {
+                groupId: groupId
+            })
+            .getOne()
+        if (groupModel) {
+            // 不是群组创建人拒绝响应
+            if (tgId != groupModel?.botUserId) {
+                return
+            }
+            groupModel.gameState = 0
+            await addLock([groupId], async () => {
+                await queryRunner.startTransaction()
+                try {
+                    await queryRunner.manager.save(groupModel)
+                    await new MessageUtils().sendTextReply(ctx, '已退出当前游戏')
+                    await queryRunner.commitTransaction()
+                } catch (err) {
+                    await queryRunner.rollbackTransaction()
+                }
+            }, async () => {
+            })
         }
     }
 }

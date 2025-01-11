@@ -94,8 +94,8 @@ class GameBotHtml {
     /**
      * 获取进入游戏模式字符串
      */
-    public getGameModelHtml = (gameType: StartGameEnum): string => {
-        let gameTypeStr = new GameEnumsIndex().getStartGameStr(gameType)
+    public getGameModelHtml = (gameType: GameTypeEnum): string => {
+        let gameTypeStr = new GameEnumsIndex().getGameTypeStr(gameType)
         let html = `
             进入游戏模式：${gameTypeStr}${
             this.N}----------------${
