@@ -137,7 +137,6 @@ class WalletYaoqingFanLiMethod {
                     cjje += parseFloat(botPayments[i]?.payment_amount || "0")
                     arrids.push(botPayments[i]?.id)
                 }
-
                 try {
                     await queryRunner.startTransaction()
                     // 2：给用户添加彩U

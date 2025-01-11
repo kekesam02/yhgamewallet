@@ -94,6 +94,12 @@ class WalletHandleMethod {
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         var firstName: string = ctx.callbackQuery?.from?.first_name || ''
         var username: string = ctx.callbackQuery?.from?.username || ''
+        await redis.del("zhuanzhangmain_msgid_"+tgId)
+        await redis.del("zhuanzhangmain_chatid_"+tgId)
+        await redis.del("txmain_msgid_" + tgId)
+        await redis.del("txmain_chatid_" + tgId)
+        await redis.del("shoukuanmain_msgid_"+tgId)
+        await redis.del("shoukuanmain_chatid_"+tgId)
         await this.removeMessage(ctx)
         await this.clearCacheRelation(ctx)
         await this.startCommand(ctx, tgId, username, firstName)
@@ -108,6 +114,12 @@ class WalletHandleMethod {
         var tgId: number = ctx.message?.from?.id || 0
         var firstName: string = ctx.message?.from?.first_name || ''
         var username: string = ctx.message?.from?.username || ''
+        await redis.del("zhuanzhangmain_msgid_"+tgId)
+        await redis.del("zhuanzhangmain_chatid_"+tgId)
+        await redis.del("txmain_msgid_" + tgId)
+        await redis.del("txmain_chatid_" + tgId)
+        await redis.del("shoukuanmain_msgid_"+tgId)
+        await redis.del("shoukuanmain_chatid_"+tgId)
         await this.removeTextMessage(ctx)
         await this.clearCacheRelation(ctx)
         await this.startCommand(ctx, tgId, username, firstName)

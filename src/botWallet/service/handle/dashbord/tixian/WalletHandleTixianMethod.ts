@@ -324,16 +324,19 @@ class WalletHandleTixianMethod {
 
                 // 删除上一次的消息
                 var botPayUerId = AESUtils.decodeUserId(botPayment.tgId);
-                var mmsgId: string | null = await redis.get("txmain_msgid_" + botPayUerId) || "0"
-                var mchatId: string | null = await redis.get("txmain_chatid_" + botPayUerId) || "0"
-                await ctx.telegram.deleteMessage(mchatId, parseInt(mmsgId))
-                await redis.del("txmain_msgid_" + botPayUerId)
-                await redis.del("txmain_chatid_" + botPayUerId)
-                // 5:给申请人发消息
-                await ubot.telegram.sendMessage(mchatId, html, {
-                    parse_mode: "HTML",
-                    reply_markup: WalletController.createModelClientBackBtn('tx').reply_markup
-                })
+                try {
+                    var mmsgId: string | null = await redis.get("txmain_msgid_" + botPayUerId) || "0"
+                    var mchatId: string | null = await redis.get("txmain_chatid_" + botPayUerId) || "0"
+                    await ctx.telegram.deleteMessage(mchatId, parseInt(mmsgId))
+                    await redis.del("txmain_msgid_" + botPayUerId)
+                    await redis.del("txmain_chatid_" + botPayUerId)
+                    // 5:给申请人发消息
+                    await ubot.telegram.sendMessage(mchatId, html, {
+                        parse_mode: "HTML",
+                        reply_markup: WalletController.createModelClientBackBtn('tx').reply_markup
+                    })
+                }catch (e){}
+
                 // 6: 编辑回复的按钮
                 await ctx.editMessageReplyMarkup(WalletController.createSuccessBtn(botPayment.username).reply_markup)
             }
@@ -401,14 +404,17 @@ class WalletHandleTixianMethod {
 
                     // 删除上一次的消息
                     var botPayUerId = AESUtils.decodeUserId(botPayment.tgId);
-                    // 删除上一次的消息
-                    var mmsgId: string | null = await redis.get("txmain_msgid_" + botPayUerId) || "0"
-                    var mchatId: string | null = await redis.get("txmain_chatid_" + botPayUerId) || "0"
-                    // 给申请人发消息
-                    await ubot.telegram.editMessageText(mchatId, parseInt(mmsgId), '', html, {
-                        parse_mode: "HTML",
-                        reply_markup: WalletController.createModelClientBackBtn('tx').reply_markup
-                    })
+                    try {
+                        // 删除上一次的消息
+                        var mmsgId: string | null = await redis.get("txmain_msgid_" + botPayUerId) || "0"
+                        var mchatId: string | null = await redis.get("txmain_chatid_" + botPayUerId) || "0"
+                        // 给申请人发消息
+                        await ubot.telegram.editMessageText(mchatId, parseInt(mmsgId), '', html, {
+                            parse_mode: "HTML",
+                            reply_markup: WalletController.createModelClientBackBtn('tx').reply_markup
+                        })
+                    }catch (e){
+                    }
                     await redis.del("txmain_msgid_" + botPayUerId)
                     await redis.del("txmain_chatid_" + botPayUerId)
                     // 6: 编辑回复的按钮

@@ -212,12 +212,15 @@ class WalletHandleZhuanzhangMethod {
                     await queryRunner.commitTransaction()
                     // 开始写入24小时定时过期转账
                     await redis.set("tx_botpayment_"+tgId,botPayment.id,"EX",60 * 60 * 24)
-
-                    // 提示钱包机器人已转账
-                    var msgId :string | null = await redis.get("zhuanzhangmain_msgid_"+tgId) || "0"
-                    var chatId :string | null = await redis.get("zhuanzhangmain_chatid_"+tgId) || "0"
-                    await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"⚠️  已完成转账，等待对方收款！",
-                        {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitTextBtn().reply_markup})
+                    try {
+                        // 提示钱包机器人已转账
+                        var msgId :string | null = await redis.get("zhuanzhangmain_msgid_"+tgId) || "0"
+                        var chatId :string | null = await redis.get("zhuanzhangmain_chatid_"+tgId) || "0"
+                        await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"⚠️  已完成转账，等待对方收款",
+                            {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitTextBtn().reply_markup})
+                    }catch (e){
+                        ctx.replyWithHTML("⚠️  已完成转账，等待对方收款")
+                    }
 
                 } catch (e) {
                     await queryRunner.rollbackTransaction()
@@ -337,11 +340,15 @@ class WalletHandleZhuanzhangMethod {
             // 开始写入24小时定时过期转账
             await redis.set("tx_botpayment_"+tgId,botPayment.id,"EX",60 * 60 * 24)
 
-            // 提示钱包机器人已转账
-            var msgId :string | null = await redis.get("zhuanzhangmain_msgid_"+tgId) || "0"
-            var chatId :string | null = await redis.get("zhuanzhangmain_chatid_"+tgId) || "0"
-            await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"✅ 已完成转账，等待对方收款！",
-                {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitTextBtn().reply_markup})
+           try {
+               // 提示钱包机器人已转账
+               var msgId :string | null = await redis.get("zhuanzhangmain_msgid_"+tgId) || "0"
+               var chatId :string | null = await redis.get("zhuanzhangmain_chatid_"+tgId) || "0"
+               await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"⚠️ 已完成转账，等待对方收款！",
+                   {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitTextBtn().reply_markup})
+           }catch (e){
+               ctx.replyWithHTML("⚠️ 已完成转账，等待对方收款！")
+           }
         } catch (e) {
             await queryRunner.rollbackTransaction()
             await ctx.answerCbQuery('提示：服务器忙，请稍后在试', {show_alert: true})
@@ -419,16 +426,17 @@ class WalletHandleZhuanzhangMethod {
             return
         }
 
-        // 删除机器人的选择收款人消息
-        var msgId :string | null = await redis.get("zhuanzhangmain_msgid_"+tgId) || "0"
-        var chatId :string | null = await redis.get("zhuanzhangmain_chatid_"+tgId) || "0"
-        await ctx.telegram.editMessageText(chatId,parseInt(msgId),"","⚠️ 已取消转账!",{
-            parse_mode:"HTML",
-            reply_markup:WalletController.createModelBackBtn('zhuangzhang').reply_markup
-        })
-        await redis.del("zhuanzhangmain_msgid_"+tgId)
-        await redis.del("zhuanzhangmain_chatid_"+tgId)
-
+       try {
+           // 删除机器人的选择收款人消息
+           var msgId :string | null = await redis.get("zhuanzhangmain_msgid_"+tgId) || "0"
+           var chatId :string | null = await redis.get("zhuanzhangmain_chatid_"+tgId) || "0"
+           await ctx.telegram.editMessageText(chatId,parseInt(msgId),"","⚠️ 已取消转账!",{
+               parse_mode:"HTML",
+               reply_markup:WalletController.createModelBackBtn('zhuangzhang').reply_markup
+           })
+       }catch (e) {
+            ctx.replyWithHTML("⚠️ 已取消转账!")
+       }
         // 删除此消息
         await ctx.editMessageText("⚠️ 已取消转账",{
             parse_mode:"HTML",
@@ -601,14 +609,18 @@ class WalletHandleZhuanzhangMethod {
                         parse_mode:"HTML",
                         reply_markup:WalletController.createHomeBackEmptyBtn().reply_markup
                     })
-                    // 提示钱包机器人已转账
-                    var msgId :string | null = await redis.get("zhuanzhangmain_msgid_"+deTgId) || "0"
-                    var chatId :string | null = await redis.get("zhuanzhangmain_chatid_"+deTgId) || "0"
-                    await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"✅ 转账已完成，收款已完成！",
-                        {parse_mode:"HTML",reply_markup:WalletController.createModelBackBtn('zhuangzhang').reply_markup})
-                    await redis.del("zhuanzhangmain_msgid_"+tgId)
-                    await redis.del("zhuanzhangmain_chatid_"+tgId)
                     await queryRunner.commitTransaction()
+                    try {
+                        // 提示钱包机器人已转账
+                        var msgId :string | null = await redis.get("zhuanzhangmain_msgid_"+deTgId) || "0"
+                        var chatId :string | null = await redis.get("zhuanzhangmain_chatid_"+deTgId) || "0"
+                        await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"✅ 转账已完成",
+                            {parse_mode:"HTML",reply_markup:WalletController.createModelBackBtn('zhuangzhang').reply_markup})
+                        await redis.del("zhuanzhangmain_msgid_"+tgId)
+                        await redis.del("zhuanzhangmain_chatid_"+tgId)
+                    }catch (e){
+                        ctx.replyWithHTML("✅ 转账已完成")
+                    }
                 } catch (e) {
                     ctx.editMessageText("出错了，请稍后在试试!")
                     ctx.editMessageReplyMarkup(WalletController.createHomeBackEmptyBtn().reply_markup)

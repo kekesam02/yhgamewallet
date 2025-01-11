@@ -143,7 +143,7 @@ class WalletUserCenterMethod {
         // 删除上一次消息
         var messageId: number = ctx.callbackQuery?.message?.message_id || 0
         if (messageId > 0) {
-            ctx.deleteMessage(messageId)
+            await ctx.deleteMessage(messageId)
         }
         // 3：查询用户是否存在交易地址
         const botWithdrawalAddrModel = await BotWithdrawalAddrModel.createQueryBuilder()

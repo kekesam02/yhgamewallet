@@ -86,11 +86,13 @@ class WalletHandleShouKuanMethod {
                     ]
                 }
             }))
-            // 提示钱包机器人已转账
-            var msgId :string | null = await redis.get("shoukuanmain_msgid_"+tgId) || "0"
-            var chatId :string | null = await redis.get("shoukuanmain_chatid_"+tgId) || "0"
-            await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"⚠️  等待好友支付！",
-                {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitPayBtn().reply_markup})
+            try {
+                // 提示钱包机器人已转账
+                var msgId :string | null = await redis.get("shoukuanmain_msgid_"+tgId) || "0"
+                var chatId :string | null = await redis.get("shoukuanmain_chatid_"+tgId) || "0"
+                await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"⚠️  等待好友支付！",
+                    {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitPayBtn().reply_markup})
+            }catch (e){}
         }, async () => {
             await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
         })
