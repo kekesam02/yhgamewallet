@@ -127,11 +127,17 @@ class WalletYaoqingFanLiMethod {
             //4: 获大于上次时间的新的需要转化的上注彩金流水 del == 0 也就是新的彩金订单
             let sql = "payment_type = " + paymentType.SZ + " and del = 0 and status = 1 and fanli = 0  and  user_id IN (SELECT quilt_tg_id FROM bot_invite_user WHERE inviter_tg_id = '"+encodeUserId+"')"
             if (ks) sql += " and create_time >='" + moment(ks).format('yyyy-MM-DD HH:mm:ss') + "'"
-
             // 2: 查询所有好友下注的订单（有效del=0 and status = 1 and payment_type = 2  and fanli = 0）统计出来。状态是：0尚未结算
-            const { cjje }  =  await BotPaymentModel.createQueryBuilder().select("SUM(payment_amount)",'cjje')
-                .where(sql).getRawOne()
-            if (cjje > 0) {
+            const  botPayments =  await BotPaymentModel.createQueryBuilder().select("id,payment_amount")
+                .where(sql).getRawMany()
+            if (botPayments && botPayments.length > 0) {
+                var cjje:number = 0;
+                var arrids = []
+                for (let i = 0; i < botPayments.length; i++) {
+                    cjje += parseFloat(botPayments[i]?.paymentAmount || "0")
+                    arrids.push(botPayments[i]?.id)
+                }
+
                 try {
                     await queryRunner.startTransaction()
                     // 2：给用户添加彩U
@@ -175,12 +181,10 @@ class WalletYaoqingFanLiMethod {
                     })
 
                     await queryRunner.commitTransaction()
-
                     // 修改状态
                     await BotPaymentModel.createQueryBuilder().update(BotPaymentModel).set({
                         fanli: 1
-                    }).where(sql).execute()
-
+                    }).where("id in(:...ids)",{ids:arrids}).execute()
                     // 删除上一次消息
                     await WalletUserCenterMethod.removeMessage(ctx)
                     // 发送消息
