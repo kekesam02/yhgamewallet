@@ -533,6 +533,9 @@ class WalletRedPacket {
             if (!botHb) {
                 return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
             }
+            if (botHb?.status == 1 || botHb?.del == 1) {
+                return new MessageUtils().sendPopMessage(this.ctx, '来晚一步, 当前红包已过期')
+            }
             if (botHb.receiveNum - botHb.num >= 0){
                 await this.updateReceiveHtml(hbId, botHb)
                 return new MessageUtils().sendPopMessage(this.ctx, '来晚一步，红包已经领完了')
@@ -545,7 +548,10 @@ class WalletRedPacket {
             }
 
             // 开始领取红包
-            let result = await botHb.receiveHb(this.ctx)
+            let result = await addLock(botHb.hbId, async () => {
+                await botHb?.receiveHb(this.ctx)
+            }, async () => {})
+            console.log('领取结果', result)
             if (result) {
                 await this.updateReceiveHtml(hbId, botHb)
             } else {

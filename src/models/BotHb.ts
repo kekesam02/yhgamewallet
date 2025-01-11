@@ -22,6 +22,7 @@ import TimeUtils from "../commons/date/TimeUtils";
 import ButtonUtils from "../commons/button/ButtonUtils";
 import GameController from "../botGame/gameController/GameController";
 import StartWalletEnum from "../type/walletEnums/StartWalletEnum";
+import {addLock} from "../config/redislock";
 
 
 /**
@@ -308,58 +309,65 @@ class BotHb extends BaseEntity {
             ]).reply_markup.inline_keyboard)
             return null
         }
-        await queryRunner.startTransaction()
-        try {
-            let hbId = new OrderUtils().createHbModelId()
-            let botHb = new BotHb()
-            botHb.tgId = ContextUtil.getUserId(ctx)
-            botHb.money = redisData.money
-            botHb.walletType = redisData.walletType
-            botHb.status = 0
-            botHb.num = redisData.num
-            botHb.hbId = hbId
-            botHb.receiveNum = 0
-            botHb.hbType = redisData.hbType
-            botHb.jeIndex = 0
-            botHb.specifyUser = redisData.specifyUser ?? null
-            botHb.createJson()
+       return await addLock(userModel.tgId, async () => {
+           await queryRunner.startTransaction()
+           try {
+               if (!redisData) {
+                   return null
+               }
+               let hbId = new OrderUtils().createHbModelId()
+               let botHb = new BotHb()
+               botHb.tgId = ContextUtil.getUserId(ctx)
+               botHb.money = redisData.money
+               botHb.walletType = redisData.walletType
+               botHb.status = 0
+               botHb.num = redisData.num
+               botHb.hbId = hbId
+               botHb.receiveNum = 0
+               botHb.hbType = redisData.hbType
+               botHb.jeIndex = 0
+               botHb.specifyUser = redisData.specifyUser ?? null
+               botHb.createJson()
 
-            let payment = new BotPaymentModel()
-            let paymentType = PaymentType.FHB
-            payment.tgId = userModel.tgId
-            payment.username = userModel.userName
-            payment.nickname = userModel.nickName
-            payment.paymentType = paymentType
-            payment.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
-            payment.balanceBefore = userModel.getBalance(this.walletType)
-            payment.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
-                ? new ComputeUtils(userModel.getBalance(this.walletType)).add(this.money).toString()
-                : new ComputeUtils(userModel.getBalance(this.walletType)).minus(this.money).toString()
-            payment.paymentTypeNumber = hbId
-            payment.paymentAmount = this.money
-            payment.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
-            payment.walletType = this.walletType
-            payment.gameType = GameTypeEnum.MEPTY
+               let payment = new BotPaymentModel()
+               let paymentType = PaymentType.FHB
+               payment.tgId = userModel.tgId
+               payment.username = userModel.userName
+               payment.nickname = userModel.nickName
+               payment.paymentType = paymentType
+               payment.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
+               payment.balanceBefore = userModel.getBalance(this.walletType)
+               payment.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
+                   ? new ComputeUtils(userModel.getBalance(this.walletType)).add(this.money).toString()
+                   : new ComputeUtils(userModel.getBalance(this.walletType)).minus(this.money).toString()
+               payment.paymentTypeNumber = hbId
+               payment.paymentAmount = this.money
+               payment.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
+               payment.walletType = this.walletType
+               payment.gameType = GameTypeEnum.MEPTY
 
-            let user = await queryRunner.manager.findOne(UserModel, {
-                where: {
-                    tgId: ContextUtil.getUserId(ctx)
-                }
-            }) as UserModel
-            user.updateUserMoney(this.walletType, this.money, false)
+               let user = await queryRunner.manager.findOne(UserModel, {
+                   where: {
+                       tgId: ContextUtil.getUserId(ctx)
+                   }
+               }) as UserModel
+               user.updateUserMoney(this.walletType, this.money, false)
 
-            await queryRunner.manager.save(user)
-            await queryRunner.manager.save(botHb)
-            await queryRunner.manager.save(payment)
-            await queryRunner.commitTransaction()
-            // 删除redis 数据
-            redis.del(this.getRedisKey(ctx))
-            return botHb
-        } catch (err) {
-            console.log('红包回滚了', err)
-            await queryRunner.rollbackTransaction()
-            return null
-        }
+               await queryRunner.manager.save(user)
+               await queryRunner.manager.save(botHb)
+               await queryRunner.manager.save(payment)
+               await queryRunner.commitTransaction()
+               // 删除redis 数据
+               redis.del(this.getRedisKey(ctx))
+               return botHb
+           } catch (err) {
+               console.log('红包回滚了', err)
+               await queryRunner.rollbackTransaction()
+               return null
+           }
+       }, async () => {
+
+       })
     }
 
     /**

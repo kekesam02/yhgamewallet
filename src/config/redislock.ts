@@ -1,7 +1,7 @@
 // @TS-NOCHECK
 import Redlock from 'redlock'
 import redis from "./redis";
-import {Context, Telegraf} from "telegraf";
+import {Context} from "telegraf";
 import ContextUtil from "../commons/ContextUtil";
 
 /**
@@ -30,12 +30,18 @@ const addLockByCtx = async (ctx: Context, fn: () => Promise<any>, efn: () => Pro
     return addLock(lockKey, fn, efn, lockTTL)
 }
 
-const addLock = async (lockKeyList: Array<string> | string, fn: () => Promise<any>, efn: () => Promise<any>, lockTTL = 1000  * 30) => {
+const addLock = async (
+    lockKeyList: Array<string> | string,
+    fn: () => Promise<any>,
+    efn: () => Promise<any>,
+    lockTTL = 1000  * 30
+) => {
     try {
         let lock = await redlock.lock(lockKeyList, lockTTL)
         try {
             // 执行异步操作
-            await fn()
+            let result = await fn()
+            return result
         } finally {
             // 释放锁
             await redlock.unlock(lock)

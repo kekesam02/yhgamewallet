@@ -31,109 +31,134 @@ class WalletScheduleHandle {
          }
     }
 
-    public static redPacketMap = new Map()
+    /**
+     * 需要退款的红包数据列表
+     */
+    public static quitRedPackList: Array<{
+        // 红包到期时间
+        endTime: string
+        // 红包对象列表
+        botHb: BotHb
+    }> = []
 
     /**
      * 初始化红包调度器
      */
     public static initReaPackSchedule = async (bot: Telegraf<Context>) => {
-        let botHbList = await BotHb
-            .createQueryBuilder()
-            .where('del = 0')
-            .where('status = 0')
-            .getMany()
+        // let botHbList = await BotHb
+        //     .createQueryBuilder()
+        //     .where('del = 0')
+        //     .where('status = 0')
+        //     .orderBy('create_time', 'ASC')
+        //     .getMany()
+        await queryRunner.startTransaction()
+        try {
+            let botHbList = await queryRunner.manager.find(BotHb, {
+                where: {
+                    del: 0,
+                    status: 0
+                },
+                order: {
+                    createTime: 'ASC'
+                }
+            }) as Array<BotHb>
+            await queryRunner.commitTransaction()
 
-        botHbList.forEach(item => {
-            // 红包过期时间
-            let endDate = moment(item.createTime).add(24, 'hours').format('YYYY-MM-DD HH:mm:ss')
-            // let endDate = moment(item.createTime).add(10, 'minutes').format('YYYY-MM-DD HH:mm:ss')
-            if (moment(endDate).isBefore()) {
-                endDate = moment().add(1, 'seconds').format('YYYY-MM-DD HH:mm:ss')
-            }
-            let job = schedule.scheduleJob(new Date(endDate), async () => {
-                await this.startRefund()
-                job.cancel()
+            botHbList.forEach(item => {
+                // 红包过期时间
+                let endDate = moment(item.createTime).add(24, 'hours').format('YYYY-MM-DD HH:mm:ss')
+                // let endDate = moment(item.createTime).add(30, 'seconds').format('YYYY-MM-DD HH:mm:ss')
+                this.quitRedPackList.push({
+                    endTime: endDate,
+                    botHb: item
+                })
             })
-            ScheduleHandle.currJobMap.set(`walletHb${item.hbId}`, job)
-        })
+
+            this.quitRedPackList.forEach(item => {
+                let time = moment(item.endTime).isBefore(new Date())
+                    ? moment().add(5, 'seconds').format('YYYY-MM-DD HH:mm:ss')
+                    : item.endTime
+
+                let job = schedule.scheduleJob(
+                    time,
+                    async () => {
+                        await this.startRefund()
+                        job.cancel()
+                    }
+                )
+                ScheduleHandle.currJobMap.set(`walletHb${item.botHb.hbId}`, job)
+            })
+        } catch (err) {
+            await queryRunner.rollbackTransaction()
+        }
     }
 
     /**
      * 开始执行红包退款操作
      */
     public static startRefund = async () => {
-        await queryRunner.startTransaction()
-        let botHbList = await queryRunner.manager.find(BotHb, {
-            where: {
-                status: 0,
-                del: 0
+        // 需要退款的红包列表
+        let list: Array<BotHb> = []
+        let firstData = WalletScheduleHandle.quitRedPackList[0]
+        WalletScheduleHandle.quitRedPackList.forEach(item => {
+            if (
+                item.endTime == firstData.endTime
+                || moment(item.endTime).isBefore(new Date())
+            ) {
+                list.push(item.botHb)
             }
         })
-        await queryRunner.commitTransaction()
-        // 需要更新的红包数据列表
-        let updateBotHbList: Array<BotHb> = []
-        // 需要新增的订单列表
-        let addPaymentList: Array<BotPaymentModel> = []
-        // 需要修改的用户金额列表
-        let updateUserList: Array<UserModel> = []
-        // 锁列表
-        let lockKeys: Array<string> = []
-        botHbList.forEach(item => {
-            lockKeys.push(item.hbId)
-        })
+        console.log('要更新的数据列表', list)
 
-        await addLock(lockKeys, async () => {
-            await queryRunner.startTransaction()
-            try {
-                for (let i = 0; i < botHbList.length; i++) {
-                    let item = botHbList[i]
-                    if (moment(item.createTime).add('30', 'seconds').isBefore()) {
-                        item.status = 1
-                        item.del = 1
+        for (let i = 0; i < list.length; i++) {
+            let botHb = list[i]
+            botHb.status = 1
+            botHb.del = 1
 
-                        let tgId = item.tgId
-                        let userModel = await new UserModel().getUserModelById(tgId)
-                        if (!userModel) {
-                            continue
-                        }
-                        let payment = new BotPaymentModel()
-                        let paymentType = PaymentType.TKHB
-                        payment.tgId = tgId
-                        payment.username = userModel.userName
-                        payment.nickname = userModel.nickName
-                        payment.paymentType = paymentType
-                        payment.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
-                        payment.balanceBefore = userModel.getBalance(item.walletType)
-                        payment.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
-                            ? new ComputeUtils(userModel.getBalance(item.walletType)).add(item.money).toString()
-                            : new ComputeUtils(userModel.getBalance(item.walletType)).minus(item.money).toString()
-                        payment.paymentTypeNumber = item.hbId
-                        payment.paymentAmount = item.money
-                        payment.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
-                        payment.walletType = item.walletType
-                        payment.gameType = GameTypeEnum.MEPTY
-
-                        userModel.updateUserMoney(item.walletType, item.money)
-
-                        updateBotHbList.push(item)
-                        updateUserList.push(userModel)
-                        addPaymentList.push(payment)
+            let tgId = botHb.tgId
+            await addLock([tgId, botHb.hbId],async () => {
+                try {
+                    await queryRunner.startTransaction()
+                    let userModel = await new UserModel().getUserModelById(tgId)
+                    if (!userModel) {
+                        return
                     }
+                    let payment = new BotPaymentModel()
+                    let paymentType = PaymentType.TKHB
+                    let money = new ComputeUtils(botHb.money).minus(botHb.lqMoney ?? 0).getValue()
+                    payment.tgId = tgId
+                    payment.username = userModel.userName
+                    payment.nickname = userModel.nickName
+                    payment.paymentType = paymentType
+                    payment.paymentTypeName = new CommonEnumsIndex().getPaymentTypeStr(paymentType)
+                    payment.balanceBefore = userModel.getBalance(botHb.walletType)
+                    payment.balanceAfter = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType) == 1
+                        ? new ComputeUtils(userModel.getBalance(botHb.walletType)).add(money).toString()
+                        : new ComputeUtils(userModel.getBalance(botHb.walletType)).minus(money).toString()
+                    payment.paymentTypeNumber = botHb.hbId
+                    payment.paymentAmount = money
+                    payment.operateType = new CommonEnumsIndex().getPaymentAddOrReduce(paymentType)
+                    payment.walletType = botHb.walletType
+                    payment.gameType = GameTypeEnum.MEPTY
+
+                    userModel.updateUserMoney(botHb.walletType, money)
+
+                    await queryRunner.manager.save(botHb)
+                    await queryRunner.manager.save(userModel)
+                    await queryRunner.manager.save(payment)
+                    await queryRunner.commitTransaction()
+                    await ScheduleHandle.bot.telegram.sendMessage(AESUtils.decodeUserId(tgId), `🧧红包过期退款 ${money} ${new CommonEnumsIndex().getWalletTypeStr(botHb.walletType)}`)
+
+                    // 重置下标
+                    if (WalletScheduleHandle.quitRedPackList.length > 0) {
+                        console.log('当前退款数据', WalletScheduleHandle.quitRedPackList[0])
+                        WalletScheduleHandle.quitRedPackList.shift()
+                    }
+                } catch (err) {
+                    await queryRunner.rollbackTransaction()
                 }
-                await queryRunner.manager.save(updateBotHbList)
-                await queryRunner.manager.save(addPaymentList)
-                await queryRunner.manager.save(updateUserList)
-                await queryRunner.commitTransaction()
-
-                updateBotHbList.forEach(item => {
-                    ScheduleHandle.bot.telegram.sendMessage(AESUtils.decodeUserId(item.tgId), `🧧红包过期退款 ${item.money} ${new CommonEnumsIndex().getWalletTypeStr(item.walletType)}`)
-                })
-            } catch (err) {
-                await queryRunner.rollbackTransaction()
-            }
-        }, async () => {
-
-        })
+            }, async () => {})
+        }
     }
 
 }
