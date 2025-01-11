@@ -56,7 +56,7 @@ class ScheduleHandle {
         // WalletScheduleHandle.init(bot).then(r => {})
         // 每天凌晨执行一次定时器
         let job = schedule.scheduleJob('0 0 * * *',()=>{
-            this.bot = bot
+            // this.bot = bot
             WalletScheduleHandle.init(bot).then(r => {})
         })
         this.currJobList.push(job)
