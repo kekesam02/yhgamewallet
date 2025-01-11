@@ -87,7 +87,6 @@ class WalletHandleShouKuanMethod {
                 }
             }))
 
-
             // 提示钱包机器人已转账
             var msgId :string | null = await redis.get("shoukuanmain_msgid_"+tgId) || "0"
             var chatId :string | null = await redis.get("shoukuanmain_chatid_"+tgId) || "0"
