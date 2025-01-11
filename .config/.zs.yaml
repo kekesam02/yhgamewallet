@@ -9,7 +9,7 @@ jwt_secret: your_jwt_secret
 
 botConfig:
   GameBotToken: '7840670913:AAGuk-XMILCw0nxFmnQbbuAXBxvzgrp274s'
-  WalletToken: '7628298549:AAHRAaSc9XJ1oSwNmbPO1C7sipJK3AeoUK8'
+  WalletToken: '7635600144:AAHELBLU6wF63MQ7j3o7A50DF7TleH6icls'
   WalletTokenTest: '7910370278:AAEta2tSswFj6RdjCkVzJG15DofJNzKmEjQ'
   WalletUrl: 'http://t.me/sanjinzsbot'
 

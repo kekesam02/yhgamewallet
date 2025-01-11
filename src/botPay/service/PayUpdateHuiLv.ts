@@ -23,6 +23,9 @@ class PayUpdateHuiLv {
             res.on("end",() => {
                 if(data){
                     const jsonData = JSON.parse(data)
+                    if (!jsonData['trc20_tokens'] || !jsonData['trc20_tokens'][0]) {
+                        return
+                    }
                     // 获取交易市场的usdt兑换trx的数据
                     const marketInfo = jsonData['trc20_tokens'][0]["market_info"]
                     if(marketInfo && marketInfo.priceInTrx > 0) {
