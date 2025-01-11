@@ -221,7 +221,11 @@ class BotPledgeUpModel extends BaseEntity {
      * @param tgId: 用户id
      * @param gameTypeList
      */
-    public getUserList = async (roundId: string, tgId: string | null = null, gameTypeList: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType()): Promise<Array<BotPledgeUpModel>> => {
+    public getUserList = async (
+        roundId: string,
+        tgId: string | null = null,
+        gameTypeList: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType()
+    ): Promise<Array<BotPledgeUpModel>> => {
         let query = BotPledgeUpModel
             .createQueryBuilder()
             .where('round_id = :roundId', {
@@ -296,7 +300,7 @@ class BotPledgeUpModel extends BaseEntity {
      */
     public cancelPledgeUp = async (ctx: Context, groupModel: BotGameModel, roundId: string) => {
         let userModel = await new UserModel().getUserModel(ctx)
-        let pledgeModelList = await this.getUserList(`${ScheduleHandle.pc28Config.roundId}`, userModel.tgId, groupModel.gameType)
+        let pledgeModelList = await this.getUserList(`${ScheduleHandle.pc28Config.roundId}`, userModel.tgId, [groupModel.gameType])
         pledgeModelList.forEach(item => {
             item.state = -1
             item.del = 1
@@ -310,6 +314,7 @@ class BotPledgeUpModel extends BaseEntity {
         })
         await queryRunner.startTransaction()
         try{
+            console.log('开始取消下注')
             await queryRunner.manager.save(pledgeModelList)
             await queryRunner.manager.save(userModel)
             await queryRunner.manager.save(paymentList)

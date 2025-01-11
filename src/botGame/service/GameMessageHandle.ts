@@ -70,11 +70,6 @@ class GameMessageHandle {
             case CommandController.defect.includes(text):
                 // 反水
                 console.log('进行反水')
-                let isPlaying = await GameUserRedis.getUserIsPlaying(ContextUtil.getUserId(ctx))
-                if (isPlaying) {
-                    await new MessageUtils().sendTextReply(ctx, '亲！正在游戏中、需等本期游戏结束在进行反水')
-                    break
-                }
                 await new CommandController().createDefect(ctx)
                 break
             case CommandController.cancel.includes(text):

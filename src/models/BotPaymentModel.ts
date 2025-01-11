@@ -462,7 +462,7 @@ class BotPaymentModel extends BaseEntity {
             .andWhere('del = 0')
             .whereTime(
                 near ? near.createTime : '',
-                ''
+                ScheduleHandle.pc28Config.prevOpenTime
             )
             .getMany()
 
