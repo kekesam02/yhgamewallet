@@ -134,7 +134,7 @@ class WalletYaoqingFanLiMethod {
                 var cjje:number = 0;
                 var arrids = []
                 for (let i = 0; i < botPayments.length; i++) {
-                    cjje += parseFloat(botPayments[i]?.paymentAmount || "0")
+                    cjje += parseFloat(botPayments[i]?.payment_amount || "0")
                     arrids.push(botPayments[i]?.id)
                 }
 
