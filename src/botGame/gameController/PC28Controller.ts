@@ -27,6 +27,7 @@ import LotteryRequest from "../lotterRequest";
 import AESUtils from "../../commons/AESUtils";
 import GameScheduleHandle from "../../commons/schedule/GameScheduleHandle";
 import GameUserRedis from "../../commons/redis/GameUserRedis";
+import BotPaymentModel from "../../models/BotPaymentModel";
 
 type PC28LotteryType = {
 
@@ -365,6 +366,28 @@ class PC28Controller {
                 gameType: GameTypeEnum.PC28GAO
             })
             .getMany()
+
+        let updatePledgeList = [...pledgeUpList28Di, ...pledgeUpList28Gao].map(item => {
+            item.state = 1
+            return item
+        })
+
+        let updatePaymentList = await new BotPaymentModel().getPaymentModelList({
+            roundId: roundId
+        })
+        updatePaymentList = updatePaymentList.map((item: BotPaymentModel) => {
+            item.status = 1
+            return item
+        })
+        try {
+            await queryRunner.startTransaction()
+            await queryRunner.manager.save(updatePaymentList)
+            await queryRunner.manager.save(updatePledgeList)
+            await queryRunner.commitTransaction()
+        } catch (err) {
+            console.log('更新上注订单失败', err)
+            return
+        }
 
         // 遍历群组列表、并发送游戏信息到群组
         result.forEach((item) => {

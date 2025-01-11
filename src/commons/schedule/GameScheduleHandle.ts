@@ -68,11 +68,6 @@ class GameScheduleHandle {
         // 是否已发送停盘维护信息
         isSendProtect: false,
 
-        /**
-         * 上期开奖时间
-         */
-        prevOpenTime: '',
-
         // 当前的开奖时间（每次开奖成功后刷新数据）
         openTime: '',
 
@@ -118,7 +113,6 @@ class GameScheduleHandle {
                 let pc28Controller = new PC28Controller()
                 let lotteryJson = await pc28Controller.getLotteryJson()
                 if (lotteryJson) {
-                    ScheduleHandle.pc28Config.prevOpenTime = lotteryJson.data[0].open_time
                     await this.checkNextPC28(lotteryJson)
                 }
             } catch (err) {
@@ -133,7 +127,6 @@ class GameScheduleHandle {
     private static checkNextPC28 = async (openJson: Pc28LotteryJsonType) => {
         let currJson = openJson.data[0]
 
-        ScheduleHandle.pc28Config.prevOpenTime = openJson.data[0].open_time
         if(!ScheduleHandle.pc28Config.isFirstStart) {
             ScheduleHandle.pc28Config.isFirstStart = true
             // 下次开奖时间、加上封盘提示时间 + 5秒、用来判断用户是否还可以继续下
