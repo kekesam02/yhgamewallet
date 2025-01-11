@@ -19,6 +19,7 @@ import BotPaymentModel from "./BotPaymentModel";
 import PaymentType from "../type/PaymentType";
 import ScheduleHandle from "../commons/schedule/ScheduleHandle";
 import AESUtils from "../commons/AESUtils";
+import CommonEnumsIndex from "../type/CommonEnumsIndex";
 
 
 /**
@@ -218,13 +219,15 @@ class BotPledgeUpModel extends BaseEntity {
      * 根据当前期数所有下注的用户
      * @param roundId: 当前游戏期数
      * @param tgId: 用户id
+     * @param gameTypeList
      */
-    public getUserList = async (roundId: string, tgId: string | null = null) => {
+    public getUserList = async (roundId: string, tgId: string | null = null, gameTypeList: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType()): Promise<Array<BotPledgeUpModel>> => {
         let query = BotPledgeUpModel
             .createQueryBuilder()
             .where('round_id = :roundId', {
                 roundId: roundId
             })
+            .whereGameType(gameTypeList)
         if (tgId) {
             query.andWhere('user_id = :tgId', {
                 tgId: tgId
@@ -293,7 +296,7 @@ class BotPledgeUpModel extends BaseEntity {
      */
     public cancelPledgeUp = async (ctx: Context, groupModel: BotGameModel, roundId: string) => {
         let userModel = await new UserModel().getUserModel(ctx)
-        let pledgeModelList = await this.getUserList(`${ScheduleHandle.pc28Config.roundId}`, userModel.tgId)
+        let pledgeModelList = await this.getUserList(`${ScheduleHandle.pc28Config.roundId}`, userModel.tgId, groupModel.gameType)
         pledgeModelList.forEach(item => {
             item.state = -1
             item.del = 1

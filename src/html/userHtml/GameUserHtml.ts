@@ -6,6 +6,9 @@ import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import AESUtils from "../../commons/AESUtils";
 import {Context} from "telegraf";
 import ContextUtil from "../../commons/ContextUtil";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import CommonEnumsIndex from "../../type/CommonEnumsIndex";
+import GameEnumsIndex from "../../type/gameEnums/GameEnumsIndex";
 
 class GameUserHtml {
 
@@ -54,7 +57,7 @@ class GameUserHtml {
      * 获取用户流水html数据
      * @param ctx
      * @param {
-     *     gameType: 游戏类型描述字段
+     *     gameTypeList: 游戏类型描述字段
      *     dayWater: 用户当日流水金额
      *     weekWater: 用户周流水金额
      *     totalWater: 用户总流水金额
@@ -62,24 +65,31 @@ class GameUserHtml {
      * @param isHtml
      */
     public getUserPaymentHtml = (ctx: Context, {
-        gameType,
+        gameTypeList,
         dayWater,
         weekWater,
         totalWater
     }: {
-        gameType: string,
+        gameTypeList: Array<GameTypeEnum>,
         dayWater: string,
         weekWater: string,
         totalWater : string
     }, isHtml: boolean = false) => {
         let userId = ContextUtil.getUserId(ctx, false)
         let firstName = ctx?.from?.first_name ?? ''
-        return `当前游戏类型: ${gameType}${this.N
-        }${this.createName(userId, firstName, isHtml)}${this.N
-        }总流水: ${totalWater}${this.N
-        }周流水: ${weekWater}${this.N
-        }今日流水: ${dayWater}
+        let html = ''
+        if (gameTypeList.length == 1 && gameTypeList[0]) {
+            let gameStr = new GameEnumsIndex().getGameTypeStr(gameTypeList[0])
+            html += `当前游戏类型: ${gameStr}${this.N}`
+        } else {
+            html += `全部流水${this.N}`
+        }
+        html += `${this.createName(userId, firstName, isHtml)}${this.N
+            }总流水: ${totalWater}${this.N
+            }周流水: ${weekWater}${this.N
+            }今日流水: ${dayWater}
         `
+        return html
     }
 
     /**
@@ -95,24 +105,31 @@ class GameUserHtml {
      *      true: 格式为 html (带标签的字符串)
      */
     public getUserProfitLossHtml = (ctx: Context, {
-        gameType,
+        gameTypeList,
         dayWater,
         weekWater,
         totalWater
     }: {
-        gameType: string,
+        gameTypeList: Array<GameTypeEnum>,
         dayWater: string,
         weekWater: string,
         totalWater : string
     }, isHtml: boolean = false) => {
         let userId = ContextUtil.getUserId(ctx, false)
         let firstName = ctx?.from?.first_name ?? ''
-        return `当前游戏类型: ${gameType}${this.N
-        }${this.createName(userId, firstName, isHtml)}${this.N
-        }总盈亏: ${totalWater}${this.N
-        }周盈亏: ${weekWater}${this.N
-        }今日盈亏: ${dayWater}
+        let html = ''
+        if (gameTypeList.length == 1 && gameTypeList[0]) {
+            let gameStr = new GameEnumsIndex().getGameTypeStr(gameTypeList[0])
+            html += `当前游戏类型: ${gameStr}${this.N}`
+        } else {
+            html += `全部盈亏${this.N}`
+        }
+        html += `${this.createName(userId, firstName, isHtml)}${this.N
+            }总盈亏: ${totalWater}${this.N
+            }周盈亏: ${weekWater}${this.N
+            }今日盈亏: ${dayWater}
         `
+        return html
     }
 
     /**

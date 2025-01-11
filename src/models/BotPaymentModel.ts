@@ -315,12 +315,12 @@ class BotPaymentModel extends BaseEntity {
      * 获取用户流水分类列表
      *      周流水、日流水、月流水、总流水之类的
      */
-    public getUserWaterClass = async (ctx: Context) => {
+    public getUserWaterClass = async (ctx: Context, gameTypeList: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType()) => {
         // trx 当前汇率
         let TRXRate = await new BotExchangeModel().getTRXRate()
         let {gameType, resultList} = await new BotPaymentModel().getUserWater(ctx, [
             PaymentType.SZ
-        ])
+        ], gameTypeList)
         return this.tidyPaymentList(
             gameType ?? GameTypeEnum.PC28DI,
             resultList,
@@ -336,14 +336,14 @@ class BotPaymentModel extends BaseEntity {
     /**
      * 获取用户盈亏数据
      */
-    public getUserProfitLoss = async (ctx: Context) => {
+    public getUserProfitLoss = async (ctx: Context, gameTypeList: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType()) => {
         // trx 当前汇率
         let TRXRate = await new BotExchangeModel().getTRXRate()
         let {gameType, resultList} = await new BotPaymentModel().getUserWater(ctx, [
             PaymentType.SZ,
             PaymentType.ZJ,
             PaymentType.FS
-        ])
+        ], gameTypeList)
         return this.tidyPaymentList(
             gameType,
             resultList,

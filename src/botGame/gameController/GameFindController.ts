@@ -6,6 +6,9 @@ import AESUtils from "../../commons/AESUtils";
 import BotPledgeUpModel from "../../models/BotPledgeUpModel";
 import BotPaymentModel from "../../models/BotPaymentModel";
 import GameEnumsIndex from "../../type/gameEnums/GameEnumsIndex";
+import GameTypeEnum from "../../type/gameEnums/GameTypeEnum";
+import ContextUtil from "../../commons/ContextUtil";
+import BotGameModel from "../../models/BotGameModel";
 
 
 /**
@@ -41,7 +44,17 @@ class GameFindController {
      * 查询用户最近投注(最近的十条记录)
      */
     public getUserRecentBetting = async () => {
-        let list = await new BotPledgeUpModel().getHistory(this.ctx, 5)
+        let groupId = ContextUtil.getGroupId(this.ctx)
+        let groupModel = await BotGameModel
+            .createQueryBuilder()
+            .where('group_id = :groupId', {
+                groupId: groupId
+            })
+            .getOne()
+        if (!groupModel) {
+            return
+        }
+        let list = await new BotPledgeUpModel().getHistory(this.ctx, 5, [groupModel.gameType])
         let html = new GameUserHtml().getPledgeHtml(list)
         console.log(html)
         await new MessageUtils().sendPopMessage(this.ctx, html)
@@ -52,18 +65,18 @@ class GameFindController {
      * @param isPop: 是否弹窗显示
      *      true: 弹窗显示
      *      false: 正常返回可copy文字
+     * @param gameTypeList
      */
-    public getUserFlowingWater = async (isPop: boolean = true) => {
+    public getUserFlowingWater = async (isPop: boolean = true, gameTypeList: Array<GameTypeEnum>) => {
         let {
-            gameType,
             dayWater,
             weekWater,
             totalWater
-        } = await new BotPaymentModel().getUserWaterClass(this.ctx)
+        } = await new BotPaymentModel().getUserWaterClass(this.ctx, gameTypeList)
         let html = new GameUserHtml().getUserPaymentHtml(
             this.ctx,
             {
-                gameType: new GameEnumsIndex().getGameTypeStr(gameType),
+                gameTypeList: gameTypeList,
                 dayWater: dayWater.getValue(),
                 weekWater: weekWater.getValue(),
                 totalWater: totalWater.getValue()
@@ -79,17 +92,17 @@ class GameFindController {
     /**
      * 查询用户盈亏
      */
-    public getUserProfitLoss = async (isPop: boolean = true) => {
+    public getUserProfitLoss = async (isPop: boolean = true, gameTypeList: Array<GameTypeEnum>) => {
         let {
             gameType,
             dayWater,
             weekWater,
             totalWater
-        } = await new BotPaymentModel().getUserProfitLoss(this.ctx)
+        } = await new BotPaymentModel().getUserProfitLoss(this.ctx, gameTypeList)
         let html = new GameUserHtml().getUserProfitLossHtml(
             this.ctx,
             {
-                gameType: new GameEnumsIndex().getGameTypeStr(gameType),
+                gameTypeList: gameTypeList,
                 dayWater: dayWater.getValue(),
                 weekWater: weekWater.getValue(),
                 totalWater: totalWater.getValue()

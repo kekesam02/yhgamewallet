@@ -5,6 +5,7 @@ import {getConfig} from "../../config/config";
 import GameMessageHandle from './GameMessageHandle'
 import GameCallbackHandle from "./GameCallbackHandle";
 import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
+import gameMessageHandle from "./GameMessageHandle";
 
 
 /**
@@ -12,10 +13,10 @@ import ScheduleHandle from "../../commons/schedule/ScheduleHandle";
  */
 const bot = new Telegraf(getConfig().botConfig.GameBotToken)
 bot.command('quit', async (ctx) => {
-    // Explicit usage
-    await ctx.telegram.leaveChat(ctx.message.chat.id)
-    // Using context shortcut
-    await ctx.leaveChat()
+    console.log('监听到退出机器人指令了 ')
+    await new gameMessageHandle().quitGame(ctx)
+    // await ctx.telegram.leaveChat(ctx.message.chat.id)
+    // await ctx.leaveChat()
 })
 
 
