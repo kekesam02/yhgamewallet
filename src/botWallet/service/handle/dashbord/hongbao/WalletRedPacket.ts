@@ -548,9 +548,7 @@ class WalletRedPacket {
             }
 
             // 开始领取红包
-            let result = await addLock(botHb.hbId, async () => {
-                await botHb?.receiveHb(this.ctx)
-            }, async () => {})
+            let result = await botHb.receiveHb(this.ctx)
             console.log('领取结果', result)
             if (result) {
                 await this.updateReceiveHtml(hbId, botHb)

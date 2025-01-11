@@ -49,14 +49,12 @@ class ScheduleHandle {
         this.bot = bot
         // 测试每30秒执行一次定时器
         // let job = schedule.scheduleJob('10 * * * * *',()=>{
-        //     console.log('scheduleCronstyle:' + new Date());
-        //     this.bot = bot
+        //     console.log('scheduleCronstyle:' + new Date())
         //     WalletScheduleHandle.init(bot).then(r => {})
         // })
         // WalletScheduleHandle.init(bot).then(r => {})
         // 每天凌晨执行一次定时器
         let job = schedule.scheduleJob('0 0 * * *',()=>{
-            // this.bot = bot
             WalletScheduleHandle.init(bot).then(r => {})
         })
         this.currJobList.push(job)

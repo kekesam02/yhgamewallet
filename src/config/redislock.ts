@@ -36,19 +36,17 @@ const addLock = async (
     efn: () => Promise<any>,
     lockTTL = 1000  * 30
 ) => {
-    try {
-        let lock = await redlock.lock(lockKeyList, lockTTL)
+    return new Promise(async (resolve, reject) => {
         try {
-            // 执行异步操作
+            let lock = await redlock.lock(lockKeyList, lockTTL)
             let result = await fn()
-            return result
-        } finally {
-            // 释放锁
+            resolve(result)
             await redlock.unlock(lock)
+        } catch (err) {
+            await efn()
+            reject(err)
         }
-    } catch (e){
-        await efn()
-    }
+    })
 }
 
 export {
