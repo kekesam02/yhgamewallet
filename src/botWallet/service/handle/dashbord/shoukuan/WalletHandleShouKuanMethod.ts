@@ -86,7 +86,6 @@ class WalletHandleShouKuanMethod {
                     ]
                 }
             }))
-
             // 提示钱包机器人已转账
             var msgId :string | null = await redis.get("shoukuanmain_msgid_"+tgId) || "0"
             var chatId :string | null = await redis.get("shoukuanmain_chatid_"+tgId) || "0"
@@ -156,20 +155,21 @@ class WalletHandleShouKuanMethod {
             "4、转账时间 : " + DateFormatUtils.CurrentDateFormatString() + " USDT\n" +
             "⚠️ 提示: 本次转账即时完成, 无法追回!";
         // 发送消息
-        // 改变上个的支付状态
-        //await ctx.telegram.editMessageReplyMarkup('',undefined,queryId,WalletController.createStatusWaitSurePayBtn().reply_markup)
         // 提示钱包机器人已转账
-        var msgId :string | null = await redis.get("shoukuanmain_msgid_"+tgIdvalue) || "0"
-        var chatId :string | null = await redis.get("shoukuanmain_chatid_"+tgIdvalue) || "0"
-        await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"\"✅  好友正在确认支付！",
-            {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitPayBtn().reply_markup})
         // 生成新的确认和支付按钮
         await bot.telegram.sendMessage(payTgId, html, {
             parse_mode: "HTML",
             reply_markup: WalletController.createPayBotButton(payTgId, tgIdvalue, value,orderId).reply_markup
         })
 
-        await redis.set("shouku_query_"+tgIdvalue,queryId)
+       try {
+           var msgId :string | null = await redis.get("shoukuanmain_msgid_"+tgIdvalue) || "0"
+           var chatId :string | null = await redis.get("shoukuanmain_chatid_"+tgIdvalue) || "0"
+           await ctx.telegram.editMessageText(chatId,parseInt(msgId),'',"\"✅  好友正在确认支付！",
+               {parse_mode:"HTML",reply_markup:WalletController.createStatusWaitPayBtn().reply_markup})
+       }catch (e){
+
+       }
     }
 
     /**
@@ -302,14 +302,17 @@ class WalletHandleShouKuanMethod {
                         "5、转账时间 : " + applyTime + "\n" +
                         "⚠️ 提示 : 您可以将次支付凭证转发给收款人";
                     await ctx.editMessageText(html,{parse_mode:"HTML",reply_markup:WalletController.createModelClientServerBtn().reply_markup})
-                    // 收款人消息
-                    var html2 = "✅ 收款操作完成，收到用户@"+payBotUser.userName+ "的付款信息金额是:" + money + " U"
-                    var cmsgId :string | null = await redis.get("shoukuanmain_msgid_"+callbackSkTgId) || "0"
-                    var cchatId :string | null = await redis.get("shoukuanmain_chatid_"+callbackSkTgId) || "0"
-                    await ctx.telegram.editMessageText(cchatId,parseInt(cmsgId),'',html2,
-                        {parse_mode:"HTML",reply_markup:WalletController.createModelBackBtn('shoukuan').reply_markup})
-                    await redis.del("shoukuanmain_msgid_"+callbackSkTgId)
-                    await redis.del("shoukuanmain_chatid_"+callbackSkTgId)
+
+                   try {
+                       // 收款人消息
+                       var html2 = "✅ 收款操作完成，收到用户@"+payBotUser.userName+ "的付款信息金额是:" + money + " U"
+                       var cmsgId :string | null = await redis.get("shoukuanmain_msgid_"+callbackSkTgId) || "0"
+                       var cchatId :string | null = await redis.get("shoukuanmain_chatid_"+callbackSkTgId) || "0"
+                       await ctx.telegram.editMessageText(cchatId,parseInt(cmsgId),'',html2,
+                           {parse_mode:"HTML",reply_markup:WalletController.createModelBackBtn('shoukuan').reply_markup})
+                       await redis.del("shoukuanmain_msgid_"+callbackSkTgId)
+                       await redis.del("shoukuanmain_chatid_"+callbackSkTgId)
+                   }catch (e){}
                     // 提交事务
                     await queryRunner.commitTransaction()
                 }catch (e) {
