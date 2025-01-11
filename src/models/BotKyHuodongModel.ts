@@ -1,23 +1,4 @@
-import WalletType from "../type/WalletType";
 import {BaseEntity, Column, Entity, PrimaryGeneratedColumn} from "typeorm";
-import {Context} from "telegraf";
-import redis from "../config/redis";
-import MessageTipUtils from "../commons/message/MessageTipUtils";
-import UserModel from "./UserModel";
-import ComputeUtils from "../commons/compute/ComputeUtils";
-import {queryRunner} from "../config/database";
-import OrderUtils from "../commons/OrderUtils";
-import ContextUtil from "../commons/ContextUtil";
-import BotPaymentModel from "./BotPaymentModel";
-import PaymentType from "../type/PaymentType";
-import CommonEnumsIndex from "../type/CommonEnumsIndex";
-import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
-import RedisHandle from "../commons/redis/RedisHandle";
-import MessageUtils from "../commons/message/MessageUtils";
-import WalletRedPacket from "../botWallet/service/handle/dashbord/hongbao/WalletRedPacket";
-import RandomUtils from "../commons/compute/RandomUtils";
-import {RedPackConditionJsonType} from "../type/WalletType/RedPackType";
-import TimeUtils from "../commons/date/TimeUtils";
 
 /**
  * 开业活动、开业豪礼、首充返利这些信息

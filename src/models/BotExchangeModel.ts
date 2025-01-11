@@ -1,5 +1,4 @@
 import {Column, PrimaryGeneratedColumn, Entity, BaseEntity} from "typeorm";
-import exchangeEnum from "../type/WalletType/ExchangeEnum";
 import ExchangeEnum from "../type/WalletType/ExchangeEnum";
 
 

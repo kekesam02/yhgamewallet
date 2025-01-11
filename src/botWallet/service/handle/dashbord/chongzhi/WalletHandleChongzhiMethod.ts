@@ -9,6 +9,7 @@ import MessageUtils from "../../../../../commons/message/MessageUtils";
 import QRCodeUtils from "../../../../../commons/qrcode/QRCodeUtils";
 import StringUtils from "../../../../../commons/StringUtils";
 import ObjectUtils from "../../../../../commons/ObjectUtils";
+import PaymentType from "../../../../../type/PaymentType";
 
 
 /**

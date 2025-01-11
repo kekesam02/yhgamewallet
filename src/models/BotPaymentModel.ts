@@ -264,13 +264,23 @@ class BotPaymentModel extends BaseEntity {
 
     /**
      * 分布式锁的互斥性处理
-     * 防止：修改订单和吊机收款的冲突
+     * 防止：修改订单收款的冲突
      */
     @Column({
         name: 'version',
         default:1
     })
     version: number
+
+    /**
+     * 用于领取邀请返利
+     * 0 未领取 1已领取
+     */
+    @Column({
+        name: 'fanli',
+        default:0
+    })
+    fanli: number
 
     /**
      * 保存用户订单对象

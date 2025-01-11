@@ -12,6 +12,11 @@ import PaymentTypeEnum from "../../../../../type/PaymentTypeEnum";
 import WalletType from "../../../../../type/WalletType";
 import CustomSnowflake from "../../../../../commons/CustomSnowflake";
 import DateFormatUtils from "../../../../../commons/date/DateFormatUtils";
+import BotInviteUserModel from "../../../../../models/BotInviteUserModel";
+import PaymentType from "../../../../../type/PaymentType";
+import paymentType from "../../../../../type/PaymentType";
+import walletType from "../../../../../type/WalletType";
+import moment from "moment/moment";
 
 /**
  * 公共方法处理
@@ -31,37 +36,56 @@ class WalletYaoqingFanLiMethod {
     public static startYqfl = async (ctx: Context) => {
         // 获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
-        await addLockByTgId(['yahyfanli_lock_'+tgId],async ()=>{
+        await addLockByTgId(['yahyfanli_lock_' + tgId], async () => {
             // 设置操作
             await redis.set("currentop" + tgId, "yaoqingfanli", 'EX', 60 * 60 * 24)
-            // fafcs : 是否领取 0未领取 1领取
-            // hdtype : 活动类型 1为开业充值，2为每日首充返利 3.邀请返利
-            // tg_id : 领取用户
-            // cjdw : usdt 1 /trx2
-            //查询是否有好友返利
-           const botKyHongDong =  await BotKyHuodongModel.createQueryBuilder()
-                .where("fafcs = 0 and hdtype = 3 and cjdw = 1 and tg_id = :tgId",{tgId:AESUtils.encodeUserId(tgId+'')})
-                .getOne()
-            if(!botKyHongDong){
-                // usdt没有返利
-                // 发送消息
-                await ctx.answerCbQuery("⚠️ 当前暂无好友返利信息",{show_alert: true})
-            }else{
+
+            // 1: 查询邀请的好友列表
+            var encodeUserId = AESUtils.encodeUserId(tgId + '');
+            const invitersList = await BotInviteUserModel.createQueryBuilder().where("inviter_tg_id = :tgId", {
+                "tgId": encodeUserId
+            }).getMany()
+
+            // 如果邀请好友不存在就返回
+            if (invitersList && invitersList.length == 0) {
+                await ctx.answerCbQuery("⚠️ 当前暂无好友返利信息", {show_alert: true})
+                return
+            }
+
+            // 查询上一次的返利的最大时间
+            // 3: 查询上次彩金提现的最大时间 del = 1
+            let {ks}: any = await BotPaymentModel.createQueryBuilder().select("max(create_time)", "ks")
+                .where("payment_type = " + paymentType.HYFL + " and status = 1  and wallet_type = " + walletType.USDT + " and user_id = :tgId",
+                    {
+                        tgId: encodeUserId
+                    }).getRawOne()
+
+            //4: 获大于上次时间的新的需要转化的上注彩金流水 del == 0 也就是新的彩金订单
+            let sql = "payment_type = " + paymentType.SZ + " and del = 0 and status = 1 and fanli = 0  and  user_id IN (SELECT quilt_tg_id FROM bot_invite_user WHERE inviter_tg_id = '"+encodeUserId+"')"
+            if (ks) sql += " and create_time >='" + moment(ks).format('yyyy-MM-DD HH:mm:ss') + "'"
+            // 2: 查询所有好友下注的订单（有效del=0 and status = 1 and payment_type = 2  and fanli = 0）统计出来。状态是：0尚未结算
+           const {cjje }  =  await BotPaymentModel.createQueryBuilder().select("SUM(payment_amount)",'cjje')
+                .where(sql).getRawOne()
+            if (cjje > 0) {
                 //获取用户信息
                 var userById = await new UserModel().getUserModelByIdNumber(tgId);
                 //有返利需要用户确认
-                const html="🛄 尊敬用户："+userById?.nickName+"您好\n" +
-                    "\uD83D\uDD3A 一旦领取邀请好友返利，将清空当前彩金流水，如当前彩金流水达到转化标准，请优先转化再领取\n" +
-                    "\uD83D\uDD3A 例：当前彩U余额有10，当前领取好友返利10，将按10+10的标准重新定义\n" +
-                    "\uD83D\uDD3A 您当前返利彩U是："+botKyHongDong.cjje+"\n" +
-                    "\uD83D\uDD3A 你当前彩U余额是："+userById?.CUSDT+"\n"+
-                    "\uD83D\uDD3A 确认执行，点击下方【确认领取】按钮"
+                const html = "🛄 尊敬用户：" + userById?.nickName + "您好\n\n" +
+                    "友情提示：一旦领取邀请好友返利，将清空当前彩金流水，如当前彩金流水达到转化标准，请优先转化再领取\n" +
+                    "例：当前彩U余额有10，当前领取好友返利10，将按10+10的标准重新定义\n\n" +
+                    "您返利总彩U金额：" + cjje + "，返佣比例是："+(parseFloat(userById?.yqNum || "1") * 100)+"%\n" +
+                    "您返利彩U金额是：" + (cjje * parseFloat(userById?.yqNum || "1")) + "\n" +
+                    "您当前彩U余额是：" + userById?.CUSDT + "\n" +
+                    "确认执行，点击下方【确认领取】按钮"
                 // 删除上一次消息
                 await WalletUserCenterMethod.removeMessage(ctx)
                 // 发送消息
-                await ctx.replyWithHTML(html,WalletUserCenterController.createYaoqingLingQuBtn())
+                await ctx.replyWithHTML(html, WalletUserCenterController.createYaoqingLingQuBtn())
+            }else{
+                // 发送消息
+                await ctx.answerCbQuery("⚠️ 当前暂无好友返利信息", {show_alert: true})
             }
-        },async ()=>{
+        }, async () => {
             await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
         })
     }
@@ -70,39 +94,51 @@ class WalletYaoqingFanLiMethod {
      * 开始领取邀请返利
      * @param ctx
      */
-    public static startLingquFanli = async (ctx:Context)=>{
+    public static startLingquFanli = async (ctx: Context) => {
         // 获取telegram的tgId
         var tgId: number = ctx.callbackQuery?.from?.id || 0
         let inlineMessageId = ctx.callbackQuery?.inline_message_id || ""
         //查询是否有好友返利
-        await addLockByTgId(['liqufanli_lock_'+tgId],async ()=>{
+        await addLockByTgId(['liqufanli_lock_' + tgId], async () => {
             // 设置操作
             await redis.set("currentop" + tgId, "yaoqingfanli", 'EX', 60 * 60 * 24)
-            // fafcs : 是否领取 0未领取 1领取
-            // hdtype : 活动类型 1为开业充值，2为每日首充返利 3.邀请返利
-            // tg_id : 领取用户
-            // cjdw : usdt 1 /trx2
-            //查询是否有好友返利
-            const botKyHongDong =  await BotKyHuodongModel.createQueryBuilder()
-                .where("fafcs = 0 and hdtype = 3 and cjdw = 1 and tg_id = :tgId",{tgId:AESUtils.encodeUserId(tgId+'')})
-                .getOne()
-            if(!botKyHongDong){
-                // usdt没有返利
-                // 发送消息
-                await ctx.answerCbQuery("⚠️ 领取失败，请联系管理员",{show_alert: true})
-            }else{
+
+            // 1: 查询邀请的好友列表
+            var encodeUserId = AESUtils.encodeUserId(tgId + '');
+            const invitersList = await BotInviteUserModel.createQueryBuilder().where("inviter_tg_id = :tgId", {
+                "tgId": encodeUserId
+            }).getMany()
+
+            // 如果邀请好友不存在就返回
+            if (invitersList && invitersList.length == 0) {
+                await ctx.answerCbQuery("⚠️ 当前暂无好友返利信息", {show_alert: true})
+                return
+            }
+
+            // 查询上一次的返利的最大时间
+            // 3: 查询上次彩金提现的最大时间 del = 1
+            let {ks}: any = await BotPaymentModel.createQueryBuilder().select("max(create_time)", "ks")
+                .where("payment_type = " + paymentType.HYFL + " and status = 1  and wallet_type = " + walletType.USDT + " and user_id = :tgId",
+                    {
+                        tgId: encodeUserId
+                    }).getRawOne()
+
+
+            //4: 获大于上次时间的新的需要转化的上注彩金流水 del == 0 也就是新的彩金订单
+            let sql = "payment_type = " + paymentType.SZ + " and del = 0 and status = 1 and fanli = 0  and  user_id IN (SELECT quilt_tg_id FROM bot_invite_user WHERE inviter_tg_id = '"+encodeUserId+"')"
+            if (ks) sql += " and create_time >='" + moment(ks).format('yyyy-MM-DD HH:mm:ss') + "'"
+
+            // 2: 查询所有好友下注的订单（有效del=0 and status = 1 and payment_type = 2  and fanli = 0）统计出来。状态是：0尚未结算
+            const { cjje }  =  await BotPaymentModel.createQueryBuilder().select("SUM(payment_amount)",'cjje')
+                .where(sql).getRawOne()
+            if (cjje > 0) {
                 try {
                     await queryRunner.startTransaction()
-                    // 1：修改为领取状态
-                    await queryRunner.manager.update(BotKyHuodongModel,{
-                        id: botKyHongDong.id
-                    },{
-                        fafcs: 1
-                    })
                     // 2：给用户添加彩U
                     var botUser = await new UserModel().getUserModelByIdNumber(tgId);
                     const userCUsdt = botUser?.CUSDT
-                    const addUserCUsdt = parseFloat(botKyHongDong.cjje) + parseFloat(userCUsdt || "0")
+                    const dcusdt = (cjje * parseFloat(botUser?.yqNum || "1"))
+                    const addUserCUsdt = dcusdt + parseFloat(userCUsdt || "0")
                     await queryRunner.manager.update(UserModel, {
                         id: botUser?.id
                     }, {
@@ -123,25 +159,40 @@ class WalletYaoqingFanLiMethod {
                         paymentType: PaymentTypeEnum.HYFL.value,
                         paymentTypeName: PaymentTypeEnum.HYFL.name,
                         operateType: 1, // 收入
-                        status:1,
+                        status: 1,
                         paymentTypeNumber: 'fanli' + orderId,
-                        paymentAmount: botKyHongDong.cjje ,
-                        paymentRealAmount: botKyHongDong.cjje,
+                        paymentAmount: dcusdt+'',
+                        paymentRealAmount: dcusdt+'',
                         walletType: WalletType.USDT,
                         applyTime: applyTime,
+                        passTime: applyTime,
+                        passNickname: botUser?.nickName,
+                        passUsername: botUser?.userName,
+                        passTgid: botUser?.tgId,
+                        fanli:1,
                         chatId: inlineMessageId,
-                        description: "申请好友返利"
+                        description: "申请好友返利，金额是：" + dcusdt
                     })
+
+                    await queryRunner.commitTransaction()
+
+                    // 修改状态
+                    await BotPaymentModel.createQueryBuilder().update(BotPaymentModel).set({
+                        fanli: 1
+                    }).where(sql).execute()
+
                     // 删除上一次消息
                     await WalletUserCenterMethod.removeMessage(ctx)
                     // 发送消息
-                    await ctx.replyWithHTML("✅ 领取成功",WalletUserCenterController.createUserCenterBackBtn())
-                    await queryRunner.commitTransaction()
-                } catch (e){
+                    await ctx.replyWithHTML("✅ 领取成功", WalletUserCenterController.createUserCenterBackBtn())
+
+                } catch (e) {
                     await queryRunner.rollbackTransaction()
                 }
+            }else{
+                await ctx.answerCbQuery("⚠️ 当前暂无好友返利信息", {show_alert: true})
             }
-        },async ()=>{
+        }, async () => {
             await ctx.replyWithHTML('亲，操作慢点，休息一会在操作!')
         })
     }

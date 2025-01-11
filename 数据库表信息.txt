@@ -40,7 +40,6 @@ OnePalace_Gamebot
 项目交接
 	bot_exchange：闪兑
 		id: 用于闪兑、
-	
 	bot_game：	正在进行的游戏表
 		game_state：
 			1: 	机器人会往对应群里发送信息
