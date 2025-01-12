@@ -1,4 +1,4 @@
-pm2 start --interpreter ./node_modules/.bin/ts-node-dev --env RUNNING_ENV=dev ./src/index.ts --log ./logFile.log
+pm2 start --interpreter ./node_modules/.bin/ts-node-dev --env RUNNING_ENV=dev ./src/index.ts --log ./logFile.log --name game
 pm2 start --interpreter ./node_modules/.bin/ts-node-dev --env RUNNING_ENV=dev ./src/index.ts --log ./logFile.log --name wallet
 
 娱乐机器人：botDic
