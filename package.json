@@ -6,7 +6,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev src/index.ts",
-    "fgl": "ts-node-dev src/indexwallet.ts  RUNNING_ENV=fglocal"
+    "fgl": "ts-node-dev src/indexwallet.ts"
   },
   "keywords": [
     "express",
