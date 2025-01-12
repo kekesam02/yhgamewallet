@@ -9,9 +9,8 @@ jwt_secret: your_jwt_secret
 
 botConfig:
   GameBotToken: '7840670913:AAGuk-XMILCw0nxFmnQbbuAXBxvzgrp274s'
-  WalletToken: '7635600144:AAHELBLU6wF63MQ7j3o7A50DF7TleH6icls'
-  WalletTokenTest: '7873009878:aah0mmdgevjyp5zvk9gbml_fbjveyh6ga-q'
-  #WalletUrl: 'http://t.me/vertexpaybot'
+  WalletToken: '7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk'
+  WalletTokenTest: '7873009878:AAH0MmDGevJYp5ZVK9GbML_fBjVeYh6gA-Q'
   WalletUrl: 'http://t.me/sanjinzsbot'
 
 cors:
@@ -35,6 +34,7 @@ database:
 redis:
   host: 127.0.0.1
   port: 6379
+  password: rLJ45123
   db: 1
 
 rateLimit:
