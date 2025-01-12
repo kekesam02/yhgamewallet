@@ -9,7 +9,7 @@ import GameEnumsIndex from "../type/gameEnums/GameEnumsIndex";
 import UserModel from "./UserModel";
 import MessageUtils from "../commons/message/MessageUtils";
 import GameBotHtml from "../html/gameHtml/GameBotHtml";
-import GameController from "../botGame/gameController/GameController";
+import GameController from "../botWallet/controller/GameController";
 import BotOddsModel from "./BotOddsModel";
 import OrderUtils from "../commons/OrderUtils";
 import BotGameModel from "./BotGameModel";
@@ -17,7 +17,6 @@ import ComputeUtils from "../commons/compute/ComputeUtils";
 import {queryRunner} from "../config/database";
 import BotPaymentModel from "./BotPaymentModel";
 import PaymentType from "../type/PaymentType";
-import ScheduleHandle from "../commons/schedule/ScheduleHandle";
 import AESUtils from "../commons/AESUtils";
 import CommonEnumsIndex from "../type/CommonEnumsIndex";
 

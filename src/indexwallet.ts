@@ -1,5 +1,4 @@
 import process from "node:process";
-import ScheduleHandle from "./commons/schedule/ScheduleHandle";
 import InitUpdateHuilv from "./botPay/PayWalletSchedule";
 require('./commons/expand/ExpandIndex')
 const moment = require('moment-timezone')
@@ -10,10 +9,8 @@ require('./botWallet/WalletServe')
 const job = InitUpdateHuilv()
 
 process.once('SIGINT', () => {
-    ScheduleHandle.closeJobs()
     if(job)job.cancel()
 })
 process.once('SIGTERM', () =>{
-    ScheduleHandle.closeJobs()
     if(job)job.cancel()
 })

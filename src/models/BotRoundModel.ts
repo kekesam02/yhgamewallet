@@ -2,8 +2,8 @@ import {BaseEntity, Between, Column, Entity, PrimaryGeneratedColumn} from "typeo
 import GameTypeEnum from "../type/gameEnums/GameTypeEnum";
 import moment from "moment";
 import {Pc28LotteryJsonType} from "../type/gameEnums/LooteryJsonType";
-import WinningTypeConfirm from "../botGame/const/WinningTypeConfirm";
-import BotGameConfig from "../botGame/BotGameConfig";
+import WinningTypeConfirm from "../botWallet/const/WinningTypeConfirm";
+import BotGameConfig from "../botWallet/const/BotGameConfig";
 import ComputeUtils from "../commons/compute/ComputeUtils";
 
 

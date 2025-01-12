@@ -5,10 +5,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node-dev src/index.ts RUNNING_ENV=dev",
-    "fg": "ts-node-dev src/indexwallet.ts  RUNNING_ENV=fg",
-    "fgl": "ts-node-dev src/indexwallet.ts  RUNNING_ENV=fglocal",
-    "zs": "RUNNING_ENV=zs ts-node-dev src/indexgame.ts"
+    "dev": "ts-node-dev src/index.ts",
+    "fgl": "ts-node-dev src/indexwallet.ts  RUNNING_ENV=fglocal"
   },
   "keywords": [
     "express",

@@ -16,7 +16,6 @@ import {DefectListType} from "../type/BotGameType/BotGameType";
 import GameDefectHtml from "../html/gameHtml/GameDefectHtml";
 import MessageUtils from "../commons/message/MessageUtils";
 import {queryRunner} from "../config/database";
-import ScheduleHandle from "../commons/schedule/ScheduleHandle";
 import AESUtils from "../commons/AESUtils";
 import DateFormatUtils from "../commons/date/DateFormatUtils";
 import botGameModel from "./BotGameModel";
@@ -300,7 +299,7 @@ class BotPaymentModel extends BaseEntity {
         paymentType: PaymentType,
         wallType: WalletType,
         money: string,
-        linkAddr: string = ScheduleHandle.pc28Config.roundId ?? new OrderUtils().createPaymentModelId()
+        linkAddr: string
     ) => {
         // 收款时间
         this.tgId = userModel.tgId

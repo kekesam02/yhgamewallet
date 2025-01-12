@@ -20,7 +20,7 @@ import RandomUtils from "../commons/compute/RandomUtils";
 import {RedPackConditionJsonType} from "../type/WalletType/RedPackType";
 import TimeUtils from "../commons/date/TimeUtils";
 import ButtonUtils from "../commons/button/ButtonUtils";
-import GameController from "../botGame/gameController/GameController";
+import GameController from "../botWallet/controller/GameController";
 import StartWalletEnum from "../type/walletEnums/StartWalletEnum";
 import {addLock} from "../config/redislock";
 

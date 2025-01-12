@@ -9,9 +9,9 @@ import WalletType from "../../type/WalletType";
 import CommonEnumsIndex from "../../type/CommonEnumsIndex";
 import AESUtils from "../../commons/AESUtils";
 import BotPledgeUpModel, {PledgeUpInfoType} from "../../models/BotPledgeUpModel";
-import WinningTypeConfirm from "../../botGame/const/WinningTypeConfirm";
+import WinningTypeConfirm from "../../botWallet/const/WinningTypeConfirm";
 import ComputeUtils from "../../commons/compute/ComputeUtils";
-import BotGameConfig from "../../botGame/BotGameConfig";
+import BotGameConfig from "../../botWallet/const/BotGameConfig";
 
 /**
  * 游戏机器人返回的html字段
