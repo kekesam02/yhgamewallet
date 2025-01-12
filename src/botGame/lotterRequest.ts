@@ -298,8 +298,9 @@ class LotteryRequest {
                         })
                     }
                     let currItem = {...list[currIndex]}
+                    let firstItem = {...list[0]}
                     let openTime = moment(currItem.drawTime)
-                    let nextTime = moment(currItem.drawTime)
+                    let nextTime = moment(firstItem.drawTime)
                         .add(3, 'minutes')
                         .add(30, 'seconds')
                     if (isExit) {
@@ -308,7 +309,7 @@ class LotteryRequest {
                                 expect: currItem.drawIssue,
                                 open_code: currItem.drawCode,
                                 open_time: openTime.format('YYYY-MM-DD HH:mm:ss'),
-                                next_expect: new ComputeUtils(currItem.drawIssue).add(1).toString(),
+                                next_expect: new ComputeUtils(firstItem.drawIssue).add(1).toString(),
                                 next_time: nextTime.format('YYYY-MM-DD HH:mm:ss'),
                             }
                         ]

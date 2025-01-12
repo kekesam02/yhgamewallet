@@ -155,8 +155,8 @@ class GameScheduleHandle {
             }
         }
 
-        let nextTime = moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime + 5, 'seconds')
         // 当前时间不够加入本局游戏了、需要切换到下一期
+        let nextTime = moment(currJson.next_time).subtract(new BotGameConfig().FPTipsTime + 5, 'seconds')
         if (!moment(nextTime).isAfter(moment())) {
             // 每10秒钟尝试加入下一局游戏
             let timer = setTimeout( async () => {
@@ -215,6 +215,27 @@ class GameScheduleHandle {
             if (!nextJson) {
                 return
             }
+
+            // 当前时间不够加入本局游戏了、需要切换到下一期
+            let nextTime2 = moment(nextJson.data[0].next_time).subtract(new BotGameConfig().FPTipsTime + 5, 'seconds')
+            if (!moment(nextTime2).isAfter(moment())) {
+                // 每10秒钟尝试加入下一局游戏
+                let timer = setTimeout( async () => {
+                    // 等待下一期在发送游戏开始信息
+                    let lotteryJson = await new PC28Controller().getLotteryJson()
+                    ScheduleHandle.clearTimeoutMap.forEach(item => {
+                        if (item) {
+                            clearTimeout(item)
+                        }
+                    })
+                    if (lotteryJson) {
+                        await this.checkNextPC28(lotteryJson)
+                    }
+                }, 10000)
+                ScheduleHandle.clearTimeoutMap.set('game_3', timer)
+                return
+            }
+
 
             // 保存开奖结果到数据库
             await pc28Controller.saveLotteryJson(nextJson)
