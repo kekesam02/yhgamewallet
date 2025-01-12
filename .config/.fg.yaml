@@ -11,7 +11,7 @@ botConfig:
   GameBotToken: '7840670913:AAGuk-XMILCw0nxFmnQbbuAXBxvzgrp274s'
   WalletToken: '7723665206:AAFEHMBvs8hW4CLgl9MvKSoISkENfaJ2NNk'
   WalletTokenTest: '7873009878:AAH0MmDGevJYp5ZVK9GbML_fBjVeYh6gA-Q'
-  WalletUrl: 'https://t.me/myxukebot'
+  WalletUrl: 'http://t.me/sanjinzsbot'
 
 cors:
   origin: "*"

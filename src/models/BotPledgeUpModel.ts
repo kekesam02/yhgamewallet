@@ -220,11 +220,13 @@ class BotPledgeUpModel extends BaseEntity {
      * @param roundId: 当前游戏期数
      * @param tgId: 用户id
      * @param gameTypeList
+     * @param state 订单状态 0 还未锁死下注订单
      */
     public getUserList = async (
         roundId: string,
         tgId: string | null = null,
-        gameTypeList: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType()
+        gameTypeList: Array<GameTypeEnum> = new CommonEnumsIndex().getAllGameType(),
+        state: string = '0'
     ): Promise<Array<BotPledgeUpModel>> => {
         let query = BotPledgeUpModel
             .createQueryBuilder()
@@ -237,7 +239,9 @@ class BotPledgeUpModel extends BaseEntity {
                 tgId: tgId
             })
         }
-        return await query.andWhere('state = 0')
+        return await query.andWhere('state = :state', {
+                state: state
+            })
             .andWhere('del = 0')
             .getMany()
     }
@@ -303,7 +307,8 @@ class BotPledgeUpModel extends BaseEntity {
         let pledgeModelList = await this.getUserList(
             `${ScheduleHandle.pc28Config.roundId}`,
             userModel.tgId,
-            [groupModel.gameType]
+            [groupModel.gameType],
+            '0'
         )
         pledgeModelList.forEach(item => {
             item.state = -1

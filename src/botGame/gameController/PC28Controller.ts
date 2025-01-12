@@ -28,6 +28,7 @@ import AESUtils from "../../commons/AESUtils";
 import GameScheduleHandle from "../../commons/schedule/GameScheduleHandle";
 import GameUserRedis from "../../commons/redis/GameUserRedis";
 import BotPaymentModel from "../../models/BotPaymentModel";
+import CommonEnumsIndex from "../../type/CommonEnumsIndex";
 
 type PC28LotteryType = {
 
@@ -440,7 +441,7 @@ class PC28Controller {
     >> => {
         // 当前所有下注的用户
         let pledgeUpList = await new BotPledgeUpModel()
-            .getUserList(json.data[0].expect)
+            .getUserList(json.data[0].expect, null, new CommonEnumsIndex().getAllGameType(), '1')
         let result: Map<GameTypeEnum, Array<BotPledgeUpModel>> = new Map()
         pledgeUpList.forEach(item => {
             if (result.has(item.gameType)) {
